@@ -1,0 +1,89 @@
+<div class="container" id="login-form"
+  style="padding-top: 20px;min-height: calc(100% - 150px);min-width: 400px;padding:0">
+  <div class="row">
+    <div [ngStyle]="{'margin-top': IsPopUp ? 0:'3%'}" [ngClass]="IsPopUp ? '' : 'col-md-4 col-md-offset-4'"
+      style="width: 100%;padding: 0;">
+      <form autocomplete="off" class="form-horizontal" method="post" role="form">
+        <div *ngIf="ErorrList && ErorrList.length > 0" class="validation-summary-errors text-danger">
+          <span style="text-align: center;">لطفا موارد زیر را اصلاح نمایید</span>
+          <ul>
+            <li *ngFor="let item of ErorrList;" style="text-align: right;">{{item}}</li>
+          </ul>
+        </div>
+        <div class="panel panel-default"
+          style="display: block; visibility: visible; opacity: 1; transform: translateY(0px);margin:0">
+          <div class="panel-heading">
+            <h2>فرم ورود به سامانه</h2>
+          </div>
+          <div class="panel-body" style="text-align: right;">
+            <div class="form-group mb-md">
+              <div class="col-xs-12">
+                <div class="input-group">
+                  <span class="input-group-addon" style="border: 1px solid #c0c0c0;border-left: none">
+                    <i class="ti ti-user"></i>
+                  </span>
+                  <input [ngStyle]="{'border-color': CheckValidate && !UserName ? 'red':''}" autocomplete="off"
+                    style="border: 1px solid #c0c0c0;color: #00094e;" class="form-control" id="UserName" name="UserName"
+                    placeholder="{{CheckValidate && !UserName ? 'نام کاربری را وارد نمایید': 'نام کاربری'}}"
+                    required="required" type="text" [(ngModel)]="UserName">
+                </div>
+
+              </div>
+            </div>
+            <div class="form-group mb-md">
+              <div class="col-xs-12">
+                <div class="input-group">
+                  <span class="input-group-addon" style="border: 1px solid #c0c0c0;border-left: none">
+                    <i class="ti ti-key"></i>
+                  </span>
+                  <input [ngStyle]="{'border-color': CheckValidate && !Password ? 'red':''}" autocomplete="off"
+                    style="border: 1px solid #c0c0c0;color: #00094e;" class="form-control" id="Password" name="Password"
+                    placeholder="{{CheckValidate && !UserName ? 'رمز عبور را وارد نمایید': 'رمز عبور'}}" type="password"
+                    [(ngModel)]="Password">
+                </div>
+
+              </div>
+            </div>
+            <section id="captcha">
+
+              <div class="page-wrapper">
+
+                <div class="item-wrapper">
+                  <div class="captchaImage">
+
+                    <a style="float:left;">
+                      <img *ngIf="CaptchaImage" ng id="MyCaptcha" style="width:85px;" (click)="ReloadCaptcha()"
+                        src="data:image/JPEG;base64,{{CaptchaImage}}" title="بر روی تصویر کلیک کنید تا تصویر تغییر کند">
+                    </a>
+                    <div class="controller" style="width:76.2%;float:right;">
+                      <input [ngStyle]="{'border-color': CheckValidate && !Captcha ? 'red':''}" autocomplete="off"
+                        class="form-control text-box single-line" id="Captcha" name="Captcha"
+                        placeholder="عبارت مقابل را وارد نمایید" style="width: 100%;min-height: 30px;height: 30px;"
+                        type="text" value="" [(ngModel)]="Captcha">
+                    </div>
+
+                  </div>
+                  <div id="divMessage" class="MessageBox">
+                  </div>
+                </div>
+
+              </div>
+
+            </section>
+          </div>
+          <div class="panel-footer" style="padding-top: 0;text-align: center;">
+            <div class="clearfix">
+              <input (click)="OnLogin()" type="submit" value="ورود" class="btn btn-primary pull-center"
+                style="width: 130px">
+            </div>
+          </div>
+        </div>
+      </form>
+
+
+      <div class="text-center">
+
+      </div>
+    </div>
+  </div>
+</div>

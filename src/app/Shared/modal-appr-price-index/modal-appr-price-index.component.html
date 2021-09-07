@@ -1,0 +1,58 @@
+<div id="container" class="" style="clear: both">
+  <div id="myContent" class="data-grid">
+    <div class="main-form-body" style="display: flex;">
+      <div class="select-with-lable">
+        <label for="fin-year-select" class="col-form-label">فهرست بها</label>
+        <ng-select class="select-general-for-lable" [items]="rowDataYears" bindLabel="PriceListTopicCodeName"
+          bindValue="PriceListTopicCode" [(ngModel)]="selectedYear" (ngModelChange)="onChangeYear($event)"
+          id="fin-year-select" style="min-width: 176px;">
+        </ng-select>
+      </div>
+      <div class="select-with-lable">
+        <label for="indicator-select" class="col-form-label FontSize12">شاخص</label>
+        <ng-select class="select-general-for-lable" [items]="IndicatorData" bindLabel="IndicatorName"
+          bindValue="IndicatorValue" [(ngModel)]="selectedLevelCode" (ngModelChange)="onChangeLevelCode($event)"
+          id="indicator-select" style="min-width: 176px;">
+        </ng-select>
+      </div>
+      <div class="select-with-lable">
+        <label for="attachment-select" class="col-form-label FontSize12">پیوست</label>
+        <ng-select class="select-general-for-lable" [items]="AttachmentData" bindLabel="AttachmentName"
+          bindValue="AttachmentValue" [(ngModel)]="selectedAttachmentNo" (ngModelChange)="onChangeAttachment($event)"
+          id="attachment-select" style="min-width: 176px;">
+        </ng-select>
+      </div>
+    </div>
+
+    <div class="main-form-body" style="height: 79%">
+      <app-grid [columns]="columnDefs" [rows]="rowData" [gridHeight]="93" (GridReady)="onGridReady($event)"
+        [IsEditable]="IsEditable" [defaultCol]="defaultColDef"
+        (cellEditingStarted)="oncellEditingStarted($event)">
+      </app-grid>
+    </div>
+    <div class="buttons-place" style="margin: 0">
+      <button *ngIf="true" (click)="onSave()" id="btn2" class="btn btn-primary btnGreen">
+        <img width="15px" height="15px" src="assets/Icons/save.png" />
+        ثبت
+      </button>
+      <button id="btnExit" class="btn btn-primary btnGreen" (click)="onShowReport()">
+        <img width="15px" height="15px" src="assets/Icons/print.png" />
+        چاپ لیست
+      </button>
+      <button id="btnExit" class="btn btn-primary btnGreen" (click)="closeModal()">
+        <img width="15px" height="15px" src="assets/Icons/exit.png" />
+        خروج
+      </button>
+    </div>
+  </div>
+</div>
+
+<ng-template #IsDefinite let-row>
+  <img width="16px" height="16px" [src]="row.IsDefinite ? 'assets/Icons/TrueCheckBox.png':'assets/Icons/uncheck.png'" />
+</ng-template>
+
+<app-over-popup *ngIf="isClicked" [PopupType]="type" [HaveMaxBtn]="HaveMaxBtn" [startLeftPosition]="startLeftPosition"
+  [startTopPosition]="startTopPosition" [MainMinwidthPixel]="MainMinwidthPixel" [HeightPercentWithMaxBtn]="95"
+  [PopupParam]="type ==='message-box'? alertMessageParams : ParamObj " (popupclosed)="popupclosed($event)"
+  (PopupOutPutParam)="getOutPutParam($event)" [minHeightPixel]="type ==='message-box' ? '' : MinHeightPixel">
+</app-over-popup>
