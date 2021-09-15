@@ -53,9 +53,9 @@ export class ArchiveDetailService {
     // const url = window.URL.createObjectURL(blob);
     // window.open(url , '_blank');
 
-    const FileSaver = require('file-saver');
-    const file = new File([blob], data.FileName, { type: mimeType });
-    FileSaver.saveAs(file);
+    // const FileSaver = require('file-saver');
+    // const file = new File([blob], data.FileName, { type: mimeType });
+    // FileSaver.saveAs(file);
 
   }
 

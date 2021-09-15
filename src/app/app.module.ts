@@ -6,24 +6,360 @@ import { AppRoutingModule } from './app-routing.module';
 import { HomeComponent } from './Home/home.component';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { UserDetailComponent } from './Users/user-detail.component';
-import { ImageViewerModule } from 'ng2-image-viewer-forked';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { TreeModule } from '@circlon/angular-tree-component';
-import { NumberInputComponentComponent } from './number-input-component/number-input-component.component';
-import { GridComponent } from './grid-component/grid.component';
-import { AgGridModule } from 'ag-grid-angular';
-import { LoadingService } from './Load/loading/LoadingService';
-import { RouterModule } from '@angular/router';
+import { AppMenuComponent } from './Shared/Menu/app-menu.component';
 import { AccessDeniedComponent } from './Shared/AccessControl/access-denied.component';
-import { MessageService } from './Shared/message-box/MessageService';
-import { MainPageComponent } from './Advertising/main-page/main-page.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { CommonModule } from '@angular/common';
+import { registerLocaleData } from '@angular/common';
+import { ModalTwoColComponent } from './Shared/modal-two-col/modal-two-col.component';
+import en from '@angular/common/locales/en';
+import { PriceListComponent } from './PriceList/price-list.component';
+import { OverPopupComponent } from './Shared/OverPopUp/over-popup.component';
+import { GridComponent } from './Shared/grid-component/grid.component';
+import { AgGridModule } from 'ag-grid-angular';
+import { NumberInputComponentComponent } from './number-input-component/number-input-component.component';
 import { TenderPageComponent } from './Advertising/tender-page/tender-page.component';
-import { NgSelectVirtualScrollComponent } from './Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
-import { NgSelectModule } from './Shared/ng-select';
+import { MainPageComponent } from './Advertising/main-page/main-page.component';
 import { CustomCheckBoxComponent } from './Shared/CustomComponent/custom-check-box/custom-check-box.component';
+import { NgSelectVirtualScrollComponent } from './Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
+import { TestComponent } from './test/test.component';
+import { RouterModule } from '@angular/router';
 import { CustomCheckboxModule } from './Shared/custom-checkbox/src/public_api';
+import { NgSelectModule } from './Shared/ng-select';
+import { LoadingService } from './Load/loading/LoadingService';
+import { MessageService } from './Shared/message-box/MessageService';
+import { TreeModule } from '@circlon/angular-tree-component';
+import { ExpandMode, NgxTreeSelectModule } from './Shared/ngx-tree-select/src';
+import { MalihuScrollbarModule } from 'ngx-malihu-scrollbar';
+import { MyTreeComponent } from './Shared/tree-component/tree.component';
+import { AppSidebarComponent } from './Shared/SideBar/app-sidebar.component';
+
+// import { PriceListAnalayseComponent } from './Shared/price-list-analayse/price-list-analayse.component';
+// import { AnalayzePriceComponent } from './Shared/analayze-price/analayze-price.component';
+// import { ContractListPageComponent } from './Shared/contract-list-page/contract-list-page.component';
+// import { ContractEstimatePageComponent } from './Shared/contract-estimate-page/contract-estimate-page.component';
+// import { ModalArchiveYearComponent } from './Shared/modal-archive-year/modal-archive-year.component';
+// import { ModalArchiveComponent } from './Shared/modal-archive/modal-archive.component';
+// import { ModalApprPriceIndexComponent } from './Shared/modal-appr-price-index/modal-appr-price-index.component';
+// import { NgSelectModule } from './Shared/ng-select';
+// import { ContractPageComponent } from './Shared/contract-page/contract-page.component';
+// import { ExcelLoadDataComponent } from './Shared/excel-load-data/excel-load-data.component';
+// import { ContractPersonPageComponent } from './Shared/contract-person-page/contract-person-page.component';
+// import { CartableComponent } from './Cartable/cartable.component';
+// import { MessageBoxComponent } from './Shared/message-box/message-box.component';
+// import { WorkflowSendComponent } from './WorkFlow/workflow-send/workflow-send.component';
+// import { CustomizedMenuComponent } from './Shared/CustomizedMenu/customized-menu/customized-menu.component';
+// import { NgSelectCellEditorComponent } from './Shared/NgSelectCellEditor/ng-select-cell-editor.component';
+// import { OverPopUpCellEditorComponent } from './Shared/OverPopUpcellEditor/over-pop-up-cell-editor.component';
+// import { UpdateWorkflowStatusComponent } from './WorkFlow/update-workflow-status/update-workflow-status.component';
+// import { UserRoleComponent } from './Users/UserRole/user-role.component';
+// import { WorkflowTypeFormComponent } from './WorkFlow/workflow-type/workflow-type-form/workflow-type-form.component';
+// import { UserConfirmPhoneNumberComponent } from './Users/ConfirmPhoneNumber/user-confirm-phone-number.component';
+// import { TemplateRendererComponent } from './Shared/grid-component/template-renderer/template-renderer.component';
+// import { LoadingComponent } from './Load/loading/loading.component';
+// import { LoadingService } from './Load/loading/LoadingService';
+// import { ContractCoefTypeComponent } from './Contract/Base_modules/contract-coef-type/contract-coef-type.component';
+// import { ChooseReportComponent } from './Shared/choose-report/choose-report.component';
+// import { ContractCoefComponent } from './Shared/contract-coef/contract-coef.component';
+// import { ContractOrderitemCoefComponent } from './Shared/contract-orderitem-coef/contract-orderitem-coef.component';
+// import { WorkflowStatusPageComponent } from './WorkFlow/workflow-status-page/workflow-status-page.component';
+// import { WorkflowOperationPageComponent } from './WorkFlow/workflow-operation-page/workflow-operation-page.component';
+// import { WorkflowNodePageComponent } from './WorkFlow/workflow-node-page/workflow-node-page.component';
+// import { WorkflowTransitionPageComponent } from './WorkFlow/workflow-transition-page/workflow-transition-page.component';
+// // tslint:disable-next-line:max-line-length
+// import { PriceListTopicDataentryPageComponent } from './PriceList/PriceListTopic/price-list-topic-dataentry-page/price-list-topic-dataentry-page.component';
+// import { NumberFieldEditableComponent } from './Shared/number-field-editable/number-field-editable.component';
+// import { PriceListTopicComponent } from './PriceList/price-list-topic/price-list-topic.component';
+// import { CheckboxFieldEditableComponent } from './Shared/checkbox-field-editable/checkbox-field-editable.component';
+// import { MessageService } from './Shared/message-box/MessageService';
+// // tslint:disable-next-line:max-line-length
+// import { NumberInputComponentComponent } from './Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
+// import { ContractPayDetailsComponent } from './Contract/ContractPay/contract-pay/contract-pay-details.component';
+
+// import { DpDatePickerModule } from './Shared/jalali-angular-datepicker';
+// import { JalaliDatepickerComponent } from './Shared/jalali-datepicker/jalali-datepicker.component';
+// // tslint:disable-next-line:max-line-length
+// import { ChildPriceListTopicPageComponent } from './PriceList/PriceListTopic/child-price-list-topic-page/child-price-list-topic-page.component';
+// import { ContractPayListComponent } from './Contract/ContractPay/contract-pay-list/contract-pay-list.component';
+// import { ContractPayTypesComponent } from './Contract/ContractPay/contract-pay-types/contract-pay-types.component';
+// import { SelecetContractEstimateComponent } from './Contract/ContractPay/selecet-contract-estimate/selecet-contract-estimate.component';
+// import { ChoosenContractPayRepComponent } from './Contract/ContractPay/Report/choosen-contract-pay-rep/choosen-contract-pay-rep.component';
+// import { UsersSearchComponent } from './Users/users-search/users-search.component';
+// import { ContractCaseListComponent } from './Contract/Base_modules/contract-case-list/contract-case-list.component';
+// import { ContractCaseComponent } from './Contract/Base_modules/contract-case/contract-case.component';
+// import { ContractEstimateViewComponent } from './Contract/Base_modules/contract-estimate-view/contract-estimate-view.component';
+// import { ContractNoEstimateViewComponent } from './Contract/Base_modules/contract-no-estimate-view/contract-no-estimate-view.component';
+// import { PriceListRelatedListComponent } from './PriceList/price-list-related-list/price-list-related-list.component';
+// // tslint:disable-next-line:max-line-length
+// import { ContractPayItemEstimatePageComponent } from './Contract/ContractPay/contract-pay-item-estimate-page/contract-pay-item-estimate-page.component';
+// import { ContractAgentComponent } from './Contract/Base_modules/contract-agent/contract-agent/contract-agent.component';
+// import { ContractAgentRoleComponent } from './Contract/Base_modules/contract-agent-role/contract-agent-role/contract-agent-role.component';
+// import { PriceListPatternGoodsComponent } from './PriceList/price-list-pattern-goods/price-list-pattern-goods.component';
+// import { WorkglowTypeModuleComponent } from './WorkFlow/workglow-type-module/workglow-type-module.component';
+// import { RoadTypeComponent } from './Contract/ContractPay/road-type/road-type.component';
+// import { TransferDistanceItemComponent } from './PriceList/transfer-distance-item/transfer-distance-item.component';
+// import { ContractPayShipmentComponent } from './Contract/ContractPay/contract-pay-shipment/contract-pay-shipment.component';
+// import { SummaryQuantitySurveyingComponent } from './Contract/ContractPay/summary-quantity-surveying/summary-quantity-surveying.component';
+// import { FinancialSheetComponent } from './Contract/ContractPay/financial-sheet/financial-sheet.component';
+// import { SelectContractPayComponent } from './Contract/ContractPay/select-contract-pay/select-contract-pay.component';
+// import { ContractMinutesListComponent } from './Contract/ContractMinutes/contract-minutes-list/contract-minutes-list.component';
+// // tslint:disable-next-line:max-line-length
+// import { ContractMinutesItemListPageComponent } from './Contract/ContractMinutes/contract-minutes-item-list-page/contract-minutes-item-list-page.component';
+// // tslint:disable-next-line:max-line-length
+// import { SetContractPriceListPatternComponent } from './Contract/Base_modules/set-contract-price-list-pattern/set-contract-price-list-pattern.component';
+// import { RefreshServices } from './Services/BaseService/RefreshServices';
+// // tslint:disable-next-line:max-line-length
+// import { SetInvalidContractEstimateComponent } from './Contract/Estimate/set-invalid-contract-estimate/set-invalid-contract-estimate.component';
+// import { SelectContractMinutesComponent } from './Contract/ContractMinutes/select-contract-minutes/select-contract-minutes.component';
+// import { SelectContractAgentComponent } from './Contract/ContractPay/select-contract-agent/select-contract-agent.component';
+// // tslint:disable-next-line:max-line-length
+// import { ContractPayDistanceResultComponent } from './Contract/ContractPay/contract-pay-distance-result/contract-pay-distance-result.component';
+// // tslint:disable-next-line:max-line-length
+// import { ContractIdentityPresenterComponent } from './Contract/Base_modules/contract-identity-presenter/contract-identity-presenter.component';
+// // tslint:disable-next-line:max-line-length
+// import { ChoosenContractEstimateRepComponent } from './Contract/ContractPay/Report/choosen-contract-estimate-rep/choosen-contract-estimate-rep.component';
+// import { ConsultPersonComponent } from './Actors/consult-person/consult-person.component';
+// import { NgSelectVirtualScrollComponent } from './Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
+// import { ContractVehicleEstimateComponent } from './Contract/Estimate/contract-vehicle-estimate/contract-vehicle-estimate.component';
+// import { ContractPersonEstimateComponent } from './Contract/Estimate/contract-person-estimate/contract-person-estimate.component';
+// import { ContractPayItemHourComponent } from './Contract/ContractPay/contract-pay-item-hour/contract-pay-item-hour.component';
+// import { GroupMessageBoxComponent } from './Shared/group-message-box/group-message-box.component';
+// import { MonthWorkHourComponent } from './Contract/FinYear/month-work-hour/month-work-hour.component';
+// // tslint:disable-next-line:max-line-length
+// import { ContractSupervisionListComponent } from './Contract/ContractSupervision/contract-supervision-list/contract-supervision-list.component';
+// // tslint:disable-next-line:max-line-length
+// import { ContractSupervisionItemListComponent } from './Contract/ContractSupervision/contract-supervision-item-list/contract-supervision-item-list.component';
+// import { ContractWorkOrderListComponent } from './Contract/ContractWorkOrder/contract-work-order-list/contract-work-order-list.component';
+// // tslint:disable-next-line:max-line-length
+// import { ContractWorkOrderItemListComponent } from './Contract/ContractWorkOrder/contract-work-order-item-list/contract-work-order-item-list.component';
+// import { ContractOrderItemDeductionComponent } from './Shared/contract-order-item-deduction/contract-order-item-deduction.component';
+// import { ContractPayFeeDetailsComponent } from './Contract/ContractPay/contract-pay-fee-details/contract-pay-fee-details.component';
+// import { ContractPayTransportComponent } from './Contract/ContractPay/contract-pay-transport/contract-pay-transport.component';
+// // tslint:disable-next-line:max-line-length
+// import { ContractPayVoucherDetailsComponent } from './Contract/ContractPay/contract-pay-voucher-details/contract-pay-voucher-details.component';
+// import { ShowFeeDetailsComponent } from './Contract/show-fee-details/show-fee-details.component';
+// import { ProductRequestPageComponent } from './ProductRequest/product-request-page/product-request-page.component';
+// import { WorkflowLogComponent } from './WorkFlow/workflow-log/workflow-log.component';
+// import { DealMethodComponent } from './Supply/deal-method/deal-method.component';
+// import { NgxTreeSelectModule, ExpandMode } from './Shared/ngx-tree-select/src';
+// import { TreeSelectComponent } from './Shared/tree-select/tree-select.component';
+// import { ProductRequestSuggestionComponent } from './ProductRequest/product-request-suggestion/product-request-suggestion.component';
+// import { CommonServices } from './Services/BaseService/CommonServices';
+// import { CustomCheckboxModule } from './Shared/custom-checkbox/src/public_api';
+// import { CustomCheckBoxComponent } from './Shared/CustomComponent/custom-check-box/custom-check-box.component';
+// import { ProductRequestCoefTypeComponent } from './ProductRequest/product-request-coef-type/product-request-coef-type.component';
+// import { ProductRequestCoefComponent } from './ProductRequest/product-request-coef/product-request-coef.component';
+// import { ProductRequestCostComponent } from './ProductRequest/product-request-cost/product-request-cost.component';
+// import { ProductRequestPersonItemComponent } from './ProductRequest/product-request-person-item/product-request-person-item.component';
+// import { UserWorkLogDetailComponent } from './WorkFlow/user-work-log-detail/user-work-log-detail.component';
+// import { ContractPersonRepComponent } from './Contract/Report/contract-person-rep/contract-person-rep.component';
+// import { ProductRequestContractComponent } from './ProductRequest/product-request-contract/product-request-contract.component';
+// // tslint:disable-next-line:max-line-length
+// import { RequestContractWithoutFlowComponent } from './ProductRequest/request-contract-without-flow/request-contract-without-flow.component';
+// import { ProductRequestListComponent } from './ProductRequest/product-request-list/product-request-list.component';
+// import { ContractWithoutFlowListComponent } from './ProductRequest/contract-without-flow-list/contract-without-flow-list.component';
+// import { OrderPageComponent } from './ProductRequest/order-page/order-page.component';
+// // tslint:disable-next-line:max-line-length
+// import { ProductRequestPageWithoutFlowComponent } from './ProductRequest/product-request-page-without-flow/product-request-page-without-flow.component';
+// import { RequestProposalItemComponent } from './ProductRequest/request-proposal-item/request-proposal-item.component';
+// import { CommissionPageComponent } from './ProductRequest/order-page/commission-page/commission-page.component';
+// import { ProductRequestEstimateComponent } from './ProductRequest/product-request-estimate/product-request-estimate.component';
+// // tslint:disable-next-line:max-line-length
+// import { ProductRequestPersonEstimateComponent } from './ProductRequest/product-request-person-estimate/product-request-person-estimate.component';
+// import { ProposalItemEstimateComponent } from './ProductRequest/ProPosal/proposal-item-estimate/proposal-item-estimate.component';
+// import { ProposalPersonEstimateComponent } from './ProductRequest/ProPosal/proposal-person-estimate/proposal-person-estimate.component';
+// // tslint:disable-next-line:max-line-length
+// import { SelectProductRequestEstimateComponent } from './ProductRequest/ProPosal/select-product-request-estimate/select-product-request-estimate.component';
+// import { ProductRequestProvisionComponent } from './ProductRequest/product-request-provision/product-request-provision.component';
+// import { AutomationComponent } from './Automation/automation/automation.component';
+// import { AutomationButtonComponent } from './Automation/automation-button/automation-button.component';
+// import { UserWorkLogContractPayComponent } from './WorkFlow/user-work-log-Contract-Pay/user-work-log-Contract-Pay.component';
+// import { UserWorkLogContractOrderComponent } from './WorkFlow/user-work-log-Contract-Order/user-work-log-Contract-Order.component';
+// import { UserWorkLogProductRequestComponent } from './WorkFlow/user-work-log-Product-Request/user-work-log-Product-Request.component';
+// import { DocumentTypeMasterComponent } from './Common/app-document-type-master/app-document-type-master.component';
+// // tslint:disable-next-line: max-line-length
+// import { DocumentTypeMasterMandatoryComponent } from './Common/app-document-type-master-mandatory/app-document-type-master-mandatory.component';
+// import { from } from 'rxjs';
+// import { ProvisionComponent } from './ProductRequest/provision/provision.component';
+// import { AdvertisingComponent } from './ProductRequest/advertising/advertising.component';
+// import { NewsPaperPageComponent } from './ProductRequest/news-paper-page/news-paper-page.component';
+// import { GeneralTenderComponent } from './ProductRequest/ProPosal/general-tender/general-tender.component';
+// import { ContractPayCoefComponent } from './Contract/ContractPay/contract-pay-coef/contract-pay-coef.component';
+// import { AdvertisingSearchComponent } from './ProductRequest/ProPosal/advertising-search/advertising-search.component';
+// import { AdvertisingListComponent } from './ProductRequest/ProPosal/advertising-list/advertising-list.component';
+// import { InuirySearchListComponent } from './ProductRequest/ProPosal/inuiry-search-list/inuiry-search-list.component';
+// import { ActorInquiryComponent } from './Actors/actor-inquiry/actor-inquiry.component';
+// import { PersonComponent } from './Actors/person/person.component';
+// import { CommitionComponent } from './ProductRequest/ProPosal/commition/commition.component';
+// import { CorporateComponent } from './Actors/corporate/corporate.component';
+// import { InquiryListComponent } from './ProductRequest/ProPosal/inquiry-list/inquiry-list.component';
+// import { UsersComponent } from './Actors/users/users.component';
+// import { SendLetterPageComponent } from './Common/send-letter-page/send-letter-page.component';
+// import { LetterTypeComponent } from './Common/LetterType/letter-type.component';
+// // tslint:disable-next-line: max-line-length
+// import { CumulativeContractPayListComponent } from './Contract/ContractPay/cumulative-contract-pay-list/cumulative-contract-pay-list.component';
+// // tslint:disable-next-line: max-line-length
+// import { CumulativeContractPayItemEstimateComponent } from './Contract/ContractPay/cumulative-contract-pay-item-estimate/cumulative-contract-pay-item-estimate.component';
+// import { ModuleViewTypeComponent } from './Common/ModuleViewType/module-view-type.component';
+// import { UserSelectComponent } from './Actors/user-select/user-select.component';
+// // tslint:disable-next-line: max-line-length
+// import { CumulativeContractPayDetailsComponent } from './Contract/ContractPay/cumulative-contract-pay-details/cumulative-contract-pay-details.component';
+// // tslint:disable-next-line: max-line-length
+// import { ProductRequestEstateComponent } from './ProductRequest/ProductRequestEstate/product-request-estate/product-request-estate.component';
+// import { EstateSearchComponent } from './ProductRequest/ProductRequestEstate/estate-search/estate-search.component';
+// import { ProductRequestInvestPageComponent } from './ProductRequest/product-request-invest-page/product-request-invest-page.component';
+// import { InvestUsageTypeComponent } from './ProductRequest/Invest/invest-usage-type/invest-usage-type.component';
+// // tslint:disable-next-line:max-line-length
+// import { ContractProvisionRemainPageComponent } from './ProductRequest/contract-provision-remain-page/contract-provision-remain-page.component';
+// import { InvestTypeComponent } from './ProductRequest/Invest/invest-type/invest-type.component';
+// import { CreateContractOnFlowComponent } from './ProductRequest/create-contract-on-flow/create-contract-on-flow.component';
+// import { ContractTypeComponent } from './Contract/contract-type/contract-type.component';
+// import { Person2Component } from './Actors/person/person2/person2.component';
+// // tslint:disable-next-line: max-line-length
+// import { ProductRequestArchiveDetailComponent } from './ProductRequest/product-request-archive-detail/product-request-archive-detail/product-request-archive-detail.component';
+// import { Corporate2Component } from './Actors/corporate2/corporate2.component';
+// // tslint:disable-next-line: max-line-length
+// import { ProductRequestShowDetailsPageComponent } from './ProductRequest/product-request-show-details-page/product-request-show-details-page.component';
+// // tslint:disable-next-line:max-line-length
+// import { ProductRequestArticle48PageComponent } from './ProductRequest/product-request-article-48-page/product-request-article-48-page.component';
+// // tslint:disable-next-line:max-line-length
+// import { GeneralTenderReadOnlyModeComponent } from './ProductRequest/ProPosal/general-tender-read-only-mode/general-tender-read-only-mode.component';
+// import { ShareTypeComponent } from './Common/share-type/share-type.component';
+// import { UnivercityComponent } from './Common/univercity/univercity.component';
+// import { FieldComponent } from './Common/field/field.component';
+// import { GradeComponent } from './Common/grade/grade.component';
+// import { MainPageComponent } from './Advertising/main-page/main-page.component';
+// import { TenderPageComponent } from './Advertising/tender-page/tender-page.component';
+// import { Tree2Component } from './Advertising/tree2/tree2.component';
+// import { DealDetailsComponent } from './Advertising/deal-details/deal-details.component';
+// import { LoginComponent } from './Advertising/login/login.component';
+// import { DealUploadDocsComponent } from './Advertising/deal-upload-docs/deal-upload-docs.component';
+// import { ActorCertificateComponent } from './Actors/actor-certificate/actor-certificate.component';
+// import { PriceListBusinessPatternComponent } from './Common/price-list-business-pattern/price-list-business-pattern.component';
+// import { GroundDeliveryMinutesComponent } from './Contract/ContractMinutes/ground-delivery-minutes/ground-delivery-minutes.component';
+// import { AdvertisingArchiveComponent } from './Advertising/advertising-archive/advertising-archive.component';
+// import { ContractMinutesTypeComponent } from './Contract/ContractMinutes/contract-minutes-type/contract-minutes-type.component';
+// import { CommitionTypeComponent } from './ProductRequest/Commition-type/commition-type/commition-type.component';
+// import { CommitionMemberComponent } from './ProductRequest/Commition-type/commition-member/commition-member.component';
+// import { DealTypeMethodComponent } from './ProductRequest/deal-type-method/deal-type-method.component';
+// import { AcceptRulesComponent } from './Advertising/accept-rules/accept-rules.component';
+// import { WarrantyItemComponent } from './ProductRequest/ProPosal/Warranty-item/warranty-item.component';
+// import { CommitionPrintComponent } from './ProductRequest/ProPosal/commition-print/commition-print.component';
+// // tslint:disable-next-line:max-line-length
+// import { ChooseReportProductRequestItemComponent } from './Shared/choose-report-product-request-item/choose-report-product-request-item.component';
+// import { ChoosenRequestRevocationComponent } from './ProductRequest/choosen-request-revocation/choosen-request-revocation.component';
+// // tslint:disable-next-line: max-line-length
+// import { ProductRequestPageProposalComponent } from './ProductRequest/product-request-page-proposal/product-request-page-proposal.component';
+// import { ApplicationNoteComponent } from './Cartable/application-note/application-note.component';
+// // tslint:disable-next-line: max-line-length
+// import { EstateRecognitionSearchComponent } from './ProductRequest/ProductRequestEstate/estate-recognition-search/estate-recognition-search.component';
+// import { RoleSearchComponent } from './Actors/role-search/role-search.component';
+// import { ProductRequestWFDetailComponent } from './WorkFlow/product-request-wf-detail/product-request-wf-detail.component';
+// import { PDFViewerComponent } from './Shared/pdfviewer/pdfviewer.component';
+// import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+// import { CreatedUserLogComponent } from './Actors/created-user-log/created-user-log.component';
+// import { UsersRolesInRegionListComponent } from './Actors/users-roles-in-region-list/users-roles-in-region-list.component';
+// import { CorrectionContractEstimateComponent } from './WorkFlow/correction-contract-estimate/correction-contract-estimate.component';
+// import { ProductRequestItemCoefComponent } from './ProductRequest/product-request-item-coef/product-request-item-coef.component';
+// import { PriceListCorrectionComponent } from './PriceList/price-list-correction/price-list-correction.component';
+// import { PriceListTopicSelectComponent } from './PriceList/price-list-topic-select/price-list-topic-select.component';
+// import { UrbanServicesActivitiesLogComponent } from './WorkFlow/urban-services-activities-log/urban-services-activities-log.component';
+// // tslint:disable-next-line:max-line-length
+// import { ProductRequestPageWithoutFlowProposalComponent } from './ProductRequest/product-request-page-without-flow-proposal/product-request-page-without-flow-proposal.component';
+// import { Article31PageComponent } from './ProductRequest/article31-page/article31-page.component';
+// // tslint:disable-next-line:max-line-length
+// import { EstateRecognitionEvaluationComponent } from './ProductRequest/ProductRequestEstate/estate-recognition-evaluation/estate-recognition-evaluation.component';
+// // tslint:disable-next-line:max-line-length
+// import { ProductRequestRelatedItemsComponent } from './ProductRequest/product-request-related-items/product-request-related-items.component';
+// import { RadioBoxComponentComponent } from './Shared/Radio-Box/Radio-Box-Component/radio-box-component.component';
+// import { FilterDocumentTypeComponent } from './Common/filter-document-type/filter-document-type.component';
+// import { CorporatePersonnelTypeComponent } from './Common/corporate-personnel-type/corporate-personnel-type.component';
+// // tslint:disable-next-line:max-line-length
+// import { AdjustmentPriceRangeFormulasPageComponent } from './ProductRequest/ProPosal/adjustment-price-range-formulas-page/adjustment-price-range-formulas-page.component';
+// // tslint:disable-next-line:max-line-length
+// import { RemoveContractFromClarificationComponent } from './ProductRequest/remove-contract-from-clarification/remove-contract-from-clarification.component';
+// import { CorporateCapacityComponent } from './Actors/corporate-capacity/corporate-capacity.component';
+// import { CorporateCapacityListComponent } from './Actors/corporate-capacity-list/corporate-capacity-list.component';
+// import { PureProductRequestPageComponent } from './ProductRequest/pure-product-request-page/pure-product-request-page.component';
+// import { DailyBookComponent } from './Accounting/DailyBook/daily-book.component';
+// import { ContractPeriodReportComponent } from './ProductRequest/contract-period-report/contract-period-report.component';
+// import { LedgerAccBookComponent } from './Accounting/LedgerAccBook/ledger-acc-book.component';
+// import { GlobalChoosePageComponent } from './Shared/global-choose-page/global-choose-page.component';
+// import { ConsultantSelectTypeComponent } from './ProductRequest/consultant-select-type/consultant-select-type.component';
+// import { SubLedgerAccBookComponent } from './Accounting/SubLedgerAccBook/sub-ledger-acc-book.component';
+// import { AccountTurnoverComponent } from './Accounting/account-turnover/account-turnover.component';
+// import { DetailAccBookComponent } from './Accounting/DetailAccBook/detail-acc-book.component';
+// import { ProviderAssetTypeComponent } from './Common/provider-asset-type/provider-asset-type.component';
+// import { ContractingCardSearchComponent } from './Actors/contracting-card-search/contracting-card-search.component';
+// import { ContractorCardListComponent } from './Actors/contractor-card-list/contractor-card-list.component';
+// import { CarTagComponent } from './Shared/car-tag/car-tag.component';
+// import { MovablePropertyPageComponent } from './Actors/movable-property-page/movable-property-page.component';
+// import { RequestItemEntityPageComponent } from './ProductRequest/request-item-entity-page/request-item-entity-page.component';
+// import { ProvidersSearchPageComponent } from './Actors/providers-search-page/providers-search-page.component';
+// import { ManagementTypePageComponent } from './Actors/management-type-page/management-type-page.component';
+// import { ResponsibilityTypePageComponent } from './Actors/responsibility-type-page/responsibility-type-page.component';
+// import { ProductEntityPageComponent } from './ProductRequest/product-entity-page/product-entity-page.component';
+// // tslint:disable-next-line: max-line-length
+// import { ResearcherProductRequestListComponent } from './ProductRequest/researcher-product-request-list/researcher-product-request-list.component';
+// import { EndOfContractComponent } from './Contract/Base_modules/end-of-contract/end-of-contract.component';
+// import { SendSmsComponent } from './Shared/send-sms/send-sms.component';
+// import { ControlProjectBgtInfoPageComponent } from './Budget/control-project-bgt-info-page/control-project-bgt-info-page.component';
+// import { CivilProjectPageComponent } from './Budget/civil-project-page/civil-project-page.component';
+
+
+// import { RequestEvaluateListComponent } from './ProductRequest/request-evaluate-list/request-evaluate-list.component';
+// import { RequestEvaluateComponent } from './ProductRequest/request-evaluate/request-evaluate.component';
+// import { EstatePropertyTypePageComponent } from './ProductRequest/estate-property-type-page/estate-property-type-page.component';
+// import { EvaluateTypePageComponent } from './ProductRequest/evaluate-type-page/evaluate-type-page.component';
+// import { EvaluateMethodPageComponent } from './ProductRequest/evaluate-method-page/evaluate-method-page.component';
+// import { EntityTypeComponent } from './ProductRequest/Entity-Type/entity-type.component';
+// import { AssetIncomeComponent } from './Assets/asset-income/asset-income.component';
+// import { AssetIncomeListComponent } from './Assets/asset-income/asset-income-list/asset-income-list.component';
+// import { ArchiveYearDocumentComponent } from './Shared/archive-year-document/archive-year-document.component';
+// import { SupplierWorkFlowComponent } from './Actors/supplier-work-flow/supplier-work-flow.component';
+// import { FeePageComponent } from './Accounting/fee-page/fee-page.component';
+// import { OtherContractDocsListComponent } from './Contract/OtherContractDocuments/OtherContractDocsList/other-contract-docs-list/other-contract-docs-list.component';
+// import { OtherContractDocumentsComponent } from './Contract/OtherContractDocuments/other-contract-documents/other-contract-documents.component';
+// import { OtherContractDocsTypeComponent } from './Contract/OtherContractDocuments/other-contract-docs-type/other-contract-docs-type.component';
+// import { VariableTypeComponent } from './ProductRequest/ProPosal/variable/variable-type/variable-type.component';
+// import { CommitionProceedVariableComponent } from './ProductRequest/ProPosal/variable/commition-proceed-variable/commition-proceed-variable.component';
+// import { ComprehensiveStatusReportComponent } from './Shared/comprehensive-status-report/comprehensive-status-report.component';
+// import { SelectActorForSmsComponent } from './Actors/select-actor-for-sms/select-actor-for-sms.component';
+// import { ContractPayWorkReportComponent } from './Shared/contract-pay-work-report/contract-pay-work-report.component';
+// import { SendToClarificationRepComponent } from './Contract/SendToClarificationReport/send-to-clarification-rep/send-to-clarification-rep.component';
+// import { RankCalcComponent } from './Actors/rank-calc/rank-calc.component';
+// import { RankParameterComponent } from './Common/rank-parameter/rank-parameter.component';
+// import { PrePayComponent } from './Contract/ContractPay/pre-pay/pre-pay.component';
+// import { CompletionContractInfoComponent } from './ProductRequest/completion-contract-info/completion-contract-info.component';
+// import { SingleSaleInvoiceComponent } from './Invoice/single-sale-invoice/single-sale-invoice.component';
+// import { InvoiceListComponent } from './Invoice/invoice-list/invoice-list.component';
+// import { ShowUnderTakeItemsComponent } from './Contract/ContractPay/show-under-take-items/show-under-take-items.component';
+// import { ContractOrderOnWithoutFlowComponent } from './ProductRequest/contract-order-on-without-flow/contract-order-on-without-flow.component';
+// import { ReopeningTenderEnvekopesComponent } from './ProductRequest/ProPosal/reopening-tender-envekopes/reopening-tender-envekopes.component';
+// import { GoodsComponent } from './Actors/goods/goods.component';
+// import { UserWorkLogInvoiceComponent } from './Invoice/user-work-log-invoice/user-work-log-invoice.component';
+// import { ContractorSendSMSComponent } from './Actors/contractor-send-sms/contractor-send-sms.component';
+// import { SendAutomationLetterComponent } from './Automation/send-automation-letter/send-automation-letter.component';
+// import { ChooseReportCOntractPayItemEstimateComponent } from './Shared/choose-report-contract-pay-item-estimate/choose-report-contract-pay-item-estimate/choose-report-contract-pay-item-estimate.component';
+// import { TenderEncryptedFilesListComponent } from './ProductRequest/ProPosal/tender-encrypted-files-list/tender-encrypted-files-list.component';
+// import { DataDictionaryPageComponent } from './Budget/data-dictionary-page/data-dictionary-page.component';
+// import { ViewActorRankComponent } from './Actors/view-actor-rank/view-actor-rank.component';
+// import { CompleteContractListReportComponent } from './Contract/complete-contract-list-report/complete-contract-list-report.component';
+// import { ContractWfReportLevel2Component } from './Contract/contract-wf-report-level2/contract-wf-report-level2.component';
+// import { ContractWfReportLevel3Component } from './Contract/contract-wf-report-level3/contract-wf-report-level3.component';
+// import { ReportAverageWorkflowObjectsComponent } from './WorkFlow/report-average-workflow-objects/report-average-workflow-objects.component';
+// import { AdjustmentPriceRangeFormulasComponent } from './ProductRequest/ProPosal/adjustment-price-range-formulas/adjustment-price-range-formulas.component';
+// import { FileViwerPageComponent } from './Shared/file-viwer-page/file-viwer-page.component';
+// import { ContractStatusSummaryRepPageComponent } from './ProductRequest/contract-status-summary-rep-page/contract-status-summary-rep-page.component';
+// import { ImageViewerModule } from 'ng2-image-viewer-forked';
+// import { ContractStatusSummarySearchPageComponent } from './ProductRequest/contract-status-summary-search-page/contract-status-summary-search-page.component';
+// import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+// import { TreeModule } from '@circlon/angular-tree-component';
+// import { TestComponent } from './test/test.component';
+// import { RouterModule } from '@angular/router';
 @NgModule({
   declarations: [
+    OverPopupComponent,
     AppComponent,
     NumberInputComponentComponent,
     GridComponent,
@@ -31,17 +367,36 @@ import { CustomCheckboxModule } from './Shared/custom-checkbox/src/public_api';
     TenderPageComponent,
     MainPageComponent,
     CustomCheckBoxComponent,
-    NgSelectVirtualScrollComponent
+    NgSelectVirtualScrollComponent,
+    TestComponent,
+    UserDetailComponent,
+    AppMenuComponent,
+    PriceListComponent,
+    AppSidebarComponent,
+    MyTreeComponent
   ],
   imports: [
+    FormsModule,
     BrowserModule,
     RouterModule,
+    CommonModule,
     AppRoutingModule,
     HttpClientModule,
+    MalihuScrollbarModule.forRoot(),
     AgGridModule.withComponents([]),
     CustomCheckboxModule,
     NgSelectModule,
-    FormsModule
+    TreeModule,
+    NgxTreeSelectModule.forRoot({
+      allowFilter: true,
+      filterPlaceholder: 'مقدار مورد نظر را وارد نمایید...',
+      maxVisibleItemCount: 5,
+      idField: '',
+      textField: '',
+      childrenField: '',
+      allowParentSelection: true,
+      expandMode: ExpandMode.None
+    }),
   ],
   providers: [
     LoadingService,
