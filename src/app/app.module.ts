@@ -33,30 +33,30 @@ import { ExpandMode, NgxTreeSelectModule } from './Shared/ngx-tree-select/src';
 import { MalihuScrollbarModule } from 'ngx-malihu-scrollbar';
 import { MyTreeComponent } from './Shared/tree-component/tree.component';
 import { AppSidebarComponent } from './Shared/SideBar/app-sidebar.component';
-
-// import { PriceListAnalayseComponent } from './Shared/price-list-analayse/price-list-analayse.component';
-// import { AnalayzePriceComponent } from './Shared/analayze-price/analayze-price.component';
-// import { ContractListPageComponent } from './Shared/contract-list-page/contract-list-page.component';
-// import { ContractEstimatePageComponent } from './Shared/contract-estimate-page/contract-estimate-page.component';
-// import { ModalArchiveYearComponent } from './Shared/modal-archive-year/modal-archive-year.component';
-// import { ModalArchiveComponent } from './Shared/modal-archive/modal-archive.component';
-// import { ModalApprPriceIndexComponent } from './Shared/modal-appr-price-index/modal-appr-price-index.component';
-// import { NgSelectModule } from './Shared/ng-select';
-// import { ContractPageComponent } from './Shared/contract-page/contract-page.component';
-// import { ExcelLoadDataComponent } from './Shared/excel-load-data/excel-load-data.component';
-// import { ContractPersonPageComponent } from './Shared/contract-person-page/contract-person-page.component';
-// import { CartableComponent } from './Cartable/cartable.component';
-// import { MessageBoxComponent } from './Shared/message-box/message-box.component';
-// import { WorkflowSendComponent } from './WorkFlow/workflow-send/workflow-send.component';
-// import { CustomizedMenuComponent } from './Shared/CustomizedMenu/customized-menu/customized-menu.component';
-// import { NgSelectCellEditorComponent } from './Shared/NgSelectCellEditor/ng-select-cell-editor.component';
-// import { OverPopUpCellEditorComponent } from './Shared/OverPopUpcellEditor/over-pop-up-cell-editor.component';
-// import { UpdateWorkflowStatusComponent } from './WorkFlow/update-workflow-status/update-workflow-status.component';
-// import { UserRoleComponent } from './Users/UserRole/user-role.component';
+import { PriceListAnalayseComponent } from './Shared/price-list-analayse/price-list-analayse.component';
+import { AnalayzePriceComponent } from './Shared/analayze-price/analayze-price.component';
+import { ContractListPageComponent } from './Shared/contract-list-page/contract-list-page.component';
+import { ContractEstimatePageComponent } from './Shared/contract-estimate-page/contract-estimate-page.component';
+import { ModalArchiveYearComponent } from './Shared/modal-archive-year/modal-archive-year.component';
+import { ModalArchiveComponent } from './Shared/modal-archive/modal-archive.component';
+import { ModalApprPriceIndexComponent } from './Shared/modal-appr-price-index/modal-appr-price-index.component';
+import { DpDatePickerModule } from './Shared/jalali-angular-datepicker';
+import { JalaliDatepickerComponent } from './Shared/jalali-datepicker/jalali-datepicker.component';
+import { ContractPageComponent } from './Shared/contract-page/contract-page.component';
+import { ExcelLoadDataComponent } from './Shared/excel-load-data/excel-load-data.component';
+import { ContractPersonPageComponent } from './Shared/contract-person-page/contract-person-page.component';
+import { CartableComponent } from './Cartable/cartable.component';
+import { MessageBoxComponent } from './Shared/message-box/message-box.component';
+import { WorkflowSendComponent } from './WorkFlow/workflow-send/workflow-send.component';
+import { CustomizedMenuComponent } from './Shared/CustomizedMenu/customized-menu/customized-menu.component';
+import { NgSelectCellEditorComponent } from './Shared/NgSelectCellEditor/ng-select-cell-editor.component';
+import { OverPopUpCellEditorComponent } from './Shared/OverPopUpcellEditor/over-pop-up-cell-editor.component';
+import { UpdateWorkflowStatusComponent } from './WorkFlow/update-workflow-status/update-workflow-status.component';
+import { UserRoleComponent } from './Users/UserRole/user-role.component';
 // import { WorkflowTypeFormComponent } from './WorkFlow/workflow-type/workflow-type-form/workflow-type-form.component';
-// import { UserConfirmPhoneNumberComponent } from './Users/ConfirmPhoneNumber/user-confirm-phone-number.component';
-// import { TemplateRendererComponent } from './Shared/grid-component/template-renderer/template-renderer.component';
-// import { LoadingComponent } from './Load/loading/loading.component';
+import { UserConfirmPhoneNumberComponent } from './Users/ConfirmPhoneNumber/user-confirm-phone-number.component';
+import { TemplateRendererComponent } from './Shared/grid-component/template-renderer/template-renderer.component';
+import { LoadingComponent } from './Load/loading/loading.component';
 // import { LoadingService } from './Load/loading/LoadingService';
 // import { ContractCoefTypeComponent } from './Contract/Base_modules/contract-coef-type/contract-coef-type.component';
 // import { ChooseReportComponent } from './Shared/choose-report/choose-report.component';
@@ -70,14 +70,13 @@ import { AppSidebarComponent } from './Shared/SideBar/app-sidebar.component';
 // import { PriceListTopicDataentryPageComponent } from './PriceList/PriceListTopic/price-list-topic-dataentry-page/price-list-topic-dataentry-page.component';
 // import { NumberFieldEditableComponent } from './Shared/number-field-editable/number-field-editable.component';
 // import { PriceListTopicComponent } from './PriceList/price-list-topic/price-list-topic.component';
-// import { CheckboxFieldEditableComponent } from './Shared/checkbox-field-editable/checkbox-field-editable.component';
+import { CheckboxFieldEditableComponent } from './Shared/checkbox-field-editable/checkbox-field-editable.component';
 // import { MessageService } from './Shared/message-box/MessageService';
 // // tslint:disable-next-line:max-line-length
 // import { NumberInputComponentComponent } from './Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 // import { ContractPayDetailsComponent } from './Contract/ContractPay/contract-pay/contract-pay-details.component';
 
 // import { DpDatePickerModule } from './Shared/jalali-angular-datepicker';
-// import { JalaliDatepickerComponent } from './Shared/jalali-datepicker/jalali-datepicker.component';
 // // tslint:disable-next-line:max-line-length
 // import { ChildPriceListTopicPageComponent } from './PriceList/PriceListTopic/child-price-list-topic-page/child-price-list-topic-page.component';
 // import { ContractPayListComponent } from './Contract/ContractPay/contract-pay-list/contract-pay-list.component';
@@ -370,9 +369,32 @@ import { AppSidebarComponent } from './Shared/SideBar/app-sidebar.component';
     NgSelectVirtualScrollComponent,
     TestComponent,
     UserDetailComponent,
+    CheckboxFieldEditableComponent,
     AppMenuComponent,
     PriceListComponent,
     AppSidebarComponent,
+    PriceListAnalayseComponent,
+    AnalayzePriceComponent,
+    ContractListPageComponent,
+    ContractEstimatePageComponent,
+    ModalArchiveYearComponent,
+    ModalArchiveComponent,
+    ModalApprPriceIndexComponent,
+    ContractPageComponent,
+    JalaliDatepickerComponent,
+    ExcelLoadDataComponent,
+    ContractPersonPageComponent,
+    CartableComponent,
+    MessageBoxComponent,
+    WorkflowSendComponent,
+    CustomizedMenuComponent,
+    NgSelectCellEditorComponent,
+    OverPopUpCellEditorComponent,
+    UpdateWorkflowStatusComponent,
+    UserConfirmPhoneNumberComponent,
+    UserRoleComponent,
+    TemplateRendererComponent,
+    LoadingComponent,
     MyTreeComponent
   ],
   imports: [
@@ -386,6 +408,7 @@ import { AppSidebarComponent } from './Shared/SideBar/app-sidebar.component';
     AgGridModule.withComponents([]),
     CustomCheckboxModule,
     NgSelectModule,
+    DpDatePickerModule,
     TreeModule,
     NgxTreeSelectModule.forRoot({
       allowFilter: true,
@@ -400,9 +423,12 @@ import { AppSidebarComponent } from './Shared/SideBar/app-sidebar.component';
   ],
   providers: [
     LoadingService,
-    MessageService
+    MessageService,
+    JalaliDatepickerComponent
   ],
   entryComponents: [
+    JalaliDatepickerComponent,
+    // CheckboxFieldEditableComponent,// Changee1
     NgSelectVirtualScrollComponent
   ],
   bootstrap: [AppComponent]
