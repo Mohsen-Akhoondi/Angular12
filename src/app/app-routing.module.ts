@@ -8,8 +8,10 @@ import { ModalTwoColComponent } from './Shared/modal-two-col/modal-two-col.compo
 import { MainPageComponent } from './Advertising/main-page/main-page.component';
 import { AdvertisingGuard } from './Guards/Advertising.Guard';
 import { TenderPageComponent } from './Advertising/tender-page/tender-page.component';
+import { LoginPageComponent } from './Shared/login-page/login-page.component';
 
 const routes: Routes = [
+  { path: 'Login', component: LoginPageComponent },
   { path: 'Advertising', component: MainPageComponent, canActivate: [AdvertisingGuard] },
   { path: 'tender-page', component: TenderPageComponent },
   { path: 'Home', component: HomeComponent, canActivate: [AuthGuard] },

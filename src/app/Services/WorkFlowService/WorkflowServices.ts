@@ -106,7 +106,7 @@ export class WorkflowService {
             { WorkFlowTypeCode: WorkFlowTypeCode });
     }
     GetStartModuleViewTypeCode(RegionCode, ModuleCode, WorkflowTypeCode, ObjectID) {
-        return this.http.post(window.location.origin + '/Workflow/GetStartModuleViewTypeCode',
+        return this.http.get(window.location.origin + '/Workflow/GetStartModuleViewTypeCode',
             { RegionCode, ModuleCode, WorkflowTypeCode, ObjectID });
     }
     // GetWorkFlowType(RegionCode, ModuleCode) {

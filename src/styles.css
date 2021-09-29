@@ -1,6 +1,7 @@
 @import "~@circlon/angular-tree-component/src/lib/angular-tree-component.css";
 @import "~ag-grid-community/dist/styles/ag-grid.css";
 @import "~ag-grid-community/dist/styles/ag-theme-balham.css";
+@import "app/Shared/ng-select/themes/default.theme.css";
 @import "assets/Content/themify-icons.css";
 @import "assets/Content/ng-zorro-antd.min.css";
 @font-face {

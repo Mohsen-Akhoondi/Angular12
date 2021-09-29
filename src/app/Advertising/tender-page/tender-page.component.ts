@@ -271,15 +271,13 @@ export class TenderPageComponent implements OnInit {
     }
   }
   LoadLimitedTender() {
-    this.AuthServices.CheckAuth().subscribe(res => {
-      if (!res) {
+      if (!this.AuthServices.CheckAuth()) {
         this.ContractLimitedTenderCount = '-';
       } else {
         this.DealsHall.GetCountContractLimitedTender().subscribe(CountRes => {
           this.ContractLimitedTenderCount = CountRes;
         });
       }
-    });
   }
   RefreshByRegionGroup(RegionGroupCode) {
     this.RegionCodes = [];
@@ -297,7 +295,7 @@ export class TenderPageComponent implements OnInit {
     this.RefreshByRegionGroup(selectedObject);
   }
   popupclosed(param) {
-    if (this.PopupType === 'advertising-login' && param === 'IsLogin') {
+    if (this.PopupType === 'login-page' && param === 'IsLogin') {
       if (this.BtnClickName === 'upload-archive-click') {
         this.OverPixelWidth = 800;
         this.OverPixelHeight = 530;
@@ -310,7 +308,7 @@ export class TenderPageComponent implements OnInit {
         this.LoadLimitedTender();
         this.ReloadData();
       }
-    } if (this.PopupType === 'advertising-login' && param !== 'IsLogin') {
+    } if (this.PopupType === 'login-page' && param !== 'IsLogin') {
       this.btnclicked = false;
       this.PopupType = null;
       this.IsDown = true;
@@ -444,8 +442,7 @@ export class TenderPageComponent implements OnInit {
         });
         break;
       case 'limited-tender':
-        this.AuthServices.CheckAuth().subscribe(LoginRes => {
-          if (LoginRes) {
+          if (this.AuthServices.CheckAuth()) {
             this.DealsHall.GetContractLimitedTender(
               this.RegionGroupParams.selectedObject,
               this.RegionCodes,
@@ -463,11 +460,10 @@ export class TenderPageComponent implements OnInit {
             this.OverStartTopPosition = 130;
             this.OverPixelWidth = 500;
             this.OverPixelHeight = null;
-            this.PopupType = 'advertising-login';
+            this.PopupType = 'login-page';
             this.BtnClickName = 'limited-tender-click';
             this.btnclicked = true;
           }
-        });
         break;
       default:
         break;
@@ -521,8 +517,7 @@ export class TenderPageComponent implements OnInit {
       this.PopupType = 'advertising-accept-rules';
       this.btnclicked = true;
     } else {
-      this.AuthServices.CheckAuth().subscribe(Loginres => {
-        if (Loginres) {
+        if (this.AuthServices.CheckAuth()) {
           if (row.DealMethodCode === 2) {
             this.ProductRequestService.IsValidProposalByInquiryID(row.InquiryID).subscribe(res => {
               if (res && res !== undefined && res === true) {
@@ -555,7 +550,6 @@ export class TenderPageComponent implements OnInit {
         } else {
           this.ShowMessageBoxWithOkBtn('جهت دانلود فایل ابتدا وارد سایت شوید');
         }
-      });
     }
   }
   OnUploadArchive(row) {
@@ -563,15 +557,14 @@ export class TenderPageComponent implements OnInit {
       if (!CheckRes) {
         this.ShowMessageBoxWithOkBtn('زمان بارگذاری و ارسال اسناد با توجه به مهلت ارائه اسناد پایان یافته است ');
       } else {
-        this.AuthServices.CheckAuth().subscribe(Loginres => {
-          if (!Loginres) {
+          if (!this.AuthServices.CheckAuth()) {
             this.DealsDetailParam = row;
             this.DealsDetailParam.HeaderName = 'فرم ورود به سامانه';
             this.overStartLeftPosition = 420;
             this.OverStartTopPosition = 130;
             this.OverPixelWidth = 500;
             this.OverPixelHeight = null;
-            this.PopupType = 'advertising-login';
+            this.PopupType = 'login-page';
             this.BtnClickName = 'upload-archive-click';
             this.btnclicked = true;
           } else {
@@ -584,7 +577,6 @@ export class TenderPageComponent implements OnInit {
             this.PopupType = 'deal-upload-docs';
             this.btnclicked = true;
           }
-        });
       }
     });
   }
