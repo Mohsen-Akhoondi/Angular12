@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { single } from 'rxjs/operators';
-import { ComponentResolver, GridOptions } from 'ag-grid-community';
+import {  GridOptions } from 'ag-grid-community';
 import { of } from 'rxjs';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { NgSelectConfig } from 'src/app/Shared/ng-select';
