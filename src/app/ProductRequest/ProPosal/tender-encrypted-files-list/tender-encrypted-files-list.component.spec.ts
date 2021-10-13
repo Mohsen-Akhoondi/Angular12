@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { TenderEncryptedFilesListComponent } from './tender-encrypted-files-list.component';
 
@@ -6,7 +6,7 @@ describe('TenderEncryptedFilesListComponent', () => {
   let component: TenderEncryptedFilesListComponent;
   let fixture: ComponentFixture<TenderEncryptedFilesListComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ TenderEncryptedFilesListComponent ]
     })

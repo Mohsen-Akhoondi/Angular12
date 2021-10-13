@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ShareTypeComponent } from './share-type.component';
 
@@ -6,7 +6,7 @@ describe('ShareTypeComponent', () => {
   let component: ShareTypeComponent;
   let fixture: ComponentFixture<ShareTypeComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ShareTypeComponent ]
     })

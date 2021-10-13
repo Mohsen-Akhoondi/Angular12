@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { VariableTypeComponent } from './variable-type.component';
 
@@ -6,7 +6,7 @@ describe('VariableTypeComponent', () => {
   let component: VariableTypeComponent;
   let fixture: ComponentFixture<VariableTypeComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ VariableTypeComponent ]
     })

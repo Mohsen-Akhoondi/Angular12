@@ -203,7 +203,7 @@ export class ModuleViewTypeComponent implements OnInit {
     });
 
     // tslint:disable-next-line: no-shadowed-variable
-    const promise = new Promise((resolve) => {
+    const promise = new Promise<void>((resolve) => {
       this.Modules.SaveModuleViewType(this.Dto, this.ModuleCode).subscribe(
         res => {
           this.btnclicked = true;

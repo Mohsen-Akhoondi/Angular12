@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { FilterDocumentTypeComponent } from './filter-document-type.component';
 
@@ -6,7 +6,7 @@ describe('FilterDocumentTypeComponent', () => {
   let component: FilterDocumentTypeComponent;
   let fixture: ComponentFixture<FilterDocumentTypeComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ FilterDocumentTypeComponent ]
     })

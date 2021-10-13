@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RequestContractWithoutFlowComponent } from './request-contract-without-flow.component';
 
@@ -6,7 +6,7 @@ describe('RequestContractWithoutFlowComponent', () => {
   let component: RequestContractWithoutFlowComponent;
   let fixture: ComponentFixture<RequestContractWithoutFlowComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RequestContractWithoutFlowComponent ]
     })

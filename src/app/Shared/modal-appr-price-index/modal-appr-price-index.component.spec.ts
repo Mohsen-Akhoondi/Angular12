@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ModalApprPriceIndexComponent } from './modal-appr-price-index.component';
 
@@ -6,7 +6,7 @@ describe('ModalApprPriceIndexComponent', () => {
   let component: ModalApprPriceIndexComponent;
   let fixture: ComponentFixture<ModalApprPriceIndexComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ModalApprPriceIndexComponent ]
     })

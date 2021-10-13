@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { FileViwerPageComponent } from './file-viwer-page.component';
 
@@ -6,7 +6,7 @@ describe('FileViwerPageComponent', () => {
   let component: FileViwerPageComponent;
   let fixture: ComponentFixture<FileViwerPageComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ FileViwerPageComponent ]
     })

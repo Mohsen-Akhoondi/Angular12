@@ -397,7 +397,7 @@ export class ProductRequestContractComponent implements OnInit {
     this.ContractsignApi.stopEditing();
     this.ComitionMemberApi.stopEditing();
     let ValidateForm = true;
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise<void>((resolve, reject) => {
       this.RequiredComponents.forEach((element, index, array) => {
         if (element.Required && !element.selectedObject && element.selectedObject !== 0) {
           ValidateForm = false;

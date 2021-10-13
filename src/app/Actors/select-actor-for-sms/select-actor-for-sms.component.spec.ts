@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { SelectActorForSmsComponent } from './select-actor-for-sms.component';
 
@@ -6,7 +6,7 @@ describe('SelectActorForSmsComponent', () => {
   let component: SelectActorForSmsComponent;
   let fixture: ComponentFixture<SelectActorForSmsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ SelectActorForSmsComponent ]
     })

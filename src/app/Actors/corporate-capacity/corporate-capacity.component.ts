@@ -17,10 +17,10 @@ export class CorporateCapacityComponent implements OnInit {
   columnDef;
   rowsData = [];
   gridApi;
-  PriceListTopicID;
+  PriceListTopicID = undefined;
   Note;
-  StartDate;
-  EndDate;
+  StartDate = undefined;
+  EndDate = undefined;
   isClicked: boolean;
   PopUpType: string;
   HaveHeader;

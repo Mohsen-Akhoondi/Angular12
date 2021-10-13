@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ResponsibilityTypePageComponent } from './responsibility-type-page.component';
 
@@ -6,7 +6,7 @@ describe('ResponsibilityTypePageComponent', () => {
   let component: ResponsibilityTypePageComponent;
   let fixture: ComponentFixture<ResponsibilityTypePageComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ResponsibilityTypePageComponent ]
     })

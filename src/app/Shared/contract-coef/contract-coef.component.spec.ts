@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ContractCoefComponent } from './contract-coef.component';
 
@@ -6,7 +6,7 @@ describe('ContractCoefComponent', () => {
   let component: ContractCoefComponent;
   let fixture: ComponentFixture<ContractCoefComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ContractCoefComponent ]
     })

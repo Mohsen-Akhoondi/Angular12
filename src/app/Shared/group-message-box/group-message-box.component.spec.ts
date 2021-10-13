@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { GroupMessageBoxComponent } from './group-message-box.component';
 
@@ -6,7 +6,7 @@ describe('GroupMessageBoxComponent', () => {
   let component: GroupMessageBoxComponent;
   let fixture: ComponentFixture<GroupMessageBoxComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ GroupMessageBoxComponent ]
     })

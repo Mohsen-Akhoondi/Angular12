@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { CreateContractOnFlowComponent } from './create-contract-on-flow.component';
 
@@ -6,7 +6,7 @@ describe('CreateContractOnFlowComponent', () => {
   let component: CreateContractOnFlowComponent;
   let fixture: ComponentFixture<CreateContractOnFlowComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ CreateContractOnFlowComponent ]
     })

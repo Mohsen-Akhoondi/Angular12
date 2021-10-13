@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { NumberFieldEditableComponent } from './number-field-editable.component';
 
@@ -6,7 +6,7 @@ describe('NumberFieldEditableComponent', () => {
   let component: NumberFieldEditableComponent;
   let fixture: ComponentFixture<NumberFieldEditableComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ NumberFieldEditableComponent ]
     })

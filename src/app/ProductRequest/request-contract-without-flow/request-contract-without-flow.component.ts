@@ -573,7 +573,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
     if (this.PopupParam.ModuleViewTypeCode) {
       this.ModuleViewTypeCode = this.PopupParam.ModuleViewTypeCode;
     }
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise<void>((resolve, reject) => {
       this.User.GetModulOPByUser(this.ModuleCode).subscribe(res => {
         res.forEach(node => {
           switch (node.OperationCode) {

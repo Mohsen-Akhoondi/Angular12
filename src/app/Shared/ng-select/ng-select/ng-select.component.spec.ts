@@ -1,4 +1,4 @@
-import { async, ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Component, DebugElement, ErrorHandler, NgZone, Type, ViewChild, ViewEncapsulation } from '@angular/core';
 import { ConsoleService } from './console.service';
@@ -1007,7 +1007,7 @@ describe('NgSelectComponent', function () {
             expect(panelItems.scrollTop).toBe(54);
         }));
 
-        it('should close on option select by default', async(() => {
+        it('should close on option select by default', waitForAsync(() => {
             const fixture = createTestingModule(
                 NgSelectTestCmp,
                 `<ng-select [items]="cities"
@@ -1058,7 +1058,7 @@ describe('NgSelectComponent', function () {
             })
         }));
 
-        it('should not close when isOpen is true', async(() => {
+        it('should not close when isOpen is true', waitForAsync(() => {
             const fixture = createTestingModule(
                 NgSelectTestCmp,
                 `<ng-select [items]="cities"
@@ -1569,7 +1569,7 @@ describe('NgSelectComponent', function () {
             tick();
         }));
 
-        it('should display custom dropdown option template', async(() => {
+        it('should display custom dropdown option template', waitForAsync(() => {
             const fixture = createTestingModule(
                 NgSelectTestCmp,
                 `<ng-select [items]="cities" [(ngModel)]="selectedCity">
@@ -1604,7 +1604,7 @@ describe('NgSelectComponent', function () {
             expect(el.innerHTML).toBe('selected 1');
         }));
 
-        it('should display custom footer and header template', async(() => {
+        it('should display custom footer and header template', waitForAsync(() => {
             const fixture = createTestingModule(
                 NgSelectTestCmp,
                 `<ng-select [items]="cities" [(ngModel)]="selectedCity">
@@ -1628,7 +1628,7 @@ describe('NgSelectComponent', function () {
             });
         }));
 
-        it('should display custom tag template', async(() => {
+        it('should display custom tag template', waitForAsync(() => {
             const fixture = createTestingModule(
                 NgSelectTestCmp,
                 `<ng-select [items]="cities" [(ngModel)]="selectedCity" [addTag]="true">
@@ -2105,7 +2105,7 @@ describe('NgSelectComponent', function () {
                 </ng-select>`);
         });
 
-        it('should be visible when no value selected', async(() => {
+        it('should be visible when no value selected', waitForAsync(() => {
             fixture.detectChanges();
             fixture.whenStable().then(() => {
                 const element = fixture.componentInstance.select.element;
@@ -2990,7 +2990,7 @@ describe('NgSelectComponent', function () {
     });
 
     describe('Append to', () => {
-        it('should append dropdown to body', async(() => {
+        it('should append dropdown to body', waitForAsync(() => {
             const fixture = createTestingModule(
                 NgSelectTestCmp,
                 `<ng-select [items]="cities"
@@ -3009,7 +3009,7 @@ describe('NgSelectComponent', function () {
             })
         }));
 
-        it('should append dropdown to custom selector', async(() => {
+        it('should append dropdown to custom selector', waitForAsync(() => {
             const fixture = createTestingModule(
                 NgSelectTestCmp,
                 `
@@ -3397,7 +3397,7 @@ class NgSelectTestCmp {
 
 @Component({
     template: ``,
-    encapsulation: ViewEncapsulation.Native,
+    encapsulation: ViewEncapsulation.ShadowDom,
 })
 class EncapsulatedTestCmp extends NgSelectTestCmp {
     @ViewChild(NgSelectComponent) select: NgSelectComponent;

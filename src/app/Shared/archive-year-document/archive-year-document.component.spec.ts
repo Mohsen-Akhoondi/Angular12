@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ArchiveYearDocumentComponent } from './archive-year-document.component';
 
@@ -6,7 +6,7 @@ describe('ArchiveYearDocumentComponent', () => {
   let component: ArchiveYearDocumentComponent;
   let fixture: ComponentFixture<ArchiveYearDocumentComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ArchiveYearDocumentComponent ]
     })

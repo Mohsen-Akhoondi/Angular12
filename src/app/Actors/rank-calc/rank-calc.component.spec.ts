@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RankCalcComponent } from './rank-calc.component';
 
@@ -6,7 +6,7 @@ describe('RankCalcComponent', () => {
   let component: RankCalcComponent;
   let fixture: ComponentFixture<RankCalcComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RankCalcComponent ]
     })

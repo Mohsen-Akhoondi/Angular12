@@ -1,5 +1,5 @@
 import * as console from 'console';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Component, DebugElement, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -17,7 +17,7 @@ describe('TreeSelectComponent', () => {
   let fixture: ComponentFixture<TreeSelectSimpleBasicComponent>;
   let trigger: HTMLElement;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [FormsModule, NgxTreeSelectModule.forRoot({})],
       declarations: [TreeSelectSimpleBasicComponent],

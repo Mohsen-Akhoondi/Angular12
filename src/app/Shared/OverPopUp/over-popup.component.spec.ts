@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { OverPopupComponent } from './over-popup.component';
 
@@ -6,7 +6,7 @@ describe('OverPopupComponent', () => {
   let component: OverPopupComponent;
   let fixture: ComponentFixture<OverPopupComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ OverPopupComponent ]
     })

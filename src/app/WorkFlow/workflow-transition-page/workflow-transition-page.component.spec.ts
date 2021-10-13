@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { WorkflowTransitionPageComponent } from './workflow-transition-page.component';
 
@@ -6,7 +6,7 @@ describe('WorkflowTransitionPageComponent', () => {
   let component: WorkflowTransitionPageComponent;
   let fixture: ComponentFixture<WorkflowTransitionPageComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ WorkflowTransitionPageComponent ]
     })

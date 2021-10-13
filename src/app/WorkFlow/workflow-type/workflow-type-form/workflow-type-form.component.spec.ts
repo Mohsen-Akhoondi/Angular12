@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { WorkflowTypeFormComponent } from './workflow-type-form.component';
 
@@ -6,7 +6,7 @@ describe('WorkflowTypeFormComponent', () => {
   let component: WorkflowTypeFormComponent;
   let fixture: ComponentFixture<WorkflowTypeFormComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ WorkflowTypeFormComponent ]
     })

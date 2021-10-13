@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { InvestUsageTypeComponent } from './invest-usage-type.component';
 
@@ -6,7 +6,7 @@ describe('InvestUsageTypeComponent', () => {
   let component: InvestUsageTypeComponent;
   let fixture: ComponentFixture<InvestUsageTypeComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ InvestUsageTypeComponent ]
     })

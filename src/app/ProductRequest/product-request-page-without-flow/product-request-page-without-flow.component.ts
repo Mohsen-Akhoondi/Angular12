@@ -1209,7 +1209,7 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
     }
 
     // tslint:disable-next-line: no-shadowed-variable
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise<void>((resolve, reject) => {
       this.User.GetModulOPByUser(this.ModuleCode).subscribe(res => {
         res.forEach(node => {
           switch (node.OperationCode) {
@@ -1908,7 +1908,7 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
     this.CheckValidate = true;
     let ValidateForm = true;
     // tslint:disable-next-line: no-shadowed-variable
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise<void>((resolve, reject) => {
       this.RequiredComponents.forEach((element, index, array) => {
         if (element.Required && !element.selectedObject && element.selectedObject !== 0) {
           ValidateForm = false;

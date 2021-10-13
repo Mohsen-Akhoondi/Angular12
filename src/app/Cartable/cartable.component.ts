@@ -3146,7 +3146,7 @@ export class CartableComponent implements OnInit {
 
   RemoveSelectedUser() {
     // tslint:disable-next-line: no-shadowed-variable
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise<void>((resolve, reject) => {
       this.Actor.RemoveSelectedUserSessionForCartable().subscribe(res => {
         resolve();
       }, err => {

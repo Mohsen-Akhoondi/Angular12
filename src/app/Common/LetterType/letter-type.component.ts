@@ -9,17 +9,17 @@ import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsSe
   styleUrls: ['./letter-type.component.css']
 })
 export class LetterTypeComponent implements OnInit {
-RowData: any;
-private GridApi;
-ModuleCode: number;
-LetterTypeColDef: any;
-HasSave: boolean;
-btnclicked: any;
-alertMessageParams = { HaveOkBtn: true, message: '' };
-HaveHeader: boolean;
-type: string;
-Dto: any;
-private sub: any;
+  RowData: any;
+  private GridApi;
+  ModuleCode: number;
+  LetterTypeColDef: any;
+  HasSave: boolean;
+  btnclicked: any;
+  alertMessageParams = { HaveOkBtn: true, message: '' };
+  HaveHeader: boolean;
+  type: string;
+  Dto: any;
+  private sub: any;
   constructor(private LetterService: CommonService,
     private route: ActivatedRoute,
     private router: Router,
@@ -28,7 +28,7 @@ private sub: any;
     this.sub = this.route.params.subscribe(params => {
       this.ModuleCode = +params['ModuleCode'];
     });
-   }
+  }
 
   ngOnInit() {
     const promise = new Promise((resolve) => {
@@ -58,7 +58,7 @@ private sub: any;
           editable: Save,
           resizable: true
         },
-    ];
+      ];
     });
     this.GetAllLetterTypes();
   }
@@ -67,14 +67,14 @@ private sub: any;
     this.LetterService.GetAllLetterTypes().subscribe(res => {
       this.RowData = res;
     });
-   }
+  }
   LetterTypeGridReady(event) {
     this.GridApi = event.api;
   }
   closeModal() {
     this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
   }
-  RefreshItemNo () {
+  RefreshItemNo() {
     let CurrItemNo = 0;
     const itemsToUpdate = [];
     this.GridApi.forEachNode(function (node) {
@@ -103,14 +103,14 @@ private sub: any;
       };
       this.Dto.push(temp);
     });
-    const promise = new Promise ((resolve, reject) => {
+    const promise = new Promise<void>((resolve, reject) => {
       this.LetterService.SaveLetterTypeList(this.Dto, this.ModuleCode).subscribe(
         res => {
-        this.btnclicked = true;
-        this.type = 'message-box';
-        this.HaveHeader = true;
-        this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
-        resolve();
+          this.btnclicked = true;
+          this.type = 'message-box';
+          this.HaveHeader = true;
+          this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
+          resolve();
         },
         err => {
           this.btnclicked = true;

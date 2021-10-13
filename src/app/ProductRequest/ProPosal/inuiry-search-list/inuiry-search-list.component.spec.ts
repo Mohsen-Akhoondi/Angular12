@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { InuirySearchListComponent } from './inuiry-search-list.component';
 
@@ -6,7 +6,7 @@ describe('InuirySearchListComponent', () => {
   let component: InuirySearchListComponent;
   let fixture: ComponentFixture<InuirySearchListComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ InuirySearchListComponent ]
     })

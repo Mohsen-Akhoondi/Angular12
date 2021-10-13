@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ReportAverageWorkflowObjectsComponent } from './report-average-workflow-objects.component';
 
@@ -6,7 +6,7 @@ describe('ReportAverageWorkflowObjectsComponent', () => {
   let component: ReportAverageWorkflowObjectsComponent;
   let fixture: ComponentFixture<ReportAverageWorkflowObjectsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ReportAverageWorkflowObjectsComponent ]
     })

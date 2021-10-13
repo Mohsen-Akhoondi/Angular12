@@ -73,7 +73,7 @@ export class ProductRequestPersonItemComponent implements OnInit {
     if (!this.ModuleCode) {
       this.ModuleCode = this.PopupParam.ModuleCode;
     }
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise<void>((resolve, reject) => {
       this.User.GetModulOPByUser(this.ModuleCode).subscribe(res => {
         res.forEach(node => {
           switch (node.OperationCode) {

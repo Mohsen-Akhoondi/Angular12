@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ProductRequestCoefTypeComponent } from './product-request-coef-type.component';
 
@@ -6,7 +6,7 @@ describe('ProductRequestCoefTypeComponent', () => {
   let component: ProductRequestCoefTypeComponent;
   let fixture: ComponentFixture<ProductRequestCoefTypeComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ProductRequestCoefTypeComponent ]
     })

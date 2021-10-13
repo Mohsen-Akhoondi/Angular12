@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RankParameterComponent } from './rank-parameter.component';
 
@@ -6,7 +6,7 @@ describe('RankParameterComponent', () => {
   let component: RankParameterComponent;
   let fixture: ComponentFixture<RankParameterComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RankParameterComponent ]
     })

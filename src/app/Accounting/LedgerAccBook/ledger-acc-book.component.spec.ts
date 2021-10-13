@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { LedgerAccBookComponent } from './ledger-acc-book.component';
 
@@ -6,7 +6,7 @@ describe('LedgerAccBookComponent', () => {
   let component: LedgerAccBookComponent;
   let fixture: ComponentFixture<LedgerAccBookComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ LedgerAccBookComponent ]
     })

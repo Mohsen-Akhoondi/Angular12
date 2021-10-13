@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { MovablePropertyPageComponent } from './movable-property-page.component';
 
@@ -6,7 +6,7 @@ describe('MovablePropertyPageComponent', () => {
   let component: MovablePropertyPageComponent;
   let fixture: ComponentFixture<MovablePropertyPageComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ MovablePropertyPageComponent ]
     })

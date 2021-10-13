@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { PriceListTopicDataentryPageComponent } from './price-list-topic-dataentry-page.component';
 
@@ -6,7 +6,7 @@ describe('PriceListTopicDataentryPageComponent', () => {
   let component: PriceListTopicDataentryPageComponent;
   let fixture: ComponentFixture<PriceListTopicDataentryPageComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ PriceListTopicDataentryPageComponent ]
     })

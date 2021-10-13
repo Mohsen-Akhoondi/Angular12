@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { NgSelectVirtualScrollComponent } from './ng-select-virtual-scroll.component';
 
@@ -6,7 +6,7 @@ describe('NgSelectVirtualScrollComponent', () => {
   let component: NgSelectVirtualScrollComponent;
   let fixture: ComponentFixture<NgSelectVirtualScrollComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ NgSelectVirtualScrollComponent ]
     })

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { EstatePropertyTypePageComponent } from './estate-property-type-page.component';
 
@@ -6,7 +6,7 @@ describe('EstatePropertyTypePageComponent', () => {
   let component: EstatePropertyTypePageComponent;
   let fixture: ComponentFixture<EstatePropertyTypePageComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ EstatePropertyTypePageComponent ]
     })

@@ -444,7 +444,7 @@ export class ContractingCardSearchComponent implements OnInit {
     if (this.selectedRow) {
       let PersonObject;
       let ManagerCell;
-      const promise = new Promise((resolve, reject) => {
+      const promise = new Promise<void>((resolve, reject) => {
         this.Actor.GetActorByActorID(this.selectedRow.data.ActorID, this.ContractorType).subscribe(res => {
           PersonObject = res;
           resolve();

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ContractWithoutFlowListComponent } from './contract-without-flow-list.component';
 
@@ -6,7 +6,7 @@ describe('ContractWithoutFlowListComponent', () => {
   let component: ContractWithoutFlowListComponent;
   let fixture: ComponentFixture<ContractWithoutFlowListComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ContractWithoutFlowListComponent ]
     })

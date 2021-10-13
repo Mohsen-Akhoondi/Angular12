@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ProductRequestPageWithoutFlowProposalComponent } from './product-request-page-without-flow-proposal.component';
 
@@ -6,7 +6,7 @@ describe('ProductRequestPageWithoutFlowProposalComponent', () => {
   let component: ProductRequestPageWithoutFlowProposalComponent;
   let fixture: ComponentFixture<ProductRequestPageWithoutFlowProposalComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ProductRequestPageWithoutFlowProposalComponent ]
     })

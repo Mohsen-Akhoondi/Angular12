@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ProductRequestWFDetailComponent } from './product-request-wf-detail.component';
 
@@ -6,7 +6,7 @@ describe('ProductRequestWFDetailComponent', () => {
   let component: ProductRequestWFDetailComponent;
   let fixture: ComponentFixture<ProductRequestWFDetailComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ProductRequestWFDetailComponent ]
     })

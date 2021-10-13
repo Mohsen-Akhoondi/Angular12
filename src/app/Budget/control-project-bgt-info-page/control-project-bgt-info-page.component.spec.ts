@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ControlProjectBgtInfoPageComponent } from './control-project-bgt-info-page.component';
 
@@ -6,7 +6,7 @@ describe('ControlProjectBgtInfoPageComponent', () => {
   let component: ControlProjectBgtInfoPageComponent;
   let fixture: ComponentFixture<ControlProjectBgtInfoPageComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ControlProjectBgtInfoPageComponent ]
     })

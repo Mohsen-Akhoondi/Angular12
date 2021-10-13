@@ -11,7 +11,6 @@ import { of } from 'rxjs';
 import { log, isUndefined, isNumber } from 'util';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
-import { isDefined } from '@angular/compiler/src/util';
 declare var jquery: any;
 declare var $: any;
 
@@ -195,9 +194,9 @@ export class UsersComponent implements OnInit {
     private ProductRequest: ProductRequestService,
     private ContractList: ContractListService,
     private route: ActivatedRoute) {
-        this.route.params.subscribe(params => {
-        this.ModuleCode = +params['ModuleCode'];
-      });
+    this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
     this.Role_colDef = [
       {
         headerName: 'ردیف ',
@@ -1016,7 +1015,7 @@ export class UsersComponent implements OnInit {
       this.UserCostCenter_rowData = event.data.UserCostCenterList;
       this.UserRegionRole_rowData = event.data.UserRegionRoleList;
 
-    } else if (isDefined(event.data.RegionName)) {
+    } else if (!isUndefined(event.data.RegionName)) {
 
       this.UsersRegionID = -1;
       this.RegionCode = event.data.RegionName.RegionCode;

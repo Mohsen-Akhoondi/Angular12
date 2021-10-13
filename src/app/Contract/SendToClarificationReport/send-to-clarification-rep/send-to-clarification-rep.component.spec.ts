@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { SendToClarificationRepComponent } from './send-to-clarification-rep.component';
 
@@ -6,7 +6,7 @@ describe('SendToClarificationRepComponent', () => {
   let component: SendToClarificationRepComponent;
   let fixture: ComponentFixture<SendToClarificationRepComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ SendToClarificationRepComponent ]
     })
