@@ -44,7 +44,7 @@
     "ngx-malihu-scrollbar": "^7.0.0",
     "popper.js": "^1.14.3",
     "pretty-checkbox": "^3.0.3",
-    "rxjs": "~6.6.7",
+    "rxjs": "^7.4.0",
     "stimulsoft-viewer-angular": "^2021.3.2",
     "tslib": "^2.0.0",
     "util": "^0.12.4",
