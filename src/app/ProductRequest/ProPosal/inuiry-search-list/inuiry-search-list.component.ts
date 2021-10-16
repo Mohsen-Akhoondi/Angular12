@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { forkJoin } from 'rxjs/internal/observable/forkJoin';
+import { forkJoin } from 'rxjs';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 
 @Component({

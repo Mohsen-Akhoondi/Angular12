@@ -1,6 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { forkJoin } from 'rxjs/internal/observable/forkJoin';
+import { forkJoin } from 'rxjs';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';

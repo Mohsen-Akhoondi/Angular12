@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { map, catchError } from 'rxjs/operators';
 import { Observable, observable } from 'rxjs';
 import { BaseHttpClient } from './BaseHttpClient';
-import { JwtHelperService } from 'src/app/Shared/angular-jwt/src';
+import { JwtHelperService } from '@auth0/angular-jwt';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {

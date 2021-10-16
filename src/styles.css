@@ -311,8 +311,10 @@ div.tree .toggle-children-placeholder {
   cursor: pointer !important;
   border: 1px !important;
 }
-
-.ag-theme-balham .ag-root {
+.ag-theme-balham .ag-header-cell-menu-button .ag-icon-menu {
+  width: 15px !important;
+}
+.ag-theme-balham .ag-root-wrapper{
   border: none !important;
 }
 .ag-theme-balham {

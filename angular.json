@@ -13,8 +13,6 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "aot": true,
-            "showCircularDependencies": false,
             "outputPath": "../FinanceWebAppCore/FinanceWebApp.Net5/FinanceWebApp.Net5/Finance",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -61,7 +59,13 @@
               "node_modules/ngx-extended-pdf-viewer/assets/pdf.js",
               "node_modules/ngx-extended-pdf-viewer/assets/viewer.js",
               "node_modules/jquery-contextmenu/dist/jquery.contextMenu.min.js"
-            ]
+            ],
+            "vendorChunk": true,
+            "extractLicenses": false,
+            "buildOptimizer": false,
+            "sourceMap": true,
+            "optimization": false,
+            "namedChunks": true
           },
           "configurations": {
             "production": {
@@ -77,16 +81,25 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-              "optimization": true,
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": {
+                  "inline": true
+                }
+              },
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true
             }
-          }
+          },
+          "defaultConfiguration": ""
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",

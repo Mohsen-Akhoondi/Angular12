@@ -2,7 +2,6 @@ import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ActivatedRoute, Router } from '@angular/router';
-import { forkJoin } from 'rxjs/internal/observable/forkJoin';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';

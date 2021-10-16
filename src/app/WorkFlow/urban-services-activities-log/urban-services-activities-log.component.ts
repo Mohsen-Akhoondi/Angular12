@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild, TemplateRef, Input } from '@angular/core';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
-import { forkJoin } from 'rxjs/internal/observable/forkJoin';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { DealsHallService } from 'src/app/Services/ContractService/DealsHall/DealsHallService';
@@ -9,6 +8,7 @@ import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRe
 import { Router, ActivatedRoute } from '@angular/router';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-urban-services-activities-log',
