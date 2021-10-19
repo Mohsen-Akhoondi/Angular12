@@ -347,6 +347,8 @@ import { ContractStatusSummaryRepPageComponent } from './ProductRequest/contract
 import { ContractStatusSummarySearchPageComponent } from './ProductRequest/contract-status-summary-search-page/contract-status-summary-search-page.component';
 import { ImageViewerModule } from '@udhsin/ngx-image-viewer';
 import { LoginPageComponent } from './Shared/login-page/login-page.component';
+import { StimulViewerComponent } from './Shared/stimul-viewer/stimul-viewer.component';
+import { StimulsoftViewerModule } from 'stimulsoft-viewer-angular';
 // import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 @NgModule({
   declarations: [
@@ -639,7 +641,8 @@ import { LoginPageComponent } from './Shared/login-page/login-page.component';
     AdjustmentPriceRangeFormulasComponent,
     FileViwerPageComponent,
     ContractStatusSummaryRepPageComponent,
-    ContractStatusSummarySearchPageComponent
+    ContractStatusSummarySearchPageComponent,
+    StimulViewerComponent
   ],
   imports: [
     FormsModule,
@@ -664,7 +667,8 @@ import { LoginPageComponent } from './Shared/login-page/login-page.component';
       expandMode: ExpandMode.None
     }),
     NgxExtendedPdfViewerModule,
-    ImageViewerModule
+    ImageViewerModule,
+    StimulsoftViewerModule
   ],
   providers: [
     JalaliDatepickerComponent,
