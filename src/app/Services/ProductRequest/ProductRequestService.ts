@@ -289,7 +289,7 @@ export class ProductRequestService {
             OrginalModuleCode
         });
     }
-    SaveExpertProductRequestPerson(AProductRequestPerson,IsUpdateBeforeAdevertising , ModuleCode, OrginalModuleCode?: any) {
+    SaveExpertProductRequestPerson(AProductRequestPerson, IsUpdateBeforeAdevertising, ModuleCode, OrginalModuleCode?: any) {
         return this.http.post(window.location.origin + '/ProductRequest/SaveExpertProductRequestPerson', {
             AProductRequestPerson,
             IsUpdateBeforeAdevertising,
@@ -1287,9 +1287,9 @@ export class ProductRequestService {
     GetConsultantSelectWayList() {
         return this.http.get(window.location.origin + '/ProductRequest/GetConsultantSelectWayList', null);
     }
-    RevokeProductRequest(CostFactorID, 
-        ModuleCode, 
-        ContractID: number = null, 
+    RevokeProductRequest(CostFactorID,
+        ModuleCode,
+        ContractID: number = null,
         ContractSatusCode: number = null,
         WorkFlowInstanceId: number = null) {
         return this.http.get(window.location.origin + '/ProductRequest/RevokeProductRequest', {
@@ -1934,7 +1934,13 @@ export class ProductRequestService {
     GetMaxReferenceNo(CostFactorID: any, IsCost: boolean) {
         return this.http.get(window.location.origin + '/ProductRequest/GetMaxReferenceNo', { CostFactorID, IsCost });
     }
-    GetAssetList(AssetTag :string =null , AssetCode : number = null) {
-        return this.http.get(window.location.origin + '/ProductRequest/GetAssetList', { AssetTag,AssetCode });
+    GetContractWarrantyList(CostFactorID, IsCost) {
+        return this.http.get(window.location.origin + '/Contract/GetContractWarrantyList', {
+            CostFactorID,
+            IsCost
+        });
+    }
+    GetAssetList(AssetTag: string = null, AssetCode: number = null) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetAssetList', { AssetTag, AssetCode });
     }
 }

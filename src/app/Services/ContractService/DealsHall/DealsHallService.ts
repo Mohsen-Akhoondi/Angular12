@@ -49,16 +49,7 @@ export class DealsHallService {
                 FilterModelList
             });
     }
-    GetContractAuction(RegionGroupCode,
-         RegionCodes,
-          SubCostCenterCodes,
-           CostCenterCodes,
-            IsDuring, 
-            IsExpired,
-             pageNumber, 
-             pageSize,
-              SortModelList, 
-              FilterModelList) {
+    GetContractAuction(RegionGroupCode, RegionCodes, SubCostCenterCodes, CostCenterCodes, IsDuring, IsExpired, pageNumber, pageSize, SortModelList, FilterModelList) {
         return this.http.post(window.location.origin + '/DealsHall/GetContractAuction',
             {
                 RegionGroupCode,
