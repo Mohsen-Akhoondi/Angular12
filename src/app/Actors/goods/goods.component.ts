@@ -61,7 +61,7 @@ export class GoodsComponent implements OnInit {
       IsConsumer: this.IsConsumer,
     }
 
-    this.ProductRequest.SvaeEquipment(goods, this.ScaleParams.selectedObject , this.InputParam.PriceListTopicID).subscribe(res => {
+    this.ProductRequest.SvaeEquipment(goods,null,this.ScaleParams.selectedObject , this.InputParam.PriceListTopicID).subscribe(res => {
       this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
 
     });

@@ -73,6 +73,18 @@ export class RankCalcComponent implements OnInit {
     DropDownMinWidth: '100px',
     type: 'goods'
   };
+  NgSelectRelatedGoodsParams = {
+    bindLabelProp: 'RelatedGoodsName',
+    bindValueProp: 'RelatedProductID',
+    placeholder: '',
+    MinWidth: '90px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    DropDownMinWidth: '100px',
+    type: 'Relatedgoods'
+  };
 
   EduHisGradeParams = {
     bindLabelProp: 'GradeName',
@@ -436,6 +448,40 @@ export class RankCalcComponent implements OnInit {
           HaveThousand: true,
         },
         {
+          headerName: 'خودرو جایگزین',
+          field: 'RelatedGoodsName',
+          width: 200,
+          hide: this.IsHideProduct,
+          cellEditorFramework: NgSelectVirtualScrollComponent,
+          cellEditorParams: {
+            Params: this.NgSelectRelatedGoodsParams,
+            Items: [],
+            Owner: this
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.RelatedGoodsName;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.RelatedGoodsName) {
+              params.data.RelatedGoodsName = params.newValue.RelatedGoodsName;
+              params.data.RelatedProductID = params.newValue.RelatedProductID;
+              return true;
+            } else {
+              params.data.RelatedGoodsName = '';
+              params.data.RelatedProductID = null;
+              return false;
+            }
+          },
+          resizable: true,
+          sortable: true,
+          editable: true
+        },
+        {
           headerName: ScoreHeaderName,
           field: 'Score',
           width: 200,
@@ -714,7 +760,7 @@ export class RankCalcComponent implements OnInit {
         ToYear: node.ToYear,
         DistrictDirectionCode: node.DistrictDirectionCode,
         Privilege: node.Privilege,
-
+        RelatedProductID: node.RelatedProductID
       };
       RankList.push(RankCalcListObj);
     });
@@ -784,8 +830,7 @@ export class RankCalcComponent implements OnInit {
           type: 'from-fin-year'
         });
       });
-    }
-    else if (event.colDef && event.colDef.field === 'ToYear') {
+    }  else if (event.colDef && event.colDef.field === 'ToYear') {
       this.Finyearserv.GetFinYearList().subscribe(res => {
         this.RefreshEquipmentTypeItems.RefreshItemsVirtualNgSelect({
           List: res,
@@ -797,6 +842,13 @@ export class RankCalcComponent implements OnInit {
         this.RefreshEquipmentTypeItems.RefreshItemsVirtualNgSelect({
           List: res,
           type: 'region'
+        });
+      });
+    } else  if (event.colDef && event.colDef.field === 'RelatedGoodsName') {
+      this.Common.GetGoodsListRankCalc(this.PriceListTopicParam.selectedObject).subscribe(res => {
+        this.RefreshEquipmentTypeItems.RefreshItemsVirtualNgSelect({
+          List: res,
+          type: 'Relatedgoods'
         });
       });
     }

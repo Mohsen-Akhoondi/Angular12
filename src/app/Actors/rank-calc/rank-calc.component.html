@@ -10,20 +10,18 @@
             [Items]="PriceListTopicItems">
           </app-ng-select-virtual-scroll>
         </td>
-    
+
         <td width="25%">
           <span class="table-cell-Lable">مشخصه رتبه بندی</span>
           <app-ng-select-virtual-scroll style="display: inline-block;width: 70%;" class=""
-            [NgSelectParams]="RankParameterParams" (selectedChange)="onChangeRank($event)"
-            [Items]="RankParameterItems">
+            [NgSelectParams]="RankParameterParams" (selectedChange)="onChangeRank($event)" [Items]="RankParameterItems">
           </app-ng-select-virtual-scroll>
         </td>
 
         <td *ngIf="IsShowRegion" width="25%">
           <span class="table-cell-Lable">واحد اجرایی</span>
           <app-ng-select-virtual-scroll style="display: inline-block;width: 70%;" class=""
-            [NgSelectParams]="RegionParams" (selectedChange)="onChangeRegion($event)"
-            [Items]="RegionItems">
+            [NgSelectParams]="RegionParams" (selectedChange)="onChangeRegion($event)" [Items]="RegionItems">
           </app-ng-select-virtual-scroll>
         </td>
 
@@ -32,10 +30,10 @@
   </fieldset>
   <div id="container" style="clear: both;padding-bottom: 5px;">
     <div class="box-dev" style=" width: 100%;" [style.height.%]="89">
-      <app-grid [IsNeedGeneralBtn] = "!IsHideProduct"
-      [GenralBtnName] ="'افزودن تجهیزات'" (GridReady)="onGridReady($event)" [columns]="SelectedColumnDef" [rowsData]="rowData" [gridHeight]="92"
-        (cellEditingStarted)="onCellEditingStarted($event)" 
-        (GeneralBtnClick)="onAddNewGoods($event)" [IsEditable]="true">
+      <app-grid [IsNeedGeneralBtn]="!IsHideProduct" [GenralBtnName]="'افزودن تجهیزات'" (GridReady)="onGridReady($event)"
+        [columns]="SelectedColumnDef" [rowsData]="rowData" [gridHeight]="92"
+        (cellEditingStarted)="onCellEditingStarted($event)" (GeneralBtnClick)="onAddNewGoods($event)"
+        [IsEditable]="true">
       </app-grid>
     </div>
   </div>
@@ -54,7 +52,6 @@
 <app-over-popup *ngIf="isClicked" [HaveMaxBtn]="HaveMaxBtn" [startLeftPosition]="startLeftPosition"
   [startTopPosition]="startTopPosition" [minHeightPixel]="MinHeightPixel" [PercentWidth]="PercentWidth"
   [MainMaxwidthPixel]="MainMaxwidthPixel" [PopupType]="PopUpType" [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn"
-  [PopupParam]="paramObj" [HaveHeader]="HaveHeader"
-  (popupclosed)="popupclosed($event)">
+  [PopupParam]="paramObj" [HaveHeader]="HaveHeader" (popupclosed)="popupclosed($event)">
 
 </app-over-popup>

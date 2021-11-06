@@ -75,7 +75,8 @@
         <td style="width: 25%; padding-left: 5px;">
           <span class="table-cell-Lable">شماره همراه</span>
           <input name="PersonCell" style="display: inline-block;width: 70%;" class="form-control input-style"
-            [(ngModel)]="Cell" type="text" /></td>
+            [(ngModel)]="Cell" type="text" />
+        </td>
       </tr>
     </table>
     <table style="width: 100%; margin-bottom: 3px;">
@@ -86,7 +87,7 @@
             (selectedChange)="onChangeRegion($event)" [Items]="RegionItems" (Open)="OnOpenNgSelect('Region')">
           </app-ng-select-virtual-scroll>
         </td> -->
-         <td width="25%">
+        <td width="25%">
           <span class="table-cell-Lable">محل هزینه </span>
           <app-ng-select-virtual-scroll style="display: inline-block;width: 70%;" [NgSelectParams]="VWExeUnitParams"
             (selectedChange)="onChangeExeUnit($event)" [Items]="ExeUnitItems" (Open)="OnOpenNgSelect('ExeUnit')">
@@ -144,6 +145,10 @@
   <ng-template #ShowInformations let-row>
     <img [ngClass]="'img-def'" style="cursor: pointer;" width="16px" height="16px" src="assets/Icons/Details.png"
       (click)="onShowInformationsClick(row)" />
+  </ng-template>
+  <ng-template #ShowRunningContracts let-row>
+    <img [ngClass]="'img-def'" style="cursor: pointer;" width="16px" height="16px" src="assets/Icons/Suggestion.png"
+      (click)="onShowRunningContractsClick(row)" />
   </ng-template>
 </div>
 

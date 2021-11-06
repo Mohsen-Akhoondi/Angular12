@@ -44,7 +44,7 @@ export class CartableComponent implements OnInit {
   IsDeletedWLRow = false;
   Message;
   paramObj;
-  alertMessageParams = { HaveOkBtn: true, message: '' };
+  alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false };
   startLeftPosition;
   startTopPosition;
   WorkFlowTransitionID;
@@ -206,6 +206,8 @@ export class CartableComponent implements OnInit {
     IsDisabled: false,
   };
   ISIRVersion = false;
+  btnclicked = false;
+  PopupType = '';
 
   constructor(private router: Router,
     private ContractList: ContractListService,
@@ -363,6 +365,12 @@ export class CartableComponent implements OnInit {
         width: 120,
         resizable: true
       },
+      {
+        headerName: 'نوع شی گردش کار ',
+        field: 'ObjectTypeName',
+        width: 120,
+        resizable: true
+      }
 
     ];
     this.FinishedcolumnDef = [
@@ -572,6 +580,13 @@ export class CartableComponent implements OnInit {
         resizable: true
       },
     ];
+    if (!this.ISIRVersion) {
+      this.Cartable.checkQuestionLink().subscribe(res => {
+        if (res) {
+          this.ShowMessageBoxWithYesNoBtn('پرسشنامه ای برای سامانه معاملات موجود است. آیا مایل به پاسخگویی هستید؟');
+        }
+      });
+    }
   }
 
   getRowData(CurrentWFItems = null) {
@@ -653,6 +668,7 @@ export class CartableComponent implements OnInit {
                   RegionName: this.selectedRow.data.RegionName,
                   UserRegionCode: this.UserRegionCode,
                   CartableUserID: this.selectedRow.data.CartableUserID,
+                  // x: code
                 };
                 this.isClicked = true;
                 this.selectedRow = null;
@@ -674,10 +690,6 @@ export class CartableComponent implements OnInit {
   }
 
   popupclosed() {
-    // if (this.type !== 'message-box' && this.type !== 'application-note') {
-    //   this.CrtableRefreshService.RefreshCartable();
-    // }
-
     this.OverMainMinwidthPixel = null;
     this.PercentWidth = null;
     this.MainMinwidthPixel = null;
@@ -818,6 +830,8 @@ export class CartableComponent implements OnInit {
   }
 
   onRowDoubleClicked(Value) {
+    console.log("Value",Value);
+    
     this.HeightPercentWithMaxBtn = 95;
     this.MinHeightPixel = 645;
     this.UserSettings.GetUserRegionCodeByWorkflowTransitionID(Value.data.WorkflowID).subscribe(res => {
@@ -843,6 +857,8 @@ export class CartableComponent implements OnInit {
         HeaderName = Value.data.ModuleViewTypeName.split('|')[0];
       }
     }
+    console.log("Value.data.WorkflowObjectCode",Value.data.WorkflowObjectCode);
+    
     this.Cartable.UserUpdateWorkFlowStatus(Value.data.JoinWorkflowLogID.split('|'), Value.data.CartableUserID).
       subscribe(res => {
         if (Value.data.WorkflowObjectCode === 1) {
@@ -942,7 +958,7 @@ export class CartableComponent implements OnInit {
           if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
 
             if (Value.data.ContractTypeCode === 26 || Value.data.ContractTypeCode === 29) {
-              this.type = 'contract-pay-item-hour';
+              this.type = 'contract-pay-details' // 'contract-pay-item-hour';
             }
 
             if (Value.data.ContractTypeCode === 27 || Value.data.ContractTypeCode === 28) {
@@ -956,7 +972,8 @@ export class CartableComponent implements OnInit {
             if (Value.data.PriceListPatternID &&
               Value.data.ContractTypeCode !== 26 &&
               Value.data.ContractTypeCode !== 29) {
-              this.type = 'contract-pay-item-estimate-page';
+              // this.type = 'contract-pay-item-estimate-page';
+              this.type = 'contract-pay-details';
             }
             this.HaveMaxBtn = true;
             this.HeightPercentWithMaxBtn = 97;
@@ -1073,6 +1090,8 @@ export class CartableComponent implements OnInit {
         }
         if (Value.data.WorkflowObjectCode === 3 || Value.data.WorkflowObjectCode === 5 || Value.data.WorkflowObjectCode === 7) {
           if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
+            console.log("معاملاتت");
+            
             this.type = 'product-request-page';
             this.HaveMaxBtn = true;
             this.startLeftPosition = 10;
@@ -1110,6 +1129,7 @@ export class CartableComponent implements OnInit {
             };
             this.isClicked = true;
           } else {
+            
             this.IsDown = false;
             const WorkLogIDs = Value.data.JoinWorkflowLogID.split('|');
             this.paramObj = { rows: <any>[], IsWFShow: true };
@@ -1905,6 +1925,55 @@ export class CartableComponent implements OnInit {
             });
           }
         }
+        if (Value.data.WorkflowObjectCode === 25) {
+          if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
+            this.type = 'customer-order';
+            this.HaveMaxBtn = true;
+            this.startLeftPosition = 10;
+            this.startTopPosition = 0;
+            this.HeightPercentWithMaxBtn = 97;
+            this.MinHeightPixel = 645;
+            this.paramObj = {
+              CurrWorkFlow: Value.data,
+              CustomerOrderID :Value.data.ObjectID,
+              ModuleViewTypeCode: Number(ModuleViewTypeCode),
+              Mode: 'EditMode',
+              HeaderName: HeaderName,
+              UserRegionCode: this.UserRegionCode,
+            };
+            this.isClicked = true;
+          } else {
+            this.IsDown = false;
+            const WorkLogIDs = Value.data.JoinWorkflowLogID.split('|');
+            this.paramObj = { rows: <any>[], IsWFShow: true };
+            this.Cartable.GetFinWorkFlowByWorkLogDetailID(WorkLogIDs).subscribe((res: any[]) => {
+              this.IsDown = true;
+              if (res.length > 0) {
+                res.forEach(element => {
+                  element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
+                });
+                this.paramObj = {
+                  rows: res,
+                  IsWFShow: true,
+                  CurrWorkFlow: Value.data,
+                  CustomerOrderID :Value.data.ObjectID,
+                  ModuleViewTypeCode: Number(ModuleViewTypeCode),
+                  UserRegionCode: this.UserRegionCode,
+                  Mode: 'EditMode',
+                  HeaderName: HeaderName,
+                };
+                this.type = 'work-flow-send';
+                this.isClicked = true;
+                this.HaveMaxBtn = false;
+                this.startLeftPosition = 250;
+                this.startTopPosition = 70;
+              } else {
+                this.showMessageBox('رکوردی برای نمایش وجود ندارد.');
+                return;
+              }
+            });
+          }
+        }
       });
   }
   onFinishedRowDoubleClicked(Value, num) {
@@ -1972,7 +2041,7 @@ export class CartableComponent implements OnInit {
     if (Value.data.WorkflowObjectCode === 2) {
 
       if (Value.data.ContractTypeCode === 26 || Value.data.ContractTypeCode === 29) {
-        this.type = 'contract-pay-item-hour';
+        this.type ='contract-pay-details' ; // 'contract-pay-item-hour';
       }
 
       if (Value.data.ContractTypeCode === 27 || Value.data.ContractTypeCode === 28) {
@@ -1986,7 +2055,8 @@ export class CartableComponent implements OnInit {
       if (Value.data.PriceListPatternID &&
         Value.data.ContractTypeCode !== 26 &&
         Value.data.ContractTypeCode !== 29) {
-        this.type = 'contract-pay-item-estimate-page';
+        this.type = 'contract-pay-details';
+        // this.type = 'contract-pay-item-estimate-page';
       }
 
       this.HaveMaxBtn = true;
@@ -2074,12 +2144,12 @@ export class CartableComponent implements OnInit {
         HeaderName: HeaderName,
         ShowSendBtn: 'YES',
         CartableUserID: Value.data.CartableUserID,
-        IsInProgressCartable: num === 1 ? true: false, // RFC 59699     
+        IsInProgressCartable: num === 1 ? true : false, // RFC 59699     
       };
       this.isClicked = true;
     }
     if (Value.data.WorkflowObjectCode === 5 || Value.data.WorkflowObjectCode === 7) {
-      
+
       this.type = 'product-request-page';
       this.HaveMaxBtn = true;
       this.startLeftPosition = 10;
@@ -2360,6 +2430,26 @@ export class CartableComponent implements OnInit {
         CurrWorkFlow: Value.data,
         ModuleViewTypeCode: 200000,
         Mode: 'EditMode',
+        IsInFinishedCartable: num === 2 ? true : false, // RFC 61296
+      };
+      this.isClicked = true;
+    }
+
+    if (Value.data.WorkflowObjectCode === 25) {
+
+      this.type = 'customer-order';
+      this.HaveMaxBtn = true;
+      this.startLeftPosition = 10;
+      this.startTopPosition = 0;
+      this.HeightPercentWithMaxBtn = 97;
+      this.MinHeightPixel = 645;
+
+      this.paramObj = {
+        CurrWorkFlow: Value.data,
+        CustomerOrderID :Value.data.ObjectID,
+        ModuleViewTypeCode: 200000,
+        Mode: 'EditMode',
+        IsInFinishedCartable: num === 2 ? true : false, // RFC 61296
       };
       this.isClicked = true;
     }
@@ -2467,7 +2557,7 @@ export class CartableComponent implements OnInit {
       if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
 
         if (Value.data.ContractTypeCode === 26 || Value.data.ContractTypeCode === 29) {
-          this.type = 'contract-pay-item-hour';
+          this.type ='contract-pay-details' ; // 'contract-pay-item-hour';
         }
 
         if (Value.data.ContractTypeCode === 27 || Value.data.ContractTypeCode === 28) {
@@ -2481,7 +2571,8 @@ export class CartableComponent implements OnInit {
         if (Value.data.PriceListPatternID &&
           Value.data.ContractTypeCode !== 26 &&
           Value.data.ContractTypeCode !== 29) {
-          this.type = 'contract-pay-item-estimate-page';
+          // this.type = 'contract-pay-item-estimate-page';
+          this.type = 'contract-pay-details';
         }
 
         this.HaveMaxBtn = true;
@@ -2975,6 +3066,56 @@ export class CartableComponent implements OnInit {
         });
       }
     }
+
+     if (Value.data.WorkflowObjectCode === 25) {
+      if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
+        this.type = 'customer-order';
+        this.HaveMaxBtn = true;
+        this.startLeftPosition = 10;
+        this.startTopPosition = 0;
+        this.HeightPercentWithMaxBtn = 97;
+        this.MinHeightPixel = 645;
+        this.paramObj = {
+          CurrWorkFlow: Value.data,
+          CustomerOrderID :Value.data.ObjectID,
+          ModuleViewTypeCode: Number(ModuleViewTypeCode),
+          Mode: 'EditMode',
+          HeaderName: HeaderName,
+          UserRegionCode: this.UserRegionCode,
+        };
+        this.isClicked = true;
+      } else {
+        this.IsDown = false;
+        const WorkLogIDs = Value.data.JoinWorkflowLogID.split('|');
+        this.paramObj = { rows: <any>[], IsWFShow: true };
+        this.Cartable.GetFinWorkFlowByWorkLogDetailID(WorkLogIDs).subscribe((res: any[]) => {
+          this.IsDown = true;
+          if (res.length > 0) {
+            res.forEach(element => {
+              element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
+            });
+            this.paramObj = {
+              rows: res,
+              IsWFShow: true,
+              CurrWorkFlow: Value.data,
+              CustomerOrderID :Value.data.ObjectID,
+              ModuleViewTypeCode: Number(ModuleViewTypeCode),
+              UserRegionCode: this.UserRegionCode,
+              Mode: 'EditMode',
+              HeaderName: HeaderName,
+            };
+            this.type = 'work-flow-send';
+            this.isClicked = true;
+            this.HaveMaxBtn = false;
+            this.startLeftPosition = 250;
+            this.startTopPosition = 70;
+          } else {
+            this.showMessageBox('رکوردی برای نمایش وجود ندارد.');
+            return;
+          }
+        });
+      }
+    }
   }
   onShowReport() {
     if (!this.selectedRow || !this.selectedRow.data || !this.selectedRow.data.WorkflowID) {
@@ -3414,5 +3555,46 @@ export class CartableComponent implements OnInit {
   onChangeDeletedWorkflowObject(event) { // کمبوی کارتابل ابطال شده
     this.DeletedWorkflowObjectParams.selectedObject = event;
     this.GetDeletedCartableRowData();
+  }
+
+  ShowMessageBoxWithYesNoBtn(message) {
+    this.btnclicked = true;
+    this.PopupType = 'message-box';
+    this.HaveHeader = true;
+    this.alertMessageParams.message = message;
+    this.alertMessageParams.HaveOkBtn = false;
+    this.alertMessageParams.HaveYesBtn = true;
+    this.alertMessageParams.HaveNoBtn = true;
+  }
+
+  MessageBoxAction(ActionResult) {
+    if (ActionResult === 'YES') {
+      this.Cartable.RedirectToSurveyPage().subscribe(res => {
+        if (res) {
+          this.PopupType = '';
+          this.btnclicked = false;
+          window.open(res, '_blank');
+          this.showMessageBoxWithOK('سپاس از همیاری شما. مشارکت، باعث ارائه خدمات بهتر به شما در آینده می شود.');
+        }
+      });
+    }
+  }
+  showMessageBoxWithOK(message) {
+    this.PopupType = 'message-box';
+    this.HaveHeader = true;
+    this.HaveMaxBtn = false;
+    this.btnclicked = true;
+    this.alertMessageParams.message = message;
+    this.alertMessageParams.HaveOkBtn = true;
+    this.alertMessageParams.HaveYesBtn = false;
+    this.alertMessageParams.HaveNoBtn = false;
+  }
+  popupMessageclosed() {
+    this.OverMainMinwidthPixel = null;
+    this.PercentWidth = null;
+    this.MainMinwidthPixel = null;
+    this.btnclicked = false;
+    this.HaveMaxBtn = false;
+    this.PopupType = '';
   }
 }

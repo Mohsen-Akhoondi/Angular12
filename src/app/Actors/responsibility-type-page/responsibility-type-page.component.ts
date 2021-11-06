@@ -3,9 +3,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { CommonService } from 'src/app/Services/CommonService/CommonService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
-
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 @Component({
   selector: 'app-responsibility-type-page',
   templateUrl: './responsibility-type-page.component.html',
@@ -62,7 +61,7 @@ export class ResponsibilityTypePageComponent implements OnInit {
         headerName: 'کد نوع مسئولیت',
         field: 'ResponsibilityTypeCode',
         width: 150,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 3},
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {

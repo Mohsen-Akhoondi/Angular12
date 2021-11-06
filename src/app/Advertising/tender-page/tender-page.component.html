@@ -156,9 +156,12 @@
             <hr>
           </div>
           <div style="height: 405px;">
-            <app-grid (RowClick)="onRowClick($event)" paginationPageSize="10" [isPagination]="true"
-              [GridOptionsRowStyle]="GridOptionsRowStyle" style="width: 100%;" [columns]="columnDef"
-              [rowsData]="rowData" (GridReady)="onGridReady($event)" [gridHeight]="93">
+            <app-grid (SortChange)="OnSortChange($event)" (GridReady)="onGridReady($event)"
+              (ChangePage)="OnChangePage($event)" [IsServerPaging]="true" [TotalRecordCount]="TotalRecordCount"
+              [paginationPageSize]="30" (FilterChange)="OnFilterChange($event)" (RowClick)="onRowClick($event)"
+              paginationPageSize="10" [GridOptionsRowStyle]="GridOptionsRowStyle"
+              style="width: 100%;" [columns]="columnDef" [rowsData]="rowData" (GridReady)="onGridReady($event)"
+              [gridHeight]="86">
             </app-grid>
           </div>
         </div>

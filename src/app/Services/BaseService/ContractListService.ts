@@ -29,7 +29,29 @@ export class ContractListService {
         ActorID
       });
   }
+  GetContractListPaging(pageNumber,
+    pageSize,
+    SortModelList,
+    FilterModelList,
+    ARegionCode,
+    AModuleCode, HaveEstimate = false,
+    HavePayEstimate = false,
+    HavePay = false) {
+    console.log(SortModelList);
 
+    return this.http.post(window.location.origin + '/Home/GetContractListPaging',
+      {
+        pageNumber,
+        pageSize,
+        SortModelList,
+        FilterModelList,
+        ARegionCode,
+        AModuleCode,
+        HaveEstimate,
+        HavePayEstimate,
+        HavePay
+      });
+  }
   GetContractDataByID(AContractID: number) {
     return this.http.get(window.location.origin + '/Home/GetContractDataByID', { AContractID });
   }
@@ -69,20 +91,28 @@ export class ContractListService {
     PriceListTypeCode: number,
     SeasonCode: number,
     IsVolumetric: any,
+    IsCumulative: any,
     AContractPeronList: any,
     ReigonCode: number,
     ARelatedProductList: any,
-    ProductRequestID) {
+    ProductRequestID,
+    ModuleCode: any,
+    NotControllingPayDatePeriod: any,
+    IsMultiInvoice: any) {
     return this.http.post(window.location.origin + '/Home/SaveContractPerson', {
       ContractID,
       CostListFinYearCode,
       PriceListTypeCode,
       SeasonCode,
       IsVolumetric,
+      IsCumulative,
       AContractPeronList,
       ReigonCode,
       ARelatedProductList,
-      ProductRequestID
+      ProductRequestID,
+      ModuleCode,
+      NotControllingPayDatePeriod,
+      IsMultiInvoice
     });
   }
 
@@ -298,7 +328,10 @@ export class ContractListService {
     ToCommitionDate = null,
     FromDocumentDeadlineDate = null,
     ToDocumentDeadlineDate = null,
-    CommitionMembers = null
+    CommitionMembers = null,
+    DealTypeCode = null,
+    ProvisionCode = null,
+    ProvisionFinYearCodes = null,
   ) {
     return this.http.get(window.location.origin + '/Contract/ContractRequestSearch', {
       RegionCode,
@@ -370,7 +403,10 @@ export class ContractListService {
       ToCommitionDate,
       FromDocumentDeadlineDate,
       ToDocumentDeadlineDate,
-      CommitionMembers
+      CommitionMembers,
+      DealTypeCode,
+      ProvisionCode,
+      ProvisionFinYearCodes,
     });
   }
 
@@ -444,7 +480,10 @@ export class ContractListService {
     ToCommitionDate = null,
     FromDocumentDeadlineDate = null,
     ToDocumentDeadlineDate = null,
-    CommitionMembers = null
+    CommitionMembers = null,
+    DealTypeCode = null,
+    ProvisionCode = null,
+    ProvisionFinYearCodes = null,
   ) {
     return this.http.get(window.location.origin + '/Contract/ContractRequestpartialSearch', {
       RegionCode,
@@ -516,7 +555,10 @@ export class ContractListService {
       ToCommitionDate,
       FromDocumentDeadlineDate,
       ToDocumentDeadlineDate,
-      CommitionMembers
+      CommitionMembers,
+      DealTypeCode,
+      ProvisionCode,
+      ProvisionFinYearCodes,
     });
   }
 
@@ -590,7 +632,10 @@ export class ContractListService {
     ToCommitionDate = null,
     FromDocumentDeadlineDate = null,
     ToDocumentDeadlineDate = null,
-    CommitionMembers = null
+    CommitionMembers = null,
+    DealTypeCode = null,
+    ProvisionCode = null,
+    ProvisionFinYearCodes = null,
   ) {
     return this.http.get(window.location.origin + '/Contract/ContractRequestSearchMoreInfo', {
       RegionCode,
@@ -663,7 +708,10 @@ export class ContractListService {
       ToCommitionDate,
       FromDocumentDeadlineDate,
       ToDocumentDeadlineDate,
-      CommitionMembers
+      CommitionMembers,
+      DealTypeCode,
+      ProvisionCode,
+      ProvisionFinYearCodes,
     });
   }
 
@@ -765,8 +813,16 @@ export class ContractListService {
     });
   }
 
-  UploadInRecentAllClarification(RegionCode: number) {
-    return this.http.get(window.location.origin + '/Contract/UploadInRecentAllClarification', { RegionCode });
+  UploadInRecentAllClarification(RegionCode: number,
+    ModuleCode: number,
+    FromAuditDate = null,
+    ToAuditDate = null) {
+    return this.http.get(window.location.origin + '/Contract/UploadInRecentAllClarification', {
+      RegionCode,
+      ModuleCode,
+      FromAuditDate,
+      ToAuditDate
+    });
   }
 
   ContractRequestUrbanServiceSearch(RegionCodeList,
@@ -806,9 +862,9 @@ export class ContractListService {
   CallContractStatementService(ContractID) {
     return this.http.get(window.location.origin + '/Contract/CallContractStatementService', { ContractID });
   }
-  GetConcludedContractPaging(PageNumber, PageSize, SearchTerm, SearchOption, RegionCode) {
+  GetConcludedContractPaging(PageNumber, PageSize, SearchTerm, SearchOption, RegionCode, ProductRequestTypeCode) {
     return this.http.get(window.location.origin + '/Contract/GetConcludedContractPaging',
-      { PageNumber, PageSize, SearchTerm, SearchOption, RegionCode });
+      { PageNumber, PageSize, SearchTerm, SearchOption, RegionCode, ProductRequestTypeCode });
   }
   ChangeContractStatus(ContractID: number) {
     return this.http.get(window.location.origin + '/Contract/ChangeContractStatus', { ContractID });
@@ -878,26 +934,32 @@ export class ContractListService {
     PriceListTypeCode: number,
     SeasonCode: number,
     IsVolumetric: any,
+    IsCumulative: any,
     AContractPeronList: any,
     ReigonCode: number,
     ContractAssetIncomeList: any,
     ModuleCode: number,
     ReceiveFactorID: number,
     ARelatedProductList: any,
-    ProductRequestID) {
+    ProductRequestID,
+    NotControllingPayDatePeriod: any,
+    IsMultiInvoice: any) {
     return this.http.post(window.location.origin + '/Home/SaveIncomeContractPerson', {
       ContractID,
       CostListFinYearCode,
       PriceListTypeCode,
       SeasonCode,
       IsVolumetric,
+      IsCumulative,
       AContractPeronList,
       ReigonCode,
       ContractAssetIncomeList,
       ModuleCode,
       ReceiveFactorID,
       ARelatedProductList,
-      ProductRequestID
+      ProductRequestID,
+      NotControllingPayDatePeriod,
+      IsMultiInvoice
     });
   }
 
@@ -994,4 +1056,35 @@ export class ContractListService {
       });
   }
 
+  GetContractIsMultiInvoice(ContractID) {
+    return this.http.get(window.location.origin + '/Contract/GetContractIsMultiInvoice', { ContractID });
+  }
+  GetTotalRemained(ActorID) {
+    return this.http.get(window.location.origin + '/Contract/GetTotalRemained', { ActorID });
+  }
+
+  GetProviderContractList(
+    ARegionCode: number, AModuleCode: number, IsCost = true , ActorID: number = null) {
+    return this.http.get(window.location.origin + '/Home/GetProviderContractList',
+      {
+        ARegionCode,
+        AModuleCode,     
+        IsCost,       
+        ActorID
+      });
+  }
+  
+  GetRoleNameList(SearchOption,
+    SearchTerm: string,
+    PageNumber: number,
+    PageSize: number,
+    ) {       
+    return this.http.get(window.location.origin + '/Home/GetRoleNameList', {
+        SearchOption,
+        SearchTerm,
+        PageNumber,
+        PageSize,
+    },
+        false);
+}
 }

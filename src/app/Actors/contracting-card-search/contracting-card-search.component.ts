@@ -20,6 +20,7 @@ export class ContractingCardSearchComponent implements OnInit {
   @ViewChild('ShowHistoryList') ShowHistoryList: TemplateRef<any>;
   @ViewChild('SendText') SendText: TemplateRef<any>;
   @ViewChild('ShowInformations') ShowInformations: TemplateRef<any>;
+  @ViewChild('ShowRunningContracts') ShowRunningContracts: TemplateRef<any>;
   ModuleCode = 2872;
   RegionParams = { // ok
     Items: [],
@@ -31,7 +32,7 @@ export class ContractingCardSearchComponent implements OnInit {
     loading: false,
     IsVirtualScroll: false,
     IsDisabled: false,
-  }
+  };
   RegionItems = [];
   MinHeightPixel;
   HeightPercentWithMaxBtn;
@@ -59,7 +60,7 @@ export class ContractingCardSearchComponent implements OnInit {
     loading: false,
     IsVirtualScroll: false,
     IsDisabled: false,
-  }
+  };
 
   PriceListTopicItems = [];
   PixelHeight;
@@ -76,20 +77,6 @@ export class ContractingCardSearchComponent implements OnInit {
   columnDef;
   rowData = [];
   State;
-  // NgSelectTimesParams = {
-  //   Items: [],
-  //   bindLabelProp: 'NoTimesName',
-  //   bindValueProp: 'NoTimesCode',
-  //   placeholder: '',
-  //   MinWidth: '150px',
-  //   selectedObject: null,
-  //   loading: false,
-  //   IsVirtualScroll: false,
-  //   Required: false,
-  //   clearable: true,
-  //   IsDisabled: false,
-  // };
-  // TimesListSet = [];
   ContractorType = true;
   Contractorname = '';
   IdentityNo = '';
@@ -124,6 +111,11 @@ export class ContractingCardSearchComponent implements OnInit {
     type: 'ExeUnit'
   };
   UnitPatternID;
+  MaincolumnDef = [];
+  MainrowData = [];
+  private gridApi;
+  private gridMainApi;
+  selectedCRow: any;
 
   constructor(private router: Router,
     private ProductRequest: ProductRequestService,
@@ -205,12 +197,20 @@ export class ContractingCardSearchComponent implements OnInit {
       this.minWidthPixel = null;
       this.PixelWidth = null;
       this.MainMaxwidthPixel = null;
+      this.type = '';
     }
   }
-  onGridReady(params) {
+  onGridReady (params) {
+    this.gridApi = params.api;
+  }
+  onMainGridReady (params) {
+    this.gridMainApi = params.api;
   }
   RowClick(InputValue) {
     this.selectedRow = InputValue;
+  }
+  MainRowClick(InputValue) {
+    this.selectedCRow = InputValue;
   }
 
   ShowMessageBoxWithOkBtn(message) {
@@ -304,6 +304,18 @@ export class ContractingCardSearchComponent implements OnInit {
         width: 130,
         resizable: true
       },
+      // {
+      //   headerName: 'ظرفیت مازاد ریالی',
+      //   field: 'ExtraAmount',
+      //   width: 130,
+      //   resizable: true
+      // },
+      // {
+      //   headerName: 'ظرفیت مازاد تعدادی',
+      //   field: 'ExtraCount',
+      //   width: 130,
+      //   resizable: true
+      // },
       {
         headerName: 'آدرس',
         field: 'Address',
@@ -380,6 +392,130 @@ export class ContractingCardSearchComponent implements OnInit {
         }
       }
     ];
+    this.MaincolumnDef = [
+      {
+        headerName: 'ردیف ',
+        field: 'ItemNo',
+        width: 60,
+        resizable: true
+      },
+      {
+        headerName: 'جزئیات',
+        field: '',
+        width: 80,
+        resizable: true,
+        tooltip: (params) => 'مشاهده جزییات',
+        cellStyle: function (params) {
+          return { 'text-align': 'center' };
+        },
+        cellRendererFramework: TemplateRendererComponent,
+        cellRendererParams: {
+          ngTemplate: this.ShowInformations,
+        }
+      },
+      {
+        headerName: 'شناسه / شماره ملی',
+        field: 'IdentityNO',
+        width: 150,
+        resizable: true
+      },
+      {
+        headerName: 'نام شخص',
+        field: 'ActorName',
+        width: 250,
+        resizable: true
+      },
+      {
+        headerName: 'شماره تماس',
+        field: 'Tel',
+        width: 150,
+        resizable: true
+      },
+      {
+        headerName: 'ظرفیت آزاد ریالی  کل در تمام رشته ها',
+        field: 'TotalRemainedRial',
+        width: 220,
+        resizable: true
+      },
+      {
+        headerName: 'ظرفیت آزاد تعدادی  کل در تمام رشته ها',
+        field: 'TotalRemainedCount',
+        width: 220,
+        resizable: true
+      },
+      {
+        headerName: 'ظرفیت استفاده شده ریالی  کل در تمام رشته ها',
+        field: 'TotalUsedRial',
+        width: 220,
+        resizable: true
+      },
+      {
+        headerName: 'ظرفیت استفاده شده تعدادی  کل در تمام رشته ها',
+        field: 'TotalUsedCount',
+        width: 220,
+        resizable: true
+      },
+      // {
+      //   headerName: 'ظرفیت مازاد ریالی  کل در تمام رشته ها',
+      //   field: 'TotalExtraAmount',
+      //   width: 220,
+      //   resizable: true
+      // },
+      // {
+      //   headerName: 'ظرفیت مازاد تعدادی  کل در تمام رشته ها',
+      //   field: 'TotalExtraCount',
+      //   width: 220,
+      //   resizable: true
+      // },
+      {
+        headerName: 'آدرس',
+        field: 'Address',
+        width: 250,
+        resizable: true
+      },
+      {
+        headerName: 'لیست موارد موثر در کسر ظرفیت کل',
+        field: '',
+        width: 200,
+        resizable: true,
+        tooltip: (params) => 'مشاهده لیست قراردادهای جاری و درخواست های موثر در کسر ظرفیت کل',
+        cellStyle: function (params) {
+          return { 'text-align': 'center' };
+        },
+        cellRendererFramework: TemplateRendererComponent,
+        cellRendererParams: {
+          ngTemplate: this.ShowRunningContracts,
+        }
+      },
+      {
+        headerName: 'کارت الکترونیک',
+        field: '',
+        width: 120,
+        resizable: false,
+        tooltip: (params) => 'چاپ کارت الکترونیک',
+        cellStyle: function (params) {
+          return { 'text-align': 'center' };
+        },
+        cellRendererFramework: TemplateRendererComponent,
+        cellRendererParams: {
+          ngTemplate: this.Print,
+        }
+      },
+      {
+        headerName: 'تاریخچه',
+        field: '',
+        width: 80,
+        resizable: false,
+        tooltip: (params) => 'لیست تاریخچه',
+        cellStyle: function (params) {
+          return { 'text-align': 'center' };
+        },
+        cellRendererFramework: TemplateRendererComponent,
+        cellRendererParams: {
+          ngTemplate: this.ShowHistoryList,
+        }
+      }
+    ];
   }
 
   Search() {
@@ -396,6 +532,17 @@ export class ContractingCardSearchComponent implements OnInit {
       this.ActorBusinessAllowStateParams.selectedObject
     ).subscribe(res => {
       this.rowData = res;
+    });
+  }
+
+  SearchCumulative() {
+    this.Actor.GetTotalCapacityContractorCardSearch(
+      this.ContractorType,
+      this.Contractorname,
+      this.IdentityNo,
+      this.RegisterNo,
+    ).subscribe(res => {
+      this.MainrowData = res;
     });
   }
 
@@ -438,7 +585,6 @@ export class ContractingCardSearchComponent implements OnInit {
       event.ActorID,
       'چاپ کارت پیمانکاری'
     );
-    // }
   }
   onSendTextClick() {
     if (this.selectedRow) {
@@ -527,7 +673,7 @@ export class ContractingCardSearchComponent implements OnInit {
             ActorId: row.ActorID,
             ObjectID: row.ActorID,
             HaveWF: false, // 53445
-            ModuleViewTypeCode: 2,
+            ModuleViewTypeCode: 500000, // هماهنگی با آفای آخوندی
             HeaderName: 'تامین کننده حقیقی',
           };
         } else if (IsCorporate) {
@@ -544,8 +690,8 @@ export class ContractingCardSearchComponent implements OnInit {
           this.paramObj = {
             CorporateID: row.ActorID,
             ObjectID: row.ActorID,
-            ModuleViewTypeCode: 2,
-            HeaderName: 'تامین کننده حقوقی',
+            ModuleViewTypeCode: 500000, // هماهنگی با آقای آخوندی
+            HeaderName: 'تامین کنده حقوقی',
           };
         }
       });
@@ -630,6 +776,32 @@ export class ContractingCardSearchComponent implements OnInit {
         PriceListTopicID: null,
         RegionCode: null,
         UnitPatternID: null,
+      };
+    }
+  }
+  onShowRunningContractsClick(row) {
+    if (row) {
+      if (!row.ActorID) {
+        this.type = 'message-box';
+        this.HaveHeader = true;
+        this.alertMessageParams.message = 'ردیفی جهت مشاهده انتخاب نشده است';
+        this.btnclicked = true;
+        this.startLeftPosition = 500;
+        this.startTopPosition = 250;
+        return;
+      }
+      this.type = 'current-suppliers-contract';
+      this.btnclicked = true;
+      this.startLeftPosition = 74;
+      this.startTopPosition = 5;
+      this.minWidthPixel = 1250;
+      this.PixelWidth = 1250;
+      this.MainMaxwidthPixel = 1250;
+      this.PixelHeight = 650;
+      this.MinHeightPixel = 650;
+
+      this.paramObj = {
+        ActorID: row.ActorID,
       };
     }
   }

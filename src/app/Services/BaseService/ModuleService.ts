@@ -19,27 +19,26 @@ export class ModuleService {
     });
   }
   GetModule4WorkFlowTypeModule() {
-    return this.http.get(window.location.origin + '/Workflow/GetModule4WorkFlowTypeModule', null , false);
+    return this.http.get(window.location.origin + '/Workflow/GetModule4WorkFlowTypeModule', null, false);
   }
   GetModuleViewTypeList() {
-    return this.http.get(window.location.origin + '/Common/GetModuleViewTypeList', null);
+    return this.http.get(window.location.origin + '/Common/GetModuleViewTypeList', null, false);
   }
   GetModuleViewTypeCodeSequence(ModuleCode: number) {
-    return this.http.get(window.location.origin + '/Common/GetModuleViewTypeCodeSequence', {ModuleCode: ModuleCode});
+    return this.http.get(window.location.origin + '/Common/GetModuleViewTypeCodeSequence', { ModuleCode: ModuleCode });
   }
   SaveModuleViewType(ModuleViewTypeList: any[], ModuleToLog: number) {
     return this.http.post(window.location.origin + '/Common/SaveModuleViewType',
-    {ModuleViewTypeList: ModuleViewTypeList, ModuleToLog: ModuleToLog} );
+      { ModuleViewTypeList: ModuleViewTypeList, ModuleToLog: ModuleToLog });
   }
-  GetWebModules() {
-    return this.http.get(window.location.origin + '/Common/GetWebModules', null);
+  GetWebModules(Modulelist = null) {
+    return this.http.get(window.location.origin + '/Common/GetWebModules', { Modulelist });
   }
-
-
-
-  //   GetModuleListByRegionCode(RegionCode: number , IsLoading: boolean) {
-  //    return this.http.get(window.location.origin + '/Workflow/GetModuleListByRegionCode' , { RegionCode: RegionCode},
-  //                                                                               IsLoading);
-  //  }
-
+  GetListByModuleCode(ModuleCode: number, loading: boolean) {
+    return this.http.get(window.location.origin + '/Common/GetListByModuleCode', { ModuleCode }, loading);
+  }
+GetAutomationOrganizationList() {
+    return this.http.get(window.location.origin + '/Common/GetAutomationOrganizationList', null);
+    
+  }
 }

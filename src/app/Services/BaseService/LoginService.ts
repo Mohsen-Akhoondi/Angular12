@@ -13,7 +13,4 @@ export class LoginService {
   GetFinYearList(IsLoading = true) {
     return this.http.get(window.location.origin + '/Home/GetFinYearList', null, IsLoading);
   }
-  Login(LoginModel: any) {
-    return this.http.post(window.location.origin + '/Account/Login', { LoginModel });
-  }
 }

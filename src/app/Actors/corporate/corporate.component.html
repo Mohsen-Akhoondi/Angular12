@@ -30,14 +30,13 @@
       <tr>
         <td width="33%">
           <span class="table-cell-Lable">نام</span>
-          <input [disabled]="true" style="width: 75%" class="form-control input-style" type="text" name="ActorName"
+          <input [disabled]="true" style="width: 72%" class="form-control input-style" type="text" name="ActorName"
             [(ngModel)]="ActorName" />
         </td>
         <td width="33%">
           <span class="table-cell-Lable">نوع شخص حقوقی</span>
           <app-ng-select-virtual-scroll style="display: inline-block; width: 60%;"
-            [NgSelectParams]="NgSelectCorporateTypeParams" [Items]="CorporateTypeItem"
-            [CheckValidate]="CheckValidate">
+            [NgSelectParams]="NgSelectCorporateTypeParams" [Items]="CorporateTypeItem" [CheckValidate]="CheckValidate">
           </app-ng-select-virtual-scroll>
         </td>
         <td width="33%">
@@ -49,7 +48,7 @@
       <tr>
         <td width="33%">
           <span class="table-cell-Lable">مرجع ثبت</span>
-          <input [disabled]="true" style="width: 75%" class="form-control input-style" type="text"
+          <input [disabled]="true" style="width: 72%" class="form-control input-style" type="text"
             name="RegisterReferenceName" [(ngModel)]="RegisterReferenceName" />
         </td>
         <td width="33%">
@@ -66,7 +65,7 @@
       <tr>
         <td width="33%">
           <span class="table-cell-Lable">تلفن</span>
-          <input [disabled]="false" style="width: 75%" class="form-control input-style" type="text" name="Tel"
+          <input [disabled]="false" style="width: 72%" class="form-control input-style" type="text" name="Tel"
             [(ngModel)]="Tel" />
         </td>
         <td width="33%">
@@ -83,7 +82,7 @@
       <tr>
         <td width="33%">
           <span class="table-cell-Lable">وب سایت</span>
-          <input [disabled]="!IsEditFields" style="width: 75%" class="form-control input-style" type="text" name="Web"
+          <input [disabled]="!IsEditFields" style="width: 72%" class="form-control input-style" type="text" name="Web"
             [(ngModel)]="Web" />
         </td>
         <td width="33%">
@@ -93,24 +92,40 @@
         </td>
         <td width="33%">
           <span class="table-cell-Lable">کد اقتصادی</span>
-          <input [disabled]="!IsEditFields" style="width: 60%" class="form-control input-style" type="text" name="EconomicCode"
-            [(ngModel)]="EconomicCode" />
+          <input [disabled]="!IsEditFields" style="width: 60%" class="form-control input-style" type="text"
+            name="EconomicCode" [(ngModel)]="EconomicCode" />
         </td>
       </tr>
       <tr>
         <td width="33%" colspan="2">
           <span class="table-cell-Lable">آدرس</span>
-          <input [disabled]="true" style="width: 87.5%" class="form-control input-style" type="text" name="Address"
-            [value]="Address" />
+          <input [disabled]="true" style="width: 86%" class="form-control input-style" type="text" name="Address"
+            [(ngModel)]="Address" />
         </td>
-        <td width="33%">
-          <span class="table-cell-Lable">کد شناسایی سازمان برنامه</span>
-          <input [disabled]="!IsEditFields" style="width: 60%" class="form-control input-style" type="text"
-            name="ProgramOrgIdentityCode" [(ngModel)]="ProgramOrgIdentityCode" />
-        </td>
+        <td width="25%">
+          <span class="table-cell-Lable">کد پستی</span>
+          <input style="width: 60%" class="form-control input-style" type="text" name="PostCode"
+              [(ngModel)]="PostCode"  />
+      </td>
+       
       </tr>
       <tr>
-        <td style="width: 33%;padding-left: 206px">
+        <td width="33%">
+          <span class="table-cell-Lable">کد شناسایی سازمان برنامه</span>
+          <input [disabled]="!IsEditFields" style="width: 72%" class="form-control input-style" type="text"
+            name="ProgramOrgIdentityCode" [(ngModel)]="ProgramOrgIdentityCode" />
+        </td>
+        <td style="width: 25%;">
+          <span class="table-cell-Lable">مستندات</span>
+          <div style="display: inline-block ; width: 60%; margin-left: 2px;">
+            <button type="submit" (click)="BtnArchiveClick()" class="btn btn-primary btnGreen btn-gray-border"
+              style="width: 100%; float: none !important;">
+              <img width="15px" height="15px" src="assets/Icons/TechnicalArchive.png" />
+              بارگذاری/مشاهده
+            </button>
+          </div>
+        </td>
+        <td style="width: 33%;padding-left: 92px">
           <span class="table-cell-Lable">فعال</span>
           <app-custom-check-box style="vertical-align: sub;" [configurationInfo]="CustomCheckBoxConfig"
             [isSelected]="IsValid" (PrettyCheckBoxChange)="OnCheckBoxChange($event)">
@@ -166,6 +181,6 @@
 
 
 <app-over-popup *ngIf="isClicked" [PopupType]="PopUpType" [HaveMaxBtn]="false" [startLeftPosition]="startLeftPosition"
-  [startTopPosition]="startTopPosition" [PopupParam]="alertMessageParams" [HaveHeader]="HaveHeader"
-  (popupclosed)="popupclosed($event)">
+  [startTopPosition]="startTopPosition" [PopupParam]="PopUpType === 'message-box' ? alertMessageParams : PopupParam"
+  [HaveHeader]="HaveHeader" (popupclosed)="popupclosed($event)">
 </app-over-popup>

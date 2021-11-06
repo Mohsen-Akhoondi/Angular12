@@ -151,4 +151,5 @@ export class UserSettingsService {
   SignedPDFData(Certificate, Signature, LoadedPDFName) {
     return this.http.post(window.location.origin + '/Home/SignedPDFData', { Certificate, Signature, LoadedPDFName });
   }
+ 
 }
