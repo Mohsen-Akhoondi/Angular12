@@ -1,0 +1,13 @@
+.custom-control-label::before{
+    top:0px;
+    right: -1.5rem;
+    }
+    .custom-control-label::after{
+    top:0px;
+    right: -1.5rem;
+    }
+    
+    .redio-div{
+        display: inline-block;
+        width: 60%;
+    }

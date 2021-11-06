@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { RoadTypeService } from 'src/app/Services/ContractService/BasemodulesService/RoadType/RoadTypeService';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
+
 
 @Component({
   selector: 'app-road-type',
@@ -37,7 +38,7 @@ export class RoadTypeComponent implements OnInit {
         headerName: 'کد نوع جاده ',
         field: 'RoadTypeCode',
         width: 90,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 3},
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {

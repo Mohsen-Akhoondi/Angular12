@@ -4,7 +4,6 @@ import * as moment from 'jalali-moment';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { FinYearService } from 'src/app/Services/BaseService/FinYearService';
 import { forkJoin, of } from 'rxjs';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
@@ -13,6 +12,7 @@ import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServi
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { ContractMinutesService } from 'src/app/Services/ContractService/ContractMinutes/ContractMinutesService';
 import { OverPopUpCellEditorComponent } from 'src/app/Shared/OverPopUpcellEditor/over-pop-up-cell-editor.component';
+import { isUndefined } from 'util';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
@@ -21,7 +21,7 @@ import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRe
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 declare var jquery: any;
 declare var $: any;
-
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 @Component({
   selector: 'app-cumulative-contract-pay-item-estimate',
   templateUrl: './cumulative-contract-pay-item-estimate.component.html',
@@ -481,7 +481,7 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: {
           IsFloat: true,
         },
@@ -501,7 +501,7 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: {
           IsFloat: true,
         },
@@ -521,7 +521,7 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: {
           IsFloat: true,
         },
@@ -541,7 +541,7 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: {
           IsFloat: true,
         },
@@ -561,7 +561,7 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: {
           IsFloat: true,
         },
@@ -581,7 +581,7 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: {
           IsFloat: true,
         },
@@ -615,7 +615,7 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: {
           IsFloat: true,
         },
@@ -752,7 +752,8 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
         '',
         null,
         1,
-        true)
+        true,
+        this.ContractOperationId)
         .subscribe(
           ress => {
 
@@ -972,7 +973,8 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
         ADate.MDate,
         null,
         1,
-        true)
+        true,
+        this.ContractOperationId)
         .subscribe(
           ress => {
             ress.forEach(item => {
@@ -1078,7 +1080,8 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
         this.ContractPayDate,
         this.ProductIDs,
         1,
-        false);
+        false,
+        this.ContractOperationId);
 
 
     if (this.PopupParam.Mode === 'InsertMode') {
@@ -1608,7 +1611,14 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
       //   return;
       // }
 
-      this.contractpaydetail.SaveContractPay(ContractPayObj, ContractPayItemList).subscribe(res => {
+      this.contractpaydetail.SaveContractPay(ContractPayObj,
+             ContractPayItemList,
+              null, 
+              false,
+              false,
+              false,
+              this.ModuleCode,
+              null).subscribe(res => {
         this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
         this.ChangeDetection = false;
         this.PopupParam.Mode = 'EditMode';
@@ -1944,7 +1954,12 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
       this.contractpaydetail.UpdateContractPay(ContractPayObj,
         ContractPayItemList,
         this.ContractAgentParams.selectedObject,
-        2769
+        2769,
+        false,
+        false,
+        null,
+        false,
+        null
       ).subscribe(res => {
         this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
         this.ChangeDetection = false;
@@ -2807,7 +2822,8 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
           0,
           this.WorkflowObjectCode,
           null, null,
-          this.CartableUserID)
+          this.CartableUserID,
+          this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null)
           .subscribe(res => {
             this.HaveWorkFlow = true;
             this.ShowMessageBoxWithOkBtn('عدم تایید صورت وضعیت تجمیعی با موفقیت انجام شد');
@@ -2839,7 +2855,8 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
       this.WorkflowObjectCode,
       this.ModuleViewTypeCode,
       this.OrginalModuleCode,
-      this.CartableUserID).
+      this.CartableUserID,
+      this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).
       subscribe(res => {
         if (HasAlert) {
           this.ShowMessageBoxWithOkBtn('تاييد صورت وضعیت تجمیعی با موفقيت انجام شد');
@@ -2849,7 +2866,7 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
         this.btnConfirmName = 'عدم تاييد';
         this.btnConfirmIcon = 'cancel';
         this.IsEditConfirm = false;
-        resolve(true);
+        resolve(res);
       },
         err => {
           if (err.error.Message.includes('|')) {
@@ -3027,7 +3044,8 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
           this.WorkflowObjectCode,
           this.ModuleViewTypeCode,
           this.OrginalModuleCode,
-          this.CartableUserID)
+          this.CartableUserID,
+          this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null)
           .subscribe(res => {
             this.ShowMessageBoxWithOkBtn('عدم تاييد صورت وضعیت تجمیعی با موفقيت انجام شد');
             this.ReadyToConfirm = 0;
@@ -3188,7 +3206,7 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
     // tslint:disable-next-line:no-shadowed-variable
     const promise = new Promise((resolve, reject) => {
       this.DOConfirm(false, resolve);
-    }).then((IsDown) => {
+    }).then((IsDown: any) => {
       if (IsDown) {
         new Promise((StartedWFResolve, reject) => {
           this.SetStartedWFInfo(StartedWFResolve);
@@ -3228,7 +3246,7 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
                       WorkflowTypeName: this.WorkflowTypeName,
                       WorkflowTypeCode: this.WorkflowTypeCode,
                       WorkflowObjectCode: this.WorkflowObjectCode,
-                      MinimumPosting: this.PopupParam.MinimumPosting,
+                      MinimumPosting: this.PopupParam.WorkFlowID ? this.PopupParam.MinimumPosting : IsDown.MinimumPosting,
                       OrginalModuleCode: this.ModuleCode,
                       CartableUserID: this.CartableUserID
                     };
@@ -3253,7 +3271,8 @@ export class CumulativeContractPayItemEstimateComponent implements OnInit {
       this.WorkflowObjectCode,
       this.ModuleViewTypeCode,
       this.OrginalModuleCode,
-      this.CartableUserID).subscribe(res => {
+      this.CartableUserID,
+      this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).subscribe(res => {
         if (alert) {
           this.ShowMessageBoxWithOkBtn('عدم تاييدصورت وضعیت تجمیعی با موفقيت انجام شد');
         }

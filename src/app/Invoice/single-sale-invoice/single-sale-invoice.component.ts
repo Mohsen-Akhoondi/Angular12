@@ -15,14 +15,14 @@ import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServi
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
 import { CommonService } from 'src/app/Services/CommonService/CommonService';
-import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-angular-datepicker/jalali-datepicker/jalali-datepicker.component';
+import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { isUndefined } from 'util';
 import { InvoiceDataModel } from './InvoiceDataModel';
 import { InvoiceFooterDataModel } from './InvoiceFooterDataModel';
 import { InvoiceItemDataModel } from './InvoiceItemDataModel';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 
 @Component({
   selector: 'app-single-sale-invoice',
@@ -328,6 +328,9 @@ export class SingleSaleInvoiceComponent implements OnInit {
   ShebaNo;
   HaveBank = true;
   IsForcedBankInfo = true;
+  IsDisableRefisterField = false;
+  IsInFinishedCartable = false; // RFC 61296
+  ShowBtn = true;
 
   constructor(private RegionList: RegionListService,
     private ProductRequest: ProductRequestService,
@@ -345,247 +348,6 @@ export class SingleSaleInvoiceComponent implements OnInit {
     private Common: CommonService,
     private contractpaydetail: ContractPayDetailsService) {
     this.InvoiceObject.Init();
-    this.InvocieItemcolumnDef = [
-
-      {
-        headerName: 'ردیف',
-        field: 'ItemNo',
-        width: 70,
-        resizable: true
-      },
-      {
-        headerName: 'نوع درخواستی',
-        field: 'ProductTypeName',
-        cellEditorFramework: NgSelectCellEditorComponent,
-        cellEditorParams: {
-          HardCodeItems: this.ProductTypeList,
-          bindLabelProp: 'ProductTypeName',
-          bindValueProp: 'ProductTypeCode'
-        },
-        cellRenderer: 'SeRender',
-        valueFormatter: function currencyFormatter(params) {
-          if (params.value) {
-            return params.value.ProductTypeName;
-
-          } else {
-            return '';
-          }
-        },
-        editable: () => {
-          return this.IsGridEditable;
-        },
-        // editable: true,
-        valueSetter: (params) => {
-          if (params.newValue) {
-            if (params.newValue.ProductTypeName !== params.oldValue) {
-              params.data.ProductTypeName = params.newValue.ProductTypeName;
-              params.data.ProductTypeCode = params.newValue.ProductTypeCode;
-              params.data.ScaleName = null;
-              params.data.ProductID = null;
-              params.data.ProductCodeName = null;
-              return true;
-            }
-          } else {
-            params.data.ProductTypeName = null;
-            params.data.ProductTypeCode = null;
-            params.data.ScaleName = null;
-            params.data.ProductID = null;
-            params.data.ProductCodeName = null;
-            return false;
-          }
-        },
-        width: 120,
-        resizable: true,
-      },
-      {
-        headerName: 'کالا/خدمت',
-        field: 'ProductCodeName',
-        cellEditorFramework: NgSelectVirtualScrollComponent,
-        cellEditorParams: {
-          Params: this.NgSelectVSParams,
-          Items: [],
-          MoreFunc: this.FetchMoreProduct,
-          FetchByTerm: this.FetchProductByTerm,
-          RedioChangeFunc: this.RedioSelectedChange,
-          Owner: this
-        },
-        cellRenderer: 'SeRender',
-        valueFormatter: function currencyFormatter(params) {
-          if (params.value) {
-            return params.value.ProductCodeName;
-          } else {
-            return '';
-          }
-        },
-        editable: () => {
-          return this.IsGridEditable;
-        },
-        valueSetter: (params) => {
-          if (params.newValue && params.newValue.ProductCodeName) {
-            params.data.ProductCodeName = params.newValue.ProductCodeName;
-            params.data.ProductID = params.newValue.ProductID;
-
-            return true;
-          } else {
-            params.data.ProductCodeName = '';
-            params.data.ProductID = null;
-            params.data.ScaleName = '';
-            return false;
-          }
-        },
-        width: 350,
-        resizable: true
-      },
-      {
-        headerName: 'مقدار',
-        field: 'Qty',
-        editable: () => {
-          return this.IsGridEditable;
-        },
-        valueSetter: (params) => {
-          if (params.newValue) {
-            // tslint:disable-next-line: radix
-            params.data.Qty = params.newValue;
-            // tslint:disable-next-line: radix
-            params.data.Price = Math.round(parseFloat((!params.newValue || params.newValue == 0) ? 1 : params.newValue) * (params.data.UnitPrice));
-            this.CalculateTaxValue(params);// RFC 54950
-            this.CalculateFinalPrice(params);
-          }
-        },
-        valueFormatter: function currencyFormatter(params) {
-          if (params.value && !isUndefined(params.value) && params.value != null) {
-            return params.value;
-          } else {
-            return '';
-          }
-        },
-        HaveThousand: true,
-        width: 90,
-        resizable: true
-      },
-      {
-        headerName: 'مبلغ واحد',
-        field: 'UnitPrice',
-        HaveThousand: true,
-        width: 120,
-        resizable: true,
-        editable: () => {
-          return this.IsGridEditable;
-        },
-        cellEditorFramework: NumberFieldEditableComponent,
-        valueSetter: (params) => {
-          if (params.newValue) {
-            params.data.UnitPrice = params.newValue;
-            if (((parseFloat(params.data.Qty) === null || parseFloat(params.data.Qty) === 0 || isUndefined(params.data.Qty)))) {
-              params.data.Price = params.newValue;
-            } else {
-              params.data.Price = Math.round(parseFloat(params.data.Qty) * params.newValue);
-            }
-            this.CalculateTaxValue(params);
-            this.CalculateFinalPrice(params);
-          }
-        },
-      },
-      {
-        headerName: 'مبلغ',
-        field: 'Price',
-        HaveThousand: true,
-        width: 120,
-        resizable: true,
-        editable: () => {
-          return this.IsGridEditable;
-        },
-        valueSetter: (params) => {
-          if (params.newValue) {
-            params.data.Price = params.newValue;
-            if (parseFloat(params.data.Qty) === null || parseFloat(params.data.Qty) === 0 || isUndefined(params.data.Qty)) {
-              params.data.UnitPrice = params.newValue;
-            } else {
-              params.data.UnitPrice = Math.round(parseFloat(params.newValue) / parseFloat(params.data.Qty));
-            }
-            this.CalculateTaxValue(params);
-            this.CalculateFinalPrice(params);
-          }
-        },
-        cellEditorFramework: NumberFieldEditableComponent,
-        cellRenderer: 'SeRender',
-        valueFormatter: function currencyFormatter(params) {
-          if (params.value) {
-            return params.value;
-          } else {
-            return '';
-          }
-        },
-      },
-      {
-        headerName: 'تخفیف',
-        field: 'Discount',
-        HaveThousand: true,
-        width: 120,
-        resizable: true,
-        editable: () => {
-          return this.IsGridEditable;
-        },
-        valueSetter: (params) => {
-          if (params.newValue) {
-            params.data.Discount = params.newValue;
-            this.CalculateFinalPrice(params);
-          }
-        },
-        cellEditorFramework: NumberFieldEditableComponent,
-        cellRenderer: 'SeRender',
-        valueFormatter: function currencyFormatter(params) {
-          if (params.value) {
-            return params.value;
-          } else {
-            return '';
-          }
-        },
-      },
-      {
-        headerName: 'مالیات ارزش افزوده',
-        field: 'TaxValue',
-        HaveThousand: true,
-        width: 120,
-        resizable: true,
-        editable: () => {
-          return this.IsGridEditable;
-        },
-        valueSetter: (params) => {
-          console.log(params);
-          if (!isUndefined(params.newValue)) {
-            params.data.TaxValue = params.newValue;
-            this.CalculateFinalPrice(params);
-          }
-        },
-        cellEditorFramework: NumberFieldEditableComponent,
-        cellRenderer: 'SeRender',
-        valueFormatter: function currencyFormatter(params) {
-          if (params.value) {
-            return params.value;
-          } else {
-            return '';
-          }
-        },
-      },
-      {
-        headerName: 'مبلغ نهایی',
-        field: 'FinalPrice',
-        HaveThousand: true,
-        width: 120,
-        resizable: true,
-        editable: false,
-        cellEditorFramework: NumberFieldEditableComponent,
-        cellRenderer: 'SeRender',
-        valueFormatter: function currencyFormatter(params) {
-          if (params.value) {
-            return params.value;
-          } else {
-            return '';
-          }
-        },
-      },
-    ];
 
     this.InvoiceFootercolumnDef = [
 
@@ -648,7 +410,7 @@ export class SingleSaleInvoiceComponent implements OnInit {
             params.data.Amount = params.newValue;
           }
         },
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
@@ -706,6 +468,8 @@ export class SingleSaleInvoiceComponent implements OnInit {
       this.CurrentModuleCode = this.InputParam.CurrentModuleCode;
       this.ModuleViewTypeCode_Cache = this.ModuleViewTypeCode;
       this.ObjectID = this.InputParam.InvoiceID;
+      this.IsInFinishedCartable = this.InputParam.IsInFinishedCartable; // RFC 61296
+      this.ShowBtn = this.IsInFinishedCartable ? false : true;
       if (this.CurrWorkFlow) {
         this.WorkFlowID = this.CurrWorkFlow.WorkflowID;
         this.ReadyToConfirm = this.CurrWorkFlow.ReadyToConfirm;
@@ -758,6 +522,7 @@ export class SingleSaleInvoiceComponent implements OnInit {
         this.InvoiceObject = InvoiceObject;
         this.InvoiceItemList = this.InvoiceObject.InvoiceItemList;
         this.InvoiceFooterList = this.InvoiceObject.InvoiceFooterList;
+        this.IsDisableRefisterField = this.InvoiceObject.IsMultiInvoice;
         this.FillAllNgSelectByInvoiceObject(InvoiceObject);
 
         if (InvoiceObject.ActorID > 0) {
@@ -785,7 +550,7 @@ export class SingleSaleInvoiceComponent implements OnInit {
         this.OnOpenNgSelect('Region');
         this.OnOpenNgSelect('FinYear');
       }
-
+      this.SetColumnDef(this.IsDisableRefisterField);
 
       if (!this.InvoiceObject.IsValid) {
         this.btnRevocationName = 'بازگشت از ابطال';
@@ -1133,11 +898,13 @@ export class SingleSaleInvoiceComponent implements OnInit {
       (!this.InvoiceObject.Subject || this.InvoiceObject.Subject === '') ||
       (!this.NgSelectActorParams.selectedObject || this.NgSelectActorParams.selectedObject === null) ||
       // tslint:disable-next-line: max-line-length
-      (!this.InvoiceObject.RegisterInvoiceCode || this.InvoiceObject.RegisterInvoiceCode === null) || (this.InvoiceObject.RegisterInvoiceDate === null)
+      (!this.IsDisableRefisterField ? (!this.InvoiceObject.RegisterInvoiceCode || this.InvoiceObject.RegisterInvoiceCode === null) || (this.InvoiceObject.RegisterInvoiceDate === null) : false)
       // tslint:disable-next-line: max-line-length
       || (this.IsMandatory ? (!this.AdministratorActorParams.selectedObject || this.AdministratorActorParams.selectedObject === null) : false)
-      || ((!this.NgSelectBankParams.selectedObject || this.NgSelectBankParams.selectedObject === null) && (this.ModuleViewTypeCode === 1 && this.IsForcedBankInfo))
-      || ((!this.NgSelectBranchParams.selectedObject || this.NgSelectBranchParams.selectedObject === null) && (this.ModuleViewTypeCode === 1 && this.IsForcedBankInfo))
+      || ((!this.NgSelectBankParams.selectedObject || this.NgSelectBankParams.selectedObject === null)
+          && (this.ModuleViewTypeCode === 1 && this.IsForcedBankInfo))
+      || ((!this.NgSelectBranchParams.selectedObject || this.NgSelectBranchParams.selectedObject === null)
+          && (this.ModuleViewTypeCode === 1 && this.IsForcedBankInfo))
       || ((!this.AccNo || this.AccNo === null) && (this.ModuleViewTypeCode === 1 && this.IsForcedBankInfo))) {
       this.ShowMessageBoxWithOkBtn('.لطفا فیلد های ستاره دار را پر نمایید');
       return;
@@ -1148,7 +915,21 @@ export class SingleSaleInvoiceComponent implements OnInit {
     const InvoiceItemList = [];
     const InvoiceFooterList = [];
     this.gridApi.forEachNode(node => {
-      InvoiceItemList.push(node.data);
+      const InvoiceItemObj = {
+        InvoiceItemID: node.data.InvoiceItemID ? node.data.InvoiceItemID : -1,
+        ItemNo: node.data.ItemNo,
+        QTY: parseFloat(node.data.Qty),
+        // tslint:disable-next-line:radix
+        TaxValue: parseFloat(node.data.TaxValue),
+        // tslint:disable-next-line:max-line-length
+        ProductID: node.data.ProductCodeName && node.data.ProductCodeName.ProductID ? node.data.ProductCodeName.ProductID : (node.data.ProductID ? node.data.ProductID : null),
+        // tslint:disable-next-line:max-line-length
+        RegisterInvoiceItemDate: node.data.ShortRegisterInvoiceItemDate ? node.data.ShortRegisterInvoiceItemDate : null,
+        Price: parseFloat(node.data.Price),
+        Discount: parseFloat(node.data.Discount),
+        RegisterInvoiceItemCode: node.data.RegisterInvoiceItemCode ? node.data.RegisterInvoiceItemCode : null,
+      };
+      InvoiceItemList.push(InvoiceItemObj);
     });
 
     this.InvoiceFootergridApi.forEachNode(node => {
@@ -1158,7 +939,8 @@ export class SingleSaleInvoiceComponent implements OnInit {
     this.InvoiceObject.InvoiceItemList = InvoiceItemList;
     this.InvoiceObject.InvoiceFooterList = InvoiceFooterList;
 
-    this.InvoiceObject.RegisterInvoiceDate = this.CommonService.ConvertToASPDateTime(this.InvoiceObject.RegisterInvoiceDate);
+    this.InvoiceObject.RegisterInvoiceDate = this.InvoiceObject.RegisterInvoiceDate ?
+                                             this.CommonService.ConvertToASPDateTime(this.InvoiceObject.RegisterInvoiceDate) : null;
 
     const BankList = [];
     this.HaveBank = (this.NgSelectBankParams.selectedObject || this.NgSelectBankParams.selectedObject !== null)  ? false : true;
@@ -1180,19 +962,15 @@ export class SingleSaleInvoiceComponent implements OnInit {
       this.InvoiceObject = InvoiceObj;
       this.InvoiceItemList = InvoiceObj.InvoiceItemList;
       this.InvoiceFooterList = InvoiceObj.InvoiceFooterList;
+      this.IsDisableRefisterField = this.InvoiceObject.IsMultiInvoice;
       this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
-
-
     });
-
   }
 
   Close() {
-
     if (this.IsWFShow && this.WorkListDetailRows) {
       this.Workflow.RunAfterActionMethod(this.WorkListDetailRows).subscribe();
     }
-
     this.Closed.emit(true);
   }
 
@@ -1470,7 +1248,8 @@ export class SingleSaleInvoiceComponent implements OnInit {
             this.WorkflowObjectCode,
             this.ModuleViewTypeCode,
             this.OrginalModuleCode,
-            this.CartableUserID)
+            this.CartableUserID,
+            this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null)
             .subscribe(res => {
               this.ShowMessageBoxWithOkBtn('عدم تایید درخواست انجام معامله با موفقیت انجام شد');
 
@@ -1577,7 +1356,8 @@ export class SingleSaleInvoiceComponent implements OnInit {
         this.WorkflowObjectCode,
         this.ModuleViewTypeCode,
         this.OrginalModuleCode,
-        this.CartableUserID).
+        this.CartableUserID,
+        this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).
         subscribe(res => {
           if (HasAlert) {
             this.ShowMessageBoxWithOkBtn('تایید با موفقیت انجام شد');
@@ -1613,7 +1393,8 @@ export class SingleSaleInvoiceComponent implements OnInit {
         this.WorkflowObjectCode,
         this.ModuleViewTypeCode,
         this.OrginalModuleCode,
-        this.CartableUserID).subscribe(res => {
+        this.CartableUserID,
+        this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).subscribe(res => {
           if (alert) {
             this.ShowMessageBoxWithOkBtn('عدم تایید برآورد اولیه با موفقیت انجام شد');
           }
@@ -1811,7 +1592,7 @@ export class SingleSaleInvoiceComponent implements OnInit {
       DocTypeCode: 703,
       ModuleCode: this.ModuleCode,
       HasCheck: true,
-      IsReadOnly: this.InputParam && this.InputParam.ShowSendBtn === 'YES' ? true : !this.IsEditable,
+      IsReadOnly: (this.InputParam && this.InputParam.ShowSendBtn === 'YES') || (this.InputParam && this.InputParam.IsInFinishedCartable) ? true : !this.IsEditable,
       OrginalModuleCode: this.ModuleCode,
       RegionCode: this.InvoiceObject.RegionCode
     };
@@ -2127,6 +1908,321 @@ export class SingleSaleInvoiceComponent implements OnInit {
       this.BranchPageCount = Math.ceil(res.TotalItemCount / 30);
       this.NgSelectBranchParams.loading = false;
     });
+  }
+
+  rdoIsMultiClick(IsMulti) {
+    this.InvoiceObject.IsMultiInvoice = IsMulti;
+    this.IsDisableRefisterField = IsMulti;
+    this.SetColumnDef(IsMulti);
+  }
+
+  SetColumnDef(IsMulti = false ) {
+    this.InvocieItemcolumnDef = [
+
+      {
+        headerName: 'ردیف',
+        field: 'ItemNo',
+        width: 70,
+        resizable: true
+      },
+      {
+        headerName: 'نوع درخواستی',
+        field: 'ProductTypeName',
+        cellEditorFramework: NgSelectCellEditorComponent,
+        cellEditorParams: {
+          HardCodeItems: this.ProductTypeList,
+          bindLabelProp: 'ProductTypeName',
+          bindValueProp: 'ProductTypeCode'
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.ProductTypeName;
+
+          } else {
+            return '';
+          }
+        },
+        editable: () => {
+          return this.IsGridEditable;
+        },
+        valueSetter: (params) => {
+          if (params.newValue) {
+            if (params.newValue.ProductTypeName !== params.oldValue) {
+              params.data.ProductTypeName = params.newValue.ProductTypeName;
+              params.data.ProductTypeCode = params.newValue.ProductTypeCode;
+              params.data.ScaleName = null;
+              params.data.ProductID = null;
+              params.data.ProductCodeName = null;
+              return true;
+            }
+          } else {
+            params.data.ProductTypeName = null;
+            params.data.ProductTypeCode = null;
+            params.data.ScaleName = null;
+            params.data.ProductID = null;
+            params.data.ProductCodeName = null;
+            return false;
+          }
+        },
+        width: 120,
+        resizable: true,
+      },
+      {
+        headerName: 'کالا/خدمت',
+        field: 'ProductCodeName',
+        cellEditorFramework: NgSelectVirtualScrollComponent,
+        cellEditorParams: {
+          Params: this.NgSelectVSParams,
+          Items: [],
+          MoreFunc: this.FetchMoreProduct,
+          FetchByTerm: this.FetchProductByTerm,
+          RedioChangeFunc: this.RedioSelectedChange,
+          Owner: this
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.ProductCodeName;
+          } else {
+            return '';
+          }
+        },
+        editable: () => {
+          return this.IsGridEditable;
+        },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.ProductCodeName) {
+            params.data.ProductCodeName = params.newValue.ProductCodeName;
+            params.data.ProductID = params.newValue.ProductID;
+
+            return true;
+          } else {
+            params.data.ProductCodeName = '';
+            params.data.ProductID = null;
+            params.data.ScaleName = '';
+            return false;
+          }
+        },
+        width: 350,
+        resizable: true
+      },
+      {
+        headerName: 'شماره فاکتور',
+        field: 'RegisterInvoiceItemCode',
+        editable: () => {
+          return (this.IsGridEditable && this.InvoiceObject.IsMultiInvoice) ;
+        },
+        hide: !IsMulti,
+        HaveThousand: false,
+        cellEditorFramework: NumberInputComponentComponent,
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value;
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue) {
+            params.data.RegisterInvoiceItemCode = params.newValue;
+            return true;
+          } else {
+            params.data.RegisterInvoiceItemCode = '';
+            return false;
+          }
+        },
+        width: 100,
+        resizable: true
+      },
+      {
+        headerName: 'تاریخ فاکتور',
+        field: 'PersianRegisterInvoiceItemDate',
+        editable: () => {
+          return (this.IsGridEditable && this.InvoiceObject.IsMultiInvoice) ;
+        },
+        hide: !IsMulti,
+        width: 100,
+        resizable: true,
+        cellEditorFramework: JalaliDatepickerComponent,
+        cellEditorParams: {
+          CurrShamsiDateValue: 'PersianRegisterInvoiceItemDate',
+          DateFormat: 'YYYY/MM/DD',
+          WidthPC: 100,
+          AppendTo: '.reg-inv'
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.SDate;
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.MDate) {
+            params.data.ShortRegisterInvoiceItemDate = params.newValue.MDate;
+            params.data.RegisterInvoiceItemDate = params.newValue.MDate;
+            params.data.PersianRegisterInvoiceItemDate = params.newValue.SDate;
+            return true;
+          } else {
+            params.data.RegisterInvoiceItemDate = null;
+            params.data.ShortRegisterInvoiceItemDate = null;
+            params.data.PersianRegisterInvoiceItemDate = '';
+            return false;
+          }
+        }
+      },
+      {
+        headerName: 'مقدار',
+        field: 'Qty',
+        editable: () => {
+          return this.IsGridEditable;
+        },
+        valueSetter: (params) => {
+          if (params.newValue) {
+            // tslint:disable-next-line: radix
+            params.data.Qty = params.newValue;
+            // tslint:disable-next-line: radix
+            params.data.Price = Math.round(parseFloat((!params.newValue || params.newValue == 0) ? 1 : params.newValue) * (params.data.UnitPrice));
+            this.CalculateTaxValue(params);// RFC 54950
+            this.CalculateFinalPrice(params);
+          }
+        },
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value && !isUndefined(params.value) && params.value != null) {
+            return params.value;
+          } else {
+            return '';
+          }
+        },
+        HaveThousand: true,
+        width: 90,
+        resizable: true
+      },
+      {
+        headerName: 'مبلغ واحد',
+        field: 'UnitPrice',
+        HaveThousand: true,
+        width: 120,
+        resizable: true,
+        editable: () => {
+          return this.IsGridEditable;
+        },
+        cellEditorFramework: NumberInputComponentComponent,
+        valueSetter: (params) => {
+          if (params.newValue) {
+            params.data.UnitPrice = params.newValue;
+            if (((parseFloat(params.data.Qty) === null || parseFloat(params.data.Qty) === 0 || isUndefined(params.data.Qty)))) {
+              params.data.Price = params.newValue;
+            } else {
+              params.data.Price = Math.round(parseFloat(params.data.Qty) * params.newValue);
+            }
+            this.CalculateTaxValue(params);
+            this.CalculateFinalPrice(params);
+          }
+        },
+      },
+      {
+        headerName: 'مبلغ',
+        field: 'Price',
+        HaveThousand: true,
+        width: 120,
+        resizable: true,
+        editable: () => {
+          return this.IsGridEditable;
+        },
+        valueSetter: (params) => {
+          if (params.newValue) {
+            params.data.Price = params.newValue;
+            if (parseFloat(params.data.Qty) === null || parseFloat(params.data.Qty) === 0 || isUndefined(params.data.Qty)) {
+              params.data.UnitPrice = params.newValue;
+            } else {
+              params.data.UnitPrice = Math.round(parseFloat(params.newValue) / parseFloat(params.data.Qty));
+            }
+            this.CalculateTaxValue(params);
+            this.CalculateFinalPrice(params);
+          }
+        },
+        cellEditorFramework: NumberInputComponentComponent,
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value;
+          } else {
+            return '';
+          }
+        },
+      },
+      {
+        headerName: 'تخفیف',
+        field: 'Discount',
+        HaveThousand: true,
+        width: 120,
+        resizable: true,
+        editable: () => {
+          return this.IsGridEditable;
+        },
+        valueSetter: (params) => {
+          if (params.newValue) {
+            params.data.Discount = params.newValue;
+            this.CalculateFinalPrice(params);
+          }
+        },
+        cellEditorFramework: NumberInputComponentComponent,
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value;
+          } else {
+            return '';
+          }
+        },
+      },
+      {
+        headerName: 'مالیات ارزش افزوده',
+        field: 'TaxValue',
+        HaveThousand: true,
+        width: 120,
+        resizable: true,
+        editable: () => {
+          return this.IsGridEditable;
+        },
+        valueSetter: (params) => {
+          if (!isUndefined(params.newValue)) {
+            params.data.TaxValue = params.newValue;
+            this.CalculateFinalPrice(params);
+          }
+        },
+        cellEditorFramework: NumberInputComponentComponent,
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value;
+          } else {
+            return '';
+          }
+        },
+      },
+      {
+        headerName: 'مبلغ نهایی',
+        field: 'FinalPrice',
+        HaveThousand: true,
+        width: 120,
+        resizable: true,
+        editable: false,
+        cellEditorFramework: NumberInputComponentComponent,
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value;
+          } else {
+            return '';
+          }
+        },
+      },
+    ];
   }
 
 }

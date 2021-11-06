@@ -18,4 +18,8 @@ export class InvoiceItemDataModel {
     ReceiveFactorID: number;
     FinalPrice: number;
     UnitPrice: number;
+    RegisterInvoiceItemDate: string;
+    RegisterInvoiceItemCode: string;
+    ShortRegisterInvoiceItemDate: string;
+    PersianRegisterInvoiceItemDate: string;
 }

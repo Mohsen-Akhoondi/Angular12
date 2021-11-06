@@ -21,6 +21,7 @@ export class ContractPayListComponent implements OnInit {
   @Input() PopupMaximized;
   @Input() ModuleCode;
   @Output() ContractEstimateClosed: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() Closed: EventEmitter<boolean> = new EventEmitter<boolean>();
   isClicked: boolean;
   type: string;
   SelectedContractID: any;
@@ -43,6 +44,7 @@ export class ContractPayListComponent implements OnInit {
   LetterDatePersian;
   ContractAmount: any;
   ContractorName: any;
+  ContractorID: any;
   FromContractDatePersian: any;
   ToContractDatePersian: any;
   Subject: any;
@@ -91,6 +93,7 @@ export class ContractPayListComponent implements OnInit {
     FinYearCode: 0,
     ContractCode: 0,
     ContractorName: '',
+    ContractorID: -1,
     LetterDatePersian: '',
     Subject: '',
     LetterNo: '',
@@ -123,7 +126,7 @@ export class ContractPayListComponent implements OnInit {
   IsDown = false;
   ISIRVersion = false;
   SelectedRow: any;
-  IsConfirm: 0;
+  IsConfirm;
   OverPixelWidth: number;
   MinHeightPixel: number;
   HeightPercentWithMaxBtn: number;
@@ -132,6 +135,7 @@ export class ContractPayListComponent implements OnInit {
   PriceListTypeName;
   WorkFlowInstanceId;
   IsAdmin = false;
+  BtnClickedName: any;
 
   constructor(private User: UserSettingsService,
     private ShipmentService: ContractPayShipmentService,
@@ -239,7 +243,7 @@ export class ContractPayListComponent implements OnInit {
     }
     this.ISIRVersion = environment.IsExternal;
     if (!this.PopupParam.ModuleCode || this.PopupParam.ModuleCode === 2516) {
-      this.IsConfirm = 0;
+      this.IsConfirm = null;
     }
 
     if (this.PopupParam.ModuleCode && this.PopupParam.ModuleCode === 2687) {
@@ -252,6 +256,7 @@ export class ContractPayListComponent implements OnInit {
       this.HaveUpdate = false;
       this.IsEditable = false;
     }
+
     this.User.GetModulOPByUser(2516).subscribe(res => {
       res.forEach(node => {
         switch (node.OperationCode) {
@@ -274,6 +279,7 @@ export class ContractPayListComponent implements OnInit {
 
       });
     });
+
     if (this.PopupParam.selectedRow && this.PopupParam.selectedRow.data && this.PopupParam.selectedRow.data.ContractId != null) {
       const currentData = this.PopupParam.selectedRow.data;
       this.SelectedContractID = currentData.ContractId;
@@ -291,6 +297,7 @@ export class ContractPayListComponent implements OnInit {
       this.LetterDatePersian = currentData.LetterDatePersian;
       this.ContractAmount = currentData.ContractAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       this.ContractorName = currentData.ContractorName;
+      this.ContractorID = currentData.ContractorID;
       this.FromContractDatePersian = currentData.FromContractDatePersian;
       this.ToContractDatePersian = currentData.ToContractDatePersian;
       this.Subject = currentData.Subject;
@@ -323,6 +330,7 @@ export class ContractPayListComponent implements OnInit {
         this.LetterDatePersian = currentData.LetterDatePersian;
         this.ContractAmount = currentData.ContractAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         this.ContractorName = currentData.ContractorName;
+        this.ContractorID = currentData.ContractorID;
         this.FromContractDatePersian = currentData.FromContractDatePersian;
         this.ToContractDatePersian = currentData.ToContractDatePersian;
         this.Subject = currentData.Subject;
@@ -397,7 +405,7 @@ export class ContractPayListComponent implements OnInit {
       this.IsEndRow = false;
     }
     this.User.CheckIsAdmin().subscribe(res => { // RFC 54198
-      if (res && this.PopupParam.ModuleCode === 2875) {
+      if (res && this.PopupParam.ModuleCode === 2875) { // ابزار راهبری
         this.IsAdmin = res;
       }
     });
@@ -408,20 +416,8 @@ export class ContractPayListComponent implements OnInit {
   onInsert() {
     this.startLeftPosition = 416;
     this.startTopPosition = 89;
-    // this.PixelWidth = 400;
-    // this.PixelHeight = 245;
     this.PopUpType = 'contract-pay-types';
     this.isClicked = true;
-    this.ContractPayPopupParam.IsViewable = false;
-    this.ContractPayPopupParam.FinYearCode = this.FinYearCode;
-    this.ContractPayPopupParam.ContractCode = this.ContractCode;
-    this.ContractPayPopupParam.ContractorName = this.ContractorName;
-    this.ContractPayPopupParam.LetterNo = this.LetterNo;
-    this.ContractPayPopupParam.ContractAmount = this.ContractAmount;
-    this.ContractPayPopupParam.Subject = this.Subject;
-    this.ContractPayPopupParam.LetterDatePersian = this.LetterDatePersian;
-    this.ContractPayPopupParam.IsReadOnly = this.PopupParam.selectedRow.data.IsReadOnly; // RFC 52262
-    this.ContractPayPopupParam.ModuleViewTypeCode = this.PopupParam.ModuleViewTypeCode;
   }
 
   onEdit(isViewable: boolean) {
@@ -431,9 +427,10 @@ export class ContractPayListComponent implements OnInit {
     }
 
     this.HaveMaxBtn = true;
-    this.startLeftPosition = 100;
+    this.startLeftPosition = 5;
     this.startTopPosition = 10;
     this.ContractPayPopupParam.Mode = 'EditMode';
+    this.isClicked = true;
     this.ContractPayPopupParam.SelectedCPCostFactorID = this.SelectedCPCostFactorID;
     this.ContractPayPopupParam.SelectedContractPayID = this.SelectedContractPayID;
     this.ContractPayPopupParam.PriceListPatternID = this.PriceListPatternID;
@@ -445,6 +442,7 @@ export class ContractPayListComponent implements OnInit {
     this.ContractPayPopupParam.FinYearCode = this.FinYearCode;
     this.ContractPayPopupParam.ContractCode = this.ContractCode;
     this.ContractPayPopupParam.ContractorName = this.ContractorName;
+    this.ContractPayPopupParam.ContractorID = this.ContractorID;
     this.ContractPayPopupParam.LetterNo = this.LetterNo;
     this.ContractPayPopupParam.LetterDatePersian = this.LetterDatePersian;
     this.ContractPayPopupParam.ContractAmount = this.ContractAmount;
@@ -454,20 +452,24 @@ export class ContractPayListComponent implements OnInit {
     this.ContractPayPopupParam.IsReadOnly = this.PopupParam.selectedRow.data.IsReadOnly; // RFC 52262
     this.ContractPayPopupParam.selectedRow = this.PopupParam.selectedRow.data;
     this.ContractPayPopupParam.ModuleViewTypeCode = this.PopupParam.ModuleViewTypeCode;
+    this.ContractPayPopupParam.SelectedCostFactorID = this.SelectedCostFactorID;
 
-    if (this.ContractOperationID === 1 || this.ContractOperationID === 2) {
+    if (this.ContractOperationID === 1 || this.ContractOperationID === 2 ||
+      this.ContractOperationID === 21 || this.ContractOperationID === 20 ||
+      this.ContractOperationID === 7) {
       this.startLeftPosition = 280;
       this.startTopPosition = 90;
       this.PixelWidth = 900;
-      this.PixelHeight = 320;
+      this.PixelHeight = (this.PopupParam.ModuleViewTypeCode === 100000 && (this.ContractPayPopupParam.RegionCode >= 0 && this.ContractPayPopupParam.RegionCode < 23)) ? 370 :
+                         (this.ContractPayPopupParam.RegionCode >= 0 && this.ContractPayPopupParam.RegionCode < 23) ? 342: 338;
       this.ContractPayPopupParam.IsEditable1 = false;
       this.PopUpType = 'pre-pay';
-      this.isClicked = true;
       return;
-    } else if (this.ContractOperationID === 3 || this.ContractOperationID === 4) {
-      this.isClicked = true;
+    } else if (this.ContractOperationID === 3 || this.ContractOperationID === 4
+      || this.ContractOperationID === 5 || this.ContractOperationID === 8) {
+
       if (this.ContractTypeCode === 26 || this.ContractTypeCode === 29) {
-        this.PopUpType = 'contract-pay-item-hour';
+        this.PopUpType = 'contract-pay-details'  // 'contract-pay-item-hour';
         return;
       }
       if (this.ContractTypeCode === 27 || this.ContractTypeCode === 28) {
@@ -481,18 +483,30 @@ export class ContractPayListComponent implements OnInit {
         return;
       }
       if (this.PriceListPatternID &&
-        this.ContractTypeCode !== 26 && this.ContractTypeCode !== 29) {
-        this.PopUpType = 'contract-pay-item-estimate-page';
+          this.ContractTypeCode !== 26 && this.ContractTypeCode !== 29) {
+        // this.PopUpType = 'contract-pay-item-estimate-page';
+        this.PopUpType = 'contract-pay-details';
+        this.ContractPayPopupParam.ShowReportsSign = true;
         return;
       }
+
+    }
+  }
+
+  onDeleteContractPay() {
+    if (this.IsRowClick) {
+      this.BtnClickedName = 'DelContract';
+      this.ShowMessageBoxWithYesNoBtn('آیا مایل به حذف درخواست انتخاب شده می باشید؟');
+    } else {
+      this.ShowMessageBoxWithOkBtn('لطفا یک ردیف را برای حذف انتخاب نمایید.');
     }
   }
 
   onDelete() {
-    this.ContractPayDetails.DeleteContractPay(this.SelectedCPCostFactorID).subscribe(
-      res => {
-        this.ngOnInit();
-      }
+    this.ContractPayDetails.DeleteContractPay(this.SelectedCPCostFactorID).subscribe(res => {
+      this.ShowMessageBoxWithOkBtn('حذف موفقیت آمیز بود');
+      this.ngOnInit();
+    }
     );
   }
 
@@ -505,6 +519,7 @@ export class ContractPayListComponent implements OnInit {
     this.ContractPayPopupParam.ContractPayNo = this.ContractPayNo;
     this.ContractPayPopupParam.ContractCode = this.ContractCode;
     this.ContractPayPopupParam.ContractorName = this.ContractorName;
+    this.ContractPayPopupParam.ContractorID = this.ContractorID;
     this.ContractPayPopupParam.Subject = this.Subject;
     this.ContractPayPopupParam.SelectedRow = this.SelectedRow;
     this.ContractPayPopupParam.ModuleCode = this.PopupParam.ModuleCode;
@@ -530,73 +545,28 @@ export class ContractPayListComponent implements OnInit {
     this.startTopPosition = 10;
     this.PixelWidth = null;
     this.PixelHeight = null;
-    if (this.ContractOperationID && this.PopUpType === 'contract-pay-types'
-      && (this.ContractOperationID === '3' || this.ContractOperationID === '4')
-      && (this.ContractTypeCode === 26 || this.ContractTypeCode === 29)) {
-      this.ContractPayPopupParam.ContractOperationID = this.ContractOperationID;
-      this.ContractPayPopupParam.PriceListPatternID = this.PriceListPatternID;
-      this.ContractPayPopupParam.CostListFinYearCode = this.CostListFinYearCode;
-      this.ContractPayPopupParam.PriceListTypeCode = this.PriceListTypeCode;
-      this.ContractPayPopupParam.PriceListFineYearName = this.PriceListFineYearName;
-      this.ContractPayPopupParam.PriceListTypeName = this.PriceListTypeName;
-      this.ContractPayPopupParam.SelectedCPCostFactorID = -1;
-      this.ContractPayPopupParam.selectedRow = this.PopupParam.selectedRow.data;
-      this.PopUpType = 'contract-pay-item-hour';
-      this.HaveMaxBtn = true;
-      // tslint:disable-next-line: radix
-      this.ContractPayPopupParam.ContractOperationID = parseInt(this.ContractOperationID);
-      this.ContractPayPopupParam.Mode = 'InsertMode';
-      return;
-    }
-    if (this.ContractOperationID && this.PopUpType === 'contract-pay-types'
-      && (this.ContractOperationID === '3' || this.ContractOperationID === '4')
-      && (this.ContractTypeCode === 27 || this.ContractTypeCode === 28)) {
-      this.ContractPayPopupParam.ContractOperationID = this.ContractOperationID;
+    this.isClicked = true;
+    if (this.ContractOperationID && this.PopUpType === 'contract-pay-types') {
+      if (this.ContractOperationID === '3' || this.ContractOperationID === '4'
+      || this.ContractOperationID === '5' || this.ContractOperationID === '8') { // RFC 62307
       this.ContractPayPopupParam.selectedRow = this.PopupParam.selectedRow.data;
       this.PopUpType = 'contract-pay-details';
       this.HaveMaxBtn = true;
+      this.startLeftPosition = 5;
       // tslint:disable-next-line: radix
       this.ContractPayPopupParam.ContractOperationID = parseInt(this.ContractOperationID);
       this.ContractPayPopupParam.Mode = 'InsertMode';
+      this.ContractPayPopupParam.ModuleViewTypeCode = this.PopupParam.ModuleViewTypeCode;
       return;
-    }
-    if (!this.PriceListPatternID && this.ContractOperationID && (this.ContractOperationID === '3' || this.ContractOperationID === '4')
-      && this.PopUpType === 'contract-pay-types') {
-      this.ContractPayPopupParam.ContractOperationID = this.ContractOperationID;
-      this.ContractPayPopupParam.selectedRow = this.PopupParam.selectedRow.data;
-      this.PopUpType = 'contract-pay-details';
-      this.HaveMaxBtn = true;
-      // tslint:disable-next-line: radix
-      this.ContractPayPopupParam.ContractOperationID = parseInt(this.ContractOperationID);
-      this.ContractPayPopupParam.Mode = 'InsertMode';
-      return;
-    }
-    if (this.PriceListPatternID && this.ContractOperationID && (this.ContractOperationID === '3' || this.ContractOperationID === '4') &&
-      this.PopUpType === 'contract-pay-types' &&
-      this.ContractTypeCode !== 26 &&
-      this.ContractTypeCode !== 29) {
-      this.ContractPayPopupParam.ContractOperationID = this.ContractOperationID;
-      this.ContractPayPopupParam.PriceListPatternID = this.PriceListPatternID;
-      this.ContractPayPopupParam.CostListFinYearCode = this.CostListFinYearCode;
-      this.ContractPayPopupParam.PriceListTypeCode = this.PriceListTypeCode;
-      this.ContractPayPopupParam.PriceListFineYearName = this.PriceListFineYearName;
-      this.ContractPayPopupParam.PriceListTypeName = this.PriceListTypeName;
-      this.ContractPayPopupParam.SelectedCPCostFactorID = -1;
-      this.ContractPayPopupParam.selectedRow = this.PopupParam.selectedRow.data;
-      this.PopUpType = 'contract-pay-item-estimate-page';
-      this.HaveMaxBtn = true;
-      // tslint:disable-next-line: radix
-      this.ContractPayPopupParam.ContractOperationID = parseInt(this.ContractOperationID);
-      this.ContractPayPopupParam.Mode = 'InsertMode';
-      return;
-    }
-    if (this.ContractOperationID === '1' || this.ContractOperationID === '2' ||
-      this.ContractOperationID === '20' || this.ContractOperationID === '21') {
+    } else if (this.ContractOperationID === '1' || this.ContractOperationID === '2' ||
+      this.ContractOperationID === '20' || this.ContractOperationID === '21' ||
+      this.ContractOperationID === '7') {
       this.startLeftPosition = 280;
       this.startTopPosition = 90;
       this.PixelWidth = 900;
-      this.PixelHeight = 320;
-      this.ContractPayPopupParam.ContractOperationID = this.ContractOperationID;
+      this.PixelHeight = (this.PopupParam.ModuleViewTypeCode === 100000 && (this.ContractPayPopupParam.RegionCode >= 0 && this.ContractPayPopupParam.RegionCode < 23)) ? 370 :
+                         (this.ContractPayPopupParam.RegionCode >= 0 && this.ContractPayPopupParam.RegionCode < 23) ? 342: 320;
+      this.ContractPayPopupParam.ContractOperationID = parseInt(this.ContractOperationID);
       this.ContractPayPopupParam.CostListFinYearCode = this.CostListFinYearCode;
       this.ContractPayPopupParam.PriceListTypeCode = this.PriceListTypeCode;
       this.ContractPayPopupParam.PriceListFineYearName = this.PriceListFineYearName;
@@ -610,7 +580,7 @@ export class ContractPayListComponent implements OnInit {
       this.ContractPayPopupParam.Mode = 'InsertMode';
       return;
     }
-    this.isClicked = true;
+    }
   }
 
   OnClickPrintFlow() {
@@ -646,6 +616,7 @@ export class ContractPayListComponent implements OnInit {
     this.alertMessageParams.HaveYesBtn = false;
     this.alertMessageParams.HaveNoBtn = false;
   }
+
   ShowContractCase() {
     this.PopUpType = 'contract-case';
     this.PixelWidth = null;
@@ -696,6 +667,7 @@ export class ContractPayListComponent implements OnInit {
         this.ContractPayPopupParam.ContractCode = this.ContractCode;
         this.ContractPayPopupParam.SelectedContractID = this.SelectedContractID;
         this.ContractPayPopupParam.ContractorName = this.ContractorName;
+        this.ContractPayPopupParam.ContractorID = this.ContractorID;
         this.ContractPayPopupParam.ContractTypeName = this.ContractTypeName;
         this.ContractPayPopupParam.ContractAmount = this.ContractAmount;
         this.ContractPayPopupParam.LetterDatePersian = this.LetterDatePersian;
@@ -708,5 +680,29 @@ export class ContractPayListComponent implements OnInit {
     } else {
       this.ShowMessageBoxWithOkBtn(' ردیفی جهت مشاهده انتخاب نشده است');
     }
+  }
+
+  MessageBoxAction(ActionResult) {
+    if (this.BtnClickedName === 'DelContract' && ActionResult === 'YES') {
+      this.onDelete();
+    } else {
+      this.Closed.emit(true);
+    }
+    this.PopUpType = '';
+    this.BtnClickedName = '';
+    this.isClicked = false;
+  }
+  ShowMessageBoxWithYesNoBtn(message) {
+    this.isClicked = true;
+    this.PopUpType = 'message-box';
+    this.PixelWidth = null;
+    this.HaveHeader = true;
+    this.HaveMaxBtn = false;
+    this.startLeftPosition = 505;
+    this.startTopPosition = 195;
+    this.alertMessageParams.message = message;
+    this.alertMessageParams.HaveOkBtn = false;
+    this.alertMessageParams.HaveYesBtn = true;
+    this.alertMessageParams.HaveNoBtn = true;
   }
 }

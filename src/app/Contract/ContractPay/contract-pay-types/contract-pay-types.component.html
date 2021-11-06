@@ -1,6 +1,6 @@
 <div id="container" class="row" style="clear: both">
   <div id="content" class="" style="width: 400px;">
-    <div class="main-form-body" style="margin: 5px; height: 165px;">
+    <div class="main-form-body" style="margin: 5px; height: 235px;">
       <form>
         <fieldset align="right" class="feild-set" style="display: inherit;text-align: right;">
           <legend class="legend">درخواست پرداخت</legend>
@@ -32,7 +32,7 @@
               </a>
             </div>
           </div>
-           <div style="width: 100%; overflow: auto;">
+          <div style="width: 100%; overflow: auto;">
             <div style="margin-top: 7px; width: 50%; float: right;">
               <a style="cursor: pointer;margin: 5px;" (click)="SetPayTypes('21')">
                 <img [src]="'assets/Icons/TechnicalArchive.png'" />
@@ -43,6 +43,28 @@
               <a style="cursor: pointer; margin: 5px;" (click)="SetPayTypes('20')">
                 <img [src]="'assets/Icons/TechnicalArchive.png'" />
                 استرداد کسور بیمه
+              </a>
+            </div>
+          </div>
+          <div style="width: 100%; overflow: auto;">
+            <div style="margin-top: 7px; width: 50%; float: right;">
+              <a style="cursor: pointer;margin: 5px;" (click)="SetPayTypes('7')">
+                <img [src]="'assets/Icons/TechnicalArchive.png'" />
+                جرایم
+              </a>
+            </div>
+            <div style="margin-top: 7px; width: 50%; float: left;">
+              <a style="cursor: pointer;margin: 5px;" (click)="SetPayTypes('5')">
+                <img [src]="'assets/Icons/TechnicalArchive.png'" />
+                ما به التفاوت مصالح
+              </a>
+            </div>
+          </div>
+          <div style="width: 100%; overflow: auto;">
+            <div style="margin-top: 4px; width: 50%; float: right;">
+              <a style="cursor: pointer; margin: 5px;" (click)="SetPayTypes('8')">
+                <img [src]="'assets/Icons/TechnicalArchive.png'" />
+                پرداخت ارزش افزوده
               </a>
             </div>
           </div>

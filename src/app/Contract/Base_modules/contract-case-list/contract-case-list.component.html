@@ -32,9 +32,12 @@
       </tr>
     </table>
   </fieldset>
-  <div id="container" style="clear: both;padding-bottom: 5px;">
-    <div class="box-dev" style=" width: 100%;" [style.height.%]="BoxDevHeight">
-      <app-grid (RowClick)="RowClick($event)" [columns]="columnDef" [rows]="rowData" [gridHeight]=95></app-grid>
+  <div style="clear: both;padding-bottom: 5px;" [style.height.%]="BoxDevHeight">
+    <div class="box-dev" style=" width: 100%;height: 100%;">
+      <app-grid (SortChange)="OnSortChange($event)" (GridReady)="onGridReady($event)"
+        (ChangePage)="OnChangePage($event)" [IsServerPaging]="true" [TotalRecordCount]="TotalRecordCount"
+        [paginationPageSize]="30" (FilterChange)="OnFilterChange($event)" (RowClick)=" RowClick($event)"
+        [columns]="columnDef" [rowsData]="rowData" [gridHeight]="gridHeight"></app-grid>
     </div>
   </div>
 </div>

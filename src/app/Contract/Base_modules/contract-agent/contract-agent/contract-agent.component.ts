@@ -1,5 +1,4 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { Router, ActivatedRoute } from '@angular/router';
 import { GridOptions } from 'ag-grid-community';
 import { of } from 'rxjs';
@@ -7,7 +6,7 @@ import { ContractAgentService } from 'src/app/Services/ContractService/Basemodul
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 declare var jquery: any;
 declare var $: any;
-
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 @Component({
   selector: 'app-contract-agent',
   templateUrl: './contract-agent.component.html',
@@ -42,7 +41,7 @@ export class ContractAgentComponent implements OnInit {
         headerName: 'کد عامل قرارداد',
         field: 'ContractAgentCode',
         width: 100,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 3},
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {

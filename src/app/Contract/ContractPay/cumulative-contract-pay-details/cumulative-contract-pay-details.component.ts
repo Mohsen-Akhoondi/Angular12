@@ -4,7 +4,6 @@ import * as moment from 'jalali-moment';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { FinYearService } from 'src/app/Services/BaseService/FinYearService';
 import { forkJoin, of } from 'rxjs';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
@@ -13,6 +12,8 @@ import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServi
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 // import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-angular-datepicker/jalali-datepicker/jalali-datepicker.component';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
+
 @Component({
   selector: 'app-cumulative-contract-pay-details',
   templateUrl: './cumulative-contract-pay-details.component.html',
@@ -84,7 +85,7 @@ export class CumulativeContractPayDetailsComponent implements OnInit {
   ContractTypeCode;
   IsDown = false;
   MinusCoef = 1;
-  ContractPayAmount = 0 ;
+  ContractPayAmount = 0;
   ContractPayTaxValue = 0;
   CartableUserID: any;
   CurrWorkFlow: any;
@@ -269,7 +270,7 @@ export class CumulativeContractPayDetailsComponent implements OnInit {
           resizable: true,
           editable: true,
           HaveThousand: true,
-          cellEditorFramework: NumberFieldEditableComponent,
+          cellEditorFramework: NumberInputComponentComponent,
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
             if (params.value) {
@@ -286,7 +287,7 @@ export class CumulativeContractPayDetailsComponent implements OnInit {
           resizable: true,
           editable: true,
           HaveThousand: true,
-          cellEditorFramework: NumberFieldEditableComponent,
+          cellEditorFramework: NumberInputComponentComponent,
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
             if (params.value) {
@@ -302,7 +303,7 @@ export class CumulativeContractPayDetailsComponent implements OnInit {
           width: 150,
           resizable: true,
           HaveThousand: true,
-          cellEditorFramework: NumberFieldEditableComponent,
+          cellEditorFramework: NumberInputComponentComponent,
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
             if (params.value) {
@@ -319,7 +320,7 @@ export class CumulativeContractPayDetailsComponent implements OnInit {
           resizable: true,
           editable: true,
           HaveThousand: true,
-          cellEditorFramework: NumberFieldEditableComponent,
+          cellEditorFramework: NumberInputComponentComponent,
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
             if (params.value) {
@@ -336,7 +337,7 @@ export class CumulativeContractPayDetailsComponent implements OnInit {
           resizable: true,
           editable: true,
           HaveThousand: false,
-          cellEditorFramework: NumberFieldEditableComponent,
+          cellEditorFramework: NumberInputComponentComponent,
           cellEditorParams: { IsFloat: true, MaxLength: 4, FloatMaxLength: 2 },
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
@@ -361,7 +362,7 @@ export class CumulativeContractPayDetailsComponent implements OnInit {
           resizable: true,
           editable: true,
           HaveThousand: false,
-          cellEditorFramework: NumberFieldEditableComponent,
+          cellEditorFramework: NumberInputComponentComponent,
           cellEditorParams: { IsFloat: true, MaxLength: 4, FloatMaxLength: 2 },
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
@@ -379,7 +380,7 @@ export class CumulativeContractPayDetailsComponent implements OnInit {
           resizable: true,
           editable: false,
           HaveThousand: true,
-          cellEditorFramework: NumberFieldEditableComponent,
+          cellEditorFramework: NumberInputComponentComponent,
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
             if (params.value) {
@@ -476,7 +477,7 @@ export class CumulativeContractPayDetailsComponent implements OnInit {
           resizable: true,
           editable: true,
           HaveThousand: true,
-          cellEditorFramework: NumberFieldEditableComponent,
+          cellEditorFramework: NumberInputComponentComponent,
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
             if (params.value) {
@@ -529,7 +530,8 @@ export class CumulativeContractPayDetailsComponent implements OnInit {
         '',
         null,
         0,
-        true)
+        true,
+        this.ContractOperationId)
         .subscribe(
           ress => {
             this.ContractPayDate = ress[0].ContractPayDate;
@@ -709,7 +711,8 @@ export class CumulativeContractPayDetailsComponent implements OnInit {
         ADate.MDate,
         null,
         0,
-        true)
+        true,
+        this.ContractOperationId)
         .subscribe(
           ress => {
             this.ContractPayItemList = ress;
@@ -804,7 +807,8 @@ export class CumulativeContractPayDetailsComponent implements OnInit {
       this.ContractPayDate,
       this.ProductIDs,
       0,
-      false);
+      false,
+      this.ContractOperationId);
   }
 
   onCellValueChanged(event) {
@@ -1035,7 +1039,16 @@ export class CumulativeContractPayDetailsComponent implements OnInit {
       return;
     }
 
-    this.contractpaydetail.SaveContractPay(ContractPayObj, ContractPayItemList).subscribe(res => {
+    this.contractpaydetail.SaveContractPay(
+      ContractPayObj,
+      ContractPayItemList,
+      null,
+      false,
+      false,
+      false,
+      2769,
+      null
+    ).subscribe(res => {
       this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
       this.ChangeDetection = false;
       this.PopupParam.Mode = 'EditMode';
@@ -1106,7 +1119,17 @@ export class CumulativeContractPayDetailsComponent implements OnInit {
       return;
     }
 
-    this.contractpaydetail.UpdateContractPay(ContractPayObj, ContractPayItemList, -1 , 2769).subscribe(res => {
+    this.contractpaydetail.UpdateContractPay(
+      ContractPayObj,
+      ContractPayItemList,
+      -1,
+      2769,
+      false,
+      false,
+      null,
+      false, 
+      null
+    ).subscribe(res => {
       this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
       this.ChangeDetection = false;
       this.ngOnInit();
@@ -1150,8 +1173,10 @@ export class CumulativeContractPayDetailsComponent implements OnInit {
           2769,
           0,
           this.WorkflowObjectCode,
-          null,null,
-          this.CartableUserID)
+          null,
+          null,
+          this.CartableUserID,
+          this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null)
           .subscribe(res => {
             this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
             if (this.ConfirmStatus.includes(21)) {
@@ -1184,8 +1209,10 @@ export class CumulativeContractPayDetailsComponent implements OnInit {
       2769,
       1,
       this.WorkflowObjectCode,
-      null,null,
-      this.CartableUserID)
+      null,
+      null,
+      this.CartableUserID,
+      this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null)
       .subscribe(res => {
         this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
         this.RefreshCartable.RefreshCartable();
@@ -1205,8 +1232,8 @@ export class CumulativeContractPayDetailsComponent implements OnInit {
 
   DOFinalConfirm() {
     this.Cartable.UserFinalConfirmWorkFlow(
-    this.CurrWorkFlow,
-    this.WorkFlowID,
+      this.CurrWorkFlow,
+      this.WorkFlowID,
       10,
       '',
       this.ObjectNo,

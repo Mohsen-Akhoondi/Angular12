@@ -192,20 +192,20 @@ export class CumulativeContractPayListComponent implements OnInit {
     if (this.PopupParam.ModuleViewTypeCode) {
       this.ModuleViewTypeCode = this.PopupParam.ModuleViewTypeCode;
       switch (this.ModuleViewTypeCode) {
-        case 100000 :   /* abzar rahbar 52104 */
+        case 100000:   /* abzar rahbar 52104 */
           break;
         default:
           break;
       }
     }
     if (!this.PopupParam.ModuleCode || this.PopupParam.ModuleCode === 2516) {
-     this.IsConfirm = 0;
+      this.IsConfirm = 0;
     }
 
     if (this.PopupParam.ModuleCode && this.PopupParam.ModuleCode === 2687) {
       this.IsConfirm = null;
-     }
-     if (this.PopupParam && this.PopupParam.IsEditable === false) {
+    }
+    if (this.PopupParam && this.PopupParam.IsEditable === false) {
       this.Showable = false;
     }
 
@@ -268,7 +268,7 @@ export class CumulativeContractPayListComponent implements OnInit {
     this.IsRowClick = false;
     this.HaveMaxBtn = false;
     this.isClicked = false;
-    this.ContPayService.GetContractPayList(this.SelectedCostFactorID , null, 2).subscribe(res => {
+    this.ContPayService.GetContractPayList(this.SelectedCostFactorID, null, 2).subscribe(res => {
       this.rowData = res;
     });
   }
@@ -450,15 +450,18 @@ export class CumulativeContractPayListComponent implements OnInit {
       this.PopUpType === 'contract-pay-types' &&
       this.ContractTypeCode !== 26 &&
       this.ContractTypeCode !== 29) {
-
       this.ContractPayPopupParam.ContractOperationID = ContractOperationID;
-      this.ContractPayPopupParam.PriceListPatternID = this.PriceListPatternID;
-      this.ContractPayPopupParam.CostListFinYearCode = this.CostListFinYearCode;
-      this.ContractPayPopupParam.PriceListTypeCode = this.PriceListTypeCode;
-      this.ContractPayPopupParam.SelectedCPCostFactorID = -1;
-      this.PopUpType = 'contract-pay-item-estimate-page';
+      this.PopUpType = 'contract-pay-details';
       this.HaveMaxBtn = true;
       this.ContractPayPopupParam.Mode = 'InsertMode';
+      // this.ContractPayPopupParam.ContractOperationID = ContractOperationID;
+      // this.ContractPayPopupParam.PriceListPatternID = this.PriceListPatternID;
+      // this.ContractPayPopupParam.CostListFinYearCode = this.CostListFinYearCode;
+      // this.ContractPayPopupParam.PriceListTypeCode = this.PriceListTypeCode;
+      // this.ContractPayPopupParam.SelectedCPCostFactorID = -1;
+      // this.PopUpType = 'contract-pay-item-estimate-page';
+      // this.HaveMaxBtn = true;
+      // this.ContractPayPopupParam.Mode = 'InsertMode';
       return;
 
     }
@@ -509,7 +512,7 @@ export class CumulativeContractPayListComponent implements OnInit {
     this.ContractPayPopupParam.HeaderName = 'صورت جلسات';
     this.ContractPayPopupParam.ModuleCode = this.ModuleCode;
     this.ContractPayPopupParam.selectedRow = this.PopupParam.selectedRow;
-    this.ContractPayPopupParam.GridHeightInTab =  100;
+    this.ContractPayPopupParam.GridHeightInTab = 100;
     this.ContractPayPopupParam.PanelHeightInTab = 99;
     this.ContractPayPopupParam.HaveSave = false;
     this.ContractPayPopupParam.IsViewable = true;

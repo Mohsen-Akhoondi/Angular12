@@ -1,0 +1,185 @@
+<div style="clear: both;height: 95%;">
+  <div class="main-form-body" style="margin: 5px; height:91%">
+    <div class="main-form-body" style="display: inherit">
+      <table style="width: 100%;">
+
+        <tr>
+          <!-- <td width="25%">
+          <span style="color: red;">*</span>
+          <span class="table-cell-Lable">واحد اجرایی</span>
+          <app-ng-select-virtual-scroll style="display: inline-block;width: 60%;" class=""
+            [NgSelectParams]="RegionParams" [CheckValidate]="CheckValidate" [Items]="RegionItems"
+            (selectedChange)="onChangeRegion($event)">
+
+          </app-ng-select-virtual-scroll>
+        </td> -->
+
+          <td width="25%">
+            <span style="color: red;">*</span>
+            <span class="table-cell-Lable">نام مشتری</span>
+            <app-ng-select-virtual-scroll style="display: inline-block;width: 77%;" [CheckValidate]="CheckValidate"
+              [Disabled]="!IsAdmin" [NgSelectParams]="NgSelectPersonReqParams" [Items]="PersonReqItems"
+              (FetchMore)="PersonReq_FetchMore($event)" (Open)="PersonReqOpened()"
+              (doSearch)="Person_Req_DoSearch($event)">
+            </app-ng-select-virtual-scroll>
+          </td>
+          <td width="25%">
+            <span style="color: red;">*</span>
+            <span class="table-cell-Lable">نماینده مشتری</span>
+            <app-ng-select-virtual-scroll style="display: inline-block;width: 60%;" class="" [Disabled]="true"
+              [NgSelectParams]="NgSelectAgentPersonReqParams" [Items]="AgentPersonReqItems"
+              (FetchMore)="AgentPersonReq_FetchMore($event)" (Open)="AgentPersonReqOpened()"
+              (doSearch)="AgentPerson_Req_DoSearch($event)" [CheckValidate]="CheckValidate">
+            </app-ng-select-virtual-scroll>
+          </td>
+
+          <td width="25%">
+            <span style="color: red;">*</span>
+            <span class="table-cell-Lable"> شماره سفارش</span>
+            <input [disabled]="IsEditable" [ngStyle]="{'border-color': CheckValidate && !Subject ? 'red':''}"
+              placeholder="{{CheckValidate && !Subject ? 'پر کردن مقدار این فیلد الزامیست': ''}}" style="width: 60%; "
+              class="form-control input-style" type="text" name="CustomerOrderCode" [(ngModel)]="CustomerOrderCode" />
+          </td>
+
+        </tr>
+
+        <tr>
+          <td width="25%">
+            <span style="color: red;">*</span>
+            <span class="table-cell-Lable">تاریخ</span>
+            <app-jalali-datepicker [Disabled]="IsEditable" [WidthPC]="77" [CheckValidate]="CheckValidate"
+              [Required]="true" [CurrMiladiDateValue]="CustomerOrderDate" (Change)="OnOrderRequestDateChange($event)">
+            </app-jalali-datepicker>
+          </td>
+          <td width="25%">
+
+            <span style="color: red;">*</span>
+            <span class="table-cell-Lable">نوع سفارش</span>
+            <app-ng-select-virtual-scroll style="display: inline-block;width: 60%;" class=""
+              [NgSelectParams]="OrderTypeParams" [CheckValidate]="CheckValidate" [Items]="OrderTypeItems">
+            </app-ng-select-virtual-scroll>
+
+          </td>
+          <!-- <td width="25%">
+          <span class="table-cell-Lable">مشتری</span>
+          <div class="redio-div">
+            <div class="custom-control custom-radio custom-control-inline">
+              <input [checked]="IsPerson" type="radio" class="custom-control-input" id="ISPersonRadio"
+                name="ChoosenISpersonRadioName" (click)="RedioClick(true)">
+              <label style="margin: auto;" class="custom-control-label redio-label" for="ISPersonRadio">
+                حقیقی
+              </label>
+            </div>
+            <div class="custom-control custom-radio custom-control-inline">
+              <input [checked]="!IsPerson" type="radio" class="custom-control-input" id="ISCorporateRadio"
+                name="ChoosenISCorporateRadioName">
+              <label style="margin: auto;" class="custom-control-label redio-label" for="ISCorporateRadio"
+                (click)="RedioClick(false)">
+                حقوقی
+              </label>
+            </div>
+          </div>
+        </td> -->
+
+          <!-- <td width="25%">
+          <span class="table-cell-Lable">نماینده کارفرما</span>
+          <app-ng-select-virtual-scroll style="display: inline-block;width: 60%;"
+            [NgSelectParams]="NgSelectEmployerPersonReqParams" [Items]="EmployerPersonReqItems"
+            (FetchMore)="EmployerPersonReq_FetchMore($event)" (Open)="EmployerPersonReqOpened()"
+            (doSearch)="EmployerPerson_Req_DoSearch($event)">
+          </app-ng-select-virtual-scroll>
+        </td> -->
+        </tr>
+
+        <tr>
+          <!-- <td width="25%">
+
+          <span style="color: red;">*</span>
+          <span class="table-cell-Lable">شناسه قرارداد </span>
+          <app-ng-select-virtual-scroll style="display: inline-block;width: 60%;"
+            [TotalItemCount]="FromContractTotalItemCount" [PageCount]="FromContractPageCount"
+            [NgSelectParams]="NgSelectContractParamsFrom" [Items]="ContractListSetFrom"
+            (FetchMore)="FetchMoreFromContract($event)" (doSearch)="doFromContractSearch($event)"
+            (selectedChange)="FromContractChanged($event)" (Open)="FromContractOpened()"
+            [CheckValidate]="CheckValidate">
+          </app-ng-select-virtual-scroll>
+
+        </td> -->
+
+          <td colspan="3" width="65%">
+            <span style="color: red;vertical-align: top">*</span>
+            <span class="table-cell-Lable" style="vertical-align: top;"> موضوع</span>
+            <textarea [disabled]="IsEditable" [ngStyle]="{'border-color': CheckValidate && !Subject ? 'red':''}"
+              placeholder="{{CheckValidate && !Subject ? 'پر کردن مقدار این فیلد الزامیست': ''}}" [(ngModel)]="Subject"
+              name="Subject" class="form-control input-style" rows="2"
+              style="display: inline-block;height: 35px;width: 92.5%;" id="indicator-text_note"></textarea>
+          </td>
+
+        </tr>
+
+        <!-- <tr>
+        <td style="width: 25%;">
+          <div style=" display: inline-block;width: 70%; text-align: right;">
+            <span class="table-cell-Lable" style="margin: 0 ;margin-left: 5px">فعال</span>
+            <app-custom-check-box style="vertical-align: sub; " [configurationInfo]="CustomCheckBoxConfig"
+              [isSelected]="IsValid" (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event)">
+            </app-custom-check-box>
+          </div>
+        </td>
+      </tr> -->
+
+      </table>
+    </div>
+
+    <div class="for-append-date" style="width: 100%;" [style.height.%]="gridHeightDiv">
+      <app-grid [HaveBorder]="true" [columns]="columnDef" [rowsData]="rowsData" (GridReady)="onGridReady($event)"
+        [IsEditable]="true" (cellEditingStarted)="oncellEditingStarted($event)" [gridHeight]="GridHeight"
+        (RowClick)="RowClick($event)" (CellValueChanged)="onCellValueChanged($event)">
+      </app-grid>
+    </div>
+  </div>
+
+
+  <div style="margin: 5px;">
+
+    <div class="buttons-place" style="float: right;margin: auto; width: 50%;">
+      <button (click)="onSave()" id="btnSave" class="btn btn-primary btnGreen">
+        <img width="15px" height="15px" src="assets/Icons/save.png" />
+        ثبت
+      </button>
+      <button id="btnClose" class="btn btn-primary btnGreen" (click)="Close()">
+        <img width="15px" height="15px" src="assets/Icons/exit.png" />
+        خروج
+      </button>
+    </div>
+
+    <div *ngIf="true" class="buttons-place" style="float:left;margin: auto;" [style.width.%]="49.5">
+      <button [disabled]="BTNsShow" (click)="onConfirm()" id="btn2" class="btn btn-primary btnGreen"
+        style="margin: 2px;">
+        <img width="15px" height="15px" src="assets/Icons/{{btnConfirmIcon}}.png" />
+        <!--RFC 53826-->
+        {{btnConfirmName}}
+      </button>
+      <button [disabled]="BTNsShow" (click)="onConfirmAndSend()" id="btn2" class="btn btn-primary btnGreen"
+        style="margin: 2px;">
+        <img width="15px" height="15px" src="assets/Icons/Approve.png" />
+        تایید و ارسال </button>
+      <button [disabled]="BTNsShow" (click)="onUnConfirmAndReturn()" id="btn2" class="btn btn-primary btnGreen"
+        style="margin: 2px;">
+        <img width="15px" height="15px" src="assets/Icons/DisApprove.png" />
+        {{btnConfirmAndReturnName}} </button>
+      <button [disabled]="BTNsShow" (click)="OnClickPrintFlow()" class="btn btn-primary btnGreen">
+        <img width="15px" height="15px" src="assets/Icons/print.png" />
+        گردش
+      </button>
+    </div>
+  </div>
+</div>
+
+<app-over-popup *ngIf="isClicked" [PopupType]="PopUpType" [startLeftPosition]="startLeftPosition"
+  [startTopPosition]="startTopPosition" [minHeightPixel]="MinHeightPixel"
+  [PercentWidth]="PercentWidth" [HaveMaxBtn]="HaveMaxBtn" [MainMaxwidthPixel]="MainMaxwidthPixel"
+  [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn"
+  [PopupParam]="PopUpType ==='message-box' ? alertMessageParams : PopupParam " (popupclosed)="popupclosed($event)"
+  (PopupOutPutParam)="PopUpType ==='message-box' ? MessageBoxAction($event) : getOutPutParam($event)">
+</app-over-popup>

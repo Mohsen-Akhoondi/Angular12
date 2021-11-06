@@ -24,10 +24,11 @@
               class="form-control input-style" type="text" name="InvoiceCode" [(ngModel)]="InvoiceObject.InvoiceCode" />
           </td>
           <td width="25%">
-            <span style="color: red;">*</span>
-            <span class="table-cell-Lable">شماره فاکتور</span><input style="width: 60%" [readonly]="!IsEditable"
+            <span *ngIf="!IsDisableRefisterField" style="color: red;">*</span>
+            <span class="table-cell-Lable">شماره فاکتور</span><input style="width: 60%"
+              [readonly]="!IsEditable || IsDisableRefisterField"
               [ngStyle]="{'border-color': CheckValidate && !InvoiceObject.RegisterInvoiceCode ? 'red':''}"
-              placeholder="{{CheckValidate && !InvoiceObject.RegisterInvoiceCode ? 'پر کردن مقدار این فیلد الزامیست': ''}}"
+              placeholder="{{CheckValidate && !IsDisableRefisterField && !InvoiceObject.RegisterInvoiceCode ? 'پر کردن مقدار این فیلد الزامیست': ''}}"
               class="form-control input-style" type="text" name="InvoiceObject.RegisterInvoiceCode"
               [(ngModel)]="InvoiceObject.RegisterInvoiceCode" />
           </td>
@@ -70,9 +71,10 @@
         </tr>
         <tr>
           <td width="25%">
-            <span style="color: red;">*</span>
+            <span *ngIf="!IsDisableRefisterField" style="color: red;">*</span>
             <span class="table-cell-Lable">تاریخ فاکتور</span>
-            <app-jalali-datepicker [Disabled]="!IsEditable" [WidthPC]="60" [CheckValidate]="CheckValidate"
+            <app-jalali-datepicker [Disabled]="!IsEditable || IsDisableRefisterField" [WidthPC]="60"
+              [CheckValidate]="CheckValidate && !IsDisableRefisterField"
               [CurrMiladiDateValue]="InvoiceObject.ShortRegisterInvoiceDate" [Required]="true"
               (Change)="OnRegisterInvoiceDateChange($event)">
             </app-jalali-datepicker>
@@ -91,7 +93,7 @@
         <tr>
           <td width="25%">
             <span class="table-cell-Lable">نوع تامین کننده</span>
-            <div class="redio-div" style="width: 60%; text-align: center; margin-left: 10px;">
+            <div class="redio-div" style="width: 60%; text-align: center;">
               <div class="custom-control custom-radio custom-control-inline">
                 <input [checked]="InvoiceObject.ActorType" type="radio" class="custom-control-input"
                   [disabled]="!IsEditable" id="rdoPersonContractor" name="ChoosenContractorType"
@@ -126,6 +128,24 @@
               [Disabled]="!IsEditable">
             </app-custom-check-box>
           </td>
+          <td width="25%">
+            <span class="table-cell-Lable">نوع فاکتور</span>
+            <div class="redio-div" style="width: 60%; text-align: center;">
+              <div class="custom-control custom-radio custom-control-inline">
+                <input [checked]="!InvoiceObject.IsMultiInvoice" type="radio" class="custom-control-input"
+                  [disabled]="!IsEditable" id="rdoIsNotMulti" name="ChoosenMultiInvoice"
+                  (click)="rdoIsMultiClick(false)">
+                <label style="margin: auto;" class="custom-control-label redio-label" for="rdoIsNotMulti">تک فاکتوره
+                </label>
+              </div>
+              <div class="custom-control custom-radio custom-control-inline">
+                <input [checked]="InvoiceObject.IsMultiInvoice" type="radio" class="custom-control-input"
+                  [disabled]="!IsEditable" id="rdoIsMulti" name="ChoosenMultiInvoice">
+                <label style="margin: auto;" class="custom-control-label redio-label" for="rdoIsMulti"
+                  (click)="rdoIsMultiClick(true)">چند فاکتوره</label>
+              </div>
+            </div>
+          </td>
 
         </tr>
 
@@ -135,8 +155,8 @@
             <span class="table-cell-Lable">بانک</span>
             <app-ng-select-virtual-scroll [PageCount]="BankPageCount" [TotalItemCount]="BankTotalItemCount"
               style="display: inline-block;width: 60%;" class="select-general-for-lable" [Disabled]="!IsEditable"
-              [NgSelectParams]="NgSelectBankParams" [Items]="BankItems" (FetchMore)="FetchMoreBank($event)" (Open)="OpenBank()"
-              (doSearch)="doBankSearch($event)" (selectedChange)="onBankSelectedchanged($event)"
+              [NgSelectParams]="NgSelectBankParams" [Items]="BankItems" (FetchMore)="FetchMoreBank($event)"
+              (Open)="OpenBank()" (doSearch)="doBankSearch($event)" (selectedChange)="onBankSelectedchanged($event)"
               [CheckValidate]="(ModuleViewTypeCode === 1 && IsForcedBankInfo) ? CheckValidate : false">
             </app-ng-select-virtual-scroll>
           </td>
@@ -164,9 +184,9 @@
     </div>
   </form>
   <div class="box-dev" style="margin-top: 2px;padding: 2px;" [style.height.%]="32">
-    <div id="div2" class="box-dev" [style.height.%]="80">
+    <div id="div2" class="box-dev reg-inv" [style.height.%]="80">
       <app-grid (CellValueChanged)="onCellValueChanged($event)" [columns]="InvocieItemcolumnDef"
-        [rowsData]="InvoiceItemList" (GridReady)="onGridReady($event)" [IsEditable]="IsGridEditable"
+        [rowsData]="InvoiceItemList" (GridReady)="onGridReady($event)" [IsEditable]="IsGridEditable && ShowBtn"
         (cellEditingStarted)="oncellEditingStarted($event)" [gridHeight]="77"
         (ImportFromExcelClick)="OnImportFromExcelBtnClick()" [IsNeedImportBtn]="false" (RowClick)="RowClick($event)"
         (FilterChanged)="OnFilterChanged('InvoiceItem')" (RowDataChanged)="OnRowDataChanged('InvoiceItem')"
@@ -199,7 +219,7 @@
   <div class="box-dev" style="margin-top: 2px;padding: 2px;" [style.height.%]="FooterGridDevHeight">
     <div id="div3" class="box-dev" [style.height.%]="80">
       <app-grid [columns]="InvoiceFootercolumnDef" [rowsData]="InvoiceFooterList"
-        (GridReady)="onInvocieFooterGridReady($event)" [IsEditable]="IsGridEditable"
+        (GridReady)="onInvocieFooterGridReady($event)" [IsEditable]="IsGridEditable && ShowBtn"
         (cellEditingStarted)="onInvoiceFootercellEditingStarted($event)" [gridHeight]="FooterGridHeight"
         (ImportFromExcelClick)="OnImportFromExcelBtnClick()" [IsNeedImportBtn]="false"
         (FilterChanged)="OnFilterChanged('InvoiceFooter')" (RowDataChanged)="OnRowDataChanged('InvoiceFooter')"
@@ -224,7 +244,7 @@
 
 <div style="margin: 5px;">
   <div class="buttons-place" style="float: right;margin: auto;width: 60%;">
-    <button *ngIf="IsEditable" (click)="onSave()" id="btnSave" class="btn btn-primary btnGreen">
+    <button *ngIf="IsEditable && ShowBtn" (click)="onSave()" id="btnSave" class="btn btn-primary btnGreen">
       <img width="15px" height="15px" src="assets/Icons/save.png" />
       ثبت
     </button>
@@ -262,11 +282,10 @@
         <img width="15px" height="15px" src="assets/Icons/DisApprove.png" />
         عدم تایید و بازگشت </button>
     </div>
-    <button  *ngIf="false" (click)="onRevocationClick()" id="btn2" class="btn btn-primary btnGreen"
-    style="margin: 2px;">
-    <img width="15px" height="15px" src="assets/Icons/{{btnRevocationIcon}}.png" />
-    {{btnRevocationName}} </button>
-
+    <button *ngIf="false" (click)="onRevocationClick()" id="btn2" class="btn btn-primary btnGreen" style="margin: 2px;">
+      <img width="15px" height="15px" src="assets/Icons/{{btnRevocationIcon}}.png" />
+      {{btnRevocationName}}
+    </button>
     <button *ngIf="true" (click)="OnClickPrintFlow()" [disabled]="false" class="btn btn-primary btnGreen">
       <img width="15px" height="15px" src="assets/Icons/print.png" />
       گردش

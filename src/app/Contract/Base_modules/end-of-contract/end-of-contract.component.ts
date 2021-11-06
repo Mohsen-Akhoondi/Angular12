@@ -69,6 +69,7 @@ OverstartTopPosition: number;
 PopupType;
 alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false };
 HaveHeader = false;
+ProductRequestTypeCode;
 
   constructor(private ContractService: ContractListService,
               private router: Router,
@@ -86,6 +87,8 @@ HaveHeader = false;
       this.ReigonListSet = res;
       this.NgSelectRegionParams.selectedObject = res[0].RegionCode;
     });
+    this.ProductRequestTypeCode = this.ModuleCode == 3025 ? 3 : 
+                                  this.ModuleCode == 3003 ? 1 : 4; // 63316
   }
 ///////////////////////////////////////////////////////////////
 onChangeReigonObj(event) { // واحد اجرایی
@@ -98,7 +101,7 @@ onChangeContractObj(event) { // قرارداد
 OnOpenNgSelect() {
       this.ContractParams.loading = true;
       this.ContractService.GetConcludedContractPaging(1, 30, '', '',
-        this.NgSelectRegionParams.selectedObject).subscribe((res: any) => {
+        this.NgSelectRegionParams.selectedObject, this.ProductRequestTypeCode).subscribe((res: any) => {
           this.ContractItems = res.List;
           this.RefreshItems.RefreshItemsVirtualNgSelect({
             List: res.List,
@@ -115,7 +118,7 @@ FetchMoreContract(event) {
   const ResultList = [];
   const promise = new Promise((resolve, reject) => {
     this.ContractService.GetConcludedContractPaging(event.PageNumber, event.PageSize, event.term,
-      event.SearchOption, this.NgSelectRegionParams.selectedObject)
+      event.SearchOption, this.NgSelectRegionParams.selectedObject, this.ProductRequestTypeCode)
       .subscribe((res: any) => {
         event.CurrentItems.forEach(el => {
           ResultList.push(el);
@@ -146,7 +149,7 @@ doContractSearch(event) {
     event.SearchOption = 'ContractCode';
   }
   this.ContractService.GetConcludedContractPaging(event.PageNumber, event.PageSize, event.term,
-    event.SearchOption, this.NgSelectRegionParams.selectedObject).subscribe((res: any) => {
+    event.SearchOption, this.NgSelectRegionParams.selectedObject, this.ProductRequestTypeCode).subscribe((res: any) => {
       if (this.currentContractSearchTerm === event.term) {
         this.ContractItems = res.List;
         this.RefreshItems.RefreshItemsVirtualNgSelect({

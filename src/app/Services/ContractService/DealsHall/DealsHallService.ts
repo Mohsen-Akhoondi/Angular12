@@ -19,59 +19,88 @@ export class DealsHallService {
     GetCountContractPublicSale() {
         return this.http.get(window.location.origin + '/DealsHall/GetCountContractPublicSale', null);
     }
-    GetContractTender(RegionGroupCode, RegionCodes: any[], SubCostCenterCodes: any[], CostCenterCodes: any[], IsDuring, IsExpired) {
-        return this.http.get(window.location.origin + '/DealsHall/GetContractTender',
+    GetContractTender(RegionGroupCode, RegionCodes: any[], SubCostCenterCodes: any[], CostCenterCodes: any[], IsDuring, IsExpired, pageNumber, pageSize, SortModelList, FilterModelList) {
+        return this.http.post(window.location.origin + '/DealsHall/GetContractTender',
             {
                 RegionGroupCode,
                 RegionCodes,
                 SubCostCenterCodes,
                 CostCenterCodes,
                 IsDuring,
-                IsExpired
+                IsExpired,
+                pageNumber,
+                pageSize,
+                SortModelList,
+                FilterModelList
             });
     }
-    GetContractLimitedTender(RegionGroupCode, RegionCodes: any[], SubCostCenterCodes: any[], CostCenterCodes: any[], IsDuring, IsExpired) {
-        return this.http.get(window.location.origin + '/DealsHall/GetContractLimitedTender',
+    GetContractLimitedTender(RegionGroupCode, RegionCodes: any[], SubCostCenterCodes: any[], CostCenterCodes: any[], IsDuring, IsExpired, pageNumber, pageSize, SortModelList, FilterModelList) {
+        return this.http.post(window.location.origin + '/DealsHall/GetContractLimitedTender',
             {
                 RegionGroupCode,
                 RegionCodes,
                 SubCostCenterCodes,
                 CostCenterCodes,
                 IsDuring,
-                IsExpired
+                IsExpired,
+                pageNumber,
+                pageSize,
+                SortModelList,
+                FilterModelList
             });
     }
-    GetContractAuction(RegionGroupCode, RegionCodes, SubCostCenterCodes, CostCenterCodes, IsDuring, IsExpired) {
-        return this.http.get(window.location.origin + '/DealsHall/GetContractAuction',
+    GetContractAuction(RegionGroupCode,
+         RegionCodes,
+          SubCostCenterCodes,
+           CostCenterCodes,
+            IsDuring, 
+            IsExpired,
+             pageNumber, 
+             pageSize,
+              SortModelList, 
+              FilterModelList) {
+        return this.http.post(window.location.origin + '/DealsHall/GetContractAuction',
             {
                 RegionGroupCode,
                 RegionCodes,
                 SubCostCenterCodes,
                 CostCenterCodes,
                 IsDuring,
-                IsExpired
+                IsExpired,
+                pageNumber,
+                pageSize,
+                SortModelList,
+                FilterModelList
             });
     }
-    GetContractInquiry(RegionGroupCode, RegionCodes, SubCostCenterCodes, CostCenterCodes, IsDuring, IsExpired) {
-        return this.http.get(window.location.origin + '/DealsHall/GetContractInquiry',
+    GetContractInquiry(RegionGroupCode, RegionCodes, SubCostCenterCodes, CostCenterCodes, IsDuring, IsExpired, pageNumber, pageSize, SortModelList, FilterModelList) {
+        return this.http.post(window.location.origin + '/DealsHall/GetContractInquiry',
             {
                 RegionGroupCode,
                 RegionCodes,
                 SubCostCenterCodes,
                 CostCenterCodes,
                 IsDuring,
-                IsExpired
+                IsExpired,
+                pageNumber,
+                pageSize,
+                SortModelList,
+                FilterModelList
             });
     }
-    GetContractPublicSale(RegionGroupCode, RegionCodes, SubCostCenterCodes, CostCenterCodes, IsDuring, IsExpired) {
-        return this.http.get(window.location.origin + '/DealsHall/GetContractPublicSale',
+    GetContractPublicSale(RegionGroupCode, RegionCodes, SubCostCenterCodes, CostCenterCodes, IsDuring, IsExpired, pageNumber, pageSize, SortModelList, FilterModelList) {
+        return this.http.post(window.location.origin + '/DealsHall/GetContractPublicSale',
             {
                 RegionGroupCode,
                 RegionCodes,
                 SubCostCenterCodes,
                 CostCenterCodes,
                 IsDuring,
-                IsExpired
+                IsExpired,
+                pageNumber,
+                pageSize,
+                SortModelList,
+                FilterModelList
             });
     }
     GetSpecialRegionList(RegionGroupCode) {
@@ -127,6 +156,11 @@ export class DealsHallService {
     CheckAdvertisingExpireDate(InquiryID) {
         return this.http.get(window.location.origin + '/DealsHall/CheckAdvertisingExpireDate', {
             InquiryID
+        });
+    }
+    CancelReceiveElectronicDocs(ProposalID) {
+        return this.http.get(window.location.origin + '/DealsHall/CancelReceiveElectronicDocs', {
+            ProposalID
         });
     }
 }

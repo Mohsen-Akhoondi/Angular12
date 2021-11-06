@@ -4,7 +4,6 @@ import * as moment from 'jalali-moment';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { FinYearService } from 'src/app/Services/BaseService/FinYearService';
 import { forkJoin, of } from 'rxjs';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
@@ -25,6 +24,7 @@ import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { GridOptions } from 'ag-grid-community';
 declare var jquery: any;
 declare var $: any;
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 
 @Component({
   selector: 'app-contract-pay-item-estimate-page',
@@ -527,7 +527,7 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: this.DisplayControlls,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: {
           IsFloat: true,
         },
@@ -547,7 +547,7 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: this.DisplayControlls,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: {
           IsFloat: true,
         },
@@ -567,7 +567,7 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: this.DisplayControlls,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: {
           IsFloat: true,
         },
@@ -587,7 +587,7 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: this.DisplayControlls,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: {
           IsFloat: true,
         },
@@ -607,7 +607,7 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: this.DisplayControlls,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: {
           IsFloat: true,
         },
@@ -627,7 +627,7 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: this.DisplayControlls,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: {
           IsFloat: true,
         },
@@ -661,7 +661,7 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: this.DisplayControlls,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: {
           IsFloat: true,
         },
@@ -800,28 +800,10 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
       this.ContractSubLetter = this.ContractDetails.LetterNo + ' - ' + this.ContractDetails.Subject;
       this.Note = this.ContractSubLetter;
       this.ContractPayNo = res[1];
-      // this.ContractPayTechnicalCode = this.ContractDetails.ContractCode * 10000 + res[1];
       this.ContractPayStartDate = this.ContractDetails.FromContractDateString;
       this.ContractPayEndDate = this.ContractDetails.ToContractDateString;
       this.CanDateChange = false;
       this.ContractPayDate = res[3];
-      // this.contractpaydetail.GetContractOrder(this.PopupParam.SelectedContractID,
-      //   this.ContractPayNo, '', null, 1, true).subscribe(ress => {
-      //     if (ress && ress[0]) {
-      //       this.ContractPayDate = ress[0].ContractPayDate;
-      //       ress.forEach(item => {
-      //         item.ContractOrderEstimateList = [];
-      //       });
-      //       this.ContractPayItemList = ress;
-
-      //       let SumFinalItemAmount = 0;
-      //       this.ContractPayItemList.forEach(node => {
-      //         SumFinalItemAmount = SumFinalItemAmount + node.AmountCOEF;
-      //       });
-      //       this.SumFinalItemAmount = SumFinalItemAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-      //     }
-      //   }
-      //   );
       this.IsDown = true;
     });
 
@@ -844,10 +826,10 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
     this.EditModeInit = true;
     this.IsFinYearDisable = true;
     this.IsDisableWorkflow = !this.PopupParam.IsViewable ? false : true; // RFC 52262
+    this.RegionCode = this.PopupParam.RegionCode;
     if (!this.PopupParam.IsViewable) { // مشاهده درخواست پرداخت نباشد
       this.CurrWorkFlow = this.PopupParam.CurrWorkFlow;
       this.WorkFlowID = this.PopupParam.WorkFlowID;
-      this.RegionCode = this.PopupParam.RegionCode;
       this.ReadyToConfirm = this.PopupParam.ReadyToConfirm;
       if (this.WorkFlowID) {
         this.HaveWorkFlow = true;
@@ -999,14 +981,6 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
     if (this.PopupParam.Mode === 'EditMode') {
       this.ContractPayItemList = [];
       this.beforeProductID = null;
-      // if (this.ContractAgentParams.selectedObject !== 1) { RFC 53697
-      //   this.ISEstimateGridEditable = false;
-      //   this.dgCPEHeight = 90;
-      // } else {
-      //   this.ISEstimateGridEditable = true;
-      //   this.dgCPEHeight = 90;
-      // }
-
       this.ngOnInit();
     }
   }
@@ -1019,7 +993,7 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
         this.BtnClickedName = 'IsDateChange';
       } else {
         this.contractpaydetail.GetContractOrder(this.PopupParam.SelectedContractID,
-          this.ContractPayNo, ADate.MDate, null, 1, true).subscribe(
+          this.ContractPayNo, ADate.MDate, null, 1, true,this.ContractOperationId).subscribe(
             ress => {
               ress.forEach(item => {
                 item.ContractOrderEstimateList = [];
@@ -1050,7 +1024,7 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
   }
   DateChangeGetContractOrder() {
     this.contractpaydetail.GetContractOrder(this.PopupParam.SelectedContractID,
-      this.ContractPayNo, this.ContractPayDate, null, 1, true).subscribe(
+      this.ContractPayNo, this.ContractPayDate, null, 1, true,this.ContractOperationId).subscribe(
         ress => {
           ress.forEach(item => {
             item.ContractOrderEstimateList = [];
@@ -1168,7 +1142,7 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
         this.ContractPayDate,
         this.ProductIDs,
         1,
-        false);
+        false,this.ContractOperationId);
 
 
     if (this.PopupParam.Mode === 'InsertMode') {
@@ -1576,7 +1550,7 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
       this.BtnClickedName !== 'IsDateChange' && this.BtnClickedName !== 'SaveBtnWithMessage' && ActionResult === 'YES') {
       this.Closed.emit(true);
     }
-    
+
     if (this.BtnClickedName === 'PriceListTopicNotFound' && ActionResult === 'YES') {
       if (this.selectedRow.data.PriceListNo !== null && this.selectedRow.data.PriceListNo !== '') {
         this.type = 'price-list-topic-dataentry-page';
@@ -1777,9 +1751,9 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
           ContractPayItemListDataList.forEach(item => {
             let Obj = this.Percent25PriceListPatterns.find(x => x.PriceListPatternID === item.PriceListPatternID && x.ProductID === node.data.ProductID);
             if (Obj) {
-            //  let Coef = item.FContractPayListDetailObject.Coef ? item.FContractPayListDetailObject.Coef : 1;
+              //  let Coef = item.FContractPayListDetailObject.Coef ? item.FContractPayListDetailObject.Coef : 1;
               item.FContractPayListDetailObject.Coef = item.FContractPayListDetailObject.Coef &&
-                                                       (this.ContractProposalCoef > item.FContractPayListDetailObject.Coef) ? this.ContractProposalCoef : item.FContractPayListDetailObject.Coef;
+                (this.ContractProposalCoef > item.FContractPayListDetailObject.Coef) ? this.ContractProposalCoef : item.FContractPayListDetailObject.Coef;
             }
           });
         }
@@ -1823,7 +1797,15 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
       // tslint:disable-next-line:max-line-length
       this.ContractStima.GetAllWithContractOrderItemID(this.PopupParam.selectedRow.LastContractOrderID).subscribe(ress => {
         if (ress) {
-          this.contractpaydetail.SaveContractPay(ContractPayObj, ContractPayItemList, !IsCheck).subscribe((res: any) => {
+          this.contractpaydetail.SaveContractPay(
+             ContractPayObj,
+             ContractPayItemList,
+             null,
+             false, 
+             !IsCheck, 
+             false,
+             this.ModuleCode,
+             null).subscribe((res: any) => {
             if (res.HasNotCapacity) {
               let Str = '';
               this.BtnClickedName = 'SaveBtnWithMessage';
@@ -1831,6 +1813,7 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
               res.PriceListPatterns.forEach(element => {
                 Str += ' - ' + element.PriceListTopicCode;
               });
+              // tslint:disable-next-line: max-line-length
               this.ShowMessageBoxWithYesNoBtn('مبلغ فهارس بهای' + '  ' + Str + ' بیشتر از  25 درصد مبلغ برآورد می باشد . آیا مایل به ادامه هستید ؟ ');
             } else {
               this.BtnClickedName = '';
@@ -2139,9 +2122,9 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
           ContractPayItemLists.forEach(item => {
             let Obj = this.Percent25PriceListPatterns.find(x => x.PriceListPatternID === item.PriceListPatternID && x.ProductID === node.data.ProductID);
             if (Obj) {
-            //  let Coef = item.FContractPayListDetailObject.Coef ? item.FContractPayListDetailObject.Coef : 1;
+              //  let Coef = item.FContractPayListDetailObject.Coef ? item.FContractPayListDetailObject.Coef : 1;
               item.FContractPayListDetailObject.Coef = item.FContractPayListDetailObject.Coef &&
-                                                       (this.ContractProposalCoef > item.FContractPayListDetailObject.Coef) ? this.ContractProposalCoef : item.FContractPayListDetailObject.Coef;
+                (this.ContractProposalCoef > item.FContractPayListDetailObject.Coef) ? this.ContractProposalCoef : item.FContractPayListDetailObject.Coef;
             }
           });
         }
@@ -2186,8 +2169,12 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
           this.contractpaydetail.UpdateContractPay(ContractPayObj,
             ContractPayItemList,
             this.ContractAgentParams.selectedObject,
-            2516,
-            !IsCheck
+            this.ModuleCode,
+            !IsCheck,
+            false,
+            null,
+            false,
+            null
           ).subscribe((res: any) => {
             if (res.HasNotCapacity) {
               let Str = '';
@@ -3400,7 +3387,8 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
             this.WorkflowObjectCode,
             this.ModuleViewTypeCode,
             this.OrginalModuleCode,
-            this.CartableUserID)
+            this.CartableUserID,
+            this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null)
             .subscribe(res => {
               this.ShowMessageBoxWithOkBtn('عدم تاييد درخواست انجام معامله با موفقيت انجام شد');
               this.ReadyToConfirm = 0;
@@ -3513,7 +3501,8 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
         this.WorkflowObjectCode,
         this.ModuleViewTypeCode,
         this.OrginalModuleCode,
-        this.CartableUserID).
+        this.CartableUserID,
+        this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).
         subscribe(res => {
           if (HasAlert) {
             this.ShowMessageBoxWithOkBtn('تاييد درخواست پرداخت با موفقيت انجام شد');
@@ -3523,7 +3512,7 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
           this.btnConfirmName = 'عدم تاييد';
           this.btnConfirmIcon = 'cancel';
           this.IsEditConfirm = false;
-          resolve(true);
+          resolve(res);
         },
           err => {
             if (err.error.Message.includes('|')) {
@@ -3578,12 +3567,11 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
     // tslint:disable-next-line:no-shadowed-variable
     const promise = new Promise((resolve, reject) => {
       this.DOConfirm(false, resolve);
-    }).then((IsDown) => {
+    }).then((IsDown: any) => {
       if (IsDown) {
         new Promise((StartedWFResolve, reject) => {
           this.SetStartedWFInfo(StartedWFResolve);
         }).then(() => {
-          //this.ObjectNo = this.PersonObject.IdentityNo;
           this.ObjectID = this.CostFactorID;
           this.Cartable.GetUserWorkFlow(this.WorkFlowID, 1)
             .subscribe(
@@ -3619,7 +3607,7 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
                       WorkflowTypeName: this.WorkflowTypeName,
                       WorkflowTypeCode: this.WorkflowTypeCode,
                       WorkflowObjectCode: this.WorkflowObjectCode,
-                      MinimumPosting: this.PopupParam.MinimumPosting,
+                      MinimumPosting: this.PopupParam.WorkFlowID ? this.PopupParam.MinimumPosting : IsDown.MinimumPosting,
                       OrginalModuleCode: this.ModuleCode,
                       CartableUserID: this.CartableUserID
                     };
@@ -3646,7 +3634,8 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
         this.WorkflowObjectCode,
         this.ModuleViewTypeCode,
         this.OrginalModuleCode,
-        this.CartableUserID).subscribe(res => {
+        this.CartableUserID,
+        this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).subscribe(res => {
           if (alert) {
             this.ShowMessageBoxWithOkBtn('عدم تاييد درخواس�� پرداخت با موفقيت انجام شد');
           }

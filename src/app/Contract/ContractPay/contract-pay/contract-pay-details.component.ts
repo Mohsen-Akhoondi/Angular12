@@ -4,7 +4,6 @@ import * as moment from 'jalali-moment';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { FinYearService } from 'src/app/Services/BaseService/FinYearService';
 import { forkJoin, of } from 'rxjs';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
@@ -15,12 +14,14 @@ import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { ContractEstimateService } from 'src/app/Services/ContractService/ContractEstimates/ContractEstimateService';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
+import { CommonService } from 'src/app/Services/CommonService/CommonService';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/lib/custom-checkbox.model';
 import { environment } from 'src/environments/environment';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 
 @Component({
   selector: 'app-contract-pay-details',
@@ -34,6 +35,8 @@ export class ContractPayDetailsComponent implements OnInit {
   @Output() Output: EventEmitter<boolean> = new EventEmitter<boolean>();
   IsEditTaxValue = true;
   MessageBoxResult = false;
+  ActorName = '';
+  PlaceActorName = '';
   columnDef1;
   defaultColDef1;
   rowData1: any;
@@ -65,7 +68,7 @@ export class ContractPayDetailsComponent implements OnInit {
   startTopPosition: number;
   ChangeDetection = false;
   ProductIDs = [];
-  ContractOperationId;
+  ContractOperationID;
   alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false };
   Excel_Header_Param: { colDef2: any };
   ParamObj;
@@ -74,7 +77,7 @@ export class ContractPayDetailsComponent implements OnInit {
   HaveDelete = false;
   EditModeInit = false;
   ArchiveBtnText;
-  GridBoxHeight = 68;
+  GridBoxHeight = 62;
   HaveLoadExcel = true;
   IsEditable = true;
   dgCPHeight = 90;
@@ -138,7 +141,7 @@ export class ContractPayDetailsComponent implements OnInit {
   sumContractPayItemAmountStr = '0';
   ShowWfButton = true;
   CustomCheckBoxConfig: CustomCheckBoxModel = new CustomCheckBoxModel();
-  IsConfirm = false;
+  IsConfirm = 0;
   ShowConfimChekBox = false;
   ContractPayPopupParam = {
     SelectedContractID: -1,
@@ -232,6 +235,90 @@ export class ContractPayDetailsComponent implements OnInit {
   MiladiMaxEndDate;
   MiladiMinStartDate;
   CanDateChange = false;
+  IsMultiInvoice = false;
+  ///////////////// بانک /////////////////
+  NgSelectBankParams = {
+    bindLabelProp: 'BankName',
+    bindValueProp: 'BankID',
+    placeholder: '',
+    MinWidth: '170px',
+    PageSize: 30,
+    PageCount: 0,
+    TotalItemCount: 0,
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: true,
+    IsDisabled: false,
+    Required: true,
+    type: 'Bank',
+    DropDownMinWidth: '300px',
+    AdvanceSearch: {
+      SearchLabel: 'جستجو:',
+      SearchItemDetails:
+        [{ HeaderCaption: 'شناسه', HeaderName: 'BankID', width: 65, MinTermLenght: 1, SearchOption: 'BankID' },
+        { HeaderCaption: 'کد بانک', HeaderName: 'BankCode', width: 45, MinTermLenght: 1, SearchOption: 'BankCode' },
+        { HeaderCaption: 'نام بانک', HeaderName: 'BankName', width: 63, MinTermLenght: 3, SearchOption: 'BankName' }],
+      SearchItemHeader:
+        [{ HeaderCaption: 'شناسه', width: 65, },
+        { HeaderCaption: 'کد بانک', width: 45, },
+        { HeaderCaption: 'نام بانک', width: 63, }],
+      HaveItemNo: true,
+      ItemNoWidth: 18
+    }
+  };
+  BankPageCount;
+  BankItems: any;
+  BankTotalItemCount;
+  EditableBankInf = false;
+
+  ///////////////// شعبه /////////////////
+  NgSelectBranchParams = {
+    bindLabelProp: 'BranchName',
+    bindValueProp: 'BranchID',
+    placeholder: '',
+    MinWidth: '170px',
+    PageSize: 30,
+    PageCount: 0,
+    TotalItemCount: 0,
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: true,
+    IsDisabled: false,
+    Required: true,
+    type: 'Branch',
+    DropDownMinWidth: '300px',
+    AdvanceSearch: {
+      SearchLabel: 'جستجو:',
+      SearchItemDetails:
+        [{ HeaderCaption: 'شناسه', HeaderName: 'BranchID', width: 65, MinTermLenght: 1, SearchOption: 'BranchID' },
+        { HeaderCaption: 'کد شعبه', HeaderName: 'CorporateCode', width: 45, MinTermLenght: 1, SearchOption: 'CorporateCode' },
+        { HeaderCaption: 'نام شعبه', HeaderName: 'BranchName', width: 63, MinTermLenght: 3, SearchOption: 'BranchName' }],
+      SearchItemHeader:
+        [{ HeaderCaption: 'شناسه', width: 65, },
+        { HeaderCaption: 'کد شعبه', width: 45, },
+        { HeaderCaption: 'نام شعبه', width: 63, }],
+      HaveItemNo: true,
+      ItemNoWidth: 18
+    }
+  };
+  BranchPageCount;
+  BranchItems: any;
+  BranchTotalItemCount;
+  AccNo;
+  CityID;
+  ShebaNo;
+  ActorBankAccID;
+  ContractorID: number;
+  IsCumulative = false;
+  IsContractorAgent: boolean = false;
+  IsAdminToolsModule: boolean;
+  IsEditableContractPayItemAmountCol = true;
+  IsEditableProductNameCol = true;
+  IsEditableProductTypeCol = true;
+  HaveModuleViewTypeSave = false;
+  EditItemAmount = true;
+  DisableForMultiInvoice = true; // 62513
+
   constructor(private router: Router,
     private contractpaydetail: ContractPayDetailsService,
     private FinYear: FinYearService,
@@ -243,7 +330,9 @@ export class ContractPayDetailsComponent implements OnInit {
     private ContractStima: ContractEstimateService,
     private FlowService: WorkflowService,
     private route: ActivatedRoute,
-    private CommonService: CommonServices,
+    private RefreshBankItems: RefreshServices,
+    private CommonServicee: CommonServices,
+    private Common: CommonService,
     private ProductRequest: ProductRequestService,
     private Report: ReportService,
     private ContractList: ContractListService
@@ -273,14 +362,26 @@ export class ContractPayDetailsComponent implements OnInit {
       if (this.PopupParam.ShowSendBtn === 'YES') {
         this.ShowWfButton = false;
       }
+      this.DisableForMultiInvoice = this.PopupParam.ModuleViewTypeCode === 100000 ? false : true;
     }
-    this.User.CheckAdmin().subscribe(res => {
-      this.IsAdmin = res;
+    forkJoin([
+      this.User.CheckAdmin(),
+      this.contractpaydetail.GetcostCenterActorName(
+        (this.PopupParam.SelectedCostFactorID ? this.PopupParam.SelectedCostFactorID : 0),
+        (this.PopupParam.SelectedContractID ? this.PopupParam.SelectedContractID : 0)),
+      this.contractpaydetail.GetSubCostCenterNameBycntractCostFactorID(
+        (this.PopupParam.SelectedCostFactorID ? this.PopupParam.SelectedCostFactorID : 0),
+        (this.PopupParam.SelectedContractID ? this.PopupParam.SelectedContractID : 0))
+    ]).subscribe(res => {
+      this.IsAdmin = res[0];
+      this.ActorName = res[1];
+      this.PlaceActorName = res[2];
     });
+
     this.CheckRegionWritable = this.PopupParam.IsReadOnly; // RFC 52262
     this.CostFactorID = this.PopupParam.SelectedCPCostFactorID;
     this.ContractTypeCode = this.PopupParam.ContractTypeCode;
-    this.ContractOperationId = this.PopupParam.ContractOperationID;
+    this.ContractOperationID = this.PopupParam.ContractOperationID;
     this.contractpaydetail.GetSumContractCoef(this.PopupParam.SelectedContractID).subscribe(
       res => {
         if (res) {
@@ -312,15 +413,36 @@ export class ContractPayDetailsComponent implements OnInit {
       this.MiladiMinStartDate = res.ShortStartDate;
       this.sumFinalAmountt = res.FinalAmount;
     });
+
     const promise = new Promise<void>((resolve, reject) => {
       this.contractpaydetail.GetIsVolumetric(this.PopupParam.SelectedContractID).subscribe(
         res => {
           this.IsVolumetric = res.IsVolumetric;
           this.IsTaxValue = res.IsTaxValue;
-          // if (this.IsVolumetric) {
-          //   this.NgSelectVSParams.bindValueProp = 'PriceID';
-          // }
-          this.ColumnDefinition();
+          this.IsCumulative = res.IsCumulative;
+          this.ColumnDefinition(res.IsMultiInvoice, res.IsCumulative);
+          this.IsMultiInvoice = res.IsMultiInvoice;
+          this.ContractorID = res.ContractorID;
+          this.Common.GetActorBankAccList(this.ContractorID).subscribe((ress: any[]) => {
+            if (ress && ress.length > 0) {
+              this.OpenBank();
+              this.NgSelectBankParams.selectedObject = ress[0].BankID;
+              this.OpenBranch();
+              this.NgSelectBranchParams.selectedObject = ress[0].BranchID;
+              this.ActorBankAccID = ress[0].ActorBankAccID;
+              this.AccNo = ress[0].AccNo;
+              this.CityID = ress[0].CityID;
+              this.ShebaNo = ress[0].ShebaNo;
+            } else {
+              this.NgSelectBankParams.selectedObject = null;
+              this.NgSelectBranchParams.selectedObject = null;
+              this.AccNo = null;
+              this.ActorBankAccID = null;
+              this.CityID = null;
+              this.ShebaNo = null;
+            }
+          });
+
           resolve();
         }
       );
@@ -336,679 +458,810 @@ export class ContractPayDetailsComponent implements OnInit {
     });
   }
 
-  ColumnDefinition() {
+  ColumnDefinition(IsMultiInvoice, IsCumulative) {
+    //  if (this.ContractTypeCode !== 27 && this.ContractTypeCode !== 28) {
 
-    if (this.ContractTypeCode !== 27 && this.ContractTypeCode !== 28) {
-      this.columnDef1 = [
-        {
-          headerName: 'ردیف',
-          field: 'ItemNo',
-          width: 70,
-          resizable: true
+    this.columnDef1 = [
+      {
+        headerName: 'ردیف',
+        field: 'ItemNo',
+        width: 70,
+        resizable: true
+      },
+      {
+        headerName: 'نوع درخواستی',
+        field: 'ProductTypeName',
+        cellEditorFramework: NgSelectCellEditorComponent,
+        cellEditorParams: {
+          HardCodeItems: this.ProductTypeList,
+          bindLabelProp: 'ProductTypeName',
+          bindValueProp: 'ProductTypeCode'
         },
-        {
-          headerName: 'نوع درخواستی',
-          field: 'ProductTypeName',
-          cellEditorFramework: NgSelectCellEditorComponent,
-          cellEditorParams: {
-            HardCodeItems: this.ProductTypeList,
-            bindLabelProp: 'ProductTypeName',
-            bindValueProp: 'ProductTypeCode'
-          },
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value.ProductTypeName;
-            } else {
-              return '';
-            }
-          },
-          valueSetter: (params) => {
-            if (params.newValue) {
-              if (params.newValue.ProductTypeName !== params.oldValue) {
-                params.data.ProductTypeName = params.newValue.ProductTypeName;
-                params.data.ProductTypeCode = params.newValue.ProductTypeCode;
-                params.data.ScaleName = null;
-                params.data.ProductID = null;
-                params.data.ProductCodeName = null;
-                return true;
-              }
-            } else {
-              params.data.ProductTypeName = null;
-              params.data.ProductTypeCode = null;
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.ProductTypeName;
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue) {
+            if (params.newValue.ProductTypeName !== params.oldValue) {
+              params.data.ProductTypeName = params.newValue.ProductTypeName;
+              params.data.ProductTypeCode = params.newValue.ProductTypeCode;
               params.data.ScaleName = null;
               params.data.ProductID = null;
               params.data.ProductCodeName = null;
-              return false;
-            }
-          },
-          editable: true,
-          width: 120,
-          resizable: true
-        },
-        {
-          headerName: 'کالا/خدمت',
-          field: 'ProductCodeName',
-          cellEditorFramework: NgSelectVirtualScrollComponent,
-          cellEditorParams: {
-            Params: this.NgSelectVSParams,
-            Items: [],
-            MoreFunc: this.FetchMoreProduct,
-            FetchByTerm: this.FetchProductByTerm,
-            RedioChangeFunc: this.RedioSelectedChange,
-            Owner: this
-          },
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value.ProductCodeName;
-
-            } else {
-              return '';
-            }
-          },
-          valueSetter: (params) => {
-            if (params.newValue && params.newValue.ProductCodeName) {
-              params.data.ProductCodeName = params.newValue.ProductCodeName;
-              params.data.ProductID = params.newValue.ProductID;
-              params.data.ScaleName = params.newValue.ScaleName;
-              params.data.PersianStartDate = params.newValue.PersianStartDate;
-              params.data.PersianEndDate = params.newValue.PersianEndDate;
-              params.data.ShortStartDate = params.newValue.ShortStartDate;
-              params.data.ShortEndDate = params.newValue.ShortEndDate;
-              if (params.newValue.IsVolumetric || this.IsVolumetric) {
-                params.data.IsTaxValue = this.IsTaxValue && params.newValue.IsTaxValue;
-                params.data.PriceID = params.newValue.PriceID;
-                // tslint:disable-next-line: max-line-length
-                params.data.ShortStartDate = this.ContractDetails.ShortStartDate ? this.ContractDetails.ShortStartDate : this.ContractDetails.FromContractDateString;
-                // tslint:disable-next-line: max-line-length
-                params.data.ShortEndDate = this.ContractDetails.ShortEndDate ? this.ContractDetails.ShortEndDate : this.ContractDetails.ToContractDateString;
-                // tslint:disable-next-line: max-line-length
-                params.data.PersianStartDate = this.ContractDetails.ShortStartDate ? this.ContractDetails.PersianStartDate : this.ContractDetails.PersianFromContractDateString;
-                // tslint:disable-next-line: max-line-length
-                params.data.PersianEndDate = this.ContractDetails.ShortEndDate ? this.ContractDetails.PersianEndDate : this.ContractDetails.PersianToContractDateString;
-                params.data.ContractPayItemUnitAmount = params.newValue.Price;
-              } else { // RFC 60706
-                params.data.Amount = params.newValue.Amount;
-                params.data.IsTaxValue = params.newValue.IsTaxValue;
-                params.data.Qty = params.newValue.Qty;
-                params.data.ContractPayItemUnitAmount = params.data.Amount;
-                params.data.FinalAmount = params.newValue.FinalAmount;
-                params.data.AmountCOEFPact = params.newValue.AmountCOEFPact;
-                params.data.BeforeAmount = params.newValue.BeforeAmount;
-                params.data.BeforeAmountCOEF = params.newValue.BeforeAmountCOEF;
-                params.data.BeforeQty = params.newValue.BeforeQty;
-                const ProgressPercent = params.newValue.ProgressPercent ? params.newValue.ProgressPercent : 0;
-                const PenaltyPercentage = params.newValue.PenaltyPercentage ? params.newValue.PenaltyPercentage : 0;
-                // tslint:disable-next-line:radix
-                params.data.DeductionAmount = (1 - parseInt(ProgressPercent)) * params.newValue.ContractPayItemAmountCOEF;
-                // tslint:disable-next-line:radix
-                params.data.PenaltyAmount = parseInt(PenaltyPercentage) * (params.newValue.ContractPayItemAmountCOEF - params.data.DeductionAmount);
-                // tslint:disable-next-line: radix
-                params.data.CumultiveAmount = parseInt(params.data.BeforeAmount) - parseInt(params.data.PenaltyAmount);
-                // tslint:disable-next-line: radix
-                params.data.CumultiveAmountCOEF = parseInt(params.data.DeductionAmount) - parseInt(params.data.PenaltyAmount);
-              }
-
-              if (params.data.IsTaxValue) {
-                // tslint:disable-next-line: radix
-                params.data.ContractPayItemAmountFinal = parseInt(params.data.ContractPayItemAmount) + parseInt(params.data.TaxValue);
-              } else {
-                // tslint:disable-next-line: radix
-                params.data.ContractPayItemAmountFinal = parseInt(params.data.ContractPayItemAmount);
-              }
-
-              this.EntityColumnDefinition(params.data.ProductID, params, null, true);
               return true;
-            } else {
-              params.data.ProductCodeName = '';
-              params.data.ProductID = null;
-              params.data.ScaleName = '';
-              return false;
             }
-          },
-          editable: true,
-          resizable: true,
-          width: 370,
-        },
-        {
-          headerName: 'تاریخ شروع',
-          field: 'PersianStartDate',
-          width: 100,
-          resizable: true,
-          editable: this.IsVolumetric,
-          cellEditorFramework: JalaliDatepickerComponent,
-          cellEditorParams: {
-            CurrShamsiDateValue: 'PersianEndDate',
-            DateFormat: 'YYYY/MM/DD',
-            WidthPC: 100,
-            AppendTo: '.for-append-date'
-          },
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value.SDate;
-            } else {
-              return '';
-            }
-          },
-          valueSetter: (params) => {
-            if (params.newValue && params.newValue.MDate) {
-              params.data.ShortStartDate = params.newValue.MDate;
-              params.data.PersianStartDate = params.newValue.SDate;
-              return true;
-            } else {
-              params.data.ShortStartDate = null;
-              params.data.PersianStartDate = '';
-              return false;
-            }
+          } else {
+            params.data.ProductTypeName = null;
+            params.data.ProductTypeCode = null;
+            params.data.ScaleName = null;
+            params.data.ProductID = null;
+            params.data.ProductCodeName = null;
+            return false;
           }
         },
-        {
-          headerName: 'تاریخ پایان',
-          field: 'PersianEndDate',
-          width: 100,
-          resizable: true,
-          editable: this.IsVolumetric,
-          cellEditorFramework: JalaliDatepickerComponent,
-          cellEditorParams: {
-            CurrShamsiDateValue: 'PersianEndDate',
-            DateFormat: 'YYYY/MM/DD',
-            WidthPC: 100,
-            AppendTo: '.for-append-date'
-          },
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value.SDate;
-            } else {
-              return '';
-            }
-          },
-          valueSetter: (params) => {
-            if (params.newValue && params.newValue.MDate) {
-              params.data.ShortEndDate = params.newValue.MDate;
-              params.data.PersianEndDate = params.newValue.SDate;
-              return true;
-            } else {
-              params.data.ShortEndDate = null;
-              params.data.PersianEndDate = '';
-              return false;
-            }
+        editable: this.IsEditableProductTypeCol,
+        width: 120,
+        resizable: true
+      },
+      {
+        headerName: 'کالا/خدمت',
+        field: 'ProductCodeName',
+        cellEditorFramework: NgSelectVirtualScrollComponent,
+        cellEditorParams: {
+          Params: this.NgSelectVSParams,
+          Items: [],
+          MoreFunc: this.FetchMoreProduct,
+          FetchByTerm: this.FetchProductByTerm,
+          RedioChangeFunc: this.RedioSelectedChange,
+          Owner: this
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.ProductCodeName;
+
+          } else {
+            return '';
           }
         },
-        {
-          headerName: 'واحد',
-          field: 'ScaleName',
-          width: 100,
-          HaveThousand: true,
-          resizable: true
-        },
-        {
-          headerName: 'تعداد برآورد',
-          field: 'Qty',
-          width: 100,
-          HaveThousand: true,
-          resizable: true
-        },
-        {
-          headerName: 'مبلغ واحد برآورد',
-          field: 'Amount',
-          HaveThousand: true,
-          width: 150,
-          resizable: true,
-        },
-        {
-          headerName: 'مبلغ برآورد',
-          field: 'FinalAmount',
-          width: 150,
-          HaveThousand: true,
-          resizable: true
-        },
-        {
-          headerName: 'مبلغ برآورد با ضرایب',
-          field: 'AmountCOEFPact',
-          width: 150,
-          HaveThousand: true,
-          resizable: true
-        },
-        {
-          headerName: 'تعداد قبلی',
-          field: 'BeforeQty',
-          width: 100,
-          HaveThousand: true,
-          resizable: true
-        },
-        {
-          headerName: 'مبلغ قبلی',
-          field: 'BeforeAmount',
-          width: 150,
-          HaveThousand: true,
-          resizable: true
-        },
-        {
-          headerName: 'تعداد فعلی',
-          field: 'ContractPayItemQty',
-          width: 150,
-          resizable: true,
-          editable: this.DisplayControlls,
-          cellEditorParams: { IsFloat: true, },
-          HaveThousand: true,
-          cellEditorFramework: NumberFieldEditableComponent,
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value;
-            } else {
-              return '';
-            }
-          },
-        },
-        {
-          headerName: 'مبلغ واحد فعلی',
-          field: 'ContractPayItemUnitAmount',
-          width: 150,
-          resizable: true,
-          editable: this.PopupParam.ModuleViewTypeCode === 100000 ? true : false,
-          HaveThousand: true,
-          cellEditorFramework: NumberFieldEditableComponent,
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value;
-            } else {
-              return '';
-            }
-          },
-        },
-        {
-          headerName: 'مبلغ فعلی',
-          field: 'ContractPayItemAmount',
-          width: 150,
-          resizable: true,
-          editable: true,
-          HaveThousand: true,
-          cellEditorFramework: NumberFieldEditableComponent,
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value;
-            } else {
-              return '';
-            }
-          },
-        },
-        {
-          headerName: 'مبلغ فعلی با ضرایب',
-          field: 'ContractPayItemAmountCOEF',
-          width: 150,
-          resizable: true,
-          HaveThousand: true,
-          cellEditorFramework: NumberFieldEditableComponent,
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value;
-            } else {
-              return '';
-            }
-          },
-        },
-        {
-          headerName: 'ارزش افزوده',
-          field: 'TaxValue',
-          width: 150,
-          resizable: true,
-          editable: () => {
-            if (this.IsEditTaxValue) {
-              return true;
-            } else {
-              return false;
-            }
-          },
-          HaveThousand: true,
-          cellEditorFramework: NumberFieldEditableComponent,
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value;
-            } else {
-              return '';
-            }
-          },
-        },
-        {
-          headerName: 'مبلغ نهایی',
-          field: 'ContractPayItemAmountFinal',
-          width: 150,
-          resizable: true,
-          editable: false,
-          HaveThousand: true,
-          cellEditorFramework: NumberFieldEditableComponent,
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value;
-            } else {
-              return '';
-            }
-          },
-        },
-        {
-          headerName: 'مبلغ تجمیعی',
-          field: 'CumultiveAmount',
-          width: 150,
-          HaveThousand: true,
-          resizable: true,
-        },
-        {
-          headerName: 'مبلغ قبلی با ضرایب',
-          field: 'BeforeAmountCOEF',
-          width: 150,
-          HaveThousand: true,
-          resizable: true
-        },
-        {
-          headerName: 'مبلغ تجمیعی با ضرایب',
-          field: 'CumultiveAmountCOEF',
-          width: 150,
-          HaveThousand: true,
-          resizable: true,
-        },
-        {
-          headerName: 'درصد پیشرفت',
-          field: 'ProgressPercent',
-          width: 100,
-          resizable: true,
-          editable: this.DisplayControlls,
-          HaveThousand: false,
-          cellEditorFramework: NumberFieldEditableComponent,
-          cellEditorParams: { IsFloat: true, MaxLength: 4, FloatMaxLength: 2 },
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value;
-            } else {
-              return '';
-            }
-          },
-        },
-        {
-          headerName: 'مبلغ کسر کار',
-          field: 'DeductionAmount',
-          width: 100,
-          resizable: true,
-          HaveThousand: true,
-        },
-        {
-          headerName: 'درصد جریمه',
-          field: 'PenaltyPercentage',
-          width: 90,
-          resizable: true,
-          editable: this.DisplayControlls,
-          HaveThousand: false,
-          cellEditorFramework: NumberFieldEditableComponent,
-          cellEditorParams: { IsFloat: true, MaxLength: 4, FloatMaxLength: 2 },
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value;
-            } else {
-              return '';
-            }
-          },
-        },
-        {
-          headerName: 'مبلغ جریمه',
-          field: 'PenaltyAmount',
-          width: 150,
-          resizable: true,
-          editable: this.DisplayControlls,
-          HaveThousand: true,
-          cellEditorFramework: NumberFieldEditableComponent,
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value;
-            } else {
-              return '';
-            }
-          },
-        },
-      ];
-    }
-
-    if (this.ContractTypeCode === 27 || this.ContractTypeCode === 28) {
-      this.columnDef1 = [
-        {
-          headerName: 'ردیف',
-          field: 'ItemNo',
-          width: 70,
-          resizable: true
-        },
-        {
-          headerName: 'نوع درخواستی',
-          field: 'ProductTypeName',
-          cellEditorFramework: NgSelectCellEditorComponent,
-          cellEditorParams: {
-            HardCodeItems: this.ProductTypeList,
-            bindLabelProp: 'ProductTypeName',
-            bindValueProp: 'ProductTypeCode'
-          },
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value.ProductTypeName;
-            } else {
-              return '';
-            }
-          },
-          valueSetter: (params) => {
-            if (params.newValue) {
-              if (params.newValue.ProductTypeName !== params.oldValue) {
-                params.data.ProductTypeName = params.newValue.ProductTypeName;
-                params.data.ProductTypeCode = params.newValue.ProductTypeCode;
-                params.data.ScaleName = null;
-                params.data.ProductID = null;
-                params.data.ProductCodeName = null;
-                return true;
-              }
-            } else {
-              params.data.ProductTypeName = null;
-              params.data.ProductTypeCode = null;
-              params.data.ScaleName = null;
-              params.data.ProductID = null;
-              params.data.ProductCodeName = null;
-              return false;
-            }
-          },
-          editable: true,
-          width: 120,
-          resizable: true
-        },
-        {
-          headerName: 'کالا/خدمت',
-          field: 'ProductCodeName',
-          cellEditorFramework: NgSelectVirtualScrollComponent,
-          cellEditorParams: {
-            Params: this.NgSelectVSParams,
-            Items: [],
-            MoreFunc: this.FetchMoreProduct,
-            FetchByTerm: this.FetchProductByTerm,
-            RedioChangeFunc: this.RedioSelectedChange,
-            Owner: this
-          },
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value.ProductCodeName;
-
-            } else {
-              return '';
-            }
-          },
-          valueSetter: (params) => {
-            if (params.newValue && params.newValue.ProductCodeName) {
-              params.data.ProductCodeName = params.newValue.ProductCodeName;
-              params.data.ProductID = params.newValue.ProductID;
-              params.data.ScaleName = params.newValue.ScaleName;
-              params.data.PersianStartDate = params.newValue.PersianStartDate;
-              params.data.PersianEndDate = params.newValue.PersianEndDate;
-              params.data.ShortStartDate = params.newValue.ShortStartDate;
-              params.data.ShortEndDate = params.newValue.ShortEndDate;
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.ProductCodeName) {
+            params.data.ProductCodeName = params.newValue.ProductCodeName;
+            params.data.ProductID = params.newValue.ProductID;
+            params.data.ScaleName = params.newValue.ScaleName;
+            params.data.PersianStartDate = params.newValue.PersianStartDate;
+            params.data.PersianEndDate = params.newValue.PersianEndDate;
+            params.data.ShortStartDate = params.newValue.ShortStartDate;
+            params.data.ShortEndDate = params.newValue.ShortEndDate;
+            if (params.newValue.IsVolumetric || this.IsVolumetric) {
+              params.data.IsTaxValue = this.IsTaxValue && params.newValue.IsTaxValue;
+              params.data.PriceID = params.newValue.PriceID;
+              // tslint:disable-next-line: max-line-length
+              params.data.ShortStartDate = this.ContractDetails.ShortStartDate ? this.ContractDetails.ShortStartDate : this.ContractDetails.FromContractDateString;
+              // tslint:disable-next-line: max-line-length
+              params.data.ShortEndDate = this.ContractDetails.ShortEndDate ? this.ContractDetails.ShortEndDate : this.ContractDetails.ToContractDateString;
+              // tslint:disable-next-line: max-line-length
+              params.data.PersianStartDate = this.ContractDetails.ShortStartDate ? this.ContractDetails.PersianStartDate : this.ContractDetails.PersianFromContractDateString;
+              // tslint:disable-next-line: max-line-length
+              params.data.PersianEndDate = this.ContractDetails.ShortEndDate ? this.ContractDetails.PersianEndDate : this.ContractDetails.PersianToContractDateString;
+              params.data.ContractPayItemUnitAmount = params.newValue.Price;
+            } else { // RFC 60706
+              params.data.Amount = params.newValue.Amount;
+              params.data.IsTaxValue = params.newValue.IsTaxValue;
               params.data.Qty = params.newValue.Qty;
-              params.data.BeforeQty = params.newValue.BeforeQty;
-              if (params.newValue.IsVolumetric) {
-                params.data.Amount = params.newValue.Price;
-              } else {
-                params.data.Amount = params.newValue.Amount;
-              }
-
               params.data.ContractPayItemUnitAmount = params.data.Amount;
-              if (params.newValue.IsTaxValue) {
-                // tslint:disable-next-line: radix
-                params.data.ContractPayItemAmountFinal = parseInt(params.data.ContractPayItemAmount) + parseInt(params.data.TaxValue);
-              } else {
-                params.data.ContractPayItemAmountFinal = parseInt(params.data.ContractPayItemAmount);
-              }
               params.data.FinalAmount = params.newValue.FinalAmount;
               params.data.AmountCOEFPact = params.newValue.AmountCOEFPact;
               params.data.BeforeAmount = params.newValue.BeforeAmount;
               params.data.BeforeAmountCOEF = params.newValue.BeforeAmountCOEF;
-              params.data.IsTaxValue = params.newValue.IsTaxValue;
+              params.data.BeforeQty = params.newValue.BeforeQty;
               const ProgressPercent = params.newValue.ProgressPercent ? params.newValue.ProgressPercent : 0;
               const PenaltyPercentage = params.newValue.PenaltyPercentage ? params.newValue.PenaltyPercentage : 0;
               // tslint:disable-next-line:radix
               params.data.DeductionAmount = (1 - parseInt(ProgressPercent)) * params.newValue.ContractPayItemAmountCOEF;
               // tslint:disable-next-line:radix
-              params.data.PenaltyAmount = parseInt(PenaltyPercentage) * (parseInt(params.newValue.ContractPayItemAmountCOEF) - parseInt(params.data.DeductionAmount));
-              params.data.CumultiveAmount = parseInt(params.data.ContractPayItemAmount) + parseInt(params.data.BeforeAmount) - params.data.PenaltyAmount;
-              params.data.CumultiveAmountCOEF = parseInt(params.newValue.BeforeAmountCOEF);
-              this.EntityColumnDefinition(params.data.ProductID, params, null, true);
-              return true;
-            } else {
-              params.data.ProductCodeName = '';
-              params.data.ProductID = null;
-              params.data.ScaleName = '';
-              return false;
+              params.data.PenaltyAmount = parseInt(PenaltyPercentage) * (params.newValue.ContractPayItemAmountCOEF - params.data.DeductionAmount);
+              // tslint:disable-next-line: radix
+              params.data.CumultiveAmount = parseInt(params.data.BeforeAmount) - parseInt(params.data.PenaltyAmount);
+              // tslint:disable-next-line: radix
+              params.data.CumultiveAmountCOEF = parseInt(params.data.DeductionAmount) - parseInt(params.data.PenaltyAmount);
             }
-          },
-          editable: true,
-          resizable: true,
-          width: 370,
-        },
-        {
-          headerName: 'تاریخ شروع',
-          field: 'PersianStartDate',
-          width: 100,
-          resizable: true,
-          editable: this.DisplayControlls,
-          cellEditorFramework: JalaliDatepickerComponent,
-          cellEditorParams: {
-            CurrShamsiDateValue: 'PersianEndDate',
-            DateFormat: 'YYYY/MM/DD',
-            WidthPC: 100,
-            AppendTo: '.for-append-date'
-          },
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value.SDate;
+
+            if (params.data.IsTaxValue) {
+              // tslint:disable-next-line: radix
+              params.data.ContractPayItemAmountFinal = parseInt(params.data.ContractPayItemAmount) + parseInt(params.data.TaxValue);
             } else {
-              return '';
+              // tslint:disable-next-line: radix
+              params.data.ContractPayItemAmountFinal = parseInt(params.data.ContractPayItemAmount);
             }
-          },
-          valueSetter: (params) => {
-            if (params.newValue && params.newValue.MDate) {
-              params.data.ShortStartDate = params.newValue.MDate;
-              params.data.PersianStartDate = params.newValue.SDate;
-              return true;
-            } else {
-              params.data.ShortStartDate = null;
-              params.data.PersianStartDate = '';
-              return false;
-            }
+
+            this.EntityColumnDefinition(params.data.ProductID, params, null, true);
+            return true;
+          } else {
+            params.data.ProductCodeName = '';
+            params.data.ProductID = null;
+            params.data.ScaleName = '';
+            return false;
           }
         },
-        {
-          headerName: 'تاریخ پایان',
-          field: 'PersianEndDate',
-          width: 100,
-          resizable: true,
-          editable: this.DisplayControlls,
-          cellEditorFramework: JalaliDatepickerComponent,
-          cellEditorParams: {
-            CurrShamsiDateValue: 'PersianEndDate',
-            DateFormat: 'YYYY/MM/DD',
-            WidthPC: 100,
-            AppendTo: '.for-append-date'
-          },
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value.SDate;
-            } else {
-              return '';
-            }
-          },
-          valueSetter: (params) => {
-            if (params.newValue && params.newValue.MDate) {
-              params.data.ShortEndDate = params.newValue.MDate;
-              params.data.PersianEndDate = params.newValue.SDate;
-              return true;
-            } else {
-              params.data.ShortEndDate = null;
-              params.data.PersianEndDate = '';
-              return false;
-            }
+        editable: this.IsEditableProductNameCol,
+        resizable: true,
+        width: 370,
+      },
+      {
+        headerName: 'شماره فاکتور',
+        field: 'ContractPayItemTechCode',
+        editable: () => {
+          return (this.DisplayControlls && this.IsMultiInvoice);
+        },
+        hide: !IsMultiInvoice,
+        HaveThousand: false,
+        cellEditorFramework: NumberInputComponentComponent,
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value;
+          } else {
+            return '';
           }
         },
-        {
-          headerName: 'واحد',
-          field: 'ScaleName',
-          width: 100,
-          HaveThousand: true,
-          resizable: true
+        valueSetter: (params) => {
+          if (params.newValue) {
+            params.data.ContractPayItemTechCode = params.newValue;
+            return true;
+          } else {
+            params.data.ContractPayItemTechCode = '';
+            return false;
+          }
         },
-        {
-          headerName: 'وزن',
-          field: 'Weight',
-          width: 100,
-          HaveThousand: true,
-          resizable: true
+        width: 100,
+        resizable: true
+      },
+      {
+        headerName: 'تاریخ فاکتور',
+        field: 'PersianContractPayItemDate',
+        editable: () => {
+          return (this.DisplayControlls && this.IsMultiInvoice);
         },
-        {
-          headerName: 'مبلغ برآورد',
-          field: 'FinalAmount',
-          width: 150,
-          HaveThousand: true,
-          resizable: true
+        hide: !IsMultiInvoice,
+        width: 100,
+        resizable: true,
+        cellEditorFramework: JalaliDatepickerComponent,
+        cellEditorParams: {
+          CurrShamsiDateValue: 'PersianContractPayItemDate',
+          DateFormat: 'YYYY/MM/DD',
+          WidthPC: 100,
+          AppendTo: '.for-append-date'
         },
-        {
-          headerName: 'درصد پیشرفت',
-          field: 'ProgressPercent',
-          width: 150,
-          resizable: true,
-          editable: this.DisplayControlls,
-          HaveThousand: true,
-          cellEditorFramework: NumberFieldEditableComponent,
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value;
-            } else {
-              return '';
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.SDate;
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.MDate) {
+            params.data.ShortContractPayItemDate = params.newValue.MDate;
+            params.data.PersianContractPayItemDate = params.newValue.SDate;
+            return true;
+          } else {
+            params.data.ShortContractPayItemDate = null;
+            params.data.PersianContractPayItemDate = '';
+            return false;
+          }
+        }
+      },
+      {
+        headerName: 'تاریخ شروع',
+        field: 'PersianStartDate',
+        width: 100,
+        resizable: true,
+        editable: this.IsVolumetric,
+        cellEditorFramework: JalaliDatepickerComponent,
+        cellEditorParams: {
+          CurrShamsiDateValue: 'PersianEndDate',
+          DateFormat: 'YYYY/MM/DD',
+          WidthPC: 100,
+          AppendTo: '.for-append-date'
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.SDate;
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.MDate) {
+            params.data.ShortStartDate = params.newValue.MDate;
+            params.data.PersianStartDate = params.newValue.SDate;
+            return true;
+          } else {
+            params.data.ShortStartDate = null;
+            params.data.PersianStartDate = '';
+            return false;
+          }
+        }
+      },
+      {
+        headerName: 'تاریخ پایان',
+        field: 'PersianEndDate',
+        width: 100,
+        resizable: true,
+        editable: this.IsVolumetric,
+        cellEditorFramework: JalaliDatepickerComponent,
+        cellEditorParams: {
+          CurrShamsiDateValue: 'PersianEndDate',
+          DateFormat: 'YYYY/MM/DD',
+          WidthPC: 100,
+          AppendTo: '.for-append-date'
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.SDate;
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.MDate) {
+            params.data.ShortEndDate = params.newValue.MDate;
+            params.data.PersianEndDate = params.newValue.SDate;
+            return true;
+          } else {
+            params.data.ShortEndDate = null;
+            params.data.PersianEndDate = '';
+            return false;
+          }
+        }
+      },
+      {
+        headerName: 'واحد',
+        field: 'ScaleName',
+        width: 100,
+        HaveThousand: true,
+        resizable: true
+      },
+      {
+        headerName: 'تعداد برآورد',
+        field: 'Qty',
+        width: 100,
+        HaveThousand: true,
+        resizable: true
+      },
+      {
+        headerName: 'مبلغ واحد برآورد',
+        field: 'Amount',
+        HaveThousand: true,
+        width: 150,
+        resizable: true,
+      },
+      {
+        headerName: 'مبلغ برآورد',
+        field: 'FinalAmount',
+        width: 150,
+        HaveThousand: true,
+        resizable: true
+      },
+      // {
+      //   headerName: 'مبلغ برآورد با ضرایب',
+      //   field: 'AmountCOEFPact',
+      //   width: 150,
+      //   HaveThousand: true,
+      //   resizable: true
+      // },
+      {
+        headerName: 'تعداد قبلی',
+        field: 'BeforeQty',
+        width: 100,
+        HaveThousand: true,
+        resizable: true
+      },
+      {
+        headerName: 'مبلغ قبلی',
+        field: 'BeforeAmount',
+        width: 150,
+        HaveThousand: true,
+        resizable: true
+      },
+      {
+        headerName: 'مبلغ پیمانکار',
+        field: 'RequestedAmount',
+        width: 150,
+        resizable: true,
+        editable: this.IsContractorAgent || this.IsAdminToolsModule,
+        hide: !(this.RegionCode > 0 && this.RegionCode < 23),
+        cellEditorParams: { IsFloat: true, HaveNegative: true, },
+        HaveThousand: true,
+        cellEditorFramework: NumberInputComponentComponent,
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.RequestedAmount;
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue) {
+            if (params.newValue !== params.oldValue) {
+              params.data.RequestedAmount = params.newValue;
+              params.data.ContractPayItemAmount = params.newValue;
+              if (params.data.IsTaxValue) {
+                // tslint:disable-next-line: radix
+                params.data.TaxValue = Math.round(0.09 * parseInt(params.data.RequestedAmount));
+              } else {
+                params.data.TaxValue = 0;
+              }
+              return true;
             }
-          },
+          } else {
+            params.data.RequestedAmount = null;
+            params.data.ContractPayItemAmount = null;
+            params.data.IsTaxValue = null;
+            return false;
+          }
         },
-      ];
+      },
+      {
+        headerName: 'تعداد فعلی',
+        field: 'ContractPayItemQty',
+        width: 150,
+        resizable: true,
+        editable: this.DisplayControlls && !this.IsContractorAgent && this.EditItemAmount,
+        cellEditorParams: { IsFloat: true, },
+        HaveThousand: true,
+        cellEditorFramework: NumberInputComponentComponent,
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value;
+          } else {
+            return '';
+          }
+        },
+      },
+      {
+        headerName: 'مبلغ واحد فعلی',
+        field: 'ContractPayItemUnitAmount',
+        width: 150,
+        resizable: true,
+        editable: this.PopupParam.ModuleViewTypeCode === 100000 ? true : false,
+        HaveThousand: true,
+        cellEditorFramework: NumberInputComponentComponent,
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value;
+          } else {
+            return '';
+          }
+        },
+      },
+      {
+        headerName: 'مبلغ فعلی',
+        field: 'ContractPayItemAmount',
+        width: 150,
+        resizable: true,
+        editable: this.IsEditableContractPayItemAmountCol && !this.IsContractorAgent,
+        HaveThousand: true,
+        cellEditorFramework: NumberInputComponentComponent,
+        cellEditorParams: {
+          HaveNegative: true,
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value;
+          } else {
+            return '';
+          }
+        },
+      },
+      {
+        headerName: 'مبلغ فعلی با ضرایب',
+        field: 'ContractPayItemAmountCOEF',
+        width: 150,
+        resizable: true,
+        HaveThousand: true,
+        cellEditorFramework: NumberInputComponentComponent,
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value;
+          } else {
+            return '';
+          }
+        },
+      },
+      {
+        headerName: 'ارزش افزوده',
+        field: 'TaxValue',
+        width: 150,
+        resizable: true,
+        editable: () => {
+          if (this.IsEditTaxValue) {
+            return true;
+          } else {
+            return false;
+          }
+        },
+        HaveThousand: true,
+        cellEditorFramework: NumberInputComponentComponent,
+        cellEditorParams: {
+          HaveNegative: true,
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value;
+          } else {
+            return '';
+          }
+        },
+      },
+      {
+        headerName: 'مبلغ نهایی',
+        field: 'ContractPayItemAmountFinal',
+        width: 150,
+        resizable: true,
+        editable: false,
+        HaveThousand: true,
+        cellEditorFramework: NumberInputComponentComponent,
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value;
+          } else {
+            return '';
+          }
+        },
+      },
+      // {
+      //   headerName: 'مبلغ تجمیعی',
+      //   field: 'CumultiveAmount',
+      //   width: 150,
+      //   HaveThousand: true,
+      //   resizable: true,
+      // },
+      {
+        headerName: 'مبلغ قبلی با ضرایب',
+        field: 'BeforeAmountCOEF',
+        width: 150,
+        HaveThousand: true,
+        resizable: true
+      },
+      {
+        headerName: 'مبلغ تجمیعی با ضرایب',
+        field: 'CumultiveAmountCOEF',
+        width: 150,
+        HaveThousand: true,
+        resizable: true,
+      },
+      {
+        headerName: 'درصد پیشرفت',
+        field: 'ProgressPercent',
+        width: 100,
+        resizable: true,
+        editable: this.DisplayControlls,
+        HaveThousand: false,
+        cellEditorFramework: NumberInputComponentComponent,
+        cellEditorParams: { IsFloat: true, MaxLength: 4, FloatMaxLength: 2 },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value;
+          } else {
+            return '';
+          }
+        },
+      },
+      {
+        headerName: 'مبلغ کسر کار',
+        field: 'DeductionAmount',
+        width: 100,
+        resizable: true,
+        HaveThousand: true,
+      },
+      {
+        headerName: 'درصد جریمه',
+        field: 'PenaltyPercentage',
+        width: 90,
+        resizable: true,
+        editable: this.DisplayControlls,
+        HaveThousand: false,
+        cellEditorFramework: NumberInputComponentComponent,
+        cellEditorParams: { IsFloat: true, MaxLength: 4, FloatMaxLength: 2 },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value;
+          } else {
+            return '';
+          }
+        },
+      },
+      {
+        headerName: 'مبلغ جریمه',
+        field: 'PenaltyAmount',
+        width: 150,
+        resizable: true,
+        editable: this.DisplayControlls,
+        HaveThousand: true,
+        cellEditorFramework: NumberInputComponentComponent,
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value;
+          } else {
+            return '';
+          }
+        },
+      },
+    ];
+
+    const Item = {
+      headerName: 'مبلغ تجمیعی',
+      field: 'CumultiveAmount',
+      width: 150,
+      HaveThousand: true,
+      resizable: true,
+      editable: () => {
+        return (this.DisplayControlls && IsCumulative);
+      },
+    };
+
+    //  let Inedex = 20;
+    let Index = this.columnDef1.findIndex(x => x.field === 'BeforeAmountCOEF');
+    if (IsCumulative) {
+      Index = this.columnDef1.findIndex(x => x.field === 'ContractPayItemQty');
     }
+
+    this.columnDef1.splice(Index, 0, Item);
+    // }
+
+    // if (this.ContractTypeCode === 27 || this.ContractTypeCode === 28) {
+    //   this.columnDef1 = [
+    //     {
+    //       headerName: 'ردیف',
+    //       field: 'ItemNo',
+    //       width: 70,
+    //       resizable: true
+    //     },
+    //     {
+    //       headerName: 'نوع درخواستی',
+    //       field: 'ProductTypeName',
+    //       cellEditorFramework: NgSelectCellEditorComponent,
+    //       cellEditorParams: {
+    //         HardCodeItems: this.ProductTypeList,
+    //         bindLabelProp: 'ProductTypeName',
+    //         bindValueProp: 'ProductTypeCode'
+    //       },
+    //       cellRenderer: 'SeRender',
+    //       valueFormatter: function currencyFormatter(params) {
+    //         if (params.value) {
+    //           return params.value.ProductTypeName;
+    //         } else {
+    //           return '';
+    //         }
+    //       },
+    //       valueSetter: (params) => {
+    //         if (params.newValue) {
+    //           if (params.newValue.ProductTypeName !== params.oldValue) {
+    //             params.data.ProductTypeName = params.newValue.ProductTypeName;
+    //             params.data.ProductTypeCode = params.newValue.ProductTypeCode;
+    //             params.data.ScaleName = null;
+    //             params.data.ProductID = null;
+    //             params.data.ProductCodeName = null;
+    //             return true;
+    //           }
+    //         } else {
+    //           params.data.ProductTypeName = null;
+    //           params.data.ProductTypeCode = null;
+    //           params.data.ScaleName = null;
+    //           params.data.ProductID = null;
+    //           params.data.ProductCodeName = null;
+    //           return false;
+    //         }
+    //       },
+    //       editable: true,
+    //       width: 120,
+    //       resizable: true
+    //     },
+    //     {
+    //       headerName: 'کالا/خدمت',
+    //       field: 'ProductCodeName',
+    //       cellEditorFramework: NgSelectVirtualScrollComponent,
+    //       cellEditorParams: {
+    //         Params: this.NgSelectVSParams,
+    //         Items: [],
+    //         MoreFunc: this.FetchMoreProduct,
+    //         FetchByTerm: this.FetchProductByTerm,
+    //         RedioChangeFunc: this.RedioSelectedChange,
+    //         Owner: this
+    //       },
+    //       cellRenderer: 'SeRender',
+    //       valueFormatter: function currencyFormatter(params) {
+    //         if (params.value) {
+    //           return params.value.ProductCodeName;
+
+    //         } else {
+    //           return '';
+    //         }
+    //       },
+    //       valueSetter: (params) => {
+    //         if (params.newValue && params.newValue.ProductCodeName) {
+    //           params.data.ProductCodeName = params.newValue.ProductCodeName;
+    //           params.data.ProductID = params.newValue.ProductID;
+    //           params.data.ScaleName = params.newValue.ScaleName;
+    //           params.data.PersianStartDate = params.newValue.PersianStartDate;
+    //           params.data.PersianEndDate = params.newValue.PersianEndDate;
+    //           params.data.ShortStartDate = params.newValue.ShortStartDate;
+    //           params.data.ShortEndDate = params.newValue.ShortEndDate;
+    //           params.data.Qty = params.newValue.Qty;
+    //           params.data.BeforeQty = params.newValue.BeforeQty;
+    //           if (params.newValue.IsVolumetric) {
+    //             params.data.Amount = params.newValue.Price;
+    //           } else {
+    //             params.data.Amount = params.newValue.Amount;
+    //           }
+
+    //           params.data.ContractPayItemUnitAmount = params.data.Amount;
+    //           if (params.newValue.IsTaxValue) {
+    //             // tslint:disable-next-line: radix
+    //             params.data.ContractPayItemAmountFinal = parseInt(params.data.ContractPayItemAmount) + parseInt(params.data.TaxValue);
+    //           } else {
+    //             params.data.ContractPayItemAmountFinal = parseInt(params.data.ContractPayItemAmount);
+    //           }
+    //           params.data.FinalAmount = params.newValue.FinalAmount;
+    //           params.data.AmountCOEFPact = params.newValue.AmountCOEFPact;
+    //           params.data.BeforeAmount = params.newValue.BeforeAmount;
+    //           params.data.BeforeAmountCOEF = params.newValue.BeforeAmountCOEF;
+    //           params.data.IsTaxValue = params.newValue.IsTaxValue;
+    //           const ProgressPercent = params.newValue.ProgressPercent ? params.newValue.ProgressPercent : 0;
+    //           const PenaltyPercentage = params.newValue.PenaltyPercentage ? params.newValue.PenaltyPercentage : 0;
+    //           // tslint:disable-next-line:radix
+    //           params.data.DeductionAmount = (1 - parseInt(ProgressPercent)) * params.newValue.ContractPayItemAmountCOEF;
+    //           // tslint:disable-next-line:radix
+    //           params.data.PenaltyAmount = parseInt(PenaltyPercentage) * (parseInt(params.newValue.ContractPayItemAmountCOEF) - parseInt(params.data.DeductionAmount));
+    //           params.data.CumultiveAmount = parseInt(params.data.ContractPayItemAmount) + parseInt(params.data.BeforeAmount) - params.data.PenaltyAmount;
+    //           params.data.CumultiveAmountCOEF = parseInt(params.newValue.BeforeAmountCOEF);
+    //           this.EntityColumnDefinition(params.data.ProductID, params, null, true);
+    //           return true;
+    //         } else {
+    //           params.data.ProductCodeName = '';
+    //           params.data.ProductID = null;
+    //           params.data.ScaleName = '';
+    //           return false;
+    //         }
+    //       },
+    //       editable: true,
+    //       resizable: true,
+    //       width: 370,
+    //     },
+    //     {
+    //       headerName: 'تاریخ شروع',
+    //       field: 'PersianStartDate',
+    //       width: 100,
+    //       resizable: true,
+    //       editable: this.DisplayControlls,
+    //       cellEditorFramework: JalaliDatepickerComponent,
+    //       cellEditorParams: {
+    //         CurrShamsiDateValue: 'PersianEndDate',
+    //         DateFormat: 'YYYY/MM/DD',
+    //         WidthPC: 100,
+    //         AppendTo: '.for-append-date'
+    //       },
+    //       cellRenderer: 'SeRender',
+    //       valueFormatter: function currencyFormatter(params) {
+    //         if (params.value) {
+    //           return params.value.SDate;
+    //         } else {
+    //           return '';
+    //         }
+    //       },
+    //       valueSetter: (params) => {
+    //         if (params.newValue && params.newValue.MDate) {
+    //           params.data.ShortStartDate = params.newValue.MDate;
+    //           params.data.PersianStartDate = params.newValue.SDate;
+    //           return true;
+    //         } else {
+    //           params.data.ShortStartDate = null;
+    //           params.data.PersianStartDate = '';
+    //           return false;
+    //         }
+    //       }
+    //     },
+    //     {
+    //       headerName: 'تاریخ پایان',
+    //       field: 'PersianEndDate',
+    //       width: 100,
+    //       resizable: true,
+    //       editable: this.DisplayControlls,
+    //       cellEditorFramework: JalaliDatepickerComponent,
+    //       cellEditorParams: {
+    //         CurrShamsiDateValue: 'PersianEndDate',
+    //         DateFormat: 'YYYY/MM/DD',
+    //         WidthPC: 100,
+    //         AppendTo: '.for-append-date'
+    //       },
+    //       cellRenderer: 'SeRender',
+    //       valueFormatter: function currencyFormatter(params) {
+    //         if (params.value) {
+    //           return params.value.SDate;
+    //         } else {
+    //           return '';
+    //         }
+    //       },
+    //       valueSetter: (params) => {
+    //         if (params.newValue && params.newValue.MDate) {
+    //           params.data.ShortEndDate = params.newValue.MDate;
+    //           params.data.PersianEndDate = params.newValue.SDate;
+    //           return true;
+    //         } else {
+    //           params.data.ShortEndDate = null;
+    //           params.data.PersianEndDate = '';
+    //           return false;
+    //         }
+    //       }
+    //     },
+    //     {
+    //       headerName: 'واحد',
+    //       field: 'ScaleName',
+    //       width: 100,
+    //       HaveThousand: true,
+    //       resizable: true
+    //     },
+    //     {
+    //       headerName: 'وزن',
+    //       field: 'Weight',
+    //       width: 100,
+    //       HaveThousand: true,
+    //       resizable: true
+    //     },
+    //     {
+    //       headerName: 'مبلغ برآورد',
+    //       field: 'FinalAmount',
+    //       width: 150,
+    //       HaveThousand: true,
+    //       resizable: true
+    //     },
+    //     {
+    //       headerName: 'درصد پیشرفت',
+    //       field: 'ProgressPercent',
+    //       width: 150,
+    //       resizable: true,
+    //       editable: this.DisplayControlls,
+    //       HaveThousand: true,
+    //       cellEditorFramework: NumberFieldEditableComponent,
+    //       cellRenderer: 'SeRender',
+    //       valueFormatter: function currencyFormatter(params) {
+    //         if (params.value) {
+    //           return params.value;
+    //         } else {
+    //           return '';
+    //         }
+    //       },
+    //     },
+    //   ];
+    // }
+
   }
 
   InsertModeNgInit() {
     this.HaveConfirm = false;
     if (this.PopupParam) {
       this.RegionCode = this.PopupParam.RegionCode;
+      this.ModuleViewTypeCode = this.PopupParam.ModuleViewTypeCode; // 62257
     }
     this.User.GetModulOPByUser(2516).subscribe(res => {
       res.forEach(node => {
@@ -1025,7 +1278,6 @@ export class ContractPayDetailsComponent implements OnInit {
           default:
             break;
         }
-
       });
     });
 
@@ -1041,7 +1293,7 @@ export class ContractPayDetailsComponent implements OnInit {
       //  this.ContractPayTechnicalCode = this.ContractDetails.ContractCode * 10000 + res[1];
       this.ContractPayStartDate = this.ContractDetails.FromContractDateString;
       this.ContractPayEndDate = this.ContractDetails.ToContractDateString;
-      this.CanDateChange = false ;
+      this.CanDateChange = false;
       this.ContractPayDate = res[2];
       this.IsDown = true;
     });
@@ -1054,7 +1306,7 @@ export class ContractPayDetailsComponent implements OnInit {
       this.FinYearSet = res;
       //    this.selectedFinYearObj = res[0].FinYearCode;
     });
-    this.contractpaydetail.GetContractOperationName(this.ContractOperationId).subscribe(res => {
+    this.contractpaydetail.GetContractOperationName(this.ContractOperationID).subscribe(res => {
       this.ContractOperationName = res;
     });
     new Promise((StartedWFResolve, reject) => { // RFC 52262
@@ -1176,15 +1428,10 @@ export class ContractPayDetailsComponent implements OnInit {
       this.ContractPayDate = this.ContractDetails.ShortContractPayDate;
       this.selectedFinYearObj = this.ContractDetails.FinYearCode;
       this.selectedContractPayTypeObj = this.ContractDetails.ContractPayTypeCode;
-      this.ContractOperationId = this.ContractDetails.ContractOperationId;
+      this.ContractOperationID = this.ContractDetails.ContractOperationId;
       this.IsConfirm = this.ContractDetails.IsConfirm;
       this.ContractPayItemList = res.ContractPayItemViewList;
       this.ContractPayItemList.forEach(item => {
-        // tslint:disable-next-line:radix
-        // if (item.IsVolumetric) {
-        //   item.Amount = item.Price;
-        // }
-
         item.ProgressPercent = item.ProgressPercent ? item.ProgressPercent : 0;
         item.PenaltyPercentage = item.PenaltyPercentage ? item.PenaltyPercentage : 0;
         item.ContractPayItemAmountFinal = item.TaxValue ? parseInt(item.ContractPayItemAmount) + parseInt(item.TaxValue) : parseInt(item.ContractPayItemAmount);
@@ -1203,6 +1450,13 @@ export class ContractPayDetailsComponent implements OnInit {
         item.CumultiveAmountCOEF = parseInt(item.BeforeAmountCOEF) + parseInt(item.ContractPayItemAmountCOEF); //- item.DeductionAmount - item.PenaltyAmount;
         // tslint:disable-next-line:radix
         // item.UnitAmount = parseInt(item.ContractPayItemAmount) / parseInt(item.ContractPayItemQty);
+        if (item.IsTaxValue) { // 62898
+          if (item.TaxValue) { // 63220
+            item.TaxValue = item.TaxValue
+          } else {
+            item.TaxValue = Math.round(parseInt(item.ContractPayItemAmount) * 0.09);
+          }
+        }
         this.EntityColumnDefinition(null, null, item.EntityList, false);
         this.SetEntityDataInDataRow(item);
       });
@@ -1210,7 +1464,7 @@ export class ContractPayDetailsComponent implements OnInit {
         this.ContractPayTypeSet = ress;
       });
 
-      this.contractpaydetail.GetContractOperationName(this.ContractOperationId).subscribe(res1 => {
+      this.contractpaydetail.GetContractOperationName(this.ContractOperationID).subscribe(res1 => {
         this.ContractOperationName = res1;
       });
 
@@ -1257,7 +1511,8 @@ export class ContractPayDetailsComponent implements OnInit {
           ADate.MDate,
           null,
           0,
-          true)
+          true,
+          this.ContractOperationID)
           .subscribe(
             ress => {
               this.ContractPayItemList = ress;
@@ -1309,7 +1564,8 @@ export class ContractPayDetailsComponent implements OnInit {
       this.ContractPayDate,
       null,
       0,
-      true)
+      true,
+      this.ContractOperationID)
       .subscribe(
         ress => {
           this.ContractPayItemList = ress;
@@ -1361,12 +1617,12 @@ export class ContractPayDetailsComponent implements OnInit {
       return;
     }
 
-    if (!this.ContractPayTechnicalCode || this.ContractPayTechnicalCode == null) {
+    if (!this.IsMultiInvoice && (!this.ContractPayTechnicalCode || this.ContractPayTechnicalCode == null)) {
       this.ShowMessageBoxWithOkBtn('شماره صورت وضعیت نمی تواند خالی باشد');
       return;
     }
 
-    if (!this.selectedContractPayTypeObj || this.selectedContractPayTypeObj == null) {
+    if (this.ContractOperationID != 4 && (!this.selectedContractPayTypeObj || this.selectedContractPayTypeObj == null)) {
       this.ShowMessageBoxWithOkBtn('نوع درخواست پرداخت نمی تواند خالی باشد');
       return;
     }
@@ -1381,7 +1637,7 @@ export class ContractPayDetailsComponent implements OnInit {
       return;
     }
 
-    if (!this.ContractPayDate || this.ContractPayDate == null) {
+    if (!this.IsMultiInvoice && (!this.ContractPayDate || this.ContractPayDate == null)) {
       this.ShowMessageBoxWithOkBtn('تاریخ درخواست پرداخت نمی تواند خالی باشد');
       return;
     }
@@ -1441,7 +1697,8 @@ export class ContractPayDetailsComponent implements OnInit {
             node.data.ContractPayItemAmountCOEF = node.data.Qty ? (parseInt(node.data.AmountCOEFPact) / parseInt(node.data.Qty)) * parseFloat(node.data.ContractPayItemQty) : parseInt(node.data.AmountCOEFPact) * parseFloat(node.data.ContractPayItemQty);
             node.data.CumultiveAmountCOEF = parseInt(node.data.BeforeAmountCOEF) + parseInt(node.data.ContractPayItemAmountCOEF);
             if (node.data.IsTaxValue) {
-              node.data.TaxValue = parseInt(node.data.ContractPayItemAmount) * 0.09;
+              // tslint:disable-next-line: radix
+              node.data.TaxValue = Math.round(parseInt(node.data.ContractPayItemAmount) * 0.09);
               // tslint:disable-next-line: radix
               node.data.ContractPayItemAmountFinal = parseInt(node.data.ContractPayItemAmount) + parseInt(node.data.TaxValue);
             } else {
@@ -1473,18 +1730,24 @@ export class ContractPayDetailsComponent implements OnInit {
             parseInt(node.data.ContractPayItemAmount); // - parseInt(node.data.PenaltyAmount);
 
           if (node.data.IsTaxValue) {
-            node.data.TaxValue = 0.09 * parseInt(node.data.ContractPayItemAmount);
+            // tslint:disable-next-line: radix
+            node.data.TaxValue = Math.round(0.09 * parseInt(node.data.ContractPayItemAmount));
+            // tslint:disable-next-line: radix
             node.data.ContractPayItemAmountFinal = parseInt(node.data.ContractPayItemAmount) + parseInt(node.data.TaxValue);
           } else {
             node.data.TaxValue = 0;
             node.data.ContractPayItemAmountFinal = parseInt(node.data.ContractPayItemAmount);
           }
 
-          if (node.data.Qty && node.data.ContractPayItemQty && node.data.ContractPayItemQty > 0) {
-            node.data.ContractPayItemUnitAmount = parseInt(node.data.ContractPayItemAmount) / parseFloat(node.data.ContractPayItemQty);
-          } else {
-            node.data.ContractPayItemUnitAmount = parseInt(node.data.ContractPayItemAmount);
+          if (node.data.Qty) { //RFC 61913
+            if (node.data.ContractPayItemUnitAmount) {
+              // tslint:disable-next-line: radix
+              node.data.ContractPayItemQty = parseFloat(node.data.ContractPayItemAmount) / parseFloat(node.data.ContractPayItemUnitAmount);
+            } else {
+              node.data.ContractPayItemQty = parseFloat(node.data.ContractPayItemQty);
+            }
           }
+
           itemsToUpdate.push(node.data);
         }
       });
@@ -1494,14 +1757,12 @@ export class ContractPayDetailsComponent implements OnInit {
     if (event.colDef && event.colDef.field === 'TaxValue') {
       let TaxValue;
       let IsVolumetric;
-      this.contractpaydetail.GetContractOrder(this.PopupParam.SelectedContractID,
-        this.ContractPayNo,
+      this.contractpaydetail.GetContractOrderByProductID(this.PopupParam.SelectedContractID, // 62417
         this.ContractPayDate,
-        null,
-        0,
+        event.data.ProductID,
         true).subscribe(res => {
-          TaxValue = res ? res.find(x => x.ProductID === event.data.ProductID).TaxValue : '';
-          IsVolumetric = res ? res.find(x => x.ProductID === event.data.ProductID).IsVolumetric : '';
+          TaxValue = res ? res.TaxValue : '';
+          IsVolumetric = res ? res.IsVolumetric : '';
           itemsToUpdate = [];
           this.gridApi.forEachNode(node => {
             if (node.rowIndex === event.rowIndex) {
@@ -1644,8 +1905,59 @@ export class ContractPayDetailsComponent implements OnInit {
       });
       this.gridApi.updateRowData({ update: itemsToUpdate });
     }
-    //  }
-    // });
+
+    if (event.colDef && event.colDef.field === 'CumultiveAmount') {
+      itemsToUpdate = [];
+      this.gridApi.forEachNode(node => {
+        if (node.rowIndex === event.rowIndex) {
+
+          // tslint:disable-next-line:radix
+          node.data.ContractPayItemAmount = parseInt(node.data.CumultiveAmount) - parseInt(node.data.BeforeAmount);
+
+          if (node.data.IsTaxValue) {
+            // tslint:disable-next-line: radix
+            node.data.TaxValue = Math.round(0.09 * parseInt(node.data.ContractPayItemAmount));
+            // tslint:disable-next-line: radix
+            node.data.ContractPayItemAmountFinal = parseInt(node.data.ContractPayItemAmount) + parseInt(node.data.TaxValue);
+          } else {
+            node.data.TaxValue = 0;
+            node.data.ContractPayItemAmountFinal = parseInt(node.data.ContractPayItemAmount);
+          }
+
+          if (node.data.Qty) { //RFC 61913
+            if (node.data.ContractPayItemUnitAmount) {
+              // tslint:disable-next-line: radix
+              node.data.ContractPayItemQty = parseFloat(node.data.ContractPayItemAmount) / parseFloat(node.data.ContractPayItemUnitAmount);
+            } else {
+              node.data.ContractPayItemQty = parseFloat(node.data.ContractPayItemQty);
+            }
+          }
+          itemsToUpdate.push(node.data);
+        }
+      });
+      this.gridApi.updateRowData({ update: itemsToUpdate });
+    }
+
+
+    //--------
+    // if (event.colDef && event.colDef.field === 'RequestedAmount') {
+    //   itemsToUpdate = [];
+    //   this.gridApi.forEachNode(node => {
+    //     if (node.rowIndex === event.rowIndex) {
+    //       node.data.ContractPayItemAmount = node.data.RequestedAmount;
+
+    //       if (node.data.IsTaxValue) {
+    //         // tslint:disable-next-line: radix
+    //         node.data.TaxValue = Math.round(0.09 * parseInt(node.data.RequestedAmount));
+
+    //       } else {
+    //         node.data.TaxValue = 0;
+    //       }
+    //       itemsToUpdate.push(node.data);
+    //     }
+    //   });
+    //   this.gridApi.updateRowData({ update: itemsToUpdate });
+    // }
   }
 
   onContractPayItemGridReady(params: { api: any; }) {
@@ -1687,9 +1999,9 @@ export class ContractPayDetailsComponent implements OnInit {
       this.DateChangeGetContractOrder();
     }
     if (this.BtnClickedName === 'IsDateChange' && ActionResult === 'YES' &&
-    this.CanDateChange && this.ModuleCode === 2875) {
-    this.DateChangeGetContractOrder();
-  }
+      this.CanDateChange && this.ModuleCode === 2875) {
+      this.DateChangeGetContractOrder();
+    }
     if (this.BtnClickedName !== 'BtnConfirm' && this.BtnClickedName !== 'IsDateChange' &&
       ActionResult === 'YES') {
       this.Closed.emit(true);
@@ -1748,9 +2060,10 @@ export class ContractPayDetailsComponent implements OnInit {
         PenaltyAmount: node.data.PenaltyAmount,
         FinalAmount: node.data.FinalAmount,
         EntityTypeItemIDList: EntityTypeItemIDList,
+        ContractPayItemDate: node.data.ShortContractPayItemDate,
+        ContractPayItemTechCode: node.data.ContractPayItemTechCode,
+        RequestedAmount: node.data.RequestedAmount
       };
-      // tslint:disable-next-line:radix
-      // SumContractPayItemAmount += node.data.ContractPayItemAmount;
       ContractPayItemList.push(obj);
     });
 
@@ -1765,21 +2078,44 @@ export class ContractPayDetailsComponent implements OnInit {
       EndDate: this.ContractPayEndDate,
       ContractPayTypeCode: this.selectedContractPayTypeObj,
       Note: this.Note,
-      ContractPayTechnicalCode: this.ContractPayTechnicalCode,
-      ContractOperationId: this.ContractOperationId,
+      ContractPayTechnicalCode: (this.IsMultiInvoice) ? this.ContractPayNo : this.ContractPayTechnicalCode, // 62513
+      ContractOperationId: this.ContractOperationID,
       IsConfirm: 0,
     };
-    this.contractpaydetail.SaveContractPay(ContractPayObj, ContractPayItemList).subscribe(res => {
-      this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
-      this.ChangeDetection = false;
-      this.PopupParam.Mode = 'EditMode';
-      this.PopupParam.SelectedCPCostFactorID = res;
-      this.ngOnInit();
-    },
-      err => {
-        this.ChangeDetection = true;
-      }
-    );
+    const BankList = [];
+    const HaveBank = (this.NgSelectBankParams.selectedObject || this.NgSelectBankParams.selectedObject !== null) ? false : true;
+    if (this.NgSelectBankParams.selectedObject) {
+      const BankObj = {
+        ActorBankAccID: this.ActorBankAccID ? this.ActorBankAccID : -1,
+        ActorID: this.ContractorID,
+        BankID: this.NgSelectBankParams.selectedObject,
+        BranchID: this.NgSelectBranchParams.selectedObject,
+        AccNo: this.AccNo,
+        CityID: this.CityID,
+        ShebaNo: this.ShebaNo,
+      };
+      BankList.push(BankObj);
+    }
+
+    this.contractpaydetail.SaveContractPay(
+      ContractPayObj,
+      ContractPayItemList,
+      BankList,
+      HaveBank,
+      false,
+      true,
+      this.ModuleCode,
+      this.ModuleViewTypeCode).subscribe(res => {
+        this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
+        this.ChangeDetection = false;
+        this.PopupParam.Mode = 'EditMode';
+        this.PopupParam.SelectedCPCostFactorID = res;
+        this.ngOnInit();
+      },
+        err => {
+          this.ChangeDetection = true;
+        }
+      );
   }
 
   UpdateContractPay() {
@@ -1836,6 +2172,9 @@ export class ContractPayDetailsComponent implements OnInit {
         PenaltyAmount: node.data.PenaltyAmount,
         FinalAmount: node.data.FinalAmount,
         EntityTypeItemIDList: EntityTypeItemIDList,
+        ContractPayItemDate: node.data.ShortContractPayItemDate,
+        ContractPayItemTechCode: node.data.ContractPayItemTechCode,
+        RequestedAmount: node.data.RequestedAmount,
       };
       // tslint:disable-next-line:radix
       SumContractPayItemAmount += parseInt(node.data.ContractPayItemAmount);
@@ -1854,11 +2193,35 @@ export class ContractPayDetailsComponent implements OnInit {
       ContractPayTypeCode: this.selectedContractPayTypeObj,
       Note: this.Note,
       ContractPayTechnicalCode: this.ContractPayTechnicalCode,
-      ContractOperationId: this.ContractOperationId,
+      ContractOperationId: this.ContractOperationID,
       IsConfirm: this.IsConfirm, // هماهنگی با مهندس حسینی
     };
+    const BankList = [];
+    const HaveBank = (this.NgSelectBankParams.selectedObject || this.NgSelectBankParams.selectedObject !== null) ? false : true;
+    if (this.NgSelectBankParams.selectedObject) {
+      const BankObj = {
+        ActorBankAccID: this.ActorBankAccID ? this.ActorBankAccID : -1,
+        ActorID: this.ContractorID,
+        BankID: this.NgSelectBankParams.selectedObject,
+        BranchID: this.NgSelectBranchParams.selectedObject,
+        AccNo: this.AccNo,
+        CityID: this.CityID,
+        ShebaNo: this.ShebaNo,
+      };
+      BankList.push(BankObj);
+    }
 
-    this.contractpaydetail.UpdateContractPay(ContractPayObj, ContractPayItemList, -1, 2516).subscribe(res => {
+    this.contractpaydetail.UpdateContractPay(
+      ContractPayObj,
+      ContractPayItemList,
+      -1,
+      this.ModuleCode,
+      null,
+      true,
+      BankList,
+      HaveBank,
+      this.ModuleViewTypeCode
+    ).subscribe(res => {
       this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
       this.ChangeDetection = false;
       this.ngOnInit();
@@ -1889,7 +2252,7 @@ export class ContractPayDetailsComponent implements OnInit {
   ngOnChanges(changes): void {
 
     if (changes.PopupMaximized && !isUndefined(changes.PopupMaximized.currentValue)) {
-      this.GridBoxHeight = changes.PopupMaximized.currentValue ? 69 : 68;
+      this.GridBoxHeight = changes.PopupMaximized.currentValue ? 69 : 62;
     }
   }
 
@@ -1912,7 +2275,8 @@ export class ContractPayDetailsComponent implements OnInit {
             this.WorkflowObjectCode,
             this.ModuleViewTypeCode,
             this.ModuleCode,
-            this.CartableUserID)
+            this.CartableUserID,
+            this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null)
             .subscribe(res => {
               this.ShowMessageBoxWithOkBtn('عدم تاييد درخواست انجام معامله با موفقيت انجام شد');
               this.ReadyToConfirm = 0;
@@ -1988,16 +2352,19 @@ export class ContractPayDetailsComponent implements OnInit {
       this.IsEditable = true;
       this.IsEditConfirm = false;
     }
+
     switch (this.ModuleViewTypeCode) {
       case 1:
         this.IsEditable = true;
+        this.IsContractorAgent = (this.RegionCode >= 0 && this.RegionCode < 23) ? true : false;
         break;
       case 2:
-      case 5:
-        this.IsEditable = false;
+        this.IsEditableContractPayItemAmountCol = false;
+        this.IsEditableProductNameCol = false;
+        this.IsEditableProductTypeCol = false;
+        this.IsEditTaxValue = this.IsEditable = false;
         this.DisplayControlls = false;
-        this.ColumnDefinition();
-        this.ShowReportsSign = this.ModuleViewTypeCode === 5 ? true : false; // RFC 57083
+        this.ShowReportsSign = false; // RFC 57083
         break;
       case 3: // تامين اعتبار صورت وضعيت در سيستم مالي
         this.DisplayControlls = false;
@@ -2006,6 +2373,34 @@ export class ContractPayDetailsComponent implements OnInit {
         this.HaveConfirm = false;
         this.HaveAlertToFinance = true;
         this.GridBoxHeight = 62;
+        break;
+      case 5:
+        this.IsEditableContractPayItemAmountCol = false;
+        this.IsEditableProductNameCol = false;
+        this.IsEditableProductTypeCol = false;
+        this.IsEditable = false;
+        this.EditableBankInf = true; // 61719
+        this.DisplayControlls = false;
+        this.ShowReportsSign = true; // RFC 57083
+        this.IsEditTaxValue = this.RegionCode === 200 ? true : false;  // 62417
+        break;
+      case 6:
+        this.IsEditableProductNameCol = false;
+        this.IsEditableProductTypeCol = false;
+        this.IsEditable = false;
+        this.DisplayControlls = false;
+        this.ShowReportsSign = false; // RFC 57083
+        this.HaveModuleViewTypeSave = true;
+        break;
+      case 8:
+        this.IsEditable = true;
+        this.EditItemAmount = (this.RegionCode === 220 && this.PopupParam.Mode === 'EditMode') ? false : true; // 61809
+      case 7: // RFC 62332 اصلاح ارزش افزوده
+        this.IsEditableContractPayItemAmountCol = false;
+        this.IsEditableProductNameCol = false;
+        this.IsEditableProductTypeCol = this.IsEditable = false;
+        this.IsEditTaxValue = this.HaveModuleViewTypeSave = true;
+        this.DisplayControlls = this.ShowReportsSign = false;
         break;
       case 500000: // حالت فقط خواندنی
         this.DisplayControlls = false;
@@ -2017,10 +2412,14 @@ export class ContractPayDetailsComponent implements OnInit {
         break;
       case 100000:
         this.IsFinYearDisable = false;
+        this.IsAdminToolsModule = true;
+        this.IsEditTaxValue = true;  // 62417, 62641
         break;
       default:
         break;
     }
+
+    this.ColumnDefinition(this.IsMultiInvoice, this.IsCumulative);
     // }
   }
   DOConfirm(HasAlert = true, resolve = null) { // RFC 52262
@@ -2037,7 +2436,8 @@ export class ContractPayDetailsComponent implements OnInit {
         this.WorkflowObjectCode,
         this.ModuleViewTypeCode,
         this.ModuleCode,
-        this.CartableUserID).
+        this.CartableUserID,
+        this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).
         subscribe(res => {
           if (HasAlert) {
             this.ShowMessageBoxWithOkBtn('تاييد درخواست پرداخت با موفقيت انجام شد');
@@ -2047,7 +2447,7 @@ export class ContractPayDetailsComponent implements OnInit {
           this.btnConfirmName = 'عدم تاييد';
           this.btnConfirmIcon = 'cancel';
           this.IsEditConfirm = false;
-          resolve(true);
+          resolve(res);
         },
           err => {
             if (err.error.Message.includes('|')) {
@@ -2102,7 +2502,7 @@ export class ContractPayDetailsComponent implements OnInit {
     // tslint:disable-next-line:no-shadowed-variable
     const promise = new Promise((resolve, reject) => {
       this.DOConfirm(false, resolve);
-    }).then((IsDown) => {
+    }).then((IsDown: any) => {
       if (IsDown) {
         new Promise((StartedWFResolve, reject) => {
           this.SetStartedWFInfo(StartedWFResolve);
@@ -2118,7 +2518,7 @@ export class ContractPayDetailsComponent implements OnInit {
                     this.ShowMessageBoxWithOkBtn('باتوجه به اينکه نقش شما در اين گردش آخرين فعاليت مي باشدارسال شما به عنوان پايان کار در نظر گرفته مي شود');
                   } else {
                     res.forEach(element => {
-                      element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
+                      element.UserImage = this.CommonServicee._arrayBufferToBase64(element.UserImage);
                     });
                     this.type = 'work-flow-send';
                     this.startLeftPosition = 350;
@@ -2141,7 +2541,7 @@ export class ContractPayDetailsComponent implements OnInit {
                       WorkflowTypeName: this.WorkflowTypeName,
                       WorkflowTypeCode: this.WorkflowTypeCode,
                       WorkflowObjectCode: this.WorkflowObjectCode,
-                      MinimumPosting: this.PopupParam.MinimumPosting,
+                      MinimumPosting: this.PopupParam.WorkFlowID ? this.PopupParam.MinimumPosting : IsDown.MinimumPosting,
                       OrginalModuleCode: this.ModuleCode,
                       CartableUserID: this.CartableUserID
                     };
@@ -2168,7 +2568,8 @@ export class ContractPayDetailsComponent implements OnInit {
         this.WorkflowObjectCode,
         this.ModuleViewTypeCode,
         this.ModuleCode,
-        this.CartableUserID).subscribe(res => {
+        this.CartableUserID,
+        this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).subscribe(res => {
           if (alert) {
             this.ShowMessageBoxWithOkBtn('عدم تاييد برآورد اوليه با موفقيت انجام شد');
           }
@@ -2383,7 +2784,7 @@ export class ContractPayDetailsComponent implements OnInit {
                 this.IsDown = true;
                 if (res != null && res.length > 0) {
                   res.forEach(element => {
-                    element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
+                    element.UserImage = this.CommonServicee._arrayBufferToBase64(element.UserImage);
                   });
                   this.type = 'work-flow-send';
                   this.startLeftPosition = 350;
@@ -2529,7 +2930,8 @@ export class ContractPayDetailsComponent implements OnInit {
       this.ContractPayDate,
       this.ProductIDs,
       0,
-      false).subscribe(res => {
+      false,
+      this.ContractOperationID).subscribe(res => {
         res.forEach(element => {
           // if (element.IsVolumetric) {
           //   element.Amount = element.Price;
@@ -2638,8 +3040,7 @@ export class ContractPayDetailsComponent implements OnInit {
             PageCount: Math.ceil(res.TotalItemCount / 30)
           });
         });
-    }
-    else {
+    } else {
       event.Owner.contractpaydetail.GetContractOrderByPagination(
         event.SearchOption,
         event.Owner.RegionCode,
@@ -2781,5 +3182,106 @@ export class ContractPayDetailsComponent implements OnInit {
     this.sumContractPayItemAmountStr = sumContractPayItemAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     this.sumFinalAmountStr = sumFinalAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
-
+  OpenBank() {
+    const ResultList = [];
+    this.Common.GetBankPaging('',
+      '',
+      1,
+      30,
+      this.ContractorID ? this.ContractorID : null).subscribe(res => {
+        this.BankItems = res.List;
+        this.BankTotalItemCount = res.TotalItemCount;
+        this.BankPageCount = Math.ceil(res.TotalItemCount / 30);
+      });
+  }
+  FetchMoreBank(event) {
+    const ResultList = [];
+    this.NgSelectBankParams.loading = true;
+    this.Common.GetBankPaging(event.SearchOption,
+      event.term,
+      event.PageNumber,
+      event.PageSize,
+      this.ContractorID ? this.ContractorID : null).subscribe(res => {
+        event.CurrentItems.forEach(el => {
+          ResultList.push(el);
+        });
+        res.List.forEach(element => {
+          ResultList.push(element);
+        });
+        this.BankItems = ResultList;
+        this.NgSelectBankParams.loading = false;
+      }
+      );
+  }
+  doBankSearch(event) {
+    this.NgSelectBankParams.loading = true;
+    this.Common.GetBankPaging(event.SearchOption,
+      event.term,
+      event.PageNumber,
+      event.PageSize,
+      this.ContractorID ? this.ContractorID : null).subscribe(res => {
+        this.BankItems = res.List,
+          this.RefreshBankItems.RefreshItemsVirtualNgSelect({
+            List: res.List,
+            term: event.term,
+            TotalItemCount: res.TotalItemCount,
+            PageCount: Math.ceil(res.TotalItemCount / 30),
+            type: 'Bank'
+          });
+      });
+  }
+  onBankSelectedchanged(ActorID) {
+    this.NgSelectBranchParams.selectedObject = null;
+    this.OpenBranch();
+  }
+  FetchMoreBranch(event) {
+    const ResultList = [];
+    this.NgSelectBranchParams.loading = true;
+    this.Common.GetBranchPaging(event.SearchOption,
+      event.term,
+      event.PageNumber,
+      event.PageSize,
+      this.NgSelectBankParams.selectedObject,
+      this.ContractorID ? this.ContractorID : null
+    ).subscribe(res => {
+      event.CurrentItems.forEach(el => {
+        ResultList.push(el);
+      });
+      res.List.forEach(element => {
+        ResultList.push(element);
+      });
+      this.BranchItems = ResultList;
+      this.NgSelectBranchParams.loading = false;
+    }
+    );
+  }
+  OpenBranch() {
+    const ResultList = [];
+    this.Common.GetBranchPaging('',
+      '',
+      1,
+      30,
+      this.NgSelectBankParams.selectedObject,
+      this.ContractorID ? this.ContractorID : null
+    ).subscribe(res => {
+      this.BranchItems = res.List;
+      this.BranchTotalItemCount = res.TotalItemCount;
+      this.BranchPageCount = Math.ceil(res.TotalItemCount / 30);
+    });
+  }
+  doBranchSearch(event) {
+    this.NgSelectBranchParams.loading = true;
+    this.Common.GetBranchPaging(event.SearchOption,
+      event.term,
+      event.PageNumber,
+      event.PageSize,
+      this.NgSelectBankParams.selectedObject,
+      this.ContractorID ? this.ContractorID : null
+    ).subscribe(res => {
+      this.BranchItems = res.List;
+      this.BranchTotalItemCount = res.TotalItemCount;
+      this.BranchPageCount = Math.ceil(res.TotalItemCount / 30);
+      this.NgSelectBranchParams.loading = false;
+    });
+  }
 }

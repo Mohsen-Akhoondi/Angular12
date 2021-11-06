@@ -25,14 +25,16 @@ export class ContractPayDetailsService {
     Date: any,
     ProductIDs: any,
     IsContractPayEstimate: number,
-    IsLoad: boolean) {
+    IsLoad: boolean ,
+    ContractOperationID = null) {
 
     return this.http.get(window.location.origin + '/Contract/GetContractOrder', {
       ContractID,
       ContractPayNo,
       Date,
       ProductIDs,
-      IsContractPayEstimate
+      IsContractPayEstimate,
+      ContractOperationID
     },
       IsLoad);
   }
@@ -43,12 +45,22 @@ export class ContractPayDetailsService {
 
   SaveContractPay(ContractPay: any,
     ContractPayItemList: any,
-    HasCheck25Percent = false) {
+    BankList: any,
+    HaveBank: any,
+    HasCheck25Percent = false,
+    CheckMultiInvoiceType = false ,
+    ModuleCode , 
+    ModuleViewTypeCode) {
 
     return this.http.post(window.location.origin + '/Contract/SaveContractPay', {
       ContractPay,
       ContractPayItemList,
-      HasCheck25Percent
+      BankList,
+      HaveBank,
+      HasCheck25Percent,
+      CheckMultiInvoiceType,
+      ModuleCode,
+      ModuleViewTypeCode
     });
   }
 
@@ -60,14 +72,22 @@ export class ContractPayDetailsService {
     ContractPayItemList: any,
     ContractAgentCode: number,
     ModuleCode: number,
-    HasCheck25Percent = false) {
+    HasCheck25Percent = false,
+    CheckMultiInvoiceType = false,
+    BankList: any,
+    HaveBank: any,
+    ModuleViewTypeCode) {
 
     return this.http.post(window.location.origin + '/Contract/UpdateContractPay', {
       ContractPay,
       ContractPayItemList,
       ContractAgentCode,
       ModuleCode,
-      HasCheck25Percent
+      BankList,
+      HaveBank,
+      HasCheck25Percent,
+      CheckMultiInvoiceType,
+      ModuleViewTypeCode
     }
     );
   }
@@ -188,7 +208,33 @@ export class ContractPayDetailsService {
   GetContractAgents() {
     return this.http.get(window.location.origin + '/Contract/GetContractAgents', null);
   }
-  CheckIsOver25Percent(ContractID ,ProductID , ContractPayNo, ContractPayDate ,PriceListPatternIDs ) {
-    return this.http.get(window.location.origin + '/ContractPay/CheckIsOver25Percent', {ContractID ,ProductID,ContractPayNo, ContractPayDate ,PriceListPatternIDs});
+  CheckIsOver25Percent(ContractID, ProductID, ContractPayNo, ContractPayDate, PriceListPatternIDs) {
+    return this.http.get(window.location.origin + '/ContractPay/CheckIsOver25Percent', {
+      ContractID, ProductID, ContractPayNo, ContractPayDate, PriceListPatternIDs
+    });
+  }
+  GetcostCenterActorName(CostFactorID: number, SelectedContractID: number) {
+    return this.http.get(window.location.origin + '/Contract/GetcostCenterActorName', {
+      CostFactorID,
+      SelectedContractID
+    });
+  }
+  GetSubCostCenterNameBycntractCostFactorID(CostFactorID: number, SelectedContractID: number) {
+    return this.http.get(window.location.origin + '/Home/GetSubCostCenterNameBycntractCostFactorID', {
+      CostFactorID,
+      SelectedContractID
+    });
+  }
+  GetContractOrderByProductID(ContractID: number,
+    Date: any,
+    ProductID: any,
+    IsLoad: boolean) {
+
+    return this.http.get(window.location.origin + '/Contract/GetContractOrderByProductID', {
+      ContractID,
+      Date,
+      ProductID
+    },
+      IsLoad);
   }
 }

@@ -4,7 +4,6 @@ import * as moment from 'jalali-moment';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { FinYearService } from 'src/app/Services/BaseService/FinYearService';
 import { forkJoin, of } from 'rxjs';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
@@ -13,6 +12,7 @@ import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServi
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { ContractMinutesService } from 'src/app/Services/ContractService/ContractMinutes/ContractMinutesService';
 import { OverPopUpCellEditorComponent } from 'src/app/Shared/OverPopUpcellEditor/over-pop-up-cell-editor.component';
+import { Tree } from '@angular/router/src/utils/tree';
 import { isUndefined } from 'util';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { ContractEstimateService } from 'src/app/Services/ContractService/ContractEstimates/ContractEstimateService';
@@ -684,7 +684,8 @@ export class ContractPayItemHourComponent implements OnInit {
           ADate.MDate,
           null,
           1,
-          true)
+          true,
+          this.ContractOperationId)
           .subscribe(
             ress => {
               ress.forEach(item => {
@@ -712,7 +713,8 @@ export class ContractPayItemHourComponent implements OnInit {
       this.ContractPayDate,
       null,
       1,
-      true)
+      true,
+      this.ContractOperationId)
       .subscribe(
         ress => {
           ress.forEach(item => {
@@ -810,7 +812,8 @@ export class ContractPayItemHourComponent implements OnInit {
         this.ContractPayDate,
         this.ProductIDs,
         1,
-        false);
+        false,
+        this.ContractOperationId);
 
 
     if (this.PopupParam.Mode === 'InsertMode') {
@@ -1097,7 +1100,15 @@ export class ContractPayItemHourComponent implements OnInit {
     // }
     this.ContractStima.GetAllWithContractOrderItemID(this.PopupParam.selectedRow.LastContractOrderID).subscribe(ress => {
       if (ress) {
-        this.contractpaydetail.SaveContractPay(ContractPayObj, ContractPayItemList).subscribe(res => {
+        this.contractpaydetail.SaveContractPay(
+           ContractPayObj,
+           ContractPayItemList,
+           null,
+           false,
+           false,
+           false,
+           this.ModuleCode,
+           null).subscribe(res => {
           this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
           this.ChangeDetection = false;
           this.PopupParam.Mode = 'EditMode';
@@ -1232,7 +1243,12 @@ export class ContractPayItemHourComponent implements OnInit {
         this.contractpaydetail.UpdateContractPay(ContractPayObj,
           ContractPayItemList,
           this.ContractAgentParams.selectedObject,
-          2516)
+          this.ModuleCode ? this.ModuleCode : 2516,
+          false,
+          false,
+          null,
+          false,
+          null)
           .subscribe(res => {
             this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
             this.ChangeDetection = false;
@@ -1387,7 +1403,8 @@ export class ContractPayItemHourComponent implements OnInit {
           0,
           this.WorkflowObjectCode,
           null,null,
-          this.CartableUserID)
+          this.CartableUserID,
+          this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null)
           .subscribe(res => {
             this.HaveWorkFlow = true;
             this.ShowMessageBoxWithOkBtn('عدم تایید درخواست پرداخت با موفقیت انجام شد');
@@ -1526,7 +1543,8 @@ export class ContractPayItemHourComponent implements OnInit {
             this.WorkflowObjectCode,
             this.ModuleViewTypeCode,
             this.ModuleCode,
-            this.CartableUserID)
+            this.CartableUserID,
+            this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null)
             .subscribe(res => {
               this.ShowMessageBoxWithOkBtn('عدم تاييد درخواست انجام معامله با موفقيت انجام شد');
               this.ReadyToConfirm = 0;
@@ -1643,7 +1661,8 @@ export class ContractPayItemHourComponent implements OnInit {
         this.WorkflowObjectCode,
         this.ModuleViewTypeCode,
         this.ModuleCode,
-        this.CartableUserID).
+        this.CartableUserID,
+        this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).
         subscribe(res => {
           if (HasAlert) {
             this.ShowMessageBoxWithOkBtn('تاييد درخواست پرداخت با موفقيت انجام شد');
@@ -1653,7 +1672,7 @@ export class ContractPayItemHourComponent implements OnInit {
           this.btnConfirmName = 'عدم تاييد';
           this.btnConfirmIcon = 'cancel';
           this.IsEditConfirm = false;
-          resolve(true);
+          resolve(res);
         },
           err => {
             if (err.error.Message.includes('|')) {
@@ -1708,7 +1727,7 @@ export class ContractPayItemHourComponent implements OnInit {
     // tslint:disable-next-line:no-shadowed-variable
     const promise = new Promise((resolve, reject) => {
       this.DOConfirm(false, resolve);
-    }).then((IsDown) => {
+    }).then((IsDown: any) => {
       if (IsDown) {
         new Promise((StartedWFResolve, reject) => {
           this.SetStartedWFInfo(StartedWFResolve);
@@ -1748,7 +1767,7 @@ export class ContractPayItemHourComponent implements OnInit {
                       WorkflowTypeName: this.WorkflowTypeName,
                       WorkflowTypeCode: this.WorkflowTypeCode,
                       WorkflowObjectCode: this.WorkflowObjectCode,
-                      MinimumPosting: this.PopupParam.MinimumPosting,
+                      MinimumPosting: this.PopupParam.WorkFlowID ? this.PopupParam.MinimumPosting : IsDown.MinimumPosting,
                       OrginalModuleCode: this.ModuleCode,
                       CartableUserID: this.CartableUserID
                     };
@@ -1773,7 +1792,8 @@ export class ContractPayItemHourComponent implements OnInit {
         this.WorkflowObjectCode,
         this.ModuleViewTypeCode,
         this.ModuleCode,
-        this.CartableUserID).subscribe(res => {
+        this.CartableUserID,
+        this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).subscribe(res => {
           if (alert) {
             this.ShowMessageBoxWithOkBtn('عدم تاييد برآورد اوليه با موفقيت انجام شد');
           }
