@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 @Component({
   selector: 'app-variable-type',
   templateUrl: './variable-type.component.html',
@@ -47,7 +46,7 @@ export class VariableTypeComponent implements OnInit {
         headerName: 'کد نوع متغیر ',
         field: 'VariableTypeCode',
         width: 100,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 3},
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {

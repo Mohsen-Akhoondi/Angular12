@@ -36,11 +36,19 @@
         </tr>
       </table>
     </div>
-    <div id="tree" style="min-width: -moz-max-content;" [style.height.%]="treeHeight">
+    <!-- <div id="tree" style="min-width: -moz-max-content;" [style.height.%]="treeHeight">
       <app-tree (selectedchange)="tree_selectedchange($event)" [PriceListTopicID]="NgSelectParams.selectedObject"
         [DefPriceListPatternID]="ContactPriceListPatternID"></app-tree>
-    </div>
+    </div> -->
 
+    <app-customized-tree
+    [TreeHeight]="treeHeight" 
+    [SecondID]="ContactPriceListPatternID"
+    [InputParam] = "TreeInputParam"
+    [FirstID]="NgSelectParams.selectedObject" 
+    (selectedchange)="tree_selectedchange($event)">
+  </app-customized-tree>
+  
     <div id="buttons-right">
       <button *ngIf="ModuleCode != 2681 || NeedSelected " (click)="Btnclick('archive-details')" id="btn1"
         class="btn btn-primary btnGreen">

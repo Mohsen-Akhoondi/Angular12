@@ -55,6 +55,7 @@ export class CommitionComponent implements OnInit {
   SecondPrintAction = false;
   FinalPrintAction = false;
   IsMultiContract: boolean;
+  IsMultiYear: boolean;
   HaveMultiContract: boolean;
   CheckRegionWritable;
   ProductRequestNo;
@@ -158,7 +159,7 @@ export class CommitionComponent implements OnInit {
   IsDisable = true;
   IsShowReport = true; // RFC 52811
   ExpertItems;
-  AProductRequestPerson = null;
+  AProductRequestPeopleList = [];
   HasWarrantyItem = false;
   CheckValidate = false;
   HaveSecurityDetails: boolean;
@@ -171,6 +172,11 @@ export class CommitionComponent implements OnInit {
   IsExpertCoef = true;
   IsType11 = false;
   HasChooseContractor = true;
+  IsDisableRaste = false;
+  IsDisableRank = false;
+  IsDisablerdoIsMaterials = false;
+  IsDisablerdoHaveMaterials = false;
+  IsDisableIsMultiYear = false;
   GridOptionsRowStyle: GridOptions = {
     getRowStyle: function (params) {
       if (!params.data.HasCapacity) {
@@ -255,6 +261,21 @@ export class CommitionComponent implements OnInit {
   IsDeactiveBtns = true;
   IsForcePriceList = false;
   IsReadOnly = false;
+  HaveAgent = false;
+  AgentParams = {
+    bindLabelProp: 'PersonName',
+    bindValueProp: 'ActorId',
+    placeholder: '',
+    MinWidth: '155px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false
+  };
+  AgentItems;
+  ShowAgentSaveBtn = false;
+  IsAgentDisable = false;
+
   constructor(private ProductRequest: ProductRequestService,
     private User: UserSettingsService,
     private Actor: ActorService,
@@ -489,16 +510,29 @@ export class CommitionComponent implements OnInit {
             resizable: true,
           },
           {
-            headerName: 'ظرفیت تعدادی',
+            headerName: 'ظرفیت آزاد تعدادی در رسته',
             field: 'FreeCount',
-            width: 150,
+            width: 155,
             resizable: true
           },
           {
-            headerName: 'ظرفیت ریالی',
+            headerName: 'ظرفیت آزاد ریالی در رسته',
             HaveThousand: true,
             field: 'FreeAmount',
-            width: 150,
+            width: 155,
+            resizable: true
+          },
+          {
+            headerName: 'ظرفیت آزاد تعدادی در کل حوزه تخصص ها',
+            field: 'TotalRemainedCountCapacity',
+            width: 250,
+            resizable: true
+          },
+          {
+            headerName: 'ظرفیت آزاد ریالی در  کل حوزه تخصص ها',
+            HaveThousand: true,
+            field: 'TotalRemainedRialCapacity',
+            width: 250,
             resizable: true
           },
           {
@@ -531,6 +565,32 @@ export class CommitionComponent implements OnInit {
             width: 378,
             resizable: true,
           },
+          {
+            headerName: 'ظرفیت مازاد تعدادی در رسته',
+            field: 'ExtraCount',
+            width: 155,
+            resizable: true
+          },
+          {
+            headerName: 'ظرفیت مازاد ریالی در رسته',
+            HaveThousand: true,
+            field: 'ExtraAmount',
+            width: 155,
+            resizable: true
+          },
+          {
+            headerName: 'ظرفیت مازاد تعدادی در کل حوزه تخصص ها',
+            field: 'TotalExtraCount',
+            width: 250,
+            resizable: true
+          },
+          {
+            headerName: 'ظرفیت مازاد ریالی در  کل حوزه تخصص ها',
+            HaveThousand: true,
+            field: 'TotalExtraAmount',
+            width: 250,
+            resizable: true
+          }
         ];
       } else {
         this.ColDef = [
@@ -722,16 +782,29 @@ export class CommitionComponent implements OnInit {
             resizable: true,
           },
           {
-            headerName: 'ظرفیت تعدادی',
+            headerName: 'ظرفیت آزاد تعدادی در رسته',
             field: 'FreeCount',
-            width: 150,
+            width: 155,
             resizable: true
           },
           {
-            headerName: 'ظرفیت ریالی',
+            headerName: 'ظرفیت آزاد ریالی در رسته',
             HaveThousand: true,
             field: 'FreeAmount',
-            width: 150,
+            width: 155,
+            resizable: true
+          },
+          {
+            headerName: 'ظرفیت آزاد تعدادی در کل حوزه تخصص ها',
+            field: 'TotalRemainedCountCapacity',
+            width: 250,
+            resizable: true
+          },
+          {
+            headerName: 'ظرفیت آزاد ریالی در  کل حوزه تخصص ها',
+            HaveThousand: true,
+            field: 'TotalRemainedRialCapacity',
+            width: 250,
             resizable: true
           },
           {
@@ -764,6 +837,32 @@ export class CommitionComponent implements OnInit {
             width: 378,
             resizable: true,
           },
+          {
+            headerName: 'ظرفیت مازاد تعدادی در رسته',
+            field: 'ExtraCount',
+            width: 155,
+            resizable: true
+          },
+          {
+            headerName: 'ظرفیت مازاد ریالی در رسته',
+            HaveThousand: true,
+            field: 'ExtraAmount',
+            width: 155,
+            resizable: true
+          },
+          {
+            headerName: 'ظرفیت مازاد تعدادی در کل حوزه تخصص ها',
+            field: 'TotalExtraCount',
+            width: 250,
+            resizable: true
+          },
+          {
+            headerName: 'ظرفیت مازاد ریالی در  کل حوزه تخصص ها',
+            HaveThousand: true,
+            field: 'TotalExtraAmount',
+            width: 250,
+            resizable: true
+          }
         ];
       }
     } else {
@@ -1484,6 +1583,7 @@ export class CommitionComponent implements OnInit {
     this.CustomCheckBoxConfig.styleCheckBox = 'pretty p-icon p-rotate';
     this.CustomCheckBoxConfig.AriaWidth = 50;
     this.IsMultiContract = null;
+    this.IsMultiYear = null;
     this.CostFactorMultiContract = null;
     this.HaveMultiContract = false;
     this.ProductRequestObject = this.PopupParam.ProductRequestObject;
@@ -1500,7 +1600,7 @@ export class CommitionComponent implements OnInit {
     });
     this.User.GetActiveActorID().subscribe(res => {
       if (res) {
-        this.ActorID = res;
+        this.ActorID = res.ActorID;
       }
     });
 
@@ -1508,11 +1608,16 @@ export class CommitionComponent implements OnInit {
     if (this.ProductRequestObject.DealMethodCode === 4 ||
       this.ProductRequestObject.DealMethodCode === 9 ||
       this.ProductRequestObject.DealMethodCode === 7 ||
-      this.ProductRequestObject.DealMethodCode === 8) {
+      this.ProductRequestObject.DealMethodCode === 8 ||
+      this.ProductRequestObject.DealMethodCode === 17 ||
+      this.ProductRequestObject.DealMethodCode === 12 ||
+      this.ProductRequestObject.DealMethodCode === 13) { // 62555
       this.HasnotOrder = true;
     }
 
-    if (this.ProductRequestObject.ProductRequestTypeCode === 2 || this.ProductRequestObject.ProductRequestTypeCode === 3) {
+    if (this.ProductRequestObject.ProductRequestTypeCode === 2 ||
+      this.ProductRequestObject.ProductRequestTypeCode === 3 ||
+      this.ProductRequestObject.ProductRequestTypeCode === 7) {
       this.IsShowPrintType = true;
       this.PrintTypeParams.selectedObject = 1;
     }
@@ -1543,7 +1648,8 @@ export class CommitionComponent implements OnInit {
     if (!this.OrderCommitionObject) {
       forkJoin([
         // tslint:disable-next-line:max-line-length
-        this.ProductRequest.GetOrdersWithProductRequest(this.ProductRequestItemID, this.HasnotOrder, this.CostFactorID, this.IsChabokContractModuleViewType11, this.IsInquriyID),
+        this.ProductRequest.GetOrdersWithProductRequest(this.ProductRequestItemID, this.HasnotOrder, this.CostFactorID, this.IsChabokContractModuleViewType11, this.IsInquriyID,
+          (this.PopupParam && this.PopupParam.ModuleViewTypeCode ? this.PopupParam.ModuleViewTypeCode : null)),
         this.ProductRequest.GetCommitionList()
         // this.ProductRequest.GetCommitionMemberList(1, this.ProductRequestObject.RegionCode)
       ]).subscribe(res => {
@@ -1558,7 +1664,8 @@ export class CommitionComponent implements OnInit {
             this.CommitionParams.selectedObject = this.OrderCommitionObject.CommitionCode;
             this.InquiryObject = this.OrdersObject.LastInquiryObject;
             // tslint:disable-next-line:max-line-length
-            this.AProposalList = (this.PopupParam.ModuleViewTypeCode === 47 || this.PopupParam.ModuleViewTypeCode === 37 || this.PopupParam.ModuleViewTypeCode === 112) ? this.InquiryObject.ProposalReceivedList :
+            this.AProposalList = (this.PopupParam.ModuleViewTypeCode === 47 || this.PopupParam.ModuleViewTypeCode === 37 || this.PopupParam.ModuleViewTypeCode === 112
+              || this.PopupParam.ModuleViewTypeCode === 166) ? this.InquiryObject.ProposalReceivedList :
               this.InquiryObject.ProposalList;
 
             this.CommitionDate = this.OrderCommitionObject.ShortCommitionDate;
@@ -1572,7 +1679,8 @@ export class CommitionComponent implements OnInit {
             this.ExpertAmount = this.OrderCommitionObject.ExpertAmount;
             this.IsPriceExtended = this.OrderCommitionObject.IsPriceExtended;
             this.IsAcceptWorkDone = this.OrderCommitionObject.IsAcceptWorkDone;
-            if ((this.PopupParam.ModuleViewTypeCode === 37 || this.PopupParam.ModuleViewTypeCode === 68) &&
+            if ((this.PopupParam.ModuleViewTypeCode === 37 || this.PopupParam.ModuleViewTypeCode === 68
+              || this.PopupParam.ModuleViewTypeCode === 169) &&
               this.OrderCommitionObject.IsAccept != null) {
               this.IsAccept = this.OrderCommitionObject.IsAccept;
             }
@@ -1605,7 +1713,8 @@ export class CommitionComponent implements OnInit {
             // tslint:disable-next-line: max-line-length
             // this.IsNoOrderCommition = (this.PopupParam.ModuleViewTypeCode === 11 || this.PopupParam.ModuleViewTypeCode === 100000 || this.PopupParam.ModuleViewTypeCode === 17) ? false : true; RFC: 58690 همراه با اوتلوک 2021/01/27
             // tslint:disable-next-line:max-line-length
-            this.AProposalList = (this.PopupParam.ModuleViewTypeCode === 47 || this.PopupParam.ModuleViewTypeCode === 37 || this.PopupParam.ModuleViewTypeCode === 112) ? this.OrdersObject.LastInquiryObject.ProposalReceivedList :
+            this.AProposalList = (this.PopupParam.ModuleViewTypeCode === 47 || this.PopupParam.ModuleViewTypeCode === 37 || this.PopupParam.ModuleViewTypeCode === 112
+              || this.PopupParam.ModuleViewTypeCode === 166) ? this.OrdersObject.LastInquiryObject.ProposalReceivedList :
               this.OrdersObject.LastInquiryObject.ProposalList;
             this.InquiryObject = this.OrdersObject.LastInquiryObject;
           }
@@ -1615,44 +1724,21 @@ export class CommitionComponent implements OnInit {
           }
         }
         this.CommitionItems = res[1];
-        this.ProductRequestObject.RegionCode === 200 ? this.CommitionParams.selectedObject = 1 : '';
-
-        // tslint:disable-next-line:max-line-length
-        if (((this.ProductRequestObject.RegionCode >= 1 && this.ProductRequestObject.RegionCode <= 22) || this.ProductRequestObject.RegionCode === 222) &&
-          (this.ProductRequestObject.ProductRequestTypeCode === 1 || this.ProductRequestObject.ProductRequestTypeCode === 4)) {
-          const promise = new Promise<void>((resolve, reject) => {
-            this.AProposalList.forEach((element, index) => {
-              // tslint:disable-next-line: max-line-length
-              this.ProductRequest.GetCapacity(element.ActorID, this.ProductRequestObject.CostFactorID).subscribe((ress: any) => {
-                if (ress) {
-                  element.FreeAmount = ress.FreeAmount;
-                  element.FreeCount = ress.FreeCount;
-                  element.HasCapacity = ress.HasCapacity;
-                }
-
-                if (this.AProposalList.length - 1 === index) {
-                  resolve();
-                }
-
-              });
-            });
-
-          }).then(() => {
-            this.RowData = this.AProposalList;
-          });
-        } else {
-          if (this.PopupParam.ModuleViewTypeCode === 110 && this.ProductRequestObject.RegionCode === 200) { // RFC 55099
-            const IsReceivedList = [];
-            this.AProposalList.forEach(item => {
-              if (item.IsReceived) {
-                IsReceivedList.push(item);
-              }
-            });
-            this.RowData = IsReceivedList;
-          } else {
-            this.RowData = this.AProposalList;
-          }
+        if (this.ProductRequestObject.RegionCode === 200) {
+          this.CommitionParams.selectedObject = 1;
         }
+        if (this.PopupParam.ModuleViewTypeCode === 110 && this.ProductRequestObject.RegionCode === 200) { // RFC 55099
+          const IsReceivedList = [];
+          this.AProposalList.forEach(item => {
+            if (item.IsReceived) {
+              IsReceivedList.push(item);
+            }
+          });
+          this.RowData = IsReceivedList;
+        } else {
+          this.RowData = this.AProposalList;
+        }
+
       });
     } else {
       this.InitOrderCommitionObject();
@@ -1687,17 +1773,22 @@ export class CommitionComponent implements OnInit {
       this.IsType113 = true;
     }
 
-    if (this.ProductRequestObject.RegionCode >= 1 && this.ProductRequestObject.RegionCode <= 22 &&
-      this.ProductRequestObject.ContractTypeCode !== 4 &&
-      this.ProductRequestObject.IsCost && this.ProductRequestObject.ProductRequestTypeCode === 1) {
+    if (this.ProductRequestObject.ProductRequestTypeCode === 1) { // عمرانی
+      if (this.ProductRequestObject.RegionCode >= 1 && this.ProductRequestObject.RegionCode <= 22) {
+        if (this.ProductRequestObject.ContractTypeCode !== 4 && this.ProductRequestObject.IsCost) {
+          this.IsForcePriceList = true;
+        }
+      } else {
+        this.IsForcePriceList = true;
+      }
+    } else if (this.ProductRequestObject.ProductRequestTypeCode === 4) { // حمل و نقل و ترافیک
       this.IsForcePriceList = true;
-    }
-    if ((this.PopupParam.OriginModuleViewTypeCode === 500000) &&
-      (this.PopupParam.OrginalModuleCode === 2756 || this.PopupParam.OrginalModuleCode === 2838)) {
-      this.IsDisableJobCategory = this.HaveShowSign = this.IsDisplayJobCategory = true;
-      this.IsnotActiveBtnSave = this.CheckRegionWritable = this.HaveSign = this.IsSearch = false;
-      this.HaveSave = this.HasWarrantyItem = this.IsWFDisable = this.IsType49 = true;
-      this.BtnSignName = 'مشاهده نسخ الکترونیک صورتجلسه';
+    } // RFC 61902
+
+    if (this.PopupParam.OriginModuleViewTypeCode === 500000) {
+      this.IsDisableJobCategory = this.IsDisplayJobCategory = true;
+      this.IsnotActiveBtnSave = this.CheckRegionWritable = this.HaveSign = this.IsSearch = this.HaveShowSign = false;
+      this.HasWarrantyItem = this.IsWFDisable = this.IsType49 = true;
     }
 
   }
@@ -1706,6 +1797,13 @@ export class CommitionComponent implements OnInit {
     this.ProductRequestCostClosed.emit(true);
   }
   onSave(IsCheckException = false) {
+    let HasWinner = false;
+    this.RowData.forEach(element => {
+      if (element.IsWin === true) {
+        HasWinner = true;
+      }
+    });
+
     // tslint:disable-next-line:max-line-length
     let CheckExceptions = (this.PopupParam.OrginalModuleCode === 2793 || this.PopupParam.OrginalModuleCode === 2824) && this.PopupParam.IsAdmin && !IsCheckException;
     let StrExceptions = '';
@@ -1713,21 +1811,26 @@ export class CommitionComponent implements OnInit {
       this.ShowMessageBoxWithOkBtn('امکان ثبت به دلیل دسترسی فقط خواندنی کاربر در این واحد اجرایی وجود ندارد');
       return;
     }
-
-    if (!this.OrdersObject || this.OrdersObject === null || isUndefined(this.OrdersObject)) {
-      this.ShowMessageBoxWithOkBtn('به علن عدم دریافت پاکات و عدم درج لیست متقاضیان، امکان ثبت کمیسیون وجود ندارد. در صورت نیاز با راهبر تماس بگیرید.');
+    if (HasWinner && this.PopupParam.OrginalModuleCode === 2793) {
+    } else {
+      if (!this.OrdersObject || this.OrdersObject === null || isUndefined(this.OrdersObject)) {
+        // tslint:disable-next-line: max-line-length
+        this.ShowMessageBoxWithOkBtn('به علت عدم دریافت پاکات و عدم درج لیست متقاضیان، امکان ثبت کمیسیون وجود ندارد. در صورت نیاز با راهبر تماس بگیرید.');
+      }
     }
 
     if (this.ExpertAmount && this.ExpertCoef) {
       this.ShowMessageBoxWithOkBtn('امکان ثبت همزمان ضریب کارشناسی و مبلغ کارشناسی وجود ندارد.');
       return;
     }
-
-    if ((this.ProductRequestObject.RegionCode >= 1 && this.ProductRequestObject.RegionCode <= 22) &&
-      (!this.CommitionMemberParams.selectedObject || this.CommitionMemberParams.selectedObject === null
-        || (this.CommitionMemberParams.selectedObject).length === 0)) {
-      this.ShowMessageBoxWithOkBtn('امکان ثبت بدون درج اعضای کمیسیون وجود ندارد'); // RFC 60827
-      return;
+    if (HasWinner && this.PopupParam.OrginalModuleCode === 2793) {
+    } else {
+      if ((this.ProductRequestObject.RegionCode >= 1 && this.ProductRequestObject.RegionCode <= 22) &&
+        (!this.CommitionMemberParams.selectedObject || this.CommitionMemberParams.selectedObject === null
+          || (this.CommitionMemberParams.selectedObject).length === 0)) {
+        this.ShowMessageBoxWithOkBtn('امکان ثبت بدون درج اعضای کمیسیون وجود ندارد'); // RFC 60827
+        return;
+      }
     }
 
     this.CheckValidate = true;
@@ -1762,6 +1865,7 @@ export class CommitionComponent implements OnInit {
         PriceInNewsPaper: this.PriceInNewsPaper !== null && !isUndefined(this.PriceInNewsPaper) && this.PriceInNewsPaper !== '' ?
           // tslint:disable-next-line: radix
           parseInt((this.PriceInNewsPaper.toString()).replace(/,/g, '')) : null,
+        IsMultiYear: this.IsMultiYear
       };
       // this.GridApi.stopEditing();
       let ProposalList = [];
@@ -1772,7 +1876,7 @@ export class CommitionComponent implements OnInit {
           node.data.IsAccept = node.data.IsAccept ? true : false;
           node.data.TechnicalStatus = node.data.TechnicalStatus ? true : false;
           node.data.IsPresent = node.data.IsPresent ? true : false;
-          node.data.IsReceived = node.data.IsReceived ? true : false;
+          node.data.IsReceived = node.data.IsReceived ? true : this.ProductRequestObject.DealMethodCode === 17 ? true : false; // 62663
           ProposalList.push(node.data);
         });
       } else {
@@ -1780,23 +1884,31 @@ export class CommitionComponent implements OnInit {
 
       }
       if (this.HaveExpertPerson) {
-        this.AProductRequestPerson = {
+
+        const ExpertPersonObj = {
           ActorID: this.ExpertParams.selectedObject,
           CostFactorID: this.ProductRequestObject.CostFactorID,
           RoleID: 972
         };
-      } else {
-        this.AProductRequestPerson = null;
+        this.AProductRequestPeopleList.push(ExpertPersonObj);
+      }
+      if (this.HaveAgent) {
+        const AgentPersonObj = {
+          ActorID: this.AgentParams.selectedObject,
+          CostFactorID: this.ProductRequestObject.CostFactorID,
+          RoleID: 1520
+        };
+        this.AProductRequestPeopleList.push(AgentPersonObj);
       }
       if (this.PopupParam.ModuleViewTypeCode === 37 || this.PopupParam.ModuleViewTypeCode === 47
         || this.PopupParam.ModuleViewTypeCode === 72 || this.PopupParam.ModuleViewTypeCode === 110
         || this.PopupParam.ModuleViewTypeCode === 11 || this.PopupParam.ModuleViewTypeCode === 107
         || this.PopupParam.ModuleViewTypeCode === 53 || this.PopupParam.ModuleViewTypeCode === 100000
-        || this.PopupParam.ModuleViewTypeCode === 149
         // tslint:disable-next-line: max-line-length
-        || this.PopupParam.ModuleViewTypeCode === 112 || this.PopupParam.ModuleViewTypeCode === 123) { // RFC 50573 & 50702 & 50728 & 50851(47 --> 112) // RFC 53953 (123)
+        || this.PopupParam.ModuleViewTypeCode === 112 || this.PopupParam.ModuleViewTypeCode === 123
+        || this.PopupParam.ModuleViewTypeCode === 149 || this.PopupParam.ModuleViewTypeCode === 166) { // RFC 50573 & 50702 & 50728 & 50851(47 --> 112) // RFC 53953 (123)
         this.IsYes = this.IsYes;
-      } else if (this.PopupParam.ModuleViewTypeCode === 68) { // RFC 50573
+      } else if (this.PopupParam.ModuleViewTypeCode === 68 || this.PopupParam.ModuleViewTypeCode === 169) { // RFC 50573 - 61935
         this.IsYes = this.HasWinner; // بررسی انتخاب برنده در گرید طبق درخواست 50573 در هنگام تایید بررسی می گردد
       } else { // RFC 50573
         this.IsYes = null;
@@ -1822,7 +1934,7 @@ export class CommitionComponent implements OnInit {
                 ProposalList,
                 false,
                 this.PopupParam.OrginalModuleCode,
-                this.AProductRequestPerson,
+                this.AProductRequestPeopleList,
                 this.IsMultiContract,
                 this.CostFactorMultiContract,
                 // tslint:disable-next-line: max-line-length
@@ -1869,9 +1981,15 @@ export class CommitionComponent implements OnInit {
                           // tslint:disable-next-line: max-line-length
                           this.ProductRequest.GetCapacity(element.ActorID, this.ProductRequestObject.CostFactorID).subscribe((ress: any) => {
                             if (ress) {
-                              element.FreeAmount = ress.FreeAmount;
-                              element.FreeCount = ress.FreeCount;
+                              element.FreeAmount = ress.FreeRialCapacity;
+                              element.FreeCount = ress.FreeCountCapacity;
                               element.HasCapacity = ress.HasCapacity;
+                              element.TotalRemainedRialCapacity = ress.TotalRemainedRialCapacity;
+                              element.TotalRemainedCountCapacity = ress.TotalRemainedCountCapacity;
+                              element.ExtraCount = ress.ExtraCount;
+                              element.ExtraAmount = ress.ExtraAmount;
+                              element.TotalExtraAmount = ress.TotalExtraAmount;
+                              element.TotalExtraCount = ress.TotalExtraCount;
                               itemsToUpdate.push(element);
                               resolve();
                             }
@@ -1897,7 +2015,7 @@ export class CommitionComponent implements OnInit {
           ProposalList,
           true,
           this.PopupParam.OrginalModuleCode,
-          this.AProductRequestPerson,
+          this.AProductRequestPeopleList,
           this.IsMultiContract,
           this.CostFactorMultiContract,
           (this.RankParams.selectedObject ? this.RankParams.selectedObject : null),
@@ -1944,9 +2062,15 @@ export class CommitionComponent implements OnInit {
                     // tslint:disable-next-line: max-line-length
                     this.ProductRequest.GetCapacity(element.ActorID, this.ProductRequestObject.CostFactorID).subscribe((ress: any) => {
                       if (ress) {
-                        element.FreeAmount = ress.FreeAmount;
-                        element.FreeCount = ress.FreeCount;
+                        element.FreeAmount = ress.FreeRialCapacity;
+                        element.FreeCount = ress.FreeCountCapacity;
                         element.HasCapacity = ress.HasCapacity;
+                        element.TotalRemainedRialCapacity = ress.TotalRemainedRialCapacity;
+                        element.TotalRemainedCountCapacity = ress.TotalRemainedCountCapacity;
+                        element.ExtraCount = ress.ExtraCount;
+                        element.ExtraAmount = ress.ExtraAmount;
+                        element.TotalExtraAmount = ress.TotalExtraAmount;
+                        element.TotalExtraCount = ress.TotalExtraCount;
                         itemsToUpdate.push(element);
                         resolve();
                       }
@@ -2050,8 +2174,7 @@ export class CommitionComponent implements OnInit {
       ContractTypeCode: this.ProductRequestObject.ContractTypeCode,
       ReadOnly: this.IsReadOnly,
       HasWarrantyItem: ((this.PopupParam.ModuleViewTypeCode === 100001) ||
-        ((this.PopupParam.OriginModuleViewTypeCode === 500000) &&
-          (this.PopupParam.OrginalModuleCode === 2756 || this.PopupParam.OrginalModuleCode === 2838))) ? true : false,
+        (this.PopupParam.OriginModuleViewTypeCode === 500000)) ? true : false,
       OrginalModuleCode: this.PopupParam.OrginalModuleCode,
       ModuleCode: this.PopupParam.ModuleCode,
       ModuleViewTypeCode: this.PopupParam.ModuleViewTypeCode,
@@ -2145,6 +2268,7 @@ export class CommitionComponent implements OnInit {
         this.IsAccept = checked;
         break;
       case 68:
+      case 169: // RFC 61935
         this.HasWinner = checked; // RFC 50573
         break;
     }
@@ -2183,8 +2307,15 @@ export class CommitionComponent implements OnInit {
   }
   print() {
     let UranTriplePrint = this.PrintTypeParams.selectedObject ? this.PrintTypeParams.selectedObject : 0;
-    // tslint:disable-next-line: max-line-length
-    this.Report.TenderProceedingsReport(this.ProductRequestObject.CostFactorID, this.OrderCommitionID, 2730, this.ProductRequestObject.RegionCode, 'صورتجلسه کمیسیون معاملات', this.HasEstimate, UranTriplePrint);
+    this.Report.TenderProceedingsReport(
+      this.ProductRequestObject.CostFactorID,
+      this.OrderCommitionID,
+      2730,
+      this.ProductRequestObject.RegionCode,
+      'صورتجلسه کمیسیون معاملات',
+      this.HasEstimate,
+      UranTriplePrint,
+      this.PopupParam.ModuleViewTypeCode);
     this.FirstPrintAction = false;
     this.SecondPrintAction = false;
 
@@ -2207,7 +2338,8 @@ export class CommitionComponent implements OnInit {
       if (this.HaveSetWinner) {
         this.ProductRequest.GetOrdersWithProductRequest(this.ProductRequestItemID).subscribe(ress => {
           // tslint:disable-next-line: max-line-length
-          this.AProposalList = (this.PopupParam.ModuleViewTypeCode === 47 || this.PopupParam.ModuleViewTypeCode === 112) ? ress.LastInquiryObject.ProposalReceivedList
+          this.AProposalList = (this.PopupParam.ModuleViewTypeCode === 47 || this.PopupParam.ModuleViewTypeCode === 112
+            || this.PopupParam.ModuleViewTypeCode === 166) ? ress.LastInquiryObject.ProposalReceivedList
             : ress.LastInquiryObject.ProposalList;
           const itemsToUpdate = [];
           this.GridApi.forEachNode(node => {
@@ -2229,29 +2361,37 @@ export class CommitionComponent implements OnInit {
       this.isClicked = false;
       this.type = '';
     } else if (this.type === 'global-choose-page' && ActionResult !== 'Exit') {
-      if (this.ClickedName === 'load-file-digital-sign') {
+      if (this.ClickedName === 'load-file-digital-sign' && ActionResult.DName !== 'Del') {
         this.ClickedName = null;
         this.LoadFileForSign(ActionResult);
       } else {
-        this.ComonService.GetAllArchiveDetailList(
-          this.OrderCommitionID, ActionResult === 3 ? 1047 : (ActionResult === 2 ? 661 : 601), true).subscribe(res => {
-            if (res && res.PDFSignersInfo && res.PDFSignersInfo.length > 0) {
-              this.type = '';
-              ActionResult === 3 ? this.SignArticle18(false) : (ActionResult === 2 ? this.SignFinal(false) : this.SignDraft(false));
-            } else if (res) {
-              if (ActionResult === 3) {
-                this.DraftOrFinallType = 3;
-              } else if (ActionResult === 2) {
-                this.DraftOrFinallType = 2;
+        if (ActionResult.DName === 'Del') {
+          this.ComonService.DeleteArchiveDetailDocuments(this.OrderCommitionID,
+            (ActionResult.DType === 2 ? 661 : 601),
+            this.PopupParam.ModuleCode).subscribe(res => {
+              this.ShowMessageBoxWithOkBtn('حذف با موفقیت انجام شد');
+            });
+        } else {
+          this.ComonService.GetAllArchiveDetailList(
+            this.OrderCommitionID, ActionResult === 3 ? 1047 : (ActionResult === 2 ? 661 : 601), true).subscribe(res => {
+              if (res && res.PDFSignersInfo && res.PDFSignersInfo.length > 0) {
+                this.type = '';
+                ActionResult === 3 ? this.SignArticle18(false) : (ActionResult === 2 ? this.SignFinal(false) : this.SignDraft(false));
+              } else if (res) {
+                if (ActionResult === 3) {
+                  this.DraftOrFinallType = 3;
+                } else if (ActionResult === 2) {
+                  this.DraftOrFinallType = 2;
+                } else {
+                  this.DraftOrFinallType = 1;
+                }
+                this.OnSignPrintEvent = true;
+                this.ShowMessageBoxWithYesNoBtn(' فایل مناقصه قبلا ذخیره شده است، آیا مایل به مشاهده آن هستید');
               } else {
-                this.DraftOrFinallType = 1;
+                ActionResult === 3 ? this.SignArticle18(false) : (ActionResult === 2 ? this.SignFinal(false) : this.SignDraft(false));
               }
-              this.OnSignPrintEvent = true;
-              this.ShowMessageBoxWithYesNoBtn(' فایل مناقصه قبلا ذخیره شده است، آیا مایل به مشاهده آن هستید');
-            } else {
-              ActionResult === 3 ? this.SignArticle18(false) : (ActionResult === 2 ? this.SignFinal(false) : this.SignDraft(false));
-            }
-          });
+            });
+        }
       }
     } else if (this.OnSignPrintEvent) {
       if (ActionResult === 'NO') {
@@ -2388,9 +2528,8 @@ export class CommitionComponent implements OnInit {
       ProductRequestObject: this.ProductRequestObject,
       ModuleViewTypeCode: this.PopupParam.ModuleViewTypeCode,
       currentRegionObject: this.PopupParam.currentRegionObject,
-      HasWarrantyItem: this.IsReadOnly || ((this.PopupParam.ModuleViewTypeCode === 100001) ||
-        ((this.PopupParam.OriginModuleViewTypeCode === 500000) &&
-          (this.PopupParam.OrginalModuleCode === 2756 || this.PopupParam.OrginalModuleCode === 2838))) ? true : false,
+      HasWarrantyItem: this.IsReadOnly || (this.PopupParam.ModuleViewTypeCode === 100001 ||
+        this.PopupParam.OriginModuleViewTypeCode === 500000) ? true : false,
       OrginalModuleCode: this.PopupParam.OrginalModuleCode,
     };
   }
@@ -2458,13 +2597,15 @@ export class CommitionComponent implements OnInit {
     this.isClicked = true;
     this.ParamObj = {
       HeaderName: 'انتخاب نوع فایل',
+      ModuleViewTypeCode: this.PopupParam.ModuleViewTypeCode,
+      ModuleCode: this.PopupParam.ModuleCode,
       RadioItems: [
+        // {
+        //   title: 'امضای نسخه پیش نویس',
+        //   type: 1
+        // },
         {
-          title: 'امضای نسخه پیش نویس',
-          type: 1
-        },
-        {
-          title: 'امضای نسخه نهایی',
+          title: 'نسخه نهایی',
           type: 2
         },
         // {
@@ -2670,7 +2811,9 @@ export class CommitionComponent implements OnInit {
           RegionCode: this.ProductRequestObject.RegionCode,
           PDFSignersInfo: PDFRes.PDFSignersInfo,
           HasTripleReport: this.HasTripleReport,
-          IsFinal: true // نهایی
+          IsFinal: true, // نهایی
+          HasDelBtn: false,
+          IsArticle18: false,
         };
       });
     this.OnSignPrintEvent = false;
@@ -2702,7 +2845,9 @@ export class CommitionComponent implements OnInit {
           RegionCode: this.ProductRequestObject.RegionCode,
           PDFSignersInfo: PDFRes.PDFSignersInfo,
           HasTripleReport: this.HasTripleReport,
-          IsFinal: false // پیش نویس
+          IsFinal: false, // پیش نویس
+          HasDelBtn: false,
+          IsArticle18: false,
         };
       });
     this.OnSignPrintEvent = false;
@@ -2731,7 +2876,9 @@ export class CommitionComponent implements OnInit {
         HasTripleReport: this.HasTripleReport,
         IsFinal: Type === 2,
         HaveUpload: !res || !res.PDFSignersInfo || res.PDFSignersInfo.length <= 0 && (!this.HaveShowSign),
-        SignByFile: false
+        SignByFile: false,
+        HasDelBtn: false,
+        IsArticle18: false,
       };
       // } else {
       //   this.ShowMessageBoxWithOkBtn('فایل بارگزاری نشده است.');
@@ -2750,13 +2897,15 @@ export class CommitionComponent implements OnInit {
     this.MinHeightPixel = null;
     this.isClicked = true;
     this.ParamObj = {
+      ModuleViewTypeCode: this.PopupParam.ModuleViewTypeCode,
+      ModuleCode: this.PopupParam.ModuleCode,
       HeaderName: 'انتخاب نوع فایل',
       RadioItems: this.BtnSignName === 'مشاهده نسخ الکترونیک صورتجلسه' ?
         [
-          {
-            title: this.HaveShowSign ? 'مشاهده نسخه پیش نویس' : 'امضای نسخه پیش نویس',
-            type: 1
-          },
+          // {
+          //   title: this.HaveShowSign ? 'مشاهده نسخه پیش نویس' : 'امضای نسخه پیش نویس',
+          //   type: 1
+          // },
           {
             title: this.HaveShowSign ? 'مشاهده نسخه نهایی' : 'امضای نسخه نهایی',
             type: 2
@@ -2768,10 +2917,10 @@ export class CommitionComponent implements OnInit {
         ]
         :
         [
-          {
-            title: this.HaveShowSign ? 'مشاهده نسخه پیش نویس' : 'امضای نسخه پیش نویس',
-            type: 1
-          },
+          // {
+          //   title: this.HaveShowSign ? 'مشاهده نسخه پیش نویس' : 'امضای نسخه پیش نویس',
+          //   type: 1
+          // },
           {
             title: this.HaveShowSign ? 'مشاهده نسخه نهایی' : 'امضای نسخه نهایی',
             type: 2
@@ -2842,6 +2991,11 @@ export class CommitionComponent implements OnInit {
             this.ProductRequestObject.HaveWinner !== null ? this.IsYes = this.ProductRequestObject.HaveWinner : this.IsYes = true; // RFC 50573
             if (this.ProductRequestObject.ProductRequestTypeCode === 4) { // RFC 54283
               this.IsDisplayJobCategory = true;
+            }
+            if (this.PopupParam && this.PopupParam.OriginModuleViewTypeCode === 300000) {
+              this.HaveAgent = true; // RFC 61802
+              this.onAgentOpen(1);
+              this.IsAgentDisable = true;
             }
             break;
           case 149:
@@ -2948,6 +3102,7 @@ export class CommitionComponent implements OnInit {
             this.ProductRequestObject.HaveWinner !== null ? this.HasWinner = this.ProductRequestObject.HaveWinner : this.HasWinner = true; // RFC 50728
             break;
           case 68:
+            this.EditableColumns = true; // RFC 61165
             this.HaveMultiContract = true;
             this.MultiContractQuestion = 'بیش از یک قرارداد تنظیم گردد؟';
             this.IsMultiContract = this.PopupParam.IsMultiContract;
@@ -3042,7 +3197,6 @@ export class CommitionComponent implements OnInit {
             this.IsDisplayJobCategory = true;
             break;
           case 400000: // جستجو پیشرفته
-            // this.HasTripleReport = true; // rfc 53619
             this.IsShowReport = false;
             this.IsnotActiveBtnSave = false;
             this.IsWFDisable = true;
@@ -3050,7 +3204,6 @@ export class CommitionComponent implements OnInit {
             this.IsDisplayJobCategory = true;
             break; // RFC 52811
           case 500000: //  حالت فقط خواندنی
-            // this.HasTripleReport = true; // rfc 53619
             this.IsShowReport = false;
             this.IsnotActiveBtnSave = false;
             this.IsWFDisable = true;
@@ -3263,6 +3416,7 @@ export class CommitionComponent implements OnInit {
             this.ProductRequestObject.HaveWinner !== null ? this.HasWinner = this.ProductRequestObject.HaveWinner : this.HasWinner = true; // RFC 50728
             break;
           case 68:
+            this.EditableColumns = true; // RFC 61165
             this.HaveMultiContract = true;
             this.MultiContractQuestion = 'بیش از یک قرارداد تنظیم گردد؟';
             this.IsMultiContract = this.PopupParam.IsMultiContract;
@@ -3353,7 +3507,6 @@ export class CommitionComponent implements OnInit {
             this.IsDisplayJobCategory = true;
             break;
           case 400000: // جستجو پیشرفته
-            // this.HasTripleReport = true; // rfc 53619
             this.IsShowReport = false;
             this.IsnotActiveBtnSave = false;
             this.IsWFDisable = true;
@@ -3362,7 +3515,6 @@ export class CommitionComponent implements OnInit {
             this.IsDisplayJobCategory = true;
             break; // RFC 52811
           case 500000: //  جستجو محدود
-            // this.HasTripleReport = true; // rfc 53619
             this.IsShowReport = false;
             this.IsnotActiveBtnSave = false;
             this.IsWFDisable = true;
@@ -3433,6 +3585,7 @@ export class CommitionComponent implements OnInit {
             }
             break;
           case 47:
+          case 166:
             this.EditableColumns = true;
             this.HasWarrantyItem = true;
             this.HaveExpertPerson = true;
@@ -3445,6 +3598,12 @@ export class CommitionComponent implements OnInit {
             this.ProductRequestObject.HaveWinner !== null ? this.IsYes = this.ProductRequestObject.HaveWinner : this.IsYes = true; // RFC 50573
             if (this.ProductRequestObject.ProductRequestTypeCode === 4) { // RFC 54283
               this.IsDisplayJobCategory = true;
+            }
+            if ((this.PopupParam && this.PopupParam.ModuleViewTypeCode === 166) || (this.PopupParam && this.PopupParam.ModuleViewTypeCode === 47
+              && this.PopupParam.OrginalModuleCode === 2793 && this.PopupParam.OriginModuleViewTypeCode === 100000)) {
+              this.HaveAgent = true; // RFC 61662 & 61802
+              this.onAgentOpen(1);
+              this.ShowAgentSaveBtn = true;
             }
             break;
           case 149:
@@ -3551,6 +3710,8 @@ export class CommitionComponent implements OnInit {
             this.ProductRequestObject.HaveWinner !== null ? this.HasWinner = this.ProductRequestObject.HaveWinner : this.HasWinner = true; // RFC 50728
             break;
           case 68:
+          case 169: // RFC 61935
+            this.EditableColumns = true; // RFC 61165 , اوتلوک خانم احمدی
             this.HaveMultiContract = true;
             this.MultiContractQuestion = 'بیش از یک قرارداد تنظیم گردد؟';
             this.IsMultiContract = this.PopupParam.IsMultiContract;
@@ -3564,6 +3725,12 @@ export class CommitionComponent implements OnInit {
             this.HasWarrantyItem = true;
             // tslint:disable-next-line: max-line-length
             this.ProductRequestObject.HaveWinner !== null ? this.HasWinner = this.ProductRequestObject.HaveWinner : this.HasWinner = true; // RFC 50573
+            if (this.PopupParam.ModuleViewTypeCode === 169 ||
+              (this.PopupParam.ModuleViewTypeCode === 68 && this.PopupParam.OriginModuleViewTypeCode === 100000)) { // RFC 62063
+              this.HaveAgent = true;
+              this.onAgentOpen(1);
+              this.ShowAgentSaveBtn = true;
+            }
             break;
           case 72:
           case 110: // RFC 50951
@@ -3621,6 +3788,9 @@ export class CommitionComponent implements OnInit {
             this.IsDisplayJobCategory = true;
             // tslint:disable-next-line: max-line-length
             this.ProductRequestObject.HaveWinner !== null ? this.HasWinner = this.ProductRequestObject.HaveWinner : this.HasWinner = true; // RFC 50728
+            this.HaveAgent = true; // 62063
+            this.onAgentOpen(1);
+            this.ShowAgentSaveBtn = true;
             break;
           case 100001: // مشاهده کمیسیون در ماژول اصلاح درخواست معامله
             this.IsnotActiveBtnSave = false;
@@ -3649,7 +3819,6 @@ export class CommitionComponent implements OnInit {
             this.IsDisplayJobCategory = true;
             break;
           case 400000: // جستجو پیشرفته
-            // this.HasTripleReport = true; // rfc 53619
             this.IsShowReport = false;
             this.IsnotActiveBtnSave = false;
             this.IsWFDisable = true;
@@ -3657,7 +3826,6 @@ export class CommitionComponent implements OnInit {
             this.IsDisplayJobCategory = true;
             break; // RFC 52811
           case 500000: //  جستجو محدود
-            // this.HasTripleReport = true; // rfc 53619
             this.IsShowReport = false;
             this.IsnotActiveBtnSave = false;
             this.IsWFDisable = true;
@@ -3705,6 +3873,25 @@ export class CommitionComponent implements OnInit {
             this.IsCompletionContractInfo = this.OrderCommitionObject ? true : false;
             break;
           case 156:
+            this.EditableColumns = true;
+            this.HasWarrantyItem = true;
+            this.HaveExpertPerson = true;
+            this.IsDisableRaste = true;
+            this.IsDisableRank = true;
+            this.IsDisablerdoIsMaterials = true
+            this.IsDisablerdoHaveMaterials = true;
+            this.IsDisableIsMultiYear = true;
+            this.HaveSign = this.EditableColumns = this.IsShowReport = this.IsnotActiveBtnSave = false;
+            this.HaveShowSign = this.HasWarrantyItem = this.HaveExpertPerson = this.IsWFDisable = this.IsType49 = this.DigitalSignShow = true;
+            this.BtnSignName = 'مشاهده نسخ الکترونیک صورتجلسه';
+            this.WfWinnerHeight = 170;
+            this.WinnerQuestion = 'آیا مناقصه عمومی برنده دارد؟';
+            this.ProductRequestObject.HaveWinner !== null ? this.IsYes = this.ProductRequestObject.HaveWinner : this.IsYes = true;
+            if (this.ProductRequestObject.ProductRequestTypeCode === 4) { // RFC 54283
+              this.IsDisplayJobCategory = true;
+            }
+            this.HasMaterialsDifference = this.ProductRequestObject.ProductRequestTypeCode === 1 ? true : false;
+            break;
           case 163:
             this.HaveSign = this.EditableColumns = this.IsShowReport = this.IsnotActiveBtnSave = false;
             this.HaveShowSign = this.HasWarrantyItem = this.HaveExpertPerson = this.IsWFDisable = this.IsType49 = this.DigitalSignShow = true;
@@ -3730,15 +3917,15 @@ export class CommitionComponent implements OnInit {
     if (this.PopupParam.OrginalModuleCode !== 2793 && ModuleViewTypeCode) {
       switch (ModuleViewTypeCode) {
         case 99999:
-          if (this.OrderCommitionObject.OrderCommitionMemberList && 
-            this.OrderCommitionObject.OrderCommitionMemberList.length > 0 && 
-            this.ProductRequestObject.RegionCode !== 200 ) {   // 61131 - و اوتلوک در تاریخ 1400/03/08
+          if (this.OrderCommitionObject.OrderCommitionMemberList &&
+            this.OrderCommitionObject.OrderCommitionMemberList.length > 0 &&
+            this.ProductRequestObject.RegionCode !== 200) {   // 61131 - و اوتلوک در تاریخ 1400/03/08
             this.OrderCommitionObject.OrderCommitionMemberList.forEach(element => {
-              if (element.FinalSignDate || element.DraftSignDate) {
+              if (element.FinalSignDate) {
                 this.IsWFDisable = true;
                 this.IsnotActiveBtnSave = this.DocUploadEnabled = false;
                 this.IsDisableJobCategory = this.IsType49 = true;
-                this.IsReadOnly = true;
+                this.IsReadOnly = this.PopupParam.ModuleViewTypeCode === 49 ? false : true; // RFC 61447
               }
             });
           }
@@ -3807,8 +3994,61 @@ export class CommitionComponent implements OnInit {
           HasTripleReport: this.HasTripleReport,
           IsFinal: false,
           IsArticle18: true,
+          HasDelBtn: false,
         };
       });
     this.OnSignPrintEvent = false;
+  }
+
+  onAgentPersonChanged(event) {
+    if (!event) {
+      this.AgentParams.selectedObject = (undefined);
+    } else {
+      this.AgentParams.selectedObject = event;
+    }
+  }
+
+  onAgentOpen(type = 0) {
+    this.Actor.GetPersonList(1520, this.ProductRequestObject.RegionCode, true).subscribe(res => {
+      this.AgentItems = res;
+      if (type === 1 && this.ProductRequestObject) {
+        // tslint:disable-next-line: max-line-length
+        this.ProductRequest.GetCommitionAgentPerson(this.ProductRequestObject.CostFactorID).subscribe(ress => {
+          if (ress) {
+            this.AgentParams.selectedObject = ress;
+          }
+        });
+      }
+    });
+  }
+
+  onSaveAgentPerson() {
+    if (this.CheckRegionWritable) {
+      this.ShowMessageBoxWithOkBtn('امکان ثبت به دلیل دسترسی فقط خواندنی کاربر در این واحد اجرایی وجود ندارد');
+      return;
+    }
+
+    if (!this.OrdersObject || this.OrdersObject === null || isUndefined(this.OrdersObject)) {
+      // tslint:disable-next-line: max-line-length
+      this.ShowMessageBoxWithOkBtn('به علت عدم دریافت پاکات و عدم درج لیست متقاضیان، امکان ثبت وجود ندارد. در صورت نیاز با راهبر تماس بگیرید.');
+    }
+
+    if (this.AgentParams.selectedObject && this.CostFactorID) {
+      const AgentPersonObj = {
+        ActorID: this.AgentParams.selectedObject,
+        CostFactorID: this.ProductRequestObject.CostFactorID,
+        RoleID: 1520
+      };
+      this.ProductRequest.SaveAgentProductRequestPerson(AgentPersonObj, this.PopupParam.ModuleCode,
+        this.PopupParam.OrginalModuleCode).subscribe(x => {
+          this.ShowMessageBoxWithOkBtn('ذخیره نماینده معاون شهردار با موفقیت انجام شد');
+        });
+    } else {
+      this.ShowMessageBoxWithOkBtn('ابتدا نماینده معاون شهردار را انتخاب نمایید');
+    }
+  }
+
+  IsMultiYearRadioClick(IsMultiYear) {
+    this.IsMultiYear = IsMultiYear;
   }
 }

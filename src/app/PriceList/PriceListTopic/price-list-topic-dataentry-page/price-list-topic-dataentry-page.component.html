@@ -37,7 +37,7 @@
             <span style="color: red;">*</span>
             <span class="table-cell-Lable"> مبلغ </span>
             <app-number-input-component class="col-form-label" [ReadOnly]="DisabledAmount" [Value]="Amount"
-              (ValueChange)="getAmount($event)" [PerCentWidth]="80" [PixelHeight]="25">
+              (ValueChange)="getAmount($event)" [PerCentWidth]="80" [PixelHeight]="25"  [HaveNegative]= "true">
             </app-number-input-component>
           </td>
         </tr>

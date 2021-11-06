@@ -85,7 +85,7 @@
           </td>
           <td width="25%">
             <span class="table-cell-Lable">کد درخواست</span><input style="width: 68% " class="form-control input-style"
-              type="text" value="{{ProductRequestNo}}" readonly />
+              type="text" value="{{ProductRequestCode}}" readonly />
           </td>
           <td width="25%">
             <span style="color: red;">*</span>
@@ -196,7 +196,7 @@
         <tr>
           <td colspan="1" width="25%" style="vertical-align: initial;">
             <span class="table-cell-Lable">شماره درخواست </span><input style="width: 60% "
-              class="form-control input-style" type="text" value="{{ProductRequestCode}}" readonly />
+              class="form-control input-style" type="text" value="{{ProductRequestNo}}" readonly />
           </td>
           <td colspan="3" width="75%">
             <span *ngIf="ModuleViewTypeCode === 89 || (IsType114 && ModuleCode === 2730)"
@@ -273,7 +273,6 @@
       <legend style="width: 7%;" class="legend">اطلاعات قرارداد</legend>
       <table style="width: 100%;">
         <tr>
-
           <td colspan="1" width="25%">
             <span class="table-cell-Lable">شماره قرارداد</span><input [readonly]="!IsEditable  || IsContractSelect"
               style="width: 60%; " class="form-control input-style" type="text" name="ContractCode"
@@ -306,6 +305,9 @@
     </li>
     <li class="nav-item">
       <a class="nav-link" href="#request-related-product" role="tab" data-toggle="tab">اقلام تعرفه</a>
+    </li>
+    <li  *ngIf="false" class="nav-item">
+      <a class="nav-link" href="#receive-doc-product" role="tab" data-toggle="tab">اسناد دریافتنی</a>
     </li>
     <!--<li class="nav-item">
           <a class="nav-link" href="#request-person-item" role="tab" data-toggle="tab">عوامل اجرایی</a>
@@ -436,7 +438,7 @@
       <app-grid [gridHeight]="WarrantyDocGridHeight" (cellEditingStarted)="onReceiveDocEditingStarted($event)"
         (RowClick)="onReceiveDocRowClick($event)" (GridReady)="onReceiveDocGridReady($event)"
         [columns]="ReceiveDocColDef" [IsEditable]="(HaveReceiveDoc && !IsShowType108) && IsEditeSearch"
-        [rowsData]="ReceiveDocRowData" [HaveBorder]="true">
+        [rowsData]="ReceiveDocRowData" [HaveBorder]="true"  [HaveDelete]="HaveDelete">
       </app-grid>
       <!-- <button [disabled]="!ReceiveDocEnable" type="submit" (click)="onReceiveDocArchiveClick()"
         class="btn-gray-border btn btn-primary small-btn btnGreen">
@@ -451,6 +453,27 @@
         [gridHeight]="100" (cellEditingStarted)="onRelatedProductcellEditingStarted($event)">
       </app-grid>
     </div>
+    <div role="tabpanel" class="tab-pane fade" id="receive-doc-product" style="margin-bottom: 5px;"
+      [style.height.%]="tabpanelHeight">
+      <app-grid (RowClick)="ReceiveDocProductRowClick($event)" (GridReady)="onReceiveDocProductGridReady($event)"
+        [columns]="ReceiveDocProductColDef" [IsEditable]="false" [rowsData]="ReceiveDocProductRowData"
+        [gridHeight]="85" (cellEditingStarted)="onReceiveDocProductcellEditingStarted($event)">
+      </app-grid>
+      <div class="main-form-body" style=" margin-top: 4px; height: 35px;padding: 3px;">
+        <button (click)="onAddReceiveDocClick()" id="btnInsert" class="btn btn-primary btnGreen">
+          <img width="15px" height="15px" src="assets/Icons/Add.png" />
+          ایجاد
+        </button>
+        <button (click)="onEditReceiveDocClick()" id="btnInsert" class="btn btn-primary btnGreen">
+          <img width="15px" height="15px" src="assets/Icons/update.png" />
+          اصلاح
+        </button>
+        <button class="btn btn-primary btnGreen" (click)="onDeleteReceiveDocclick()">
+          <img width="15px" height="15px" src="assets/Icons/delete.png" />
+          حذف
+        </button>
+      </div>
+    </div>
   </div>
   <fieldset *ngIf="BoardDecisions" [style.height.px]="WfDetailsShowHeight" class="feild-set"
     style="display: inherit; padding-top: 0px;margin-top: 3px;min-height: 0px;">
@@ -462,15 +485,15 @@
       style="display: inline-block;height: 40px;width: 100%;max-height: 40px; min-height: 40px; max-width: 100%;">
     </textarea>
   </fieldset>
-  <fieldset *ngIf="WfDetailsShow" [style.height.px]="WfDetailsShowHeight" class="feild-set"
+  <fieldset *ngIf="WfDetailsShow " [style.height.px]="WfDetailsShowHeight" class="feild-set"
     style="display: inherit; padding-top: 0px;margin-top: 3px;min-height: 0px;">
     <legend [style.width.%]="WFLegendWidth" style="width: 11%;" class="legend">
       {{WFFieldSetLegend}}</legend>
-    <table *ngIf="HaveExpertPerson" style="width: 100%;margin-top: 5px;">
+    <table *ngIf="HaveExpertPerson " style="width: 100%;margin-top: 5px;">
       <tr>
-        <td style="width: 100%;text-align: right">
+        <td style="width: 50%;text-align: right">
           <!-- RFC 52347 -->
-          <span *ngIf="ModuleViewTypeCode === 7 || ModuleViewTypeCode === 85 ||
+          <span *ngIf="ModuleViewTypeCode === 7 || ModuleViewTypeCode === 176 || ModuleViewTypeCode === 85 || ModuleViewTypeCode === 170 ||
           ModuleViewTypeCode === 86 || ModuleViewTypeCode === 87 || ModuleViewTypeCode === 103
           || ModuleViewTypeCode === 124 || ModuleViewTypeCode === 125 || ModuleViewTypeCode === 126 
           || (ModuleViewTypeCode === 88 && 
@@ -481,6 +504,24 @@
             [NgSelectParams]="ExpertParams" [Items]="ExpertItems" (selectedChange)="onChangeExpert($event)"
             [Disabled]="!ExpertIsEditable">
           </app-ng-select-virtual-scroll>
+        </td>
+        <td *ngIf="IsUpdateBefore" style="width: 50%;text-align: right">
+          <span class="table-cell-Lable">ارجاع به درخواست کننده جهت اصلاح پیش از آگهی</span>
+          <div class="redio-div">
+            <div class="custom-control custom-radio custom-control-inline" style="display: inherit !important;">
+              <input [checked]="IsUpdateBeforeAdevertising" type="radio" class="custom-control-input"
+                id="IsUpdateBeforeAdevertising" name="IsUpdateBeforeAdevertising"
+                (click)="IsUpdateBeforeAdevertisingRedioClick(true)">
+              <label style="margin: auto;" class="custom-control-label redio-label"
+                for="IsUpdateBeforeAdevertising">بله</label>
+            </div>
+            <div class="custom-control custom-radio custom-control-inline" style="display: inherit !important;">
+              <input [checked]="!IsUpdateBeforeAdevertising" type="radio" class="custom-control-input"
+                id="IsNotUpdateBeforeAdevertising" name="IsUpdateBeforeAdevertising">
+              <label style="margin: auto;" class="custom-control-label redio-label" for="IsNotUpdateBeforeAdevertising"
+                (click)="IsUpdateBeforeAdevertisingRedioClick(false)">خیر</label>
+            </div>
+          </div>
         </td>
       </tr>
     </table>
@@ -761,6 +802,7 @@
       </div>
     </div>
   </fieldset>
+
   <fieldset *ngIf="IsShowContractContentfor222" style="display: inherit;min-height: 20px;margin-top: 2px;"
     class="feild-set">
     <table style="width: 100%;">
@@ -1362,23 +1404,32 @@
   <fieldset *ngIf="HasSecretQuestion" style="display: inherit;min-height: 38px;margin-top: 2px;" class="feild-set">
     <table style="width: 100%;">
       <tr>
-        <td width="55%" *ngIf="HasMutualContractQuestion">
-          <app-radio-box-component [Mode]="'Dual'" [Params]="McRadioTypes" [Display]="'inline'" [Bordered]="false"
-            [DefaultSelected]='HaveMutualContract ? HaveMutualContract : false' [Title]="MutualContractQuestion"
-            [QuestionStyle]="true" [Title_Width]="120" [Disabled]="ShowQuestion"
+        <td width="30%" *ngIf="HasMutualContractQuestion">
+          <app-radio-box-component [BoxWidth]="46" [Mode]="'Dual'" [Params]="McRadioTypes" [Display]="'inline'"
+            [Bordered]="false" [DefaultSelected]='HaveMutualContract ? HaveMutualContract : false'
+            [Title]="MutualContractQuestion" [QuestionStyle]="true" [Title_Width]="120" [Disabled]="ShowQuestion"
             (SelectedOption)="HaveMutualContractRedioClick($event)"></app-radio-box-component>
         </td>
-        <td width="45%" *ngIf="!IsSecretQuestion">
+        <td width="30%" *ngIf="!IsSecretQuestion">
 
-        <td width="45%" *ngIf="IsSecretQuestion">
+        <td width="30%" *ngIf="IsSecretQuestion">
           <app-radio-box-component [Mode]="'Dual'" [Params]="ScRadioTypes" [Display]="'inline'" [Bordered]="false"
             [DefaultSelected]='IsSecret ? IsSecret : false' [Title]="'آیا دارای شرایط محرمانگی است؟'"
             [QuestionStyle]="true" [Disabled]="ShowQuestion" [Title_Width]="120"
             (SelectedOption)="IsSecretRedioClick($event)">
           </app-radio-box-component>
         </td>
-        <td width="55%" *ngIf="!HasMutualContractQuestion">
+        <td width="30%" *ngIf="!HasMutualContractQuestion">
         </td>
+
+        <td width="30%" *ngIf="IsUpdateBefore">
+          <app-radio-box-component [BoxWidth]="43" [Mode]="'Dual'" [Params]="IcRadioTypes" [Display]="'inline'"
+            [Bordered]="false" [DefaultSelected]='IsUpdateBeforeAdevertising ?IsUpdateBeforeAdevertising : false'
+            [Title]="'ارجاع به درخواست کننده جهت اصلاح پیش از آگهی'" [QuestionStyle]="true" [Title_Width]="120"
+            (SelectedOption)="IsUpdateBeforeAdevertisingRedioClick($event)">
+          </app-radio-box-component>
+        </td>
+
       </tr>
     </table>
   </fieldset>
@@ -1417,6 +1468,11 @@
     <button *ngIf="ShowSave106" (click)="onSave106()" id="btnSave" class="btn btn-primary btnGreen">
       <img width="15px" height="15px" src="assets/Icons/save.png" />
       ثبت
+    </button>
+    <button *ngIf="btnshowcontractlist" id="btnshowcontractlist" class="btn btn-primary btnGreen"
+      (click)="showcontractlistclick()">
+      <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
+      نقل از قرارداد
     </button>
     <button *ngIf="HaveDigitalSign" (click)="FinalMinuteDigitalSign()" id="btnTenderRep"
       class="btn btn-primary btnGreen">
@@ -1565,7 +1621,15 @@
 
 <ng-template #UploadArchive let-row>
   <img [ngClass]="'img-def'" style="cursor: pointer;" width="16px" height="16px" src="assets/Icons/TechnicalArchive.png"
-    (click)="onReceiveDocArchiveClick(row)" />
+    (click)="(row.ReceiveDocID > 0 && !IsNew && 
+    (row.ReceiveDocStatusCode !== 1 && row.ReceiveDocStatusCode !== 3)) ? 
+    '' : onReceiveDocArchiveClick(row)  " />
+</ng-template>
+
+<ng-template #DelRecDoc let-row>
+  <img [ngClass]="'img-def'" style="cursor: pointer;" width="16px" height="16px" src="assets/Icons/delete-icon.png"
+    (click)="(row.ReceiveDocID > 0 && !IsNew && 
+    (row.ReceiveDocStatusCode !== 1 && row.ReceiveDocStatusCode !== 3)) ? '' : onDelRecDocClick(row) " />
 </ng-template>
 
 <app-over-popup *ngIf="isClicked" [PopupType]="PopUpType" [HaveMaxBtn]="HaveMaxBtn"

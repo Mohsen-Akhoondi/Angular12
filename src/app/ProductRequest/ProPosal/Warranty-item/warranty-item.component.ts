@@ -3,12 +3,12 @@ import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-ed
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { AutomationService } from 'src/app/Services/BaseService/AutomationService';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 
 @Component({
   selector: 'app-warranty-item',
@@ -239,7 +239,7 @@ export class WarrantyItemComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
@@ -347,6 +347,7 @@ export class WarrantyItemComponent implements OnInit {
       case 100002:
       case 112: // rfc 50851
       case 149:
+      case 166:
         this.IsLawful = this.ProductRequestObject.IsWarrantyValidity;
         this.LetterTypeCode = 7;
         break;
@@ -365,7 +366,7 @@ export class WarrantyItemComponent implements OnInit {
     this.rowData = [];
   }
   SetPRWarrantyReciveDocList() {
-  this.ProductRequest.GetPRCostWarrantyList(this.CostFactorID, this.OrderCommitionID).subscribe(res => {
+    this.ProductRequest.GetPRCostWarrantyList(this.CostFactorID, this.OrderCommitionID).subscribe(res => {
       this.rowData = res;
     });
   }
@@ -475,7 +476,7 @@ export class WarrantyItemComponent implements OnInit {
       ReceiveDocList.push(ReceiveDocObj);
     });
     // tslint:disable-next-line:max-line-length
-   this.ProductRequest.SavePRWarrantyAndValidity(this.CostFactorID, this.IsLawful ? 1 : 0, ReceiveDocList, this.PopupParam.OrginalModuleCode, this.OrderCommitionID).subscribe(x => {
+    this.ProductRequest.SavePRWarrantyAndValidity(this.CostFactorID, this.IsLawful ? 1 : 0, ReceiveDocList, this.PopupParam.OrginalModuleCode, this.OrderCommitionID).subscribe(x => {
       this.ShowMessageBoxWithOkBtn('ثبت اطلاعات ضمانت نامه با موفقیت انجام شد');
       this.SetPRWarrantyReciveDocList();
     });

@@ -106,12 +106,12 @@ export class ProductRequestCoefTypeComponent implements OnInit {
         this.HaveHeader = true;
         this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
       },
-        err => {
-          this.btnclicked = true;
-          this.type = 'message-box';
-          this.HaveHeader = true;
-          this.alertMessageParams.message = 'ثبت با مشکل مواجه شد!';
-        }
+        // err => {
+        //   this.btnclicked = true;
+        //   this.type = 'message-box';
+        //   this.HaveHeader = true;
+        //   this.alertMessageParams.message = 'ثبت با مشکل مواجه شد!';
+        // }
       );
   }
 

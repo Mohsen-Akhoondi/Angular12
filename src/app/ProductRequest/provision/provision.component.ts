@@ -3,8 +3,9 @@ import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_a
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { FinYearService } from 'src/app/Services/BaseService/FinYearService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { AutomationService } from 'src/app/Services/BaseService/AutomationService';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
+
 @Component({
   selector: 'app-provision',
   templateUrl: './provision.component.html',
@@ -143,7 +144,7 @@ export class ProvisionComponent implements OnInit {
         field: 'Amount',
         width: 110,
         resizable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         HaveThousand: true,
         valueFormatter: function currencyFormatter(params) {

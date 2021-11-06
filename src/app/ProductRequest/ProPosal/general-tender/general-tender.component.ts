@@ -13,6 +13,7 @@ import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jala
 import { isUndefined } from 'util';
 import { AutomationService } from 'src/app/Services/BaseService/AutomationService';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
+import { DealsHallService } from 'src/app/Services/ContractService/DealsHall/DealsHallService';
 
 @Component({
   selector: 'app-general-tender',
@@ -24,6 +25,7 @@ export class GeneralTenderComponent implements OnInit {
   @ViewChild('IsReceivedValid') IsReceivedValid: TemplateRef<any>;
   @ViewChild('UploadArchive') UploadArchive: TemplateRef<any>;
   @ViewChild('Print') Print: TemplateRef<any>;
+  @ViewChild('CancelReceiveElectronicDocs') CancelReceiveElectronicDocs: TemplateRef<any>;
   @Input() PopupParam;
   @Output() PopupOutPut: EventEmitter<any> = new EventEmitter<any>();
   @Output() ProductRequestCostClosed: EventEmitter<any> = new EventEmitter<any>();
@@ -204,13 +206,18 @@ export class GeneralTenderComponent implements OnInit {
   IsEditable = true;
   CheckValidateDepositAmount = false;
   ProductRequestItemID = -1;
+  DateFormat = 'YYYY/MM/DD HH:mm:ss';
+  ShowMode = 'daytime';
+  ProposalReadingDate;
+  HaveProposalReadingDate = false;
   constructor(private ProductRequest: ProductRequestService,
     private ContractList: ContractListService,
     private User: UserSettingsService,
     private RefreshPersonItems: RefreshServices,
     private Actor: ActorService,
     private Report: ReportService,
-    private Automation: AutomationService) {
+    private Automation: AutomationService,
+    private DealsHall: DealsHallService) {
     this.PersonTypeList = [{ PersonTypeName: 'حقیقی', PersonTypeCode: 1 },
     { PersonTypeName: 'حقوقی', PersonTypeCode: 2 }];
   }
@@ -938,6 +945,21 @@ export class GeneralTenderComponent implements OnInit {
           }
         },
         {
+          headerName: 'لغو دریافت الکترونیک اسناد',
+          field: '',
+          width: 165,
+          sortable: false,
+          resizable: false,
+          hide: this.PopupParam.OriginModuleViewTypeCode !== 100000 ,
+          cellStyle: function (params) {
+            return { 'text-align': 'center' };
+          },
+          cellRendererFramework: TemplateRendererComponent,
+          cellRendererParams: {
+            ngTemplate: this.CancelReceiveElectronicDocs,
+          }
+        },
+        {
           headerName: 'حقیقی / حقوقی',
           field: 'PersonTypeName',
           cellEditorFramework: NgSelectCellEditorComponent,
@@ -1180,6 +1202,7 @@ export class GeneralTenderComponent implements OnInit {
       this.SuggestionDeadlineDate = this.InquiryObject.ShortSuggestionDeadline;
       this.AdvertisingDate = this.InquiryObject.ShortAdvertisingDate;
       this.InquiryDate = this.InquiryObject.ShortInquiryDate;
+      this.ProposalReadingDate = this.InquiryObject.ShortProposalReadingDate;
       this.Note = this.InquiryObject.Note;
       this.WarrantyReceiveDocTypeParams.selectedObject = this.InquiryObject.RequestDocTypeCode;
       this.PRCostRowData = this.InquiryObject.ProposalList;
@@ -1325,6 +1348,7 @@ export class GeneralTenderComponent implements OnInit {
           this.ISStarInquiryDateLableName = true;
           this.ISStarDocumentDeadlineDate = true;
           this.CheckValidate = true;
+          this.HaveProposalReadingDate =  this.ProductRequestObject.DealMethodCode === 6 ? true : false;
           break;
         case 29:
           this.InquiryNoLableName = 'شماره';
@@ -1396,6 +1420,30 @@ export class GeneralTenderComponent implements OnInit {
           this.FilterDocumentTypeCodeList.push(55);
           break;
         case 38:
+          this.InquiryNoLableName = 'شماره';
+          this.InquiryDateLableName = 'تاریخ';
+          this.DepositAmountLableName = 'مبلغ سپرده';
+          this.InquiryNoteLableName = 'عنوان';
+          this.HaveDetails = true;
+          this.HasPrepaymentAmount = this.HasActorCondition = this.HaveAdvertiseUpload = false;
+          this.HaveRatingRequired = true;
+          this.HaveAdvertising = true;
+          this.HasDepositAmount = this.HaveAdvertisingShow = true;
+          this.HaveSupplers = this.HaveProposaletter = this.IsWFDisable = this.HaveSupplersInfo = false;
+          this.InquiryHeaderName = 'مناقصه عمومی';
+          this.FilterDocumentTypeCodeList.push(143);
+          this.FilterDocumentTypeCodeList.push(144);
+          this.FilterDocumentTypeCodeList.push(145);
+          this.FilterDocumentTypeCodeList.push(146);
+          this.ISStarInquiryDateLableName = true;
+          this.ISStarDocumentDeadlineDate = true;
+          this.CheckValidate = true;
+          this.HasWFSave = true;
+          this.HaveAdvertisingDates = true;
+          this.HaveAdvertisingDate = false; // به درخواست خانم قربانزاده
+          this.DepositAmountWidth = 50;
+          this.HaveProposalReadingDate =  this.ProductRequestObject.DealMethodCode === 1 ? true : false;
+          break;
         case 139:
           this.InquiryNoLableName = 'شماره';
           this.InquiryDateLableName = 'تاریخ';
@@ -1714,6 +1762,7 @@ export class GeneralTenderComponent implements OnInit {
           this.HaveAdvertisingDates = true; // RFC 50325
           this.HaveAdvertisingDate = false; // RFC 50325
           this.HaveAdvertisingShow = true; // RFC 50325
+          this.HaveProposalReadingDate =  this.ProductRequestObject.DealMethodCode === 5 ? true : false;
           break;
         case 133:
           this.InquiryNoLableName = 'شماره';
@@ -2073,6 +2122,7 @@ export class GeneralTenderComponent implements OnInit {
     this.SuggestionDeadlineDate = this.InquiryObject.ShortSuggestionDeadline;
     this.AdvertisingDate = this.InquiryObject.ShortAdvertisingDate;
     this.InquiryDate = this.InquiryObject.ShortInquiryDate;
+    this.ProposalReadingDate = this.InquiryObject.ShortProposalReadingDate;
     this.Note = this.InquiryObject.Note;
     this.WarrantyReceiveDocTypeParams.selectedObject = this.InquiryObject.RequestDocTypeCode;
     this.PRCostRowData = this.InquiryObject.ProposalList;
@@ -2201,7 +2251,8 @@ export class GeneralTenderComponent implements OnInit {
     let ValidateForm = true;
     ValidateForm = ValidateForm && this.InquiryNo &&
       (this.ISStarInquiryDateLableName === false ? true : this.InquiryDate) &&
-      (!this.ISStarDocumentDeadlineDate ? true : this.DocumentDeadlineDate) && this.Note;
+      (!this.ISStarDocumentDeadlineDate ? true : this.DocumentDeadlineDate) &&
+      (!this.HaveProposalReadingDate ? true : this.ProposalReadingDate) && this.Note;
     if (ValidateForm) {
       const Inquery = {
         InquiryID: this.InquiryObject ? this.InquiryObject.InquiryID : -1,
@@ -2222,7 +2273,8 @@ export class GeneralTenderComponent implements OnInit {
         DeliveryLocation: this.DeliveryLocation,
         ReviewMethodCode: this.ReviewMethodParams.selectedObject ? this.ReviewMethodParams.selectedObject : null,
         RequestDocTypeCode: this.WarrantyReceiveDocTypeParams.selectedObject,
-        WarrantyDuration: this.WarrantyDuration
+        WarrantyDuration: this.WarrantyDuration,
+        ProposalReadingDate: this.ProposalReadingDate,
       };
       let ItemNo = 0;
       const ProposalList = [];
@@ -2705,6 +2757,9 @@ export class GeneralTenderComponent implements OnInit {
   OnAdvertisingDateChange(ADate) {
     this.AdvertisingDate = ADate.MDate;
   }
+  OnProposalReadingDateChange(ADate) {
+    this.ProposalReadingDate = ADate.MDate;
+  }
   ShowMessageBoxWithOkBtn(message) {
     this.isClicked = true;
     this.type = 'message-box';
@@ -3119,6 +3174,7 @@ export class GeneralTenderComponent implements OnInit {
     let ValidateForm = true;
     ValidateForm = ValidateForm && this.InquiryNo && (this.ISStarInquiryDateLableName === false ? true : this.InquiryDate) &&
       (!this.ISStarDocumentDeadlineDate || this.ModuleViewTypeCode === 131 ? true : this.DocumentDeadlineDate) && this.Note
+      && (!this.HaveProposalReadingDate ? true : this.ProposalReadingDate)
       && (this.ModuleViewTypeCode !== 131 ? true : this.DepositAmount); // RFC 57759
     if (ValidateForm) {
       const Inquery = {
@@ -3132,7 +3188,8 @@ export class GeneralTenderComponent implements OnInit {
         DepositAmount: this.DepositAmount,
         DocumentDeadline: this.DocumentDeadlineDate,
         AdvertisingDate: this.AdvertisingDate,
-        RequestDocTypeCode: this.WarrantyReceiveDocTypeParams.selectedObject
+        RequestDocTypeCode: this.WarrantyReceiveDocTypeParams.selectedObject,
+        ProposalReadingDate: this.ProposalReadingDate,
       };
       if (CheckExceptions) {
         this.ProductRequest.GetSaveAdvertisingInquiryExceptions(this.ProductRequestObject.CostFactorID).subscribe((res: any) => {
@@ -3240,6 +3297,19 @@ export class GeneralTenderComponent implements OnInit {
         ModuleViewTypeCode: 300000, // RFC 54203
         HeaderName: 'تامین کننده حقوقی',
       };
+    }
+  }
+  onCancelReceiveElectronicDocs(row) { // RFC 61965
+    if (!row.ProposalID || row.ProposalID < 0) {
+      this.ShowMessageBoxWithOkBtn('متقاضی جهت لغو دریافت الکترونیک اسناد انتخاب نشده است');
+      return;
+    }
+    if (row.ProposalID) {
+      this.DealsHall.CancelReceiveElectronicDocs(row.ProposalID).subscribe(res => {
+        if (res) {
+          this.ShowMessageBoxWithOkBtn('حذف تایید نهایی ارسال الکترونیک اسناد با موفقیت انجام شد');
+        } 
+      });
     }
   }
 }

@@ -2,9 +2,8 @@ import { Component, OnInit, Input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
-
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 @Component({
   selector: 'app-evaluate-type-page',
   templateUrl: './evaluate-type-page.component.html',
@@ -97,7 +96,7 @@ export class EvaluateTypePageComponent implements OnInit {
         headerName: 'کد نوع ارزیابی',
         field: 'EvaluateTypeCode',
         width: 120,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 3 },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {

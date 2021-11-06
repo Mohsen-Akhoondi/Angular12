@@ -162,7 +162,7 @@ export class ProductRequestPersonItemComponent implements OnInit {
             } else {
               if (this.PopupParam.ModuleViewTypeCode && this.PopupParam.ModuleViewTypeCode === 7) {
                 return false;
-              } if (params.data.RoleID === 1156 || params.data.RoleID === 963 || params.data.RoleID === 974) {
+              } if (params.data.RoleID === 1156 || params.data.RoleID === 963 || params.data.RoleID === 974 || params.data.RoleID === 1301) {
                 return false;
               } else {
                 return this.IsEditable;
@@ -310,7 +310,7 @@ export class ProductRequestPersonItemComponent implements OnInit {
   }
   onRowClick(row) {
     if (this.PopupParam.ModuleViewTypeCode !== 200000 && this.PopupParam.ModuleViewTypeCode !== 300000) {
-      if (row && (row.data.RoleID === 1156 || row.data.RoleID === 963 || row.data.RoleID === 974)) {
+      if (row && (row.data.RoleID === 1156 || row.data.RoleID === 963 || row.data.RoleID === 974 || row.data.RoleID === 1301)) {
         this.PRPersonHaveDelete = false;
       } else {
         this.PRPersonHaveDelete = true;

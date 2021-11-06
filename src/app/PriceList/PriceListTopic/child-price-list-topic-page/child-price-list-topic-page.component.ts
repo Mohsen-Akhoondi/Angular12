@@ -2,7 +2,6 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
 import { of } from 'rxjs';
 import { Router } from '@angular/router';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 @Component({
   selector: 'app-child-price-list-topic-page',

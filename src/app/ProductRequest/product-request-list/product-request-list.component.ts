@@ -4,7 +4,6 @@ import { ActivatedRoute } from '@angular/router';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { single } from 'rxjs/operators';
-import {  GridOptions } from 'ag-grid-community';
 import { of } from 'rxjs';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { NgSelectConfig } from 'src/app/Shared/ng-select';
@@ -267,7 +266,8 @@ export class ProductRequestListComponent implements OnInit {
   }
 
   popupclosed() {
-    if (this.type === 'completion-contract-info') {
+    if (this.type === 'completion-contract-info' || this.type === 'product-request-page'
+        || this.type === 'researcher-product-request-list' || this.type === 'pure-product-request-page') {
       this.rowData = this.ProductRequest.GetProductRequestList(this.RegionParams.selectedObject, this.ModuleCode);
     }
     this.HaveMaxBtn = false;
@@ -287,8 +287,8 @@ export class ProductRequestListComponent implements OnInit {
   }
 
   ngOnInit() {
-    if (this.ModuleCode === 2939 || this.ModuleCode === 2944 ||
-      this.ModuleCode === 2951 || this.ModuleCode === 2952) {
+    if (this.ModuleCode === 2939 || this.ModuleCode === 2944
+      || this.ModuleCode === 2951 || this.ModuleCode === 2952) {
       this.NoIsIncomplete = false;
     }
     // tslint:disable-next-line: no-shadowed-variable
@@ -442,8 +442,6 @@ export class ProductRequestListComponent implements OnInit {
           this.ShowMessageBoxWithOkBtn('حد معامله مشخص نشده است.');
           return;
         }
-        // if (this.selectedRow.data.ModuleCode &&
-        //   (this.selectedRow.data.ModuleCode === 2730 || this.selectedRow.data.ModuleCode === 2773)) {
         this.type = 'completion-contract-info';
         this.btnclicked = true;
         this.HaveHeader = true;
@@ -465,30 +463,6 @@ export class ProductRequestListComponent implements OnInit {
           IsRegionReadOnly: this.SelectedRegionObject.IsReadOnly,
           ModuleViewTypeCode: 110000,
         };
-        // }
-        // if (this.selectedRow.data.ModuleCode &&
-        //   // tslint:disable-next-line: max-line-length
-        //   (this.selectedRow.data.ModuleCode === 2776 || this.selectedRow.data.ModuleCode === 2739 || this.selectedRow.data.ModuleCode === 2840)) {
-        //   this.type = 'completion-contract-info';
-        //   this.btnclicked = true;
-        //   this.HaveHeader = true;
-        //   this.HaveMaxBtn = true;
-        //   this.HeightPercentWithMaxBtn = 97;
-        //   this.MinHeightPixel = 645;
-        //   this.startLeftPosition = 110;
-        //   this.startTopPosition = 5;
-        //   console.log(this.selectedRow.data);
-        //   this.paramObj = {
-        //     ModuleCode: this.selectedRow.data.ModuleCode,
-        //     row: this.selectedRow.data,
-        //     CostFactorID: this.selectedRow.data.CostFactorID,
-        //     HaveSave: true,
-        //     IsViewable: true,
-        //     IsEditable: true,
-        //     IsShow: false,
-        //     ModuleViewTypeCode: 110000
-        //   };
-        // }
       } else {
         // tslint:disable-next-line:max-line-length
         this.type = this.ModuleCode === 2862 ? 'pure-product-request-page' : 'product-request-page';
@@ -508,7 +482,7 @@ export class ProductRequestListComponent implements OnInit {
           ReadyToConfirm: null,
           ContractTypeCode: -1,
           SelectedRow: null,
-          ModuleViewTypeCode: this.selectedRow.data.ModuleViewTypeCode,
+          ModuleViewTypeCode: this.selectedRow.data.ModuleViewTypeCode, // RFC 61879
           IsRegionReadOnly: this.SelectedRegionObject.IsReadOnly
         };
       }
@@ -590,7 +564,6 @@ export class ProductRequestListComponent implements OnInit {
             this.ShowMessageBoxWithOkBtn('ارسال به سامانه شفاف با موفقیت انجام شد.');
           } else {
             this.ShowMessageBoxWithOkBtn(res);
-
           }
         });
       }

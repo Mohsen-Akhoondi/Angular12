@@ -1,11 +1,11 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { OverPopUpCellEditorComponent } from 'src/app/Shared/OverPopUpcellEditor/over-pop-up-cell-editor.component';
 import { fork } from 'child_process';
 import { forkJoin } from 'rxjs';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 declare var jquery: any;
 declare var $: any;
 
@@ -224,7 +224,7 @@ export class ProductRequestEstimateComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
@@ -241,7 +241,7 @@ export class ProductRequestEstimateComponent implements OnInit {
         width: 100,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {

@@ -5,12 +5,11 @@ import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsSe
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { isUndefined } from 'util';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
-
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 @Component({
   selector: 'app-article31-page',
   templateUrl: './article31-page.component.html',
@@ -172,7 +171,7 @@ export class Article31PageComponent implements OnInit {
         width: 90,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {

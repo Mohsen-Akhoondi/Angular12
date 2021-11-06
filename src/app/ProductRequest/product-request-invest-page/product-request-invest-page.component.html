@@ -64,8 +64,8 @@
             <span style="color: red;">*</span>
             <span class="table-cell-Lable">آورده شهرداری</span>
             <input style="width: 71.2%;" class="form-control input-style" type="text" [(ngModel)]="MunicipalityFound"
-            [ngStyle]="{'border-color': CheckValidate && !MunicipalityFound ? 'red':''}"
-            placeholder="{{CheckValidate && !MunicipalityFound ? 'پر کردن مقدار این فیلد الزامیست': ''}}" />
+              [ngStyle]="{'border-color': CheckValidate && !MunicipalityFound ? 'red':''}"
+              placeholder="{{CheckValidate && !MunicipalityFound ? 'پر کردن مقدار این فیلد الزامیست': ''}}" />
           </td>
           <td style="width: 50%">
             <span class="table-cell-Lable">به مبلغ</span>
@@ -79,9 +79,9 @@
           <td style="width: 52%">
             <span style="color: red;">*</span>
             <span class="table-cell-Lable">آورده ثابت سرمایه گذار</span>
-            <input style="width: 71.2%;" class="form-control input-style" type="text" [(ngModel)]="InvestorFound"
-            [ngStyle]="{'border-color': CheckValidate && !InvestorFound ? 'red':''}"
-            placeholder="{{CheckValidate && !InvestorFound ? 'پر کردن مقدار این فیلد الزامیست': ''}}" />
+            <input style="width: 70.2%;" class="form-control input-style" type="text" [(ngModel)]="InvestorFound"
+              [ngStyle]="{'border-color': CheckValidate && !InvestorFound ? 'red':''}"
+              placeholder="{{CheckValidate && !InvestorFound ? 'پر کردن مقدار این فیلد الزامیست': ''}}" />
           </td>
           <td style="width: 50%">
             <span class="table-cell-Lable">به مبلغ</span>
@@ -99,9 +99,12 @@
         </tr>
         <tr>
           <td style="width: 50%">
+            <span *ngIf="rent" style="color: red;">*</span>
             <span class="table-cell-Lable">مبلغ اجاره بها</span>
             <input style="width: 71.2% " class="form-control input-style" type="text" name="MonthlyRentAmount"
-              [(ngModel)]="MonthlyRentAmount" />
+              [(ngModel)]="MonthlyRentAmount"
+              [ngStyle]="{'border-color': CheckValidate && rent && !MonthlyRentAmount ? 'red':''}"
+              placeholder="{{CheckValidate && rent && !MonthlyRentAmount ? 'پر کردن مقدار این فیلد الزامیست': ''}}" />
           </td>
           <td style="width: 50%">
             <span class="table-cell-Lable">دوره بهره برداری</span>
@@ -118,10 +121,12 @@
             <span class="table-cell-Lable">درصد</span>
           </td>
           <td style="width: 50%">
+            <span *ngIf="period" style="color: red;">*</span>
             <span class="table-cell-Lable">مدت بهره برداری پایه</span>
             <app-number-input-component [id]="'Basic-Operation-Period'" [Value]="BasicOperationPeriod" [IsFloat]="false"
-              [PerCentWidth]="65" [PixelHeight]="25" (ValueChange)="BasicOperationPeriodChange($event)"
-              class="col-form-label" [HaveThousand]="false">
+              [PerCentWidth]="63" [PixelHeight]="25" (ValueChange)="BasicOperationPeriodChange($event)"
+              class="col-form-label" [HaveThousand]="false"
+              [CheckValidate]= "period && !BasicOperationPeriod ? CheckValidate : false">
             </app-number-input-component>
             <span class="table-cell-Lable">ماه</span>
           </td>
@@ -170,8 +175,11 @@
             </div>
           </td>
           <td style="width: 50%">
+            <span *ngIf="percent" style="color: red;">*</span>
             <span class="table-cell-Lable">درصد</span>
-            <input style="width: 71.2%;" class="form-control input-style" type="text" [(ngModel)]="Percent" />
+            <input style="width: 71.2%;" class="form-control input-style" type="text" [(ngModel)]="Percent"
+            [ngStyle]="{'border-color': CheckValidate && percent && !Percent ? 'red':''}"
+            placeholder="{{CheckValidate && percent && !Percent ? 'پر کردن مقدار این فیلد الزامیست': ''}}"/>
           </td>
         </tr>
       </table>

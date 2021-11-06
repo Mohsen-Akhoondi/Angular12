@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 

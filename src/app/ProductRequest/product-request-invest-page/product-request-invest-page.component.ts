@@ -93,6 +93,9 @@ export class ProductRequestInvestPageComponent implements OnInit {
   InvestorFound;
   InvestorFoundAmount;
   TechnicalSpec;
+  rent: boolean = false;
+  period: boolean = false;
+  percent : boolean =false;
 
   constructor(private ProductRequest: ProductRequestService,
     private Actor: ActorService) { }
@@ -140,8 +143,44 @@ export class ProductRequestInvestPageComponent implements OnInit {
       this.NgSelectContractorParams.selectedObject = this.InvestActorID;
     });
   }
-  onChangeInvestType(Type) {
-
+  onChangeInvestType(event) {
+    this.rent =false;
+    this.period =false;
+    this.percent =false;
+    switch (event) {
+      case 4:
+        this.rent = true;
+        this.period = true;
+        this.percent =true;
+        break;
+      case 5:
+        this.period = true;
+        this.percent =true;
+        break;
+      case 3:
+        this.period = true;
+        this.percent =true;
+      case 9:
+        this.rent = true;
+        this.period = true;
+        this.percent =true;
+      case 8:
+        this.rent = true;
+        this.period = true;
+        this.percent =true;
+      case 10:
+        this.period = true;
+        this.percent =true;
+      case 12:
+        this.period = true;
+        this.percent =true;
+      case 14:
+        this.period = true;
+        this.percent =true;
+        break;
+      default:
+        break;
+    }
   }
   onChangeInvestUsageType(Type) {
 
@@ -222,6 +261,25 @@ export class ProductRequestInvestPageComponent implements OnInit {
       this.ShowMessageBoxWithOkBtn('فیلد های ستاره دار را پر نمایید');
       return;
     }
+
+    if(this.rent && (this.MonthlyRentAmount === null || this.BasicOperationPeriod === null))
+    {
+      this.ShowMessageBoxWithOkBtn('فیلد های ستاره دار را پر نمایید');
+      return;
+    }
+    
+    if(this.period && (this.MonthlyRentAmount === null))
+    {
+      this.ShowMessageBoxWithOkBtn('فیلد های ستاره دار را پر نمایید');
+      return;
+    }
+
+    if(this.percent && (this.Percent === null))
+    {
+      this.ShowMessageBoxWithOkBtn('فیلد های ستاره دار را پر نمایید');
+      return;
+    }
+
     const ProductRequestInvestObj = {
       ProductRequestInvestID: this.ProductRequestInvestID ? this.ProductRequestInvestID : -1,
       CostFactorID: this.ProductRequestObject.CostFactorID,

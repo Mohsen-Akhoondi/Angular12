@@ -9,7 +9,6 @@ import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { OverPopUpCellEditorComponent } from 'src/app/Shared/OverPopUpcellEditor/over-pop-up-cell-editor.component';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { TreeSelectComponent } from 'src/app/Shared/tree-select/tree-select.component';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
 import { FinYearService } from 'src/app/Services/BaseService/FinYearService';
@@ -24,6 +23,7 @@ import { OrderService } from 'src/app/Services/ProductRequest/OrderService';
 import { isUndefined } from 'util';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { readyException } from 'jquery';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 
 declare var jquery: any;
 declare var $: any;
@@ -268,7 +268,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
     loading: false,
     IsVirtualScroll: false,
     IsDisabled: false,
-    Required: true
+    Required: false
   };
   // ContractTypeItems;
   // ContractTypeParams = {
@@ -359,7 +359,6 @@ export class RequestContractWithoutFlowComponent implements OnInit {
     loading: false,
     IsVirtualScroll: true,
     IsDisabled: false,
-    Required: true,
     type: 'product-request-contract-contractor',
     DropDownMinWidth: '300px',
     AdvanceSearch: {
@@ -415,7 +414,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
   ReceiveDocApi: any;
   CheckValidate = false;
   ContractorType = true;
-  RequiredComponents = [this.NgSelectContractorParams, this.FinYearParams, this.ContractTypeParams, this.DealMethodParams,
+  RequiredComponents = [this.ContractTypeParams, this.DealMethodParams,
   this.Article31Params];
   SelectedReceiveDocID: any;
   IsUseProviders = false;
@@ -532,6 +531,18 @@ export class RequestContractWithoutFlowComponent implements OnInit {
   };
   ProductRequestTypeCode; // RFC 59678
   HasPRIEntity = false;
+  IsOverReadOnly = false;
+  ConsultantSelectWayItems = []; // 62341
+  ConsultantSelectedWayParams = {
+    bindLabelProp: 'ConsultantSelectWayName',
+    bindValueProp: 'ConsultantSelectWayCode',
+    placeholder: '',
+    MinWidth: '92px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false
+  };
 
   constructor(private ProductRequest: ProductRequestService,
     private ContractList: ContractListService,
@@ -634,8 +645,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
       this.DealTypeCode = this.PopupParam.DealTypeCode;
       this.DealTypeName = this.PopupParam.DealTypeName;
       this.PriceListPatternID = this.PopupParam.PriceListPatternID;
-      this.Contractsubject = this.ContractObject ?
-        this.ContractObject.Subject : this.ProductRequestObject.Subject;
+      this.Contractsubject = this.ContractObject ? this.ContractObject.Subject : this.ProductRequestObject.Subject;
       this.RegionGroupCode = this.PopupParam.RegionGroupCode;
       this.CustomCheckBoxConfig.AriaWidth = 50;
       this.CostFactorID = this.ProductRequestObject.CostFactorID;
@@ -651,6 +661,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
       this.CoulumnsDefinition(this.ProductRequestObject.ContractTypeCode);
       this.ProdReqPersonColDef[1].cellEditorParams.Items = this.ProductRequest.GetBusinessPattern();
       forkJoin([
+        // tslint:disable-next-line: max-line-length
         this.ContractList.GetContractTypeListByType(this.ProductRequestObject.IsCost, this.ModuleCode, this.ProductRequestObject.RegionCode),
         // tslint:disable-next-line: max-line-length
         this.ProductRequest.GetDealMethodListByReionGroupCode(
@@ -672,7 +683,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
         this.ProductRequest.GetContractSignerList(this.ProductRequestObject.RegionCode,
           this.ProductRequestObject.ShortProductRequestDate, this.ProductRequestObject.CostFactorID, this.ContractId),
         this.ProductRequest.GetConsultantSelectTypeList(), // RFC 50806
-
+        this.ProductRequest.GetConsultantSelectWayList(),
       ]
       ).subscribe(res => {
         this.IsDown = true;
@@ -713,7 +724,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
         this.ActLocationItems = res[6];
         if (!this.ContractObject) {
           this.ActLocationParams.selectedObject = this.ProductRequestObject.ActLocationID;
-        } else if (this.ContractObject.ActLocationId) {
+        } else if (this.ContractObject && this.ContractObject.ActLocationId) {
           this.ActLocationParams.selectedObject = this.ContractObject.ActLocationId;
         }
         if (res[8]) {
@@ -750,13 +761,16 @@ export class RequestContractWithoutFlowComponent implements OnInit {
           }
         );
         this.ConsultantSelectTypeItems = res[11];
+        this.ConsultantSelectWayItems = res[12];
         this.ConsultantSelectTypeParams.selectedObject = this.ProductRequestObject.ConsultantSelectTypeCode;
+        this.ConsultantSelectedWayParams.selectedObject = this.ProductRequestObject.ConsultantSelectedWayCode;
         if (this.ContractObject) {
           this.FinYearParams.selectedObject = this.ContractObject.FinYearCode;
           this.ContractTypeParams.selectedObject = this.ContractObject.ContractTypeCode;
           this.ContractStatusParams.selectedObject = this.ContractObject.ContractSatusCode;
           this.Article31Params.selectedObject = this.ContractObject.ProdReqObject.Article31ID;
           this.ConsultantSelectTypeParams.selectedObject = this.ContractObject.ProdReqObject.ConsultantSelectTypeCode;
+          this.ConsultantSelectedWayParams.selectedObject = this.ContractObject.ProdReqObject.ConsultantSelectedWayCode;
           if (this.IsUseProviders) {
             if (this.ContractObject.IsPersonContractor && this.ContractObject.PersonContractorObject) {
               this.NgSelectContractorParams.selectedObject = this.ContractObject.PersonContractorObject.ActorId;
@@ -777,6 +791,20 @@ export class RequestContractWithoutFlowComponent implements OnInit {
             this.IsEditable = false;
             this.IsValidContract = false;
             this.DisplayLetter = true;
+            break;
+          case 3: // تامین اعتبار در مالی61605
+            this.IsEditable =
+              this.IsEstimateEditable =
+              this.HaveSave =
+              this.HaveUpdate =
+              this.HaveSaveEditable =
+              this.IsValidContract = false;
+            this.RahbariShow =
+              this.IsConInfoDisable =
+              this.DisablePriceListType =
+              this.DisablePriceListType =
+              this.IsUseProviders =
+              this.IsOverReadOnly = true;
             break;
           case 800000: // جستجو خدمات شهری
             this.IsConInfoDisable = true; // RFC 53678
@@ -918,7 +946,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
               this.HaveUpdate = false;
               this.HaveSaveEditable = true;
               this.DisplayLetter = false;
-              this.IsValidContract = true; //60680
+              this.IsValidContract = true; // 60680
               this.IsUseProviders = true;
               this.ContractorWidth = 80.1;
               this.IsEstimateEditable = false;
@@ -1042,6 +1070,25 @@ export class RequestContractWithoutFlowComponent implements OnInit {
           default:
             break;
         }
+      } else if (this.PopupParam.ModuleCode === 2901 && this.PopupParam.ModuleViewTypeCode) { // تهاتر ملک
+        switch (this.PopupParam.ModuleViewTypeCode) {
+          case 2: // تامین اعتبار در مالی
+            this.IsEditable =
+              this.IsEstimateEditable =
+              this.HaveSave =
+              this.HaveUpdate =
+              this.HaveSaveEditable =
+              this.IsValidContract = false;
+            this.RahbariShow =
+              this.IsConInfoDisable =
+              this.DisablePriceListType =
+              this.DisablePriceListType =
+              this.IsUseProviders =
+              this.IsOverReadOnly = true;
+            break;
+          default:
+            break;
+        }
       }
 
       // If There Is No Contract
@@ -1081,7 +1128,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
         ContractorId = this.ContractObject.ContractorId;
         const LetterTypeCodeList = [];
         LetterTypeCodeList.push(1);
-        this.IsValidContract = true;
+        this.IsValidContract = this.PopupParam.ModuleCode === 2776 && this.PopupParam.ModuleViewTypeCode === 3 ? false : true; // 61605
         this.LetterParam = {
           CostFactorID: this.ProductRequestObject.CostFactorID,
           RegionCode: this.ProductRequestObject.RegionCode,
@@ -1317,7 +1364,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
@@ -2137,17 +2184,17 @@ export class RequestContractWithoutFlowComponent implements OnInit {
             (this.ProductRequestObject.RegionCode === 205 ? this.LetterDate : true);
         }
         // tslint:disable-next-line:max-line-length
-        if (this.Article31Params.selectedObject === null && this.DealTypeCode !== 1 && (this.DealMethodParams.selectedObject === 7 || this.DealMethodParams.selectedObject === 8 || this.DealMethodParams.selectedObject === 4 || this.DealMethodParams.selectedObject === 9)) {
-          this.ShowMessageBoxWithOkBtn('با توجه به روش انجام معامله علت ترک تشریفات باید انتخاب شود.');
-          return;
-        }
+        // if (this.Article31Params.selectedObject === null && this.DealTypeCode !== 1 && (this.DealMethodParams.selectedObject === 7 || this.DealMethodParams.selectedObject === 8 || this.DealMethodParams.selectedObject === 4 || this.DealMethodParams.selectedObject === 9)) {
+        //   this.ShowMessageBoxWithOkBtn('با توجه به روش انجام معامله علت ترک تشریفات باید انتخاب شود.');
+        //   return;
+        // }
         if (ValidateForm) {
           this.ProdReqEstApi.stopEditing();
           this.ProdReqItemApi.stopEditing();
           this.ProdReqRelApi.stopEditing();
           this.ReceiveDocApi.stopEditing();
           this.ContractsignApi.stopEditing();
-          //this.ComitionMemberApi.stopEditing();
+          // this.ComitionMemberApi.stopEditing();
           const ProductRequestRelationList = [];
           const ProductRequestItemList = [];
           this.ProductRequestObject.Article31ID = this.Article31Params.selectedObject ? this.Article31Params.selectedObject : null;
@@ -2164,6 +2211,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
           this.ProductRequestObject.SeasonCode = this.SeasonListParams.selectedObject ? this.SeasonListParams.selectedObject : null;
           // tslint:disable-next-line: max-line-length
           this.ProductRequestObject.ConsultantSelectTypeCode = this.ConsultantSelectTypeParams.selectedObject ? this.ConsultantSelectTypeParams.selectedObject : null; // RFC 51021
+          this.ProductRequestObject.ConsultantSelectedWayCode = this.ConsultantSelectedWayParams.selectedObject ? this.ConsultantSelectedWayParams.selectedObject : null;
           this.ProductRequestObject.IsTaxValue = this.PRIsTaxValue;
 
           this.ProdReqEstApi.forEachNode(node => {
@@ -2252,7 +2300,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
             CostFactorId: -1,
             ProductRequestID: this.ProductRequestObject.CostFactorID,
             RegionCode: this.ProductRequestObject.RegionCode,
-            FinYearCode: this.FinYearParams.selectedObject,
+            FinYearCode: this.FinYearParams.selectedObject ? this.FinYearParams.selectedObject : -1,
             FromContractDate: this.StartDate,
             ToContractDate: this.EndDate,
             ContractTypeCode: this.ContractTypeParams.selectedObject,
@@ -2278,11 +2326,11 @@ export class RequestContractWithoutFlowComponent implements OnInit {
             LetterDate: this.LetterDate,
             ActLocationId: this.ActLocationParams.selectedObject
           };
-          if (!this.IsUseProviders) {
+          if (!this.IsUseProviders && this.NgSelectContractorParams.selectedObject) {
             ContractObj.ContractorId = this.NgSelectContractorParams.selectedObject;
           }
           let Contractor;
-          if (this.IsUseProviders) {
+          if (this.IsUseProviders && this.NgSelectContractorParams.selectedObject) {
             Contractor = this.ContractorItems.filter(x => x.ActorID === this.NgSelectContractorParams.selectedObject)[0];
           }
           const ContractSignList = [];
@@ -2382,10 +2430,10 @@ export class RequestContractWithoutFlowComponent implements OnInit {
             return;
           }
           // tslint:disable-next-line: max-line-length
-          if ((this.DealTypeCode === 4 || this.DealTypeCode === 7) && this.NgSelectContractorParams.selectedObject === null) { // درخواست شده
-            this.ShowMessageBoxWithOkBtn('با توجه به روش انجام معامله طرف قراداد باید انتخاب شود.');
-            return;
-          }
+          // if ((this.DealTypeCode === 4 || this.DealTypeCode === 7) && this.NgSelectContractorParams.selectedObject === null) { // درخواست شده
+          //   this.ShowMessageBoxWithOkBtn('با توجه به روش انجام معامله طرف قراداد باید انتخاب شود.');
+          //   return;
+          // }
           // tslint:disable-next-line: max-line-length
           this.ProductRequestObject.ProductRequestDate = this.CommonService.ConvertToASPDateTime(this.ProductRequestObject.ProductRequestDate);
           if (this.ProductRequestObject.IsCost === true) {
@@ -2406,10 +2454,12 @@ export class RequestContractWithoutFlowComponent implements OnInit {
               .subscribe(
                 (res: any) => {
                   this.IsValidContract = true;
-                  this.ContractObject = res.ContractObject;
-                  this.ContractCode = res.ContractObject.ContractCode;
-                  this.LetterNo = this.ContractObject.LetterNo;
-                  this.LetterDate = this.ContractObject.ShortLetterDate;
+                  if (res.ContractObject) {
+                    this.ContractObject = res.ContractObject;
+                    this.ContractCode = res.ContractObject.ContractCode;
+                    this.LetterNo = this.ContractObject.LetterNo;
+                    this.LetterDate = this.ContractObject.ShortLetterDate;
+                  }
                   this.PopupOutPut.emit(res);
                   const LetterTypeCodeList = [];
                   LetterTypeCodeList.push(1);
@@ -2424,7 +2474,8 @@ export class RequestContractWithoutFlowComponent implements OnInit {
                   };
                   this.ProductRequest.GetProductRequest(this.ProductRequestObject.CostFactorID).subscribe(ress => {
                     this.ProductRequestObject = ress;
-                    this.ReceiveDocrowsData = this.ProductRequestObject.ContractObject.ContractWarrantyList;
+                    this.ReceiveDocrowsData =
+                      this.ProductRequestObject.ContractObject ? this.ProductRequestObject.ContractObject.ContractWarrantyList : null;
                     this.RSupplierList = this.ProductRequestObject.RequestSupplierList;
                   });
                   this.ShowMessageBoxWithOkBtn('ثبت با موفقيت انجام شد');
@@ -2454,8 +2505,10 @@ export class RequestContractWithoutFlowComponent implements OnInit {
               .subscribe(
                 (res: any) => {
                   this.IsValidContract = true;
-                  this.ContractObject = res.ContractObject;
-                  this.ContractCode = res.ContractObject.ContractCode;
+                  if (res.ContractObject) {
+                    this.ContractObject = res.ContractObject;
+                    this.ContractCode = res.ContractObject.ContractCode;
+                  }
                   this.PopupOutPut.emit(res);
                   const LetterTypeCodeList = [];
                   LetterTypeCodeList.push(1);
@@ -2471,7 +2524,8 @@ export class RequestContractWithoutFlowComponent implements OnInit {
 
                   this.ProductRequest.GetProductRequest(this.ProductRequestObject.CostFactorID).subscribe(ress => {
                     this.ProductRequestObject = ress;
-                    this.ReceiveDocrowsData = this.ProductRequestObject.ContractObject.ContractWarrantyList;
+                    this.ReceiveDocrowsData =
+                      this.ProductRequestObject.ContractObject ? this.ProductRequestObject.ContractObject.ContractWarrantyList : null;
                     this.RSupplierList = this.ProductRequestObject.RequestSupplierList;
                   });
                   this.ShowMessageBoxWithOkBtn('ثبت با موفقيت انجام شد');
@@ -2825,6 +2879,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
     } else {
       this.IsConsultant = false;
       this.ConsultantSelectTypeParams.selectedObject = null;
+      this.ConsultantSelectedWayParams.selectedObject = null;
     }
   }
 
@@ -3200,8 +3255,8 @@ export class RequestContractWithoutFlowComponent implements OnInit {
       IsReadOnly: (this.ModuleCode === 2739 && this.ModuleViewTypeCode === 500000) ? true : false
     };
     this.ArchiveParam = archiveParam;
-    
-    
+
+
   }
 
   onAddPopUpBtnClick() {
@@ -3411,9 +3466,9 @@ export class RequestContractWithoutFlowComponent implements OnInit {
       this.HaveMaxBtn = false;
       this.PopupParam = {
         ProductRequestObject: this.ProductRequestObject,
-        IsReadOnly: false,
+        IsReadOnly: this.IsOverReadOnly,
         HeaderName: 'کمیسیون',
-        ModuleViewTypeCode: this.VirtualModuleViewTypeCode,
+        ModuleViewTypeCode: this.IsOverReadOnly ? 500000 : this.VirtualModuleViewTypeCode,
         CheckRegionWritable: false,
         ModuleCode: this.ModuleCode,
         // currentRegionObject: this.currentRegionObject,
@@ -3431,24 +3486,51 @@ export class RequestContractWithoutFlowComponent implements OnInit {
       const LastInquiryObject = this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.InquiryID > 0 ?
         this.ProductRequestObject.LastInquiryObject : null;
       if (!LastInquiryObject || (LastInquiryObject && !LastInquiryObject.IsWin && !LastInquiryObject.IsReturn)) {
-        this.PopUpType = 'general-tender';
-        this.isClicked = true;
-        this.HaveHeader = true;
-        this.startLeftPosition = 150;
-        this.startTopPosition = 4;
-        this.HaveMaxBtn = false;
-        this.PercentWidth = 80;
-        this.MainMaxwidthPixel = 1500;
-        this.PopupParam = {
-          ProductRequestObject: this.ProductRequestObject,
-          ModuleViewTypeCode: 200000,
-          InquiryObject: LastInquiryObject,
-          SumFinalAmount: 0,
-          IsReadOnly: false,
-          CheckRegionWritable: false,
-          OrginalModuleCode: this.PopupParam.OrginalModuleCode,
-          ModuleCode: this.ModuleCode
-        };
+        if (this.IsOverReadOnly) {
+          this.PopUpType = 'general-tender-read-only';
+          this.isClicked = true;
+          this.HaveHeader = true;
+          this.startLeftPosition = 150;
+          this.startTopPosition = 4;
+          this.HaveMaxBtn = false;
+          this.PercentWidth = 84;
+          this.MainMaxwidthPixel = 1500;
+          this.PopupParam = {
+            ProductRequestObject: this.ProductRequestObject,
+            Subject: this.ProductRequestObject.Subject,
+            RegionCode: this.ProductRequestObject.RegionCode,
+            ProductRequestCode: this.ProductRequestObject.ProductRequestCode,
+            ProductRequestDate: this.ProductRequestObject.ProductRequestDate,
+            CostFactorID: this.ProductRequestObject.CostFactorID,
+            InquiryObject: LastInquiryObject,
+            IsReadOnly: true,
+            HeaderName: 'لیست متقاضیان',
+            ModuleViewTypeCode: this.PopupParam.ModuleViewTypeCode,
+            PRRegionObject: this.PopupParam.PRRegionObject,
+            SumFinalAmount: this.PopupParam.SumFinalAmount,
+            CurrWorkFlow: this.PopupParam.CurrWorkFlow,
+            IsAdmin: this.PopupParam.IsAdmin
+          };
+        } else {
+          this.PopUpType = 'general-tender';
+          this.isClicked = true;
+          this.HaveHeader = true;
+          this.startLeftPosition = 150;
+          this.startTopPosition = 4;
+          this.HaveMaxBtn = false;
+          this.PercentWidth = 80;
+          this.MainMaxwidthPixel = 1500;
+          this.PopupParam = {
+            ProductRequestObject: this.ProductRequestObject,
+            ModuleViewTypeCode: 200000,
+            InquiryObject: LastInquiryObject,
+            SumFinalAmount: 0,
+            IsReadOnly: false,
+            CheckRegionWritable: false,
+            OrginalModuleCode: this.PopupParam.OrginalModuleCode,
+            ModuleCode: this.ModuleCode
+          };
+        }
       } else {
         this.ShowMessageBoxWithOkBtn('مناقصه یا مزایده مورد نظر تعیین تکلبف شده است .');
       }
@@ -3471,7 +3553,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
       ProductName: this.ProductName,
       ProductCode: this.ProductCode,
       Amount: this.Amount,
-      ModuleViewTypeCode: this.ModuleViewTypeCode
+      ModuleViewTypeCode: this.IsOverReadOnly ? 500000 : this.ModuleViewTypeCode
     };
     this.isClicked = true;
     this.PopUpType = 'product-request-item-coef';
@@ -3487,7 +3569,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
       ProductRequestObject: this.ProductRequestObject,
       CheckRegionWritable: this.CheckRegionWritable,
       OrginalModuleCode: this.PopupParam.OrginalModuleCode,
-      ModuleViewTypeCode: this.PopupParam.ModuleViewTypeCode,
+      ModuleViewTypeCode: this.IsOverReadOnly ? 500000 : this.PopupParam.ModuleViewTypeCode,
       ProductRequestItemID: this.SelectedProductRequestItemID
     };
     this.isClicked = true;
@@ -3504,7 +3586,8 @@ export class RequestContractWithoutFlowComponent implements OnInit {
     this.ProductCode = event.data.ProductCode;
     this.Amount = event.data.Amount;
     this.SelectedProductRequestItemID = event.data.ProductRequestItemID;
-    if (this.PopupParam.ModuleViewTypeCode !== 500000) {
+    if (this.PopupParam.ModuleViewTypeCode !== 500000
+      && !(this.PopupParam.ModuleCode === 2901 && this.PopupParam.ModuleViewTypeCode === 2)) {
       this.IsEstimateEditable = true;
     }
 
@@ -3624,6 +3707,8 @@ export class RequestContractWithoutFlowComponent implements OnInit {
           TypeCodeStr: doctypee.toString() + '-',
           DocTypeCode: doctypee,
           ModuleCode: this.ModuleCode,
+          ModuleViewTypeCode: this.ModuleViewTypeCode,
+          IsReadOnly: this.IsOverReadOnly,
         };
         this.ArchiveParam = archiveOrderParam;
       }
@@ -3639,7 +3724,9 @@ export class RequestContractWithoutFlowComponent implements OnInit {
           EntityID: this.selectedEstimateRow.data.ProductRequestEstimateID,
           TypeCodeStr: doctype.toString() + '-',
           DocTypeCode: doctype,
-          ModuleCode: this.ModuleCode
+          ModuleCode: this.ModuleCode,
+          ModuleViewTypeCode: this.ModuleViewTypeCode,
+          IsReadOnly: this.IsOverReadOnly,
         };
         this.ArchiveParam = archiveEstimateParam;
       }

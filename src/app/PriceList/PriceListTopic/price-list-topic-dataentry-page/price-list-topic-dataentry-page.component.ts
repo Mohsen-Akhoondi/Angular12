@@ -204,7 +204,7 @@ export class PriceListTopicDataentryPageComponent implements OnInit {
     }
     this.IsVisible = false; // Injust
     this.HaveSearch = true;
-    this.BtnSaveName = 'تایید';
+    this.BtnSaveName = 'ثبت';
     this.MaxLength = 8;
     this.PriceListTypeCode = this.InputParam.PriceListTypeCode;
     this.CostListFinYearCode = this.InputParam.CostListFinYearCode;
@@ -253,6 +253,15 @@ export class PriceListTopicDataentryPageComponent implements OnInit {
   }
 
   onSaveClick() {
+
+    if (this.ContractTopicMapCode) { // RFC 61095
+      const str = this.ContractTopicMapCode;
+      if (str.length > 8) {
+        this.ShowMessageBoxWithOkBtn('کد معادل حداکثر 8 رقم می تواند باشد');
+        return;
+      }
+    }
+
     if (this.InputParam.Mode === 'InsertMode') {
       this.InsertPriceListTopic_MC_2682('', '', this.ParentPriceListPatternID);
       return;
@@ -328,6 +337,13 @@ export class PriceListTopicDataentryPageComponent implements OnInit {
       const str = this.ParentTopicCode;
       if (str.length !== 4) {
         this.ShowMessageBoxWithOkBtn('کد فهرست بها باید چهار رقم باشد');
+        return;
+      }
+    }
+    if (this.ContractTopicMapCode) { // RFC 61095
+      const str = this.ContractTopicMapCode;
+      if (str.length > 8) {
+        this.ShowMessageBoxWithOkBtn('کد معادل حداکثر 8 رقم می تواند باشد');
         return;
       }
     }

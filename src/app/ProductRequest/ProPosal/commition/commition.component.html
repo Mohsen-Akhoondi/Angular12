@@ -25,7 +25,7 @@
               <span *ngIf="IsDisplayJobCategory && IsForcePriceList" style="color: red;">*</span>
               <span *ngIf="IsDisplayJobCategory" class="table-cell-Lable">رسته</span>
               <app-ng-select-virtual-scroll *ngIf="IsDisplayJobCategory"
-                [Disabled]="IsDisableJobCategory  || IsCompletionContractInfo" style="display: inline-block;width: 60%;"
+                [Disabled]="IsDisableJobCategory  || IsCompletionContractInfo || IsDisableRaste " style="display: inline-block;width: 60%;"
                 class="select-general-for-lable" style="display: inline-block;width: 50%;"
                 [NgSelectParams]="PriceListTopicRasteParams" [Items]="PriceListTopicRasteItems"
                 (Open)="OnOpenNgSelect('PriceListTopicRaste', false)" [CheckValidate]="CheckValidate">
@@ -35,7 +35,7 @@
               <span *ngIf="IsDisplayJobCategory && IsForcePriceList" style="color: red;">*</span>
               <span *ngIf="IsDisplayJobCategory" class="table-cell-Lable">رتبه</span>
               <app-ng-select-virtual-scroll *ngIf="IsDisplayJobCategory"
-                [Disabled]="IsDisableJobCategory  || IsCompletionContractInfo" style="display: inline-block;width: 60%;"
+                [Disabled]="IsDisableJobCategory  || IsCompletionContractInfo || IsDisableRank" style="display: inline-block;width: 60%;"
                 class="select-general-for-lable" style="display: inline-block;width: 50%;" [NgSelectParams]="RankParams"
                 [Items]="RankItems" [CheckValidate]="CheckValidate">
               </app-ng-select-virtual-scroll>
@@ -47,7 +47,7 @@
                 <div class="custom-control custom-radio custom-control-inline">
                   <input [checked]="IsMaterialsDifference" type="radio" class="custom-control-input"
                     id="IsMaterialsRadio" name="rdoIsMaterials" (click)="rdoIsMaterialsDifferenceClick(true)"
-                    [disabled]="IsCompletionContractInfo">
+                    [disabled]="IsCompletionContractInfo || IsDisablerdoIsMaterials">
                   <label style="margin: auto;" class="custom-control-label redio-label" for="IsMaterialsRadio">
                     دارد
                   </label>
@@ -55,7 +55,7 @@
                 <div class="custom-control custom-radio custom-control-inline">
                   <input [checked]="!IsMaterialsDifference" type="radio" class="custom-control-input"
                     id="ISNotMaterialsRadio" name="rdoIsMaterials" (click)="rdoIsMaterialsDifferenceClick(false)"
-                    [disabled]="IsCompletionContractInfo">
+                    [disabled]="IsCompletionContractInfo || IsDisablerdoIsMaterials">
                   <label style="margin: auto;" class="custom-control-label redio-label" for="ISNotMaterialsRadio">
                     ندارد</label>
                 </div>
@@ -66,7 +66,7 @@
               <div *ngIf="HasEstimate" class="redio-div">
                 <div class="custom-control custom-radio custom-control-inline">
                   <input [checked]="HaveMaterials" type="radio" class="custom-control-input" id="HaveMaterialsRadio"
-                    name="rdoHaveMaterials" (click)="rdoHaveMaterialsClick(true)" [disabled]="IsCompletionContractInfo">
+                    name="rdoHaveMaterials" (click)="rdoHaveMaterialsClick(true)" [disabled]="IsCompletionContractInfo || IsDisablerdoHaveMaterials ">
                   <label style="margin: auto;padding-right: 1px;" class="custom-control-label redio-label"
                     for="HaveMaterialsRadio">
                     دارد
@@ -75,7 +75,7 @@
                 <div class="custom-control custom-radio custom-control-inline">
                   <input [checked]="!HaveMaterials" type="radio" class="custom-control-input" id="HaveNotMaterialsRadio"
                     name="rdoHaveMaterials" (click)="rdoHaveMaterialsClick(false)"
-                    [disabled]="IsCompletionContractInfo">
+                    [disabled]="IsCompletionContractInfo || IsDisablerdoHaveMaterials">
                   <label style="margin: auto;padding-right: 1px;" class="custom-control-label redio-label"
                     for="HaveNotMaterialsRadio">
                     ندارد</label>
@@ -140,12 +140,29 @@
             </td>
           </tr>
           <tr>
-            <td colspan="3" width="100%">
+            <td colspan="2" width="66%">
               <span *ngIf="HasChooseContractor" class="table-cell-Lable" style="vertical-align: top;">خلاصه مصوبه
               </span>
               <textarea *ngIf="HasChooseContractor" [disabled]="IsWFDisable || IsCompletionContractInfo"
-                [(ngModel)]="Result" name="Result" class="form-control input-style" rows="2" style="width: 86.8%;"
+                [(ngModel)]="Result" name="Result" class="form-control input-style" rows="2" style="width: 79.8%;"
                 id="indicator-text_note"></textarea>
+            </td>
+            <td  width="33%">
+              <span class="table-cell-Lable">  آیا قرارداد چند ساله است؟</span>
+              <div class="redio-div">
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input [checked]="IsMultiYear" type="radio" class="custom-control-input" id="IsMultiYear"
+                    name="IsMultiYear" [disabled]="IsCompletionContractInfo || IsDisableIsMultiYear " (click)="IsMultiYearRadioClick(true)">
+                  <label style="margin: auto;" class="custom-control-label redio-label"
+                    for="IsMultiYear">بله</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input [checked]="!IsMultiYear" type="radio" class="custom-control-input" id="IsNotMultiYear"
+                    name="IsMultiYear" [disabled]="IsCompletionContractInfo || IsDisableIsMultiYear ">
+                  <label style="margin: auto;" class="custom-control-label redio-label" for="IsNotMultiYear"
+                    (click)="IsMultiYearRadioClick(false)">خیر</label>
+                </div>
+              </div>
             </td>
           </tr>
           <tr>
@@ -186,8 +203,8 @@
               </app-jalali-datepicker>
             </td>
           </tr>
-          <tr *ngIf="IsExpertCoef">
-            <td width="33%">
+          <tr *ngIf="IsExpertCoef || HaveAgent">
+            <td *ngIf="IsExpertCoef" width="33%">
               <span class="table-cell-Lable">ضریب کارشناسی</span>
               <app-number-input-component [id]="'indicator-label-code'" [HaveThousand]="false" [fontSize]="12"
                 [PerCentWidth]="60" [PixelHeight]="25" [Value]="ExpertCoef" (ValueChange)="getExpertCoef($event)"
@@ -195,17 +212,29 @@
               </app-number-input-component>
               <!-- remove IsType11 RFC 52670 -->
             </td>
-            <td width="33%">
+            <td *ngIf="IsExpertCoef" width="33%">
               <span class="table-cell-Lable">مبلغ کارشناسی</span>
-              <input [disabled]="IsType49 || IsCompletionContractInfo" style="width: 60% "
-                class="form-control input-style" type="text" name="ExpertAmount" [(ngModel)]="ExpertAmount" />
+              <div style="display: inline-block; width: 60%;">
+                <div style="width: 60%; display: inline-block;">
+                  <input [disabled]="IsType49 || IsCompletionContractInfo" style="width: 100% "
+                    class="form-control input-style" type="text" name="ExpertAmount" [(ngModel)]="ExpertAmount" />
+                </div>
+                <div style="display: inline-block; width: 40%;">
+                  <span class="table-cell-Lable">تبصره ماده 3-5</span>
+                  <app-custom-check-box [Disabled]="(IsType49 || IsType11) || IsCompletionContractInfo"
+                    style="vertical-align: sub; display: inline-block;" [configurationInfo]="CustomCheckBoxConfig" [isSelected]="IsPriceExtended"
+                    (PrettyCheckBoxChange)="OnCheckBoxChange($event)">
+                  </app-custom-check-box>
+                </div>
+              </div>
             </td>
-            <td style="width: 33%;text-align: center;padding-right: 16px;">
-              <span class="table-cell-Lable">تبصره ماده 3-5</span>
-              <app-custom-check-box [Disabled]="(IsType49 || IsType11) || IsCompletionContractInfo"
-                style="vertical-align: sub;" [configurationInfo]="CustomCheckBoxConfig" [isSelected]="IsPriceExtended"
-                (PrettyCheckBoxChange)="OnCheckBoxChange($event)">
-              </app-custom-check-box>
+            <td *ngIf="HaveAgent" style="width: 33%;">
+              <span class="table-cell-Lable">نماینده معاون شهردار</span>
+              <app-ng-select-virtual-scroll 
+              [Disabled]="IsAgentDisable"
+              style="display: inline-block;width: 60%;" (Open)="onAgentOpen()"
+              (selectedChange)="onAgentPersonChanged($event)" [NgSelectParams]="AgentParams" [Items]="AgentItems">
+            </app-ng-select-virtual-scroll>
             </td>
           </tr>
           <tr *ngIf="WinnerQuestion || HaveMultiContract">
@@ -364,6 +393,10 @@
     <button *ngIf="HaveSave && IsnotActiveBtnSave" (click)="onSave()" id="btnSave" class="btn btn-primary btnGreen">
       <img width="15px" height="15px" src="assets/Icons/save.png" />
       ثبت
+    </button>
+    <button *ngIf="HaveSave && !IsnotActiveBtnSave && ShowAgentSaveBtn" (click)="onSaveAgentPerson()" id="btnSave" class="btn btn-primary btnGreen">
+      <img width="15px" height="15px" src="assets/Icons/save.png" />
+      ثبت نماینده معاون
     </button>
     <button *ngIf="DisplayBtnElectronicFilse"
       [disabled]='(!SelectedProposal || !SelectedProposal.ProposalID || IsDisable) || IsCompletionContractInfo'

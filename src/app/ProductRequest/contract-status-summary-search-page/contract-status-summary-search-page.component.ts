@@ -19,7 +19,7 @@ export class ContractStatusSummarySearchPageComponent implements OnInit {
   ReigonListSet = [];
   NgSelectRegionParams = {
     Items: [],
-    bindLabelProp: 'RegionName',
+    bindLabelProp: 'RegionCodeName',
     bindValueProp: 'RegionCode',
     placeholder: '',
     MinWidth: '150px',
