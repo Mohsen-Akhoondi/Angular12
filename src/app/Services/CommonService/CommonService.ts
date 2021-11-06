@@ -17,7 +17,7 @@ export class CommonService {
             });
     }
     GetDocumentTypeByParent(DocumentTypeCode: any, Isloading: boolean) {
-        return this.http.post(window.location.origin + '/Common/GetDocumentTypeByParent', { DocumentTypeCode }, Isloading);
+        return this.http.get(window.location.origin + '/Common/GetDocumentTypeByParent', { DocumentTypeCode }, Isloading);
     }
     SaveDocumentTypeWithMandetories(List: any, ParentDocumentCode: number, Isloading: boolean, ModuleToLog) {
         return this.http.post(window.location.origin +
@@ -81,13 +81,15 @@ export class CommonService {
         SearchTerm: string,
         PageNumber: number,
         PageSize: number,
-        ActorID: number = null) {
+        ActorID: number = null,
+        BankID: number = null) {
         return this.http.get(window.location.origin + '/Common/GetBankPaging', {
             SearchOption,
             SearchTerm,
             PageNumber,
             PageSize,
-            ActorID
+            ActorID,
+            BankID
         },
             false);
     }
@@ -96,20 +98,22 @@ export class CommonService {
         PageNumber: number,
         PageSize: number,
         BankID: number = null,
-        ActorID: number = null
-        ) {
+        ActorID: number = null,
+        BranchID: number = null
+    ) {
         return this.http.get(window.location.origin + '/Common/GetBranchPaging', {
             SearchOption,
             SearchTerm,
             PageNumber,
             PageSize,
             BankID,
-            ActorID
+            ActorID,
+            BranchID
         },
             false);
     }
     GetActorBankAccList(ActorID: number) {
-        return this.http.post(window.location.origin + '/Common/GetActorBankAccList', {
+        return this.http.get(window.location.origin + '/Common/GetActorBankAccList', {
             ActorID
         });
     }
@@ -118,12 +122,12 @@ export class CommonService {
     }
 
     GetAllBranchByBankId(BankID: number) {
-        return this.http.post(window.location.origin + '/Common/GetAllBranchByBankId', {
+        return this.http.get(window.location.origin + '/Common/GetAllBranchByBankId', {
             BankID
         });
     }
     GetAllcityByStateId(StateID: number) {
-        return this.http.post(window.location.origin + '/Common/GetAllcityByStateId', {
+        return this.http.get(window.location.origin + '/Common/GetAllcityByStateId', {
             StateID
         });
     }
@@ -153,6 +157,22 @@ export class CommonService {
             PageNumber,
             PageSize,
             FieldCode
+        },
+            false);
+    }
+    GetBusinessPatternPaging(SearchOption: string,
+        SearchTerm: string,
+        PageNumber: number,
+        PageSize: number,
+        UnitPatternID: number,
+        BusinessPatternID: number) {
+        return this.http.get(window.location.origin + '/Common/GetBusinessPatternPaging', {
+            SearchOption,
+            SearchTerm,
+            PageNumber,
+            PageSize,
+            UnitPatternID,
+            BusinessPatternID,
         },
             false);
     }
@@ -187,7 +207,7 @@ export class CommonService {
     }
 
     GetAllRegionGroup(IsLoading = true) {
-        return this.http.get(window.location.origin + '/Common/GetAllRegionGroup', null , IsLoading);
+        return this.http.get(window.location.origin + '/Common/GetAllRegionGroup', null, IsLoading);
     }
     GetChildDocTypePaging(PageNumber,
         PageSize,
@@ -308,7 +328,7 @@ export class CommonService {
         });
     }
     GetCityPaging(PageNumber, PageSize, SearchTerm, SearchOption, CityID: number = null) {
-        return this.http.post(window.location.origin + '/Common/GetCityPaging',
+        return this.http.get(window.location.origin + '/Common/GetCityPaging',
             { PageNumber, PageSize, SearchTerm, SearchOption, CityID });
     }
     GetAllManagementType() {
@@ -331,20 +351,21 @@ export class CommonService {
             AResponsibilityTypeList: AResponsibilityTypeList
         });
     }
-    GetAllModule(IsWeb: any) {
-        return this.http.get(window.location.origin + '/Common/GetAllModule', { IsWeb });
+    GetAllModule(IsWeb: any, loading: boolean = false) {
+        return this.http.get(window.location.origin + '/Common/GetAllModule', { IsWeb }, loading);
     }
     GetGoodsList(ActorID: number) {
         return this.http.get(window.location.origin + '/Common/GetGoodsList', { ActorID });
     }
-    GetAllArchiveDetailList(archiveDetailCode: number, TypeCodeList: any, checkSign: any) {
+    GetAllArchiveDetailList(archiveDetailCode: number, TypeCodeList: any, checkSign: any, checkExist: boolean = true) {
         return this.http.get(window.location.origin + '/Common/GetAllArchiveDetailList', {
             archiveDetailCode,
             TypeCodeList,
-            checkSign
+            checkSign,
+            checkExist
         });
     }
-    GetRankCalcListByPriceListTopicID(PriceListTopicID: number , RankParameterCode , RegionCode = null) {
+    GetRankCalcListByPriceListTopicID(PriceListTopicID: number, RankParameterCode, RegionCode = null) {
         return this.http.get(window.location.origin + '/Common/GetRankCalcListByPriceListTopicID', {
             PriceListTopicID,
             RankParameterCode,
@@ -352,16 +373,17 @@ export class CommonService {
         });
     }
     GetGoodsListRankCalc(PriceListTopicID: number) {
-        return this.http.get(window.location.origin + '/Common/GetGoodsListRankCalc', {PriceListTopicID});
+        return this.http.get(window.location.origin + '/Common/GetGoodsListRankCalc', { PriceListTopicID });
     }
     GetAllRankParameterList() {
         return this.http.get(window.location.origin + '/Common/GetAllRankParameterList', null);
     }
-    SaveRankCalc(PriceListTopicID , RankParameterCode,RegionCode, RankCalcList: any) {
-        return this.http.post(window.location.origin + '/Common/SaveRankCalc',{PriceListTopicID , RankParameterCode, RegionCode, RankCalcList });
+    SaveRankCalc(PriceListTopicID, RankParameterCode, RegionCode, RankCalcList: any) {
+        // tslint:disable-next-line: max-line-length
+        return this.http.post(window.location.origin + '/Common/SaveRankCalc', { PriceListTopicID, RankParameterCode, RegionCode, RankCalcList });
     }
     GetRankParameterList(ModuleCode = null) {
-        return this.http.get(window.location.origin + '/Common/GetRankParameterList', {ModuleCode});
+        return this.http.get(window.location.origin + '/Common/GetRankParameterList', { ModuleCode });
     }
 
     SaveRankParameter(ARankParameterList: any, ModuleToLog: number) {
@@ -371,18 +393,42 @@ export class CommonService {
         });
     }
     GetCorporateObject(ActorID) {
-        return this.http.get(window.location.origin + '/Common/GetCorporateObject', {ActorID});
+        return this.http.get(window.location.origin + '/Common/GetCorporateObject', { ActorID });
     }
-    
+
 
     GetDataDictionary() {
         return this.http.get(window.location.origin + '/Common/GetDataDictionary', null);
     }
-    
+
     SaveDataDictionary(ADataDictionaryList: any) {
         return this.http.post(window.location.origin + '/Common/SaveDataDictionary', { ADataDictionaryList });
     }
     GetExperienceCoefList() {
         return this.http.get(window.location.origin + '/Common/GetExperienceCoefList', null, false);
+    }
+    DeleteArchiveDetailDocuments(archiveDetailCode: number, DTypeCode: any, ModuleCode) {
+        return this.http
+            .post(window.location.origin + '/Common/DeleteArchiveDetailDocuments',
+                { archiveDetailCode, DTypeCode, ModuleCode });
+    }
+    SaveModuleViewTypeDocument(DataObj: any) {
+        return this.http.post(window.location.origin + '/Common/SaveModuleViewTypeDocument', {
+            DataObj
+        }, true);
+    }
+    GetModuleViewTypeDocumentList () {
+        return this.http.get(window.location.origin + '/Common/GetModuleViewTypeDocumentList', null, false);
+    }
+    GetRelationTypeList() {
+        return this.http.get(window.location.origin + '/Common/GetRelationTypeList', null);
+    }
+    SaveRelationTypeList(ARelationTypeList: any) {
+        return this.http.post(window.location.origin + '/Common/SaveRelationTypeList', {ARelationTypeList});
+    }
+    GetAllResponsibilityTypeByCorporateType(ModuleCode) {
+        return this.http.get(window.location.origin + '/Common/GetAllResponsibilityTypeByCorporateType', {
+            ModuleCode
+        });
     }
 }

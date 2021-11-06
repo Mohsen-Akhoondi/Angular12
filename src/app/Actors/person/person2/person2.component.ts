@@ -4,7 +4,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { TreeSelectComponent } from 'src/app/Shared/tree-select/tree-select.component';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
@@ -23,6 +22,7 @@ import { resolve } from 'q';
 import { isUndefined } from 'util';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { GridOptions } from 'ag-grid-community';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 @Component({
   selector: 'app-person2',
   templateUrl: './person2.component.html',
@@ -145,6 +145,8 @@ export class Person2Component implements OnInit {
   RankrowsData: any = [];
   RankgridApi: any;
   EvaluatorList: any = [];
+  ActorNote: any = '';
+
   NgSelectRegionParams = {
     bindLabelProp: 'RegionName',
     bindValueProp: 'RegionCode',
@@ -157,17 +159,33 @@ export class Person2Component implements OnInit {
     DropDownMinWidth: '250px',
     type: 'region'
   };
-  BusinessPatternParams =
-    {
-      bindLabelProp: 'BusinessPatternName',
+  BusinessPatternParams = {
+      bindLabelProp: 'BusinessPatternNoName', // 62056
       bindValueProp: 'BusinessPatternID',
+      placeholder: '',
+      MinWidth: '300px',
+      PageSize: 30,
+      PageCount: 0,
+      TotalItemCount: 0,
       selectedObject: null,
-      IsDisabled: false,
       loading: false,
-      MinWidth: '100px',
-      DropDownMinWidth: '200px',
-      IsVirtualScroll: false,
-      type: 'business-pattern'
+      IsVirtualScroll: true,
+      IsDisabled: false,
+      DropDownMinWidth: '300px',
+      type: 'business-pattern',
+      AdvanceSearch: {
+        SearchLabel: 'جستجو براساس :',
+        SearchItemDetails:
+          // tslint:disable-next-line: max-line-length
+          [{ HeaderCaption: 'نام تخصص', HeaderName: 'BusinessPatternName', width: 55, MinTermLenght: 1, SearchOption: 'BusinessPatternName' },
+          // tslint:disable-next-line: max-line-length
+          { HeaderCaption: 'کد تجهیز', HeaderName: 'BusinessPatternNo', width: 53, MinTermLenght: 3, SearchOption: 'BusinessPatternNo' }],
+        SearchItemHeader:
+          [{ HeaderCaption: 'نام تخصص', width: 55, },
+          { HeaderCaption: 'کد تجهیز', width: 53, }],
+        HaveItemNo: true,
+        ItemNoWidth: 16
+      }
     };
   GradeParams =
     {
@@ -744,9 +762,6 @@ export class Person2Component implements OnInit {
           this.BtnClickedName = 'AdminMode';
           this.ShowMessageBoxWithYesNoBtn('آیا تمایل به نمایش فرم در حالت ادمین دارید؟');
         }
-        if (this.ModuleCode === 2872) {
-          this.ModuleViewTypeCode = 2;
-        }
         this.ViewTypeChange();
       });
     }).then(() => {
@@ -784,7 +799,7 @@ export class Person2Component implements OnInit {
       //   this.IsFromSearch = false;
       // }
       this.IsFromSearch = this.ModuleCode === 2885 || this.ModuleCode === 2893 ? true : false; // RFC 53349
-      this.ShowWorkflowButtons = this.ModuleCode === 2885 || this.ModuleCode === 2893
+      this.ShowWorkflowButtons = this.ModuleCode === 2885 || this.ModuleCode === 2893 || this.ModuleCode === 2872
         || (this.InputParam.HasConfirmBtn === false) ? false : true; // RFC 53349 - 54065
       this.ButtonsBoxWidth = this.ModuleCode === 2885 || this.ModuleCode === 2893
         || (this.InputParam.HasConfirmBtn === false) ? 100 : 50; // RFC 54065
@@ -1205,7 +1220,7 @@ export class Person2Component implements OnInit {
             return false;
           }
         },
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 4 },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
@@ -1234,7 +1249,7 @@ export class Person2Component implements OnInit {
             return false;
           }
         },
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 4 },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
@@ -1927,11 +1942,28 @@ export class Person2Component implements OnInit {
           }
         },
       },
+
+      {
+        headerName: 'توضیحات تایید کننده',
+        field: 'ActorNote',
+        width: 300,
+        resizable: true,
+        sortable: true,
+        editable: () => {
+          if (this.IsEditable) {
+            return true;
+          } else {
+            return false;
+          }
+        },
+      },
+
+      
       {
         headerName: 'کدپستي ده رقمي',
         field: 'PostCode',
         width: 150,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 10 },
         editable: () => {
           if (this.IsEditable) {
@@ -1953,7 +1985,7 @@ export class Person2Component implements OnInit {
         headerName: 'مساحت به متر مربع',
         field: 'Area',
         width: 120,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 10 },
         editable: () => {
           if (this.IsEditable) {
@@ -2278,7 +2310,7 @@ export class Person2Component implements OnInit {
         headerName: 'مدت دوره به ساعت',
         field: 'TrainingCourseDuration',
         width: 120,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         resizable: true,
         editable: () => {
           if (this.IsEditable) {
@@ -2472,7 +2504,7 @@ export class Person2Component implements OnInit {
         resizable: true,
         editable: true,
         hide: this.ModuleCode === 2893 ? false : true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
@@ -2489,7 +2521,7 @@ export class Person2Component implements OnInit {
         resizable: true,
         editable: true,
         hide: this.ModuleCode === 2893 ? false : true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
@@ -2521,7 +2553,7 @@ export class Person2Component implements OnInit {
             params.data.RegionName = params.newValue.RegionName;
             params.data.RegionCode = params.newValue.RegionCode;
             params.data.BusinessPatternID = null;
-            params.data.BusinessPatternName = '';
+            params.data.BusinessPatternNoName = '';
             params.data.PriceListTopicID = null;
             params.data.PriceListTopicName = '';
             params.data.Rank = '';
@@ -2576,7 +2608,7 @@ export class Person2Component implements OnInit {
         valueSetter: (params) => {
           if (params.newValue && params.newValue.UnitTopicName) {
             if (params.data.UnitPatternID !== params.newValue.UnitPatternID) {
-              params.data.BusinessPatternName = '';
+              params.data.BusinessPatternNoName = '';
               params.data.PriceListTopicName = '';
               params.data.BusinessPatternID = null;
               params.data.PriceListTopicID = null;
@@ -2595,7 +2627,7 @@ export class Person2Component implements OnInit {
       },
       {
         headerName: 'تخصص',
-        field: 'BusinessPatternName',
+        field: 'BusinessPatternNoName',
         editable: () => {
           if (this.IsEditable) {
             return true;
@@ -2607,31 +2639,35 @@ export class Person2Component implements OnInit {
             }
           }
         },
-        width: 200,
+        width: 330,
         resizable: true,
         cellEditorFramework: NgSelectVirtualScrollComponent,
         cellEditorParams: {
           Params: this.BusinessPatternParams,
           Items: [],
+          MoreFunc: this.FetchMoreBusinessPattern,
+          FetchByTerm: this.FetchBusinessPatternByTerm,
+          RedioChangeFunc: this.RedioSelectedChangeBusinessPattern,
+          Owner: this
         },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
-            return params.value.BusinessPatternName;
+            return params.value.BusinessPatternNoName;
           } else {
             return '';
           }
         },
         valueSetter: (params) => {
-          if (params.newValue && params.newValue.BusinessPatternName) {
-            params.data.BusinessPatternName = params.newValue.BusinessPatternName;
+          if (params.newValue && params.newValue.BusinessPatternNoName) {
+            params.data.BusinessPatternNoName = params.newValue.BusinessPatternNoName;
             params.data.BusinessPatternID = params.newValue.BusinessPatternID;
             params.data.PriceListTopicID = null;
             params.data.PriceListTopicName = '';
             params.data.Rank = '';
             return true;
           } else {
-            params.data.BusinessPatternName = '';
+            params.data.BusinessPatternNoName = '';
             params.data.BusinessPatternID = null;
             return false;
           }
@@ -2696,7 +2732,7 @@ export class Person2Component implements OnInit {
             }
           }
         },
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 1 },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
@@ -2758,14 +2794,25 @@ export class Person2Component implements OnInit {
         field: 'PersianStartDate',
         width: 100,
         resizable: true,
-        editable: () => {
-          if (this.IsEditable) {
+        editable: (params) => {
+          if (params.data.UnitPatternID === 2371 &&
+            params.data.BusinessPatternID === 4924 &&
+            ((isUndefined(params.data.ActorBusinessID) ||
+              params.data.ActorBusinessID === null ||
+              params.data.ActorBusinessID <= 0) || !params.data.IsOlder)
+            && this.ModuleViewTypeCode !== 7) {
+            return false;
+          } else if (this.ModuleViewTypeCode === 7) {
             return true;
           } else {
-            if (this.CanEdite) {
+            if (this.IsEditable) {
               return true;
             } else {
-              return false;
+              if (this.CanEdite) {
+                return true;
+              } else {
+                return false;
+              }
             }
           }
         },
@@ -2790,14 +2837,25 @@ export class Person2Component implements OnInit {
         field: 'PersianEndDate',
         width: 100,
         resizable: true,
-        editable: () => {
-          if (this.IsEditable) {
+        editable: (params) => {
+          if (params.data.UnitPatternID === 2371 &&
+            params.data.BusinessPatternID === 4924 &&
+            ((isUndefined(params.data.ActorBusinessID) ||
+              params.data.ActorBusinessID === null ||
+              params.data.ActorBusinessID <= 0) || !params.data.IsOlder)
+            && this.ModuleViewTypeCode !== 7) {
+            return false;
+          } else if (this.ModuleViewTypeCode === 7) {
             return true;
           } else {
-            if (this.CanEdite) {
+            if (this.IsEditable) {
               return true;
             } else {
-              return false;
+              if (this.CanEdite) {
+                return true;
+              } else {
+                return false;
+              }
             }
           }
         },
@@ -2980,6 +3038,7 @@ export class Person2Component implements OnInit {
     this.WorkPostCode = '';
     this.Cell2 = '';
     this.VeteranPercent = '';
+    this.ActorNote = '';
 
     if (res) {
       this.PersonObject = res; // کل آبجکت شخص و اکتور
@@ -3027,6 +3086,8 @@ export class Person2Component implements OnInit {
       this.WorkPostCode = res.WorkPostCode;
       this.Cell2 = res.Cell2;
       this.VeteranPercent = res.VeteranPercent;
+      this.ActorNote= res.ActorNote;
+     
       if (!this.WorkFlowID && res.ActorBusinessList.length > 0) { // RFC 53083 و هماهنگی با آقای آخوندی
         if (this.IsAdmin && this.ModuleCode !== 2893 && this.ModuleCode !== 2885
           && (!this.InputParam || this.InputParam.ModuleViewTypeCode !== 300000)) {
@@ -3096,6 +3157,7 @@ export class Person2Component implements OnInit {
     this.WorkPostCode = '';
     this.Cell2 = '';
     this.VeteranPercent = '';
+    this.ActorNote='';
 
     this.Actor.GetPersonByIdentityNo(this.IdentityNoSearch, PersonID, RegionCode).subscribe(res2 => {
       if (res2) {
@@ -3144,6 +3206,9 @@ export class Person2Component implements OnInit {
         this.UserLocalImage = res2.DecImage;
         this.PersianBirthDate = res2.PersianBirthDate;
         this.VeteranPercent = res2.VeteranPercent;
+        this.ActorNote = res2.ActorNote;
+
+
         if (res2.CompanyGradeCode) {
           this.OnOpenNgSelect('CompanyGrade', res2.CompanyGradeCode);
         }
@@ -3249,6 +3314,8 @@ export class Person2Component implements OnInit {
     this.VeteranPercent = '';
     this.UserImage = null;
     this.rowData = [];
+    this.ActorNote=[];
+
     this.Actor.GetActorByIdentityNo(this.IdentityNoSearch, this.BirthDateSearch, true, this.PostCodeSearch).subscribe(res => {
       if (res) {
         this.PersonObject = res; // کل آبجکت شخص و اکتور
@@ -3260,6 +3327,39 @@ export class Person2Component implements OnInit {
   }
   RedioClick(data) {
 
+  }
+  onWFSave() {
+    if (this.PersonObject) {
+      this.DisplaySearchBox = false;
+      if (this.WorkFlowID) {
+        this.ModuleCode = 2784;
+        this.FromWorkListCartable = true;
+      }
+      const ActorBusinessList = [];
+      this.RankgridApi.stopEditing();
+      this.RankgridApi.forEachNode(node => {
+        const Rankobj = {
+          ActorBusinessID: node.data.ActorBusinessID ? node.data.ActorBusinessID : -1,
+          ActorId: node.data.ActorId,
+          // tslint:disable-next-line: max-line-length
+          StartDate: node.data.PersianStartDate && node.data.PersianStartDate.MDate ? node.data.PersianStartDate.MDate : (node.data.ShortStartDate ? node.data.ShortStartDate : null),
+          // tslint:disable-next-line: max-line-length
+          EndDate: node.data.PersianEndDate && node.data.PersianEndDate.MDate ? node.data.PersianEndDate.MDate : (node.data.ShortEndDate ? node.data.ShortEndDate : null),
+        };
+        ActorBusinessList.push(Rankobj);
+      });
+
+      this.Actor.UpdatePersonOnWFSave(
+        this.PersonObject,
+        ActorBusinessList,
+        this.FromWorkListCartable
+      ).subscribe(res => {
+        this.ShowMessageBoxWithOkBtn('ثبت اطلاعات با موفقيت انجام شد');
+      });
+    } else {
+      this.ShowMessageBoxWithOkBtn('ابتدا شخص را انتحاب نمایید');
+      return;
+    }
   }
   onSave() {
     this.BtnClickedName = 'BtnSave';
@@ -3321,6 +3421,9 @@ export class Person2Component implements OnInit {
       this.PersonObject.WorkPostCode = this.WorkPostCode;
       this.PersonObject.Cell2 = this.Cell2;
       this.PersonObject.VeteranPercent = this.VeteranPercent;
+      this.PersonObject.ActorNote = this.ActorNote;
+
+
       this.CergridApi.forEachNode(item => {
         const obj = {
           CertificateID: item.data.CertificateID ? item.data.CertificateID : -1,
@@ -3380,7 +3483,7 @@ export class Person2Component implements OnInit {
           // tslint:disable-next-line: max-line-length
           RegionCode: node.data.RegionName && node.data.RegionName.RegionCode && !isUndefined(node.data.RegionName.RegionCode) ? node.data.RegionName.RegionCode : (node.data.RegionCode !== null ? node.data.RegionCode : null),
           // tslint:disable-next-line: max-line-length
-          BusinessPatternID: node.data.BusinessPatternName && node.data.BusinessPatternName.BusinessPatternID ? node.data.BusinessPatternName.BusinessPatternID : (node.data.BusinessPatternID ? node.data.BusinessPatternID : -1),
+          BusinessPatternID: node.data.BusinessPatternNoName && node.data.BusinessPatternNoName.BusinessPatternID ? node.data.BusinessPatternNoName.BusinessPatternID : (node.data.BusinessPatternID ? node.data.BusinessPatternID : -1),
           // tslint:disable-next-line: max-line-length
           PriceListTopicID: node.data.PriceListTopicName && node.data.PriceListTopicName.PriceListTopicID ? node.data.PriceListTopicName.PriceListTopicID : (node.data.PriceListTopicID ? node.data.PriceListTopicID : null),
           Rank: node.data.Rank ? node.data.Rank : null,
@@ -3508,6 +3611,14 @@ export class Person2Component implements OnInit {
     this.Closed.emit(true);
   }
   popupclosed(event) {
+    if (this.PopUpType === 'supplier-work-flow') {
+      this.Actor.GetActorBussinessList(this.PersonObject.ActorId,
+        (this.CurrWorkFlow && this.CurrWorkFlow.RegionCode ? this.CurrWorkFlow.RegionCode : null)
+      ).subscribe(res => {
+        this.RankrowsData = res;
+      });
+    }
+
     this.isClicked = false;
     this.PopUpType = '';
     this.PixelHeight = '';
@@ -3614,13 +3725,23 @@ export class Person2Component implements OnInit {
           type: 'region'
         });
       });
-    } else if (event.colDef && event.colDef.field === 'BusinessPatternName') {// For InvalidSelected When Old IsValid
-      this.Actor.GetBusinessPatternListByUnitPatternID(event.data.UnitPatternID, false).subscribe(res => {
-        this.RefreshServiceObj.RefreshItemsVirtualNgSelect({
-          List: res,
-          type: 'business-pattern'
-        });
-      });
+    } else if (event.colDef && event.colDef.field === 'BusinessPatternNoName') {
+        this.RankColumnDef[8].cellEditorParams.Params.loading = true;
+        this.Common.GetBusinessPatternPaging('',
+          '',
+          1,
+          30,
+          event.data.UnitPatternID,
+          event.data.BusinessPatternID).
+          subscribe(res => {
+            this.RankColumnDef[8].cellEditorParams.Params.loading = false;
+            this.RefreshServiceObj.RefreshItemsVirtualNgSelect({
+              List: res.List,
+              TotalItemCount: res.TotalItemCount,
+              PageCount: Math.ceil(res.TotalItemCount / 30),
+              type: 'business-pattern'
+            });
+          });
     } else if (event.colDef && event.colDef.field === 'PriceListTopicName') {
       // tslint:disable-next-line: max-line-length
       this.Actor.GetPriceListTopicByBusinesPatternID(event.data.BusinessPatternID, false).subscribe(res => {
@@ -4108,7 +4229,8 @@ export class Person2Component implements OnInit {
             this.WorkflowObjectCode,
             null,
             this.ModuleCode,
-            this.CartableUserID)
+            this.CartableUserID,
+            this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null)
             .subscribe(res => {
               this.ShowMessageBoxWithOkBtn(' عملیات عدم تایید با موفقیت انجام شد');
 
@@ -4222,7 +4344,8 @@ export class Person2Component implements OnInit {
         this.WorkflowObjectCode,
         this.ModuleViewTypeCode,
         this.ModuleCode,
-        this.CartableUserID).
+        this.CartableUserID,
+        this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).
         subscribe(res => {
           if (HasAlert) {
             this.ShowMessageBoxWithOkBtn(' عملیات تایید با موفقیت انجام شد');
@@ -4262,7 +4385,8 @@ export class Person2Component implements OnInit {
               this.WorkflowObjectCode,
               this.ModuleViewTypeCode,
               this.ModuleCode,
-              this.CartableUserID));
+              this.CartableUserID,
+              this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null));
           });
           if (APIList.length > 0) {
             forkJoin(APIList).
@@ -4393,7 +4517,8 @@ export class Person2Component implements OnInit {
       this.WorkflowObjectCode,
       this.ModuleViewTypeCode,
       this.ModuleCode,
-      this.CartableUserID).subscribe(res => {
+      this.CartableUserID,
+      this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).subscribe(res => {
         if (alert) {
           this.ShowMessageBoxWithOkBtn('عملیات عدم تایید با موفقیت انجام شد');
         }
@@ -4481,6 +4606,12 @@ export class Person2Component implements OnInit {
         this.IsSupplementaryInfo = false;
         this.HaveEducation = false;
         this.IsActiveshenasnameh = true;
+        break;
+      case 7:
+        this.IsEditable = false;
+        this.IsDisplay = false;
+        this.IsActiveshenasnameh = true;
+        this.HaveEvaluationInfo = false;
         break;
       case 100000: // LocalProvider  مشاهده اطلاعات پیمانکار
         this.IsActiveshenasnameh = true;
@@ -4720,7 +4851,7 @@ export class Person2Component implements OnInit {
       && row.RegionCode && !isUndefined(row.RegionCode)
       && row.ActorBusinessID && row.ActorBusinessID > 0
       && row.AllowStateCode !== 7) {
-      this.FlowService.GetWfInstanceIDByObjIDAndRegionCode(row.ActorId, row.RegionCode).subscribe(res => {
+      this.FlowService.GetWfInstanceIDByObjIDAndRegionCode(row.ActorId, row.RegionCode, true).subscribe(res => {
         if (res) {
           this.WorkflowInstanceID = res;
           this.PopUpType = 'user-work-log-details';
@@ -4980,5 +5111,97 @@ export class Person2Component implements OnInit {
     }
   }
 
+  FetchMoreBusinessPattern(event) {
+    event.Owner.RankColumnDef[8].cellEditorParams.Params.loading = true;
+    const ResultList = [];
+    // tslint:disable-next-line:no-shadowed-variable
+    const promise = new Promise((resolve, reject) => {
+      event.Owner.Common.GetBusinessPatternPaging(event.SearchOption,
+        event.term,
+        event.PageNumber,
+        event.PageSize,
+        event.Owner.VWExeUnitParams.selectedObject,
+        event.Owner.BusinessPatternParams.selectedObject).
+        subscribe(res => {
+          event.CurrentItems.forEach(el => {
+            ResultList.push(el);
+          });
+          res.List.forEach(element => {
+            ResultList.push(element);
+          });
+          resolve(res.TotalItemCount);
+        });
+    }).then((TotalItemCount: number) => {
+      event.Owner.RankColumnDef[8].cellEditorParams.Params.loading = false;
+      event.Owner.RefreshServiceObj.RefreshItemsVirtualNgSelect({
+        List: ResultList,
+        term: event.term,
+        TotalItemCount: TotalItemCount,
+        PageCount: Math.ceil(TotalItemCount / 30),
+        type: 'business-pattern'
+      });
+    });
+  }
+  FetchBusinessPatternByTerm(event) {
+    event.Owner.RankColumnDef[8].cellEditorParams.Params.loading = true;
+    event.Owner.Common.GetBusinessPatternPaging(event.SearchOption,
+      event.term,
+      event.PageNumber,
+      event.PageSize,
+      event.Owner.VWExeUnitParams.selectedObject,
+      event.Owner.BusinessPatternParams.selectedObject).
+      subscribe(res => {
+        event.Owner.RankColumnDef[8].cellEditorParams.Params.loading = false;
+        event.Owner.RefreshServiceObj.RefreshItemsVirtualNgSelect({
+          List: res.List,
+          term: event.term,
+          TotalItemCount: res.TotalItemCount,
+          PageCount: Math.ceil(res.TotalItemCount / 30),
+          type: 'business-pattern'
+        });
+      });
+  }
+  RedioSelectedChangeBusinessPattern(event) {
+    event.Owner.RankColumnDef[8].cellEditorParams.Params.loading = true;
+    event.Owner.Common.GetBusinessPatternPaging(event.SearchOption,
+      '',
+      1,
+      30,
+      event.Owner.VWExeUnitParams.selectedObject,
+      event.Owner.BusinessPatternParams.selectedObject).
+      subscribe(res => {
+        event.Owner.RankColumnDef[8].cellEditorParams.Params.loading = false;
+        event.Owner.RefreshServiceObj.RefreshItemsVirtualNgSelect({
+          List: res.List,
+          TotalItemCount: res.TotalItemCount,
+          PageCount: Math.ceil(res.TotalItemCount / 30),
+          type: 'business-pattern'
+        });
+      });
+  }
+  onShowRunningContractsClick() {
+    if (!this.ActorId) {
+      this.PopUpType = 'message-box';
+      this.HaveHeader = true;
+      this.alertMessageParams.message = 'ردیفی جهت مشاهده انتخاب نشده است';
+      this.isClicked = true;
+      this.startLeftPosition = 500;
+      this.startTopPosition = 250;
+      return;
+    }
+    this.PopUpType = 'current-suppliers-contract';
+    this.isClicked = true;
+    this.startLeftPosition = 74;
+    this.startTopPosition = 5;
+    this.MinHeightPixel = 500;
+    this.PixelHeight = 600;
+    // this.minWidthPixel = 1250;
+    this.OverPixelWidth = 1250;
+    this.MainMaxwidthPixel = 1250;
+
+    this.PopupParam = {
+      ActorID: this.ActorId,
+    };
+  }
 }
 

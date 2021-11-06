@@ -14,6 +14,7 @@ import { ReportService } from 'src/app/Services/ReportService/ReportService';
 export class SupplierWorkFlowComponent implements OnInit {
   @Output() Closed: EventEmitter<boolean> = new EventEmitter<boolean>();
   @ViewChild('WorkLogDetail') WorkLogDetail: TemplateRef<any>;
+  @ViewChild('RevokeProcess') RevokeProcess: TemplateRef<any>;
   @ViewChild('PrintFlow') PrintFlow: TemplateRef<any>;
   @Input() InputParam;
   WorkFlowRows = [];
@@ -38,6 +39,9 @@ export class SupplierWorkFlowComponent implements OnInit {
   alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false };
   WorkFlowColDef;
   ActorID;
+  BtnClickedName = '';
+  RegionCode;
+  HasWorkFlowID;
   constructor(private Actor: ActorService,
     private FlowService: WorkflowService,
     private route: ActivatedRoute,
@@ -56,6 +60,7 @@ export class SupplierWorkFlowComponent implements OnInit {
       this.PersianBirthDate = this.InputParam.PersianBirthDate;
       this.IsAdmin = this.InputParam.IsAdmin;
       this.ActorID = this.InputParam.ActorID;
+      this.HasWorkFlowID = this.InputParam.HasWorkFlowID;
     }
     this.Actor.GetWorkflowInstance(this.ActorID).subscribe(res => {
       this.WorkFlowRows = res;
@@ -69,6 +74,21 @@ export class SupplierWorkFlowComponent implements OnInit {
         field: 'ItemNo',
         width: 50,
         resizable: true,
+      },
+      {
+        headerName: 'انصراف از درخواست',
+        field: '',
+        width: 120,
+        sortable: false,
+        resizable: false,
+        cellStyle: function (params) {
+          return { 'text-align': 'center' };
+        },
+        cellRendererFramework: TemplateRendererComponent,
+        cellRendererParams: {
+          ngTemplate: this.RevokeProcess,
+        },
+        hide: this.HasWorkFlowID
       },
       {
         headerName: 'جزئیات گردش',
@@ -177,6 +197,7 @@ export class SupplierWorkFlowComponent implements OnInit {
     this.Closed.emit(true);
   }
   popupclosed(event) {
+    this.ngOnInit();
     this.isClicked = false;
     this.PopUpType = '';
   }
@@ -194,5 +215,40 @@ export class SupplierWorkFlowComponent implements OnInit {
       this.ModuleCode,
       row.RegionCode
     );
+  }
+  onRevokeProcessClick(row) {
+    if (row.WorkflowInstanceID && row.WorkflowInstanceID > 0) {
+      this.WorkflowInstanceID = row.WorkflowInstanceID;
+    }
+    if (row.RegionCode && row.RegionCode > 0) {
+      this.RegionCode = row.RegionCode;
+    }
+    this.BtnClickedName = 'BtnDelete';
+    this.ShowMessageBoxWithYesNoBtn('با انجام این عملیات گردش کار سازمان ' + row.RegionName + ' ابطال خواهد شد، آیا مطمعن هستید؟ ');
+  }
+  ShowMessageBoxWithYesNoBtn(message) {
+    this.isClicked = true;
+    this.PopUpType = 'message-box';
+    this.HaveHeader = true;
+    this.HaveMaxBtn = false;
+    this.startLeftPosition = 540;
+    this.startTopPosition = 240;
+    this.alertMessageParams.message = message;
+    this.alertMessageParams.HaveOkBtn = false;
+    this.alertMessageParams.HaveYesBtn = true;
+    this.alertMessageParams.HaveNoBtn = true;
+  }
+  MessageBoxAction(event) {
+    if (this.BtnClickedName === 'BtnDelete' && event === 'YES') { // RFC 62144
+      this.Actor.RevokeProcess(this.WorkflowInstanceID, this.ModuleCode, this.ActorID, this.RegionCode).subscribe(res => {
+        if (res) {
+          this.BtnClickedName = '';
+          this.ShowMessageBoxWithOkBtn('ابطال فرآیند با موفقیت انجام شد');
+        }
+      });
+    }
+  }
+  getOutPutParam(event) {
+
   }
 }

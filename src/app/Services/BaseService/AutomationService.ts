@@ -59,7 +59,7 @@ export class AutomationService {
         });
     }
     GetCostFactorLetterByCostFacorID(CostFactorID: any) {
-        return this.http.post(window.location.origin + '/Automation/GetCostFactorLetterByCostFacorID', {
+        return this.http.get(window.location.origin + '/Automation/GetCostFactorLetterByCostFacorID', {
             CostFactorID
         });
     }

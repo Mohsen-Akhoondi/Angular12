@@ -58,7 +58,7 @@ export class ContractorCardListComponent implements OnInit {
     this.ColumnsDefinition();
   }
   getNewData(): void {
-    this.Actor.GetContractorCardList(this.ActorID ,this.PriceListTopicID , this.RegionCode , this.UnitPatternID).subscribe(res => {
+    this.Actor.GetContractorCardList(this.ActorID , this.PriceListTopicID , this.RegionCode , this.UnitPatternID).subscribe(res => {
       this.rowData = res;
     });
   }
@@ -190,6 +190,26 @@ export class ContractorCardListComponent implements OnInit {
         width: 200,
         resizable: true
       },
+      {
+        headerName: 'حد معامله',
+        field: 'DealTypeName',
+        width: 120,
+        resizable: true
+      },
+      {
+        headerName: 'مبلغ قرارداد',
+        field: 'ContractAmount',
+        width: 200,
+        resizable: true,
+        HaveThousand: true, 
+      },
+      {
+        headerName: 'مبلغ برنده',
+        field: 'SumProposalItemPrice',
+        width: 200,
+        resizable: true,
+        HaveThousand: true, 
+      }, // 62593
       // 
       // {
       //   headerName: 'تاریخ شروع درخواست', // RFC 51776
@@ -242,7 +262,7 @@ export class ContractorCardListComponent implements OnInit {
       ReadyToConfirm: null,
       ContractTypeCode: -1,
       SelectedRow: null,
-      ModuleViewTypeCode: 2,
+      ModuleViewTypeCode: 222222,
       IsRegionReadOnly: false,
       ModuleCode: 2730
     };

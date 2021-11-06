@@ -32,7 +32,7 @@ export class UsersRolesInRegionListComponent implements OnInit {
   CostCenterList = [];
   SubCostCenterList = [];
   RoleParams = {
-    bindLabelProp: 'RoleName',
+    bindLabelProp: 'RoleIDName',
     bindValueProp: 'RoleID',
     placeholder: '',
     MinWidth: '155px',
@@ -42,7 +42,7 @@ export class UsersRolesInRegionListComponent implements OnInit {
     IsDisabled: false,
   };
   CostCenterParams = {
-    bindLabelProp: 'CostCenterName',
+    bindLabelProp: 'CostCenterTitle',
     bindValueProp: 'CostCenterId',
     placeholder: '',
     MinWidth: '155px',
@@ -52,7 +52,7 @@ export class UsersRolesInRegionListComponent implements OnInit {
     IsDisabled: false,
   };
   SubCostCenterParams = {
-    bindLabelProp: 'SubCostCenterName',
+    bindLabelProp: 'SubCostCenterTitle',
     bindValueProp: 'SubCostCenterId',
     placeholder: '',
     MinWidth: '155px',

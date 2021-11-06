@@ -13,6 +13,7 @@ import { isNumber, isNullOrUndefined } from 'util';
 })
 export class ProvidersSearchPageComponent implements OnInit {
   @ViewChild('ShowInformations') ShowInformations: TemplateRef<any>;
+  @ViewChild('ShowRunningContracts') ShowRunningContracts: TemplateRef<any>;
   ////////////////// حقوقی ///////////////////////////////////
   private CgridApi;
   CorporatecolumnDef;
@@ -326,6 +327,20 @@ export class ProvidersSearchPageComponent implements OnInit {
         width: 170,
         resizable: true,
       },
+      {
+        headerName: 'لیست موارد موثر در کسر ظرقیت کل',
+        field: '',
+        width: 100,
+        resizable: true,
+        tooltip: (params) => 'مشاهده لیست قراردادهای جاری و درخواست های موثر در کسر ظرقیت کل',
+        cellStyle: function (params) {
+          return { 'text-align': 'center' };
+        },
+        cellRendererFramework: TemplateRendererComponent,
+        cellRendererParams: {
+          ngTemplate: this.ShowRunningContracts,
+        }
+      },
     ];
     this.PersoncolumnDef = [
       {
@@ -412,7 +427,7 @@ export class ProvidersSearchPageComponent implements OnInit {
   OnOpenNgSelect(event) {
     switch (event) {
       case 'Region':
-        this.RegionList.GetRegionList(this.ModuleCode, true).subscribe(res => {
+        this.RegionList.GetRegionList(this.ModuleCode, false).subscribe(res => { // 62686
           this.RegionItems = res;
         });
         break;
@@ -440,5 +455,30 @@ export class ProvidersSearchPageComponent implements OnInit {
   onChangeRole(event) {
     this.RoleID = event;
   }
+  onShowRunningContractsClick(row) {
+    if (row) {
+      if (!row.ActorID) {
+        this.PopUpType = 'message-box';
+        this.HaveHeader = true;
+        this.alertMessageParams.message = 'ردیفی جهت مشاهده انتخاب نشده است';
+        this.isClicked = true;
+        this.startLeftPosition = 500;
+        this.startTopPosition = 250;
+        return;
+      }
+      this.PopUpType = 'current-suppliers-contract';
+      this.isClicked = true;
+      this.startLeftPosition = 74;
+      this.startTopPosition = 5;
+      this.MinHeightPixel = 500;
+      this.PixelHeight = 600;
+      // this.minWidthPixel = 1250;
+      this.PixelWidth = 1250;
+      this.MainMaxwidthPixel = 1250;
 
+      this.PopupParam = {
+        ActorID: row.ActorID,
+      };
+    }
+  }
 }

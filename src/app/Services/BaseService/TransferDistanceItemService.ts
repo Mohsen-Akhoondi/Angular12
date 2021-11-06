@@ -39,7 +39,7 @@ SaveContractPayTransfer(ContractPayTransferList: any,
 GetContractPayTransfer(ContractPayItemID: number,
                        ProductID: number,
                        ContractAgentCode: number) {
-    return this.http.post(window.location.origin + '/ContractPay/GetContractPayTransfer', {ContractPayItemID,
+    return this.http.get(window.location.origin + '/ContractPay/GetContractPayTransfer', {ContractPayItemID,
                                                                                            ProductID,
                                                                                            ContractAgentCode} );
 }

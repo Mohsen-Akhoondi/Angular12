@@ -32,9 +32,6 @@ export class CommonServices {
   _arrayBufferToBase64(buffer) {
     let binary = '';
     if (buffer) {
-      if (typeof buffer === 'string') {
-        return buffer;
-      }
       const bytes = new Uint8Array(buffer);
       const len = bytes.byteLength;
       for (let i = 0; i < len; i++) {
