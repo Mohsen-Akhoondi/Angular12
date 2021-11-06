@@ -16,7 +16,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
 import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServices';
@@ -807,6 +806,8 @@ export class PureProductRequestPageComponent implements OnInit {
       this.MinimumPosting = this.InputParam.MinimumPosting;
       // tslint:disable-next-line: max-line-length
       this.ModuleCode = this.ModuleCode ? this.ModuleCode : 2862;
+      this.rowsData = this.InputParam.ProductRequestItemList ? this.InputParam.ProductRequestItemList : [];
+      this.DisableCustomerOrder = this.InputParam.DisableCustomerOrder ? this.InputParam.DisableCustomerOrder : false;
     }
 
     if (!this.IsEndFlow && (!this.ReadyToConfirm || this.ReadyToConfirm === null || this.ReadyToConfirm === 0)) {
@@ -1457,12 +1458,14 @@ export class PureProductRequestPageComponent implements OnInit {
           GradeID: this.ProductRequestObject ? this.ProductRequestObject.GradeID : null,
           IsConfirm: 0,
           ContractID: this.ContractParams.selectedObject ? this.ContractParams.selectedObject : null,
-          CnrtWorkOrderID: this.ContractWorkOrderParams.selectedObject ? this.ContractWorkOrderParams.selectedObject : null
+          CnrtWorkOrderID: this.ContractWorkOrderParams.selectedObject ? this.ContractWorkOrderParams.selectedObject : null,
+          RequestObjectTypeCode: 4
         };
 
         this.gridApi.forEachNode(node => {
           const ProductRequestItemObj = {
             ProductRequestItemID: node.data.ProductRequestItemID ? node.data.ProductRequestItemID : -1,
+            CustomerOrderItemID: node.data.CustomerOrderItemID ? node.data.CustomerOrderItemID : null,
             CostFactorID: ProductRequestObj.CostFactorID,
             ItemNo: ++ItemNo,
             QTY: parseFloat(node.data.QTY),
@@ -1861,7 +1864,8 @@ export class PureProductRequestPageComponent implements OnInit {
             this.WorkflowObjectCode,
             this.ModuleViewTypeCode,
             this.OrginalModuleCode,
-            this.CartableUserID)
+            this.CartableUserID
+            , this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null)
             .subscribe(res => {
               this.ShowMessageBoxWithOkBtn('عدم تایید درخواست انجام معامله با موفقیت انجام شد');
 
@@ -1975,7 +1979,8 @@ export class PureProductRequestPageComponent implements OnInit {
         this.WorkflowObjectCode,
         this.ModuleViewTypeCode,
         this.OrginalModuleCode,
-        this.CartableUserID).
+        this.CartableUserID
+        , this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).
         subscribe(res => {
           if (HasAlert) {
             this.ShowMessageBoxWithOkBtn('تایید درخواست  انجام معامله  با موفقیت انجام شد');
@@ -2011,7 +2016,8 @@ export class PureProductRequestPageComponent implements OnInit {
         this.WorkflowObjectCode,
         this.ModuleViewTypeCode,
         this.OrginalModuleCode,
-        this.CartableUserID).subscribe(res => {
+        this.CartableUserID
+        , this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).subscribe(res => {
           if (alert) {
             this.ShowMessageBoxWithOkBtn('عدم تایید برآورد اولیه با موفقیت انجام شد');
           }
@@ -2258,6 +2264,7 @@ export class PureProductRequestPageComponent implements OnInit {
             this.RegionParams.selectedObject = this.CurrentUserSubCostCenter ?
               this.CurrentUserSubCostCenter.RegionCode : this.RegionItems[0].RegionCode;
             this.OnOpenNgSelect('FilterRegion');
+            this.OnOpenNgSelect('CustomerOrder');
             this.RefreshPageByRegion(this.RegionParams.selectedObject);
           }
         });
@@ -2287,7 +2294,8 @@ export class PureProductRequestPageComponent implements OnInit {
         break;
       case 'CustomerOrder':
         const CurrentCustomerOrderID = this.ProductRequestObject
-          && this.ProductRequestObject.CustomerOrderID ? this.ProductRequestObject.CustomerOrderID : null;
+          && this.ProductRequestObject.CustomerOrderID ? this.ProductRequestObject.CustomerOrderID :
+             this.InputParam.CustomerOrderID ? this.InputParam.CustomerOrderID : null;
         this.CustomerOrderParams.loading = true;
         const ResList = [];
         const promised = new Promise((resolve_res3, reject_res3) => {
@@ -2306,7 +2314,7 @@ export class PureProductRequestPageComponent implements OnInit {
             type: 'customer-order',
           });
           if (IsFill && CurrentCustomerOrderID) {
-            this.CustomerOrderParams.selectedObject = this.ProductRequestObject.CustomerOrderID;
+            this.CustomerOrderParams.selectedObject = CurrentCustomerOrderID;
           }
           if (IsFill && FillResolve) {
             FillResolve();
