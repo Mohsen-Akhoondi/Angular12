@@ -3,12 +3,12 @@ import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_a
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { FinYearService } from 'src/app/Services/BaseService/FinYearService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { ActivatedRoute } from '@angular/router';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { AutomationService } from 'src/app/Services/BaseService/AutomationService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 @Component({
   selector: 'app-product-request-provision',
   templateUrl: './product-request-provision.component.html',
@@ -236,7 +236,7 @@ export class ProductRequestProvisionComponent implements OnInit {
           return !this.IsCentralize && !this.IsWFDisabled;
         },
         HaveThousand: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
@@ -504,6 +504,14 @@ export class ProductRequestProvisionComponent implements OnInit {
         };
         ProvisionList.push(ProvisionObj);
       });
+    }
+
+    if (!this.IsTaxValue && this.PopupParam.OrginalModuleCode === 2793) { // RFC 61327
+      // tslint:disable-next-line: max-line-length
+      if (this.ProductRequestObject.ContractObject != null && !this.ProductRequestObject.ContractObject.Adjustment && this.CreditBalance <= 0) { // RFC 61208
+        this.ShowMessageBoxWithOkBtn('مانده تامین اعتبار کوچکتر مساوی صفر است و تعدیل ندارد');
+        return;
+      }
     }
 
     this.ProductRequest.SaveProductRequestProvision(

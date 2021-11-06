@@ -16,7 +16,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
 import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServices';
@@ -28,7 +27,11 @@ import { resolve } from 'q';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
 import { RadioBoxModel } from 'src/app/Shared/Radio-Box/Radio-Box-Model/RadioBoxModel';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
+import { CommonService } from 'src/app/Services/CommonService/CommonService';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
+
 @Component({
   selector: 'app-product-request-page',
   templateUrl: './product-request-page.component.html',
@@ -37,11 +40,14 @@ import { ReportService } from 'src/app/Services/ReportService/ReportService';
 export class ProductRequestPageComponent implements OnInit {
   @ViewChild('IsValidity') IsValidity: TemplateRef<any>;
   @ViewChild('UploadArchive') UploadArchive: TemplateRef<any>;
+  @ViewChild('DelRecDoc') DelRecDoc: TemplateRef<any>;
   @Output() Closed: EventEmitter<any> = new EventEmitter<any>();
   @Output() Output: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Input() PopupMaximized;
   @Input() InputParam;
   IsAdmin;
+  btnshowcontractlist = false;
+  IsTransferedContract = false;
   VirtualGroupModuleTypeName = '';
   VirtualGroupModuleTypeDisplay = false;
   NotIsNewHeaderName = 'تمدید';
@@ -54,6 +60,7 @@ export class ProductRequestPageComponent implements OnInit {
   MCSRadioTypes: Array<RadioBoxModel> = [];
   McRadioTypes: Array<RadioBoxModel> = [];
   ScRadioTypes: Array<RadioBoxModel> = [];
+  IcRadioTypes: Array<RadioBoxModel> = [];
   HasSecretQuestion = false;
   ISActLocation = false;
   HasMutualContractQuestion = true;
@@ -77,6 +84,7 @@ export class ProductRequestPageComponent implements OnInit {
   PRContractObject;
   FilterDocumentTypeCodeList = [];
   ParentDocType = 38;
+  ParentDocTypeList = [];
   RegisterLetterDate;
   DocumentLetterNo;
   currentContractSearchTerm;
@@ -144,7 +152,7 @@ export class ProductRequestPageComponent implements OnInit {
   IsEntryPercentageLevelOfChanges = false;
   ExpertPersonRoleID = 972;
   ExpertPersonLabel = 'کارشناس امور قرارداد ها';
-  WorkflowButtonsWidth = 44.8;
+  WorkflowButtonsWidth = 34.8;
   Excel_Header_Param: { colDef2: any };
   ContractListSetFrom: any;
   ContractSignItems;
@@ -415,7 +423,7 @@ export class ProductRequestPageComponent implements OnInit {
   PRIgridHeight = 85;
   WarrantyDocGridHeight = 82;
   HaveSave = false;
-  HaveDelete = false;
+  HaveDelete = true;
   IsRowClick = false;
   ShowContractInfo = false;
   RegionListSet;
@@ -614,7 +622,7 @@ export class ProductRequestPageComponent implements OnInit {
   IsDisableBtnContract = true;
   HaveCompleteInfo = false;
   ShowWorkflowButtons = true;
-  ButtonsPlaceWidthPercent = 55;
+  ButtonsPlaceWidthPercent = 65;
   UserRegionCode;
   NgSelectProposalParams = {
     bindLabelProp: 'ActorName',
@@ -764,6 +772,15 @@ export class ProductRequestPageComponent implements OnInit {
   HaveArticle18DigitalSign = false;
   IsSumEditableType107 = false;
   HasSingDate = false;
+  ExistsFile = false;
+  OrderCommitionID: number = null;
+  IsUpdateBefore: boolean = false;
+  IsUpdateBeforeAdevertising = null;
+
+  gridApiReceiveDocProduct;
+  ReceiveDocProductRowData = [];
+  ReceiveDocProductColDef;
+  HavePRReceiveDoc = true;
 
   constructor(
     private ContractList: ContractListService,
@@ -783,7 +800,8 @@ export class ProductRequestPageComponent implements OnInit {
     private route: ActivatedRoute,
     private FlowService: WorkflowService,
     private Automation: AutomationService,
-    private Report: ReportService) {
+    private Report: ReportService,
+    private ComonService: CommonService) {
     this.route.params.subscribe(params => {
       this.ModuleCode = +params['ModuleCode'];
       this.OrginalModuleCode = +params['ModuleCode'];
@@ -1177,7 +1195,506 @@ export class ProductRequestPageComponent implements OnInit {
       CostCenterCode = this.CostCenterItems && this.CostCenterParams.selectedObject ? this.CostCenterItems.find(x => x.CostCenterId === this.CostCenterParams.selectedObject).CostCenterCode : '';
     }
     // this.FillGrid(RegionCode, CostCenterCode);
-    this.ReceiveDocColDef = [
+    if (this.IsNew) {
+      this.ReceiveDocColDef = [
+        {
+          headerName: 'ردیف',
+          field: 'ItemNo',
+          width: 70,
+          resizable: true
+        },
+        {
+          headerName: 'مستندات',
+          field: '',
+          width: 80,
+          sortable: false,
+          resizable: false,
+          cellStyle: function (params) {
+            return { 'text-align': 'center' };
+          },
+          cellRendererFramework: TemplateRendererComponent,
+          cellRendererParams: {
+            ngTemplate: this.UploadArchive,
+          }
+        },
+        {
+          headerName: 'قبول / رد',
+          field: 'IsValidity',
+          width: 100,
+          resizable: true,
+          editable: true,
+          cellStyle: function (params) {
+            return { 'text-align': 'center' };
+          },
+          cellEditorFramework: CheckboxFieldEditableComponent,
+          valueFormatter: function isValidFormer(params) {
+            if (params.value) {
+              return 'معتبر';
+            } else {
+              return 'نامعتبر';
+            }
+          },
+          cellRendererFramework: TemplateRendererComponent,
+          cellRendererParams: {
+            ngTemplate: this.IsValidity
+          },
+        },
+        {
+          headerName: 'نام شخص پیشنهاد دهنده',
+          field: 'ActorName',
+          cellEditorFramework: NgSelectVirtualScrollComponent,
+          cellEditorParams: {
+            Params: this.NgSelectProposalParams,
+            Items: [],
+            Owner: this
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.ActorName;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.ActorName) {
+              params.data.ProposalID = params.newValue.ProposalID;
+              params.data.ActorName = params.newValue.ActorName;
+              return true;
+            } else {
+              params.data.ProposalID = null;
+              params.data.ActorName = null;
+              return false;
+            }
+          },
+          editable: true,
+          width: 250,
+          resizable: true
+        },
+        {
+          headerName: 'نوع سند',
+          field: 'ReceiveDocTypeName',
+          cellEditorFramework: NgSelectCellEditorComponent,
+          cellEditorParams: {
+            Items: this.ContractList.GetWarrantyReceiveDocType(),
+            bindLabelProp: 'ReceiveDocTypeName',
+            bindValueProp: 'ReceiveDocTypeCode'
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.ReceiveDocTypeName;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.ReceiveDocTypeName) {
+              params.data.ReceiveDocTypeCode = params.newValue.ReceiveDocTypeCode;
+              params.data.ReceiveDocTypeName = params.newValue.ReceiveDocTypeName;
+
+              if (params.data.ReceiveDocTypeCode === 11) {
+                this.Editable = true;
+              } else {
+                this.Editable = false;
+                params.data.SapamNo = null;
+                params.data.EstateValue = null;
+                params.data.Area = null;
+                params.data.EstateAddress = null;
+                params.data.EstateTypeCode = null;
+                params.data.EstateTypeName = null;
+                params.data.RegRegion = null;
+              }
+              return true;
+            } else {
+              params.data.ProposalID = null;
+              params.data.ReceiveDocTypeName = null;
+              return false;
+            }
+          },
+          editable: true,
+          width: 250,
+          resizable: true
+        },
+        {
+          headerName: 'شماره ضمانت نامه',
+          field: 'ReferenceNo',
+          editable: true,
+          width: 120,
+          resizable: true
+        },
+        {
+          headerName: 'تاریخ ضمانت نامه',
+          field: 'PersianReferenceDate',
+          width: 120,
+          resizable: true,
+          editable: true,
+          cellEditorFramework: JalaliDatepickerComponent,
+          cellEditorParams: {
+            CurrShamsiDateValue: 'PersianReferenceDate',
+            DateFormat: 'YYYY/MM/DD',
+            WidthPx: 120,
+            AppendTo: '.for-append-date'
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.SDate;
+            } else {
+              return '';
+            }
+          },
+        },
+        {
+          headerName: 'مبلغ',
+          field: 'ReceiveDocAmount',
+          width: 120,
+          HaveThousand: true,
+          resizable: true,
+          editable: true,
+          cellEditorFramework: NumberInputComponentComponent,
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value;
+            } else {
+              return '';
+            }
+          },
+        },
+        {
+          headerName: 'توضیحات',
+          field: 'Note',
+          editable: true,
+          width: 440,
+          resizable: true
+        },
+        {
+          headerName: 'شماره سپام',
+          field: 'SapamNo',
+          editable: true,
+          width: 80,
+          resizable: true
+        },
+        {
+          headerName: 'نوع ملک',
+          field: 'EstateTypeName',
+          cellEditorFramework: NgSelectVirtualScrollComponent,
+          cellEditorParams: {
+            Params: this.NgSelectEstateTypeParams,
+            Items: [],
+            Owner: this
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.EstateTypeName;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.EstateTypeName) {
+              params.data.EstateTypeCode = params.newValue.EstateTypeCode;
+              params.data.EstateTypeName = params.newValue.EstateTypeName;
+              return true;
+            } else {
+              params.data.EstateTypeCode = null;
+              params.data.EstateTypeName = null;
+              return false;
+            }
+          },
+          editable: () => {
+            return this.Editable;
+          },
+          width: 120,
+          resizable: true
+        },
+        {
+          headerName: 'ارزش ملک',
+          field: 'EstateValue',
+          editable: () => {
+            return this.Editable;
+          },
+          width: 80,
+          resizable: true
+        },
+        {
+          headerName: 'پلاک ثبتی',
+          field: 'RegRegion',
+          editable: () => {
+            return this.Editable;
+          },
+          width: 80,
+          resizable: true
+        },
+        {
+          headerName: 'متراژ',
+          field: 'Area',
+          editable: () => {
+            return this.Editable;
+          },
+          width: 80,
+          resizable: true
+        },
+        {
+          headerName: 'آدرس ملک',
+          field: 'EstateAddress',
+          editable: () => {
+            return this.Editable;
+          },
+          width: 440,
+          resizable: true
+        },
+      ];
+    } else {
+      this.ReceiveDocColDef = [
+        {
+          headerName: 'ردیف',
+          field: 'ItemNo',
+          width: 70,
+          resizable: true
+        },
+        {
+          headerName: 'مستندات',
+          field: '',
+          width: 80,
+          sortable: false,
+          resizable: false,
+          cellStyle: function (params) {
+            return { 'text-align': 'center' };
+          },
+          cellRendererFramework: TemplateRendererComponent,
+          cellRendererParams: {
+            ngTemplate: this.UploadArchive,
+          },
+        },
+        {
+          headerName: 'قبول / رد',
+          field: 'IsValidity',
+          width: 100,
+          resizable: true,
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          cellStyle: function (params) {
+            return { 'text-align': 'center' };
+          },
+          cellEditorFramework: CheckboxFieldEditableComponent,
+          valueFormatter: function isValidFormer(params) {
+            if (params.value) {
+              return 'معتبر';
+            } else {
+              return 'نامعتبر';
+            }
+          },
+          cellRendererFramework: TemplateRendererComponent,
+          cellRendererParams: {
+            ngTemplate: this.IsValidity
+          },
+        },
+        {
+          headerName: 'شماره ضمانت نامه',
+          field: 'ReferenceNo',
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          width: 120,
+          resizable: true
+        },
+        {
+          headerName: 'تاریخ ضمانت نامه',
+          field: 'PersianReferenceDate',
+          width: 120,
+          resizable: true,
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          cellEditorFramework: JalaliDatepickerComponent,
+          cellEditorParams: {
+            CurrShamsiDateValue: 'PersianReferenceDate',
+            DateFormat: 'YYYY/MM/DD',
+            WidthPx: 120,
+            AppendTo: '.for-append-date'
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.SDate;
+            } else {
+              return '';
+            }
+          },
+        },
+        {
+          headerName: 'مبلغ',
+          field: 'ReceiveDocAmount',
+          width: 120,
+          HaveThousand: true,
+          resizable: true,
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          cellEditorFramework: NumberInputComponentComponent,
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value;
+            } else {
+              return '';
+            }
+          },
+        },
+        {
+          headerName: 'توضیحات',
+          field: 'Note',
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          width: 440,
+          resizable: true
+        },
+        {
+          headerName: 'شماره سپام',
+          field: 'SapamNo',
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          width: 80,
+          resizable: true
+        },
+        {
+          headerName: 'نوع ملک',
+          field: 'EstateTypeName',
+          cellEditorFramework: NgSelectVirtualScrollComponent,
+          cellEditorParams: {
+            Params: this.NgSelectEstateTypeParams,
+            Items: [],
+            Owner: this
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.EstateTypeName;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.EstateTypeName) {
+              params.data.EstateTypeCode = params.newValue.EstateTypeCode;
+              params.data.EstateTypeName = params.newValue.EstateTypeName;
+              return true;
+            } else {
+              params.data.EstateTypeCode = null;
+              params.data.EstateTypeName = null;
+              return false;
+            }
+          },
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          width: 120,
+          resizable: true
+        },
+        {
+          headerName: 'ارزش ملک',
+          field: 'EstateValue',
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          width: 80,
+          resizable: true
+        },
+        {
+          headerName: 'پلاک ثبتی',
+          field: 'RegRegion',
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          width: 80,
+          resizable: true
+        },
+        {
+          headerName: 'متراژ',
+          field: 'Area',
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          width: 80,
+          resizable: true
+        },
+        {
+          headerName: 'آدرس ملک',
+          field: 'EstateAddress',
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          width: 440,
+          resizable: true
+        },
+        {
+          headerName: 'حذف',
+          field: '',
+          width: 80,
+          sortable: false,
+          resizable: false,
+          cellStyle: function (params) {
+            return { 'text-align': 'center' };
+          },
+          cellRendererFramework: TemplateRendererComponent,
+          cellRendererParams: {
+            ngTemplate: this.DelRecDoc,
+          }
+        }
+      ];
+    }
+
+    this.ReceiveDocProductColDef = [
       {
         headerName: 'ردیف',
         field: 'ItemNo',
@@ -1185,248 +1702,81 @@ export class ProductRequestPageComponent implements OnInit {
         resizable: true
       },
       {
-        headerName: 'مستندات',
-        field: '',
-        width: 80,
-        sortable: false,
-        resizable: false,
-        cellStyle: function (params) {
-          return { 'text-align': 'center' };
-        },
-        cellRendererFramework: TemplateRendererComponent,
-        cellRendererParams: {
-          ngTemplate: this.UploadArchive,
-        }
-      },
-      {
-        headerName: 'قبول / رد',
-        field: 'IsValidity',
-        width: 100,
-        resizable: true,
-        editable: true,
-        cellStyle: function (params) {
-          return { 'text-align': 'center' };
-        },
-        cellEditorFramework: CheckboxFieldEditableComponent,
-        valueFormatter: function isValidFormer(params) {
-          if (params.value) {
-            return 'معتبر';
-          } else {
-            return 'نامعتبر';
-          }
-        },
-        cellRendererFramework: TemplateRendererComponent,
-        cellRendererParams: {
-          ngTemplate: this.IsValidity
-        },
-      },
-      {
-        headerName: 'نام شخص پیشنهاد دهنده',
-        field: 'ActorName',
-        cellEditorFramework: NgSelectVirtualScrollComponent,
-        cellEditorParams: {
-          Params: this.NgSelectProposalParams,
-          Items: [],
-          Owner: this
-        },
-        cellRenderer: 'SeRender',
-        valueFormatter: function currencyFormatter(params) {
-          if (params.value) {
-            return params.value.ActorName;
-          } else {
-            return '';
-          }
-        },
-        valueSetter: (params) => {
-          if (params.newValue && params.newValue.ActorName) {
-            params.data.ProposalID = params.newValue.ProposalID;
-            params.data.ActorName = params.newValue.ActorName;
-            return true;
-          } else {
-            params.data.ProposalID = null;
-            params.data.ActorName = null;
-            return false;
-          }
-        },
-        editable: true,
-        width: 250,
+        headerName: 'شماره سند',
+        field: 'ReferenceNo',
+        width: 150,
         resizable: true
       },
       {
         headerName: 'نوع سند',
         field: 'ReceiveDocTypeName',
-        cellEditorFramework: NgSelectCellEditorComponent,
-        cellEditorParams: {
-          Items: this.ContractList.GetWarrantyReceiveDocType(),
-          bindLabelProp: 'ReceiveDocTypeName',
-          bindValueProp: 'ReceiveDocTypeCode'
-        },
-        cellRenderer: 'SeRender',
-        valueFormatter: function currencyFormatter(params) {
-          if (params.value) {
-            return params.value.ReceiveDocTypeName;
-          } else {
-            return '';
-          }
-        },
-        valueSetter: (params) => {
-          if (params.newValue && params.newValue.ReceiveDocTypeName) {
-            params.data.ReceiveDocTypeCode = params.newValue.ReceiveDocTypeCode;
-            params.data.ReceiveDocTypeName = params.newValue.ReceiveDocTypeName;
-
-            if (params.data.ReceiveDocTypeCode === 11) {
-              this.Editable = true;
-            } else {
-              this.Editable = false;
-              params.data.SapamNo = null;
-              params.data.EstateValue = null;
-              params.data.Area = null;
-              params.data.EstateAddress = null;
-              params.data.EstateTypeCode = null;
-              params.data.EstateTypeName = null;
-              params.data.RegRegion = null;
-            }
-            return true;
-          } else {
-            params.data.ProposalID = null;
-            params.data.ReceiveDocTypeName = null;
-            return false;
-          }
-        },
-        editable: true,
-        width: 250,
+        width: 150,
         resizable: true
       },
       {
-        headerName: 'شماره ضمانت نامه',
-        field: 'ReferenceNo',
-        editable: true,
-        width: 120,
-        resizable: true
-      },
-      {
-        headerName: 'تاریخ ضمانت نامه',
+        headerName: 'تاریخ',
         field: 'PersianReferenceDate',
-        width: 120,
-        resizable: true,
-        editable: true,
-        cellEditorFramework: JalaliDatepickerComponent,
-        cellEditorParams: {
-          CurrShamsiDateValue: 'PersianReferenceDate',
-          DateFormat: 'YYYY/MM/DD',
-          WidthPx: 120,
-          AppendTo: '.for-append-date'
-        },
-        cellRenderer: 'SeRender',
-        valueFormatter: function currencyFormatter(params) {
-          if (params.value) {
-            return params.value.SDate;
-          } else {
-            return '';
-          }
-        },
+        width: 150,
+        resizable: true
       },
       {
         headerName: 'مبلغ',
         field: 'ReceiveDocAmount',
-        width: 120,
-        HaveThousand: true,
-        resizable: true,
-        editable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
-        cellRenderer: 'SeRender',
-        valueFormatter: function currencyFormatter(params) {
-          if (params.value) {
-            return params.value;
-          } else {
-            return '';
-          }
-        },
+        width: 150,
+        resizable: true
+      },
+      {
+        headerName: 'بانک',
+        field: 'BankName',
+        width: 150,
+        resizable: true
+      },
+      {
+        headerName: 'شعبه',
+        field: 'BranchName',
+        width: 200,
+        resizable: true
+      },
+      {
+        headerName: 'شماره حساب',
+        field: 'AccNo',
+        width: 150,
+        resizable: true
+      },
+      {
+        headerName: 'مهلت پرداخت',
+        field: 'PersianDeadLine',
+        width: 150,
+        resizable: true
+      },
+      {
+        headerName: 'نوع متعهد',
+        field: 'PersonTypeName',
+        width: 150,
+        resizable: true
+      },
+      {
+        headerName: 'متعهد',
+        field: 'ActorName',
+        width: 200,
+        resizable: true
+      },
+      {
+        headerName: 'نام بانک متعهد',
+        field: 'PayerBankName',
+        width: 150,
+        resizable: true
+      },
+      {
+        headerName: 'حساب جاری متعهد',
+        field: 'PayerBankAcc',
+        width: 150,
+        resizable: true
       },
       {
         headerName: 'توضیحات',
         field: 'Note',
-        editable: true,
-        width: 440,
-        resizable: true
-      },
-      {
-        headerName: 'شماره سپام',
-        field: 'SapamNo',
-        editable: () => {
-          return this.Editable;
-        },
-        width: 80,
-        resizable: true
-      },
-      {
-        headerName: 'نوع ملک',
-        field: 'EstateTypeName',
-        cellEditorFramework: NgSelectVirtualScrollComponent,
-        cellEditorParams: {
-          Params: this.NgSelectEstateTypeParams,
-          Items: [],
-          Owner: this
-        },
-        cellRenderer: 'SeRender',
-        valueFormatter: function currencyFormatter(params) {
-          if (params.value) {
-            return params.value.EstateTypeName;
-          } else {
-            return '';
-          }
-        },
-        valueSetter: (params) => {
-          if (params.newValue && params.newValue.EstateTypeName) {
-            params.data.EstateTypeCode = params.newValue.EstateTypeCode;
-            params.data.EstateTypeName = params.newValue.EstateTypeName;
-            return true;
-          } else {
-            params.data.EstateTypeCode = null;
-            params.data.EstateTypeName = null;
-            return false;
-          }
-        },
-        editable: () => {
-          return this.Editable;
-        },
-        width: 120,
-        resizable: true
-      },
-      {
-        headerName: 'ارزش ملک',
-        field: 'EstateValue',
-        editable: () => {
-          return this.Editable;
-        },
-        width: 80,
-        resizable: true
-      },
-      {
-        headerName: 'پلاک ثبتی',
-        field: 'RegRegion',
-        editable: () => {
-          return this.Editable;
-        },
-        width: 80,
-        resizable: true
-      },
-      {
-        headerName: 'متراژ',
-        field: 'Area',
-        editable: () => {
-          return this.Editable;
-        },
-        width: 80,
-        resizable: true
-      },
-      {
-        headerName: 'آدرس ملک',
-        field: 'EstateAddress',
-        editable: () => {
-          return this.Editable;
-        },
-        width: 440,
+        width: 200,
         resizable: true
       },
     ];
@@ -1826,11 +2176,10 @@ export class ProductRequestPageComponent implements OnInit {
           field: 'QTY',
           editable: (params) => {
             return (params.data.ProductTypeCode === 2 && this.currentRegionObject.RegionGroupCode === 3 &&
-              this.OrginalModuleCode !== 2939 // RFC 52896 && برداشتن در ابزار rfc 55993
-              && this.OrginalModuleCode !== 2793
-              || (params.data.ProductTypeCode === 2 &&
-                this.ModuleCode === 2730 &&
-                this.ModuleViewTypeCode === 165)) ? false :
+              this.OrginalModuleCode !== 2939 && this.OrginalModuleCode !== 2793) // RFC 52896 && برداشتن در ابزار rfc 55993
+              || (params.data.ProductTypeCode === 2 && this.currentRegionObject.RegionGroupCode === 20
+                && this.OrginalModuleCode !== 2939 && this.OrginalModuleCode !== 2793 && this.OrginalModuleCode !== 2824)
+              || (params.data.ProductTypeCode === 2 && this.ModuleViewTypeCode === 165) ? false :
               this.IsSumEditableType107 ? true : this.IsEditable;
           },
           valueSetter: (params) => {
@@ -1858,7 +2207,7 @@ export class ProductRequestPageComponent implements OnInit {
           HaveThousand: true,
           width: 120,
           resizable: true,
-          cellEditorFramework: NumberFieldEditableComponent,
+          cellEditorFramework: NumberInputComponentComponent,
           cellEditorParams: { IsFloat: true, FloatMaxLength: 4 },
           editable: () => {
             if (this.IsSumEditableType107) {
@@ -1903,7 +2252,7 @@ export class ProductRequestPageComponent implements OnInit {
               }
             }
           },
-          cellEditorFramework: NumberFieldEditableComponent,
+          cellEditorFramework: NumberInputComponentComponent,
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
             if (params.value) {
@@ -1917,7 +2266,7 @@ export class ProductRequestPageComponent implements OnInit {
           headerName: 'مبلغ پیشنهادی با اعمال ضرایب',
           field: 'AmountCOEFPact',
           HaveThousand: true,
-          width: 150,
+          width: 200,
           resizable: true
         }
       ];
@@ -1929,6 +2278,7 @@ export class ProductRequestPageComponent implements OnInit {
     this.MutualContractStatus = event;
   }
   ngOnInit() {
+
     if (this.ModuleCode === 2895) {
       this.IsDisableResearch = true;
     }
@@ -1959,6 +2309,7 @@ export class ProductRequestPageComponent implements OnInit {
     this.ButtonsPlaceWidthPercent = this.CheckRegionWritable ? 82.8 : this.ButtonsPlaceWidthPercent;
     this.IsInit = true;
     if (this.InputParam) {
+
       // tslint:disable-next-line: max-line-length
       this.UserRegionCode = this.InputParam.UserRegionCode ? this.InputParam.UserRegionCode : this.ProductRequestObject ? this.ProductRequestObject.RegionCode : null;
       this.CurrWorkFlow = this.InputParam.CurrWorkFlow;
@@ -1994,7 +2345,7 @@ export class ProductRequestPageComponent implements OnInit {
       this.IsNew = false;
       this.ContractParams.IsDisabled = false;
     }
-    if (this.ModuleCode == 2787) {
+    if (this.ModuleCode === 2787) {
       this.ProductRequest.GetContractID(this.CostFactorID).subscribe((res) => { // 60415
         this.ContractIDForArticle48 = res;
       });
@@ -2033,9 +2384,6 @@ export class ProductRequestPageComponent implements OnInit {
             case 16:
               this.HaveSave = true;
               break;
-            case 6:
-              this.HaveDelete = true;
-              break;
             default:
               break;
           }
@@ -2053,13 +2401,22 @@ export class ProductRequestPageComponent implements OnInit {
       ]).subscribe(res => {
         this.CurrentUserSubCostCenter = res[0];
         if (res[1]) {
+
+
           this.IsDisable = false;
           this.ProductRequestObject = res[1];
+          if (!this.ProductRequestObject || this.ProductRequestObject.CostFactorID === -1) {
+            this.btnshowcontractlist = true;
+          }
           this.HasProvisionContractID = this.ProductRequestObject.ProvisionContractID ? true : false;
           if (this.ProductRequestObject.RelatedContractID) {
             this.IsNew = false;
             this.PerecentageChangesLabel = true;
           }
+          if (!this.IsNew) {
+            this.HaveDelete = false;
+          }
+          this.DisplayColDef();
           this.FillAllNgSelectByProductRequest(this.ProductRequestObject);
           if (this.ProductRequestObject && this.ProductRequestObject.ContractTypeCode) {
             this.IsInsert = true;
@@ -2088,6 +2445,7 @@ export class ProductRequestPageComponent implements OnInit {
           if (this.ProductRequestObject.ModuleViewTypeCode === 89 || this.ProductRequestObject.ModuleViewTypeCode === 95) {
             this.HasMutualContractQuestion = false;
           }
+          this.SetColumnDef();
           this.ResearcherID = this.ProductRequestObject.ResearcherID;
           this.BoardDecisionsDec = this.ProductRequestObject.BoardDecisions;
           this.ProductRequestCode = this.ProductRequestObject.ProductRequestCode;
@@ -2154,10 +2512,9 @@ export class ProductRequestPageComponent implements OnInit {
           this.User.GetCurrentUserDetails()
             // tslint:disable-next-line:no-shadowed-variable
             .subscribe(res => {
-              this.ProductRequestDate = res.MCurrentDate;
+              // this.ProductRequestDate = res.MCurrentDate;
             });
         }
-
         let RegionCode = -1;
         let CostCenterCode = '';
         if (this.ProductRequestObject) {
@@ -2180,6 +2537,7 @@ export class ProductRequestPageComponent implements OnInit {
       });
     });
     this.ProductRequest.GetCurrentDate().subscribe(res => { this.ContractPayDate = res });
+    //this.SetPRReciveDocList();
   }
 
   MakeMCSRadioTypes(): void {
@@ -2197,6 +2555,11 @@ export class ProductRequestPageComponent implements OnInit {
     this.McRadioTypes = [];
     this.McRadioTypes.push(new RadioBoxModel('بلی', true, false, 'rdoMc1'));
     this.McRadioTypes.push(new RadioBoxModel('خیر', false, false, 'rdoMc2'));
+  }
+  MakeIcRadioTypes(): void {
+    this.IcRadioTypes = [];
+    this.IcRadioTypes.push(new RadioBoxModel('بلی', true, false, 'rdoIc1'));
+    this.IcRadioTypes.push(new RadioBoxModel('خیر', false, false, 'rdoIc2'));
   }
   FillAllNgSelectByProductRequest(ProdReqObj) {
     const ContractID = ProdReqObj && ProdReqObj.RelatedContractID ?
@@ -2397,6 +2760,26 @@ export class ProductRequestPageComponent implements OnInit {
         if (this.RegionParams.selectedObject === 222) { this.ShowTrafficSign = false; } // RFC 58310
         switch (this.ModuleViewTypeCode) {
           case 1:
+            this.HaveRevocation = false; // 51753
+            this.IsEditable = true;
+            this.HaveSave = true;
+            this.HaveRequestPerson = true;
+            this.HaveAcceptArchive = true;
+            this.WfSaveDetailsShow = this.HaveCompleteInfo = false;
+            this.ISDisabledConfirmAndReturnBtn = true;
+            this.LetterTypeCodeList.push(20);
+            this.LetterTypeCodeList.push(26);
+            this.HasBtnAutomationLetter = true;
+            this.IsdisablebleAdmin = this.IsAdmin ? false : true; // 51689
+            this.WfDetailsShow = this.Is3InquiriesMode = this.HasThreeInquiries ? true : false;
+            this.gridHeight = this.HasThreeInquiries || this.CostFactorID === -1 ? 42 : 49;
+            this.tabpanelHeight = 84;
+            this.WfDetailsShowHeight = this.HasThreeInquiries ? 35 : 60;
+            this.IsReturn = this.ProductRequestObject && this.ProductRequestObject.LastInquiryObject
+              && this.HasThreeInquiries ? this.ProductRequestObject.LastInquiryObject.IsReturn : false;
+            this.NotIsNewHeaderName = this.RegionParams.selectedObject === 220 ? this.NotIsNewHeaderName = 'الحاقیه/ابلاغ' :
+              this.NotIsNewHeaderName = 'تمدید'; // RFC 61532
+            break;
           case 165:
             this.HaveRevocation = false; // 51753
             this.IsEditable = true;
@@ -2421,18 +2804,37 @@ export class ProductRequestPageComponent implements OnInit {
             this.IsEditable = false;
             this.WfSaveDetailsShow = this.WfDetailsShow = false;
             break;
+          case 222222: // ReadOnly Without Send
+            this.HaveCompleteInfo = true;
+            this.IsEditable = false;
+            this.WfSaveDetailsShow = this.WfDetailsShow = this.ShowWorkflowButtons = false;
+            this.ButtonsPlaceWidthPercent = 100;
+            break;
           case 146:
             this.HaveProvision = this.HaveCompleteInfo = true;
             this.IsEditable = false;
             this.WfSaveDetailsShow = this.WfDetailsShow = false;
             break;
           case 3:
+          case 167:
+          case 172:
             this.IsEditable = false;
             this.ArchiveIsReadOnly = true;
             this.WfSaveDetailsShow = this.WfDetailsShow = false;
             this.HaveCompleteInfo = true;
             this.DisableControlles = true;
             this.IsDisable = false;
+            if (this.ModuleViewTypeCode === 167) {
+              this.HaveAcceptArchive = true;
+              this.ArchiveIsReadOnly = false;
+              this.ParentDocType = 39;
+              // tslint:disable-next-line:no-shadowed-variable
+              new Promise((resolve, reject) => {
+                this.GetADocType(39, resolve);
+              }).then((DocType: any) => {
+                this.ArchiveBtnText = DocType.DocumentTypeName;
+              });
+            }
             if (this.RegionParams.selectedObject === 222) {
               if (!this.IsNew) {
                 this.gridHeight = 41;
@@ -2517,6 +2919,48 @@ export class ProductRequestPageComponent implements OnInit {
                 this.PRIgridHeight = 84;
                 this.IsShowContractContentfor222 = true;
               }// RFC 56864  & 58194
+            }
+            break;
+          case 176: //RFC 63114
+            this.IsUpdateBefore = true;
+            this.IsUpdateBeforeAdevertising = this.ProductRequestObject.IsUpdateBeforeAdevertising;
+            this.gridHeight = 41;
+            this.tabpanelHeight = 84;
+            this.PRIgridHeight = 83;
+            this.HaveExpertPerson = this.HaveCompleteInfo = true;
+            this.WfDetailsShowHeight = 40;
+            this.WfDetailsShow = true;
+            this.WfSaveDetailsShow = true;
+            this.onExpertOpen(1);
+            this.IsEditable = false;
+            if (this.RegionParams.selectedObject === 222) {
+              if (!this.IsNew) {
+                this.gridHeight = 33;
+                this.tabpanelHeight = 80;
+                this.PRIgridHeight = 84;
+                this.IsShowContractContentfor222 = true;
+              }
+            }
+            break;
+          case 170: // 62132
+            this.ExpertPersonRoleID = 1002;
+            this.gridHeight = 41;
+            this.tabpanelHeight = 84;
+            this.PRIgridHeight = 83;
+            this.HaveExpertPerson = this.HaveCompleteInfo = true;
+            this.WfDetailsShowHeight = 40;
+            this.WfDetailsShow = true;
+            this.WfSaveDetailsShow = true;
+            this.ExpertPersonLabel = 'کارپرداز تدارکات';
+            this.onExpertOpen(1);
+            this.IsEditable = false;
+            if (this.RegionParams.selectedObject === 222) {
+              if (!this.IsNew) {
+                this.gridHeight = 33;
+                this.tabpanelHeight = 80;
+                this.PRIgridHeight = 84;
+                this.IsShowContractContentfor222 = true;
+              } // RFC 56864  & 58194
             }
             break;
           case 85:
@@ -2624,6 +3068,7 @@ export class ProductRequestPageComponent implements OnInit {
             break;
           case 10:
           case 71:
+          case 173:
             this.HaveCompleteInfo = true;
             this.IsEditable = false;
             this.LetterTypeCodeList.push(2);
@@ -2700,6 +3145,10 @@ export class ProductRequestPageComponent implements OnInit {
             this.WfDetailsShow = true;
             this.WfSaveDetailsShow = true;
             this.onContractStyleOpen(1);
+            this.AutomationLetterBtnText = 'اتصال نامه';
+            this.LetterTypeCodeList.push(20);
+            this.LetterTypeCodeList.push(34);
+            this.HasBtnAutomationLetter = true;
             this.IsEditable = false;
             break;
           case 152:
@@ -2727,6 +3176,8 @@ export class ProductRequestPageComponent implements OnInit {
           case 148:
             this.AutomationLetterBtnText = 'اتصال نامه';
             this.LetterTypeCodeList.push(3);
+            this.LetterTypeCodeList.push(20);
+            this.LetterTypeCodeList.push(34);
             this.HasBtnAutomationLetter = true;
             this.ParentDocType = 45;
             // tslint:disable-next-line:no-shadowed-variable
@@ -2758,6 +3209,10 @@ export class ProductRequestPageComponent implements OnInit {
             this.WfSaveDetailsShow = this.WfDetailsShow = false;
             this.IsEditable = false;
             this.HaveCompleteInfo = true;
+            this.AutomationLetterBtnText = 'اتصال نامه';
+            this.LetterTypeCodeList.push(20);
+            this.LetterTypeCodeList.push(34);
+            this.HasBtnAutomationLetter = true;
             break;
           case 137:
             this.ParentDocType = 784;
@@ -2771,6 +3226,10 @@ export class ProductRequestPageComponent implements OnInit {
             this.WfSaveDetailsShow = this.WfDetailsShow = false;
             this.IsEditable = false;
             this.HaveCompleteInfo = true;
+            this.AutomationLetterBtnText = 'اتصال نامه';
+            this.LetterTypeCodeList.push(20);
+            this.LetterTypeCodeList.push(34);
+            this.HasBtnAutomationLetter = true;
             break;
           case 14:
             this.ParentDocType = 46;
@@ -2814,7 +3273,60 @@ export class ProductRequestPageComponent implements OnInit {
             // this.SetLetterDetails();
             this.HasBtnAutomationLetter = true;
             this.WfSaveDetailsShow = false; // RFC 50053 - با هماهنگی با آقای آخوندی، برای همه مناطق
+            if (this.RegionParams.selectedObject === 201) { // 61533
+              // tslint:disable-next-line: no-shadowed-variable
+              new Promise((resolve, reject) => {
+                this.GetADocType(38, resolve);
+              }).then((DocType: any) => {
+                this.ArchiveBtnText = DocType.DocumentTypeName;
+              });
+              this.HaveAcceptArchive = true;
+            }
             break;
+
+          case 171:
+            this.gridHeight = 48;
+            this.tabpanelHeight = 84;
+            this.PRIgridHeight = 83;
+            this.WfDetailsShowHeight = 50;
+            this.IsEditable = false;
+            this.HaveCompleteInfo = true;
+            this.WfDetailsShow = false;
+            this.LetterTypeCodeList.push(3);
+            this.HaveOnlyLetter = false;
+            this.WFFieldSetLegend = 'ثبت اطلاعات نامه قرارداد';
+            this.WFLegendWidth = 10;
+            // this.SetLetterDetails();
+            this.HasBtnAutomationLetter = true;
+            this.WfSaveDetailsShow = false; // RFC 50053 - با هماهنگی با آقای آخوندی، برای همه مناطق
+            this.ParentDocTypeList = [38, 40];
+            // new Promise((resolve, reject) => {
+            //   this.GetADocType(40, resolve);
+            // }).then((DocType: any) => {
+            //   this.ArchiveBtnText = DocType.DocumentTypeName;
+            // });
+            this.ArchiveBtnText = 'مستندات';   // RFC 62410
+            this.HaveAcceptArchive = true;
+            this.WfSaveDetailsShow = this.WfDetailsShow = false;
+            break;
+          case 175:
+
+            this.ParentDocType = 47;
+            // tslint:disable-next-line:no-shadowed-variable
+            new Promise((resolve, reject) => {
+              this.GetADocType(47, resolve);
+            }).then((DocType: any) => {
+              this.ArchiveBtnText = DocType.DocumentTypeName;
+            });
+
+            this.ShowSendBtn = false;
+            this.ShowConfermBtn = false;
+            this.HaveAcceptArchive = true;
+            this.WfSaveDetailsShow = this.WfDetailsShow = false;
+            this.IsEditable = false;
+            this.HaveCompleteInfo = true;
+            break;
+
           case 79:
             this.gridHeight = 39.5;
             this.tabpanelHeight = 84;
@@ -2905,6 +3417,8 @@ export class ProductRequestPageComponent implements OnInit {
             }).then((DocType: any) => {
               this.ArchiveBtnText = DocType.DocumentTypeName;
             });
+            this.LetterTypeCodeList.push(20);
+            this.LetterTypeCodeList.push(34);
             this.HaveAcceptArchive = true;
             this.HaveCommition = false;
             this.LetterTypeCodeList.push(3);
@@ -2921,7 +3435,7 @@ export class ProductRequestPageComponent implements OnInit {
             }
             this.WorkflowButtonsWidth = 40.8;
             this.ButtonsPlaceWidthPercent = 59;
-            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد درآمدی متقابل دارد؟';
+            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد متقابل دارد؟';
             this.MakeScRadioTypes();
             if (!this.IsCost) {
               this.HasMutualContractQuestion = false;
@@ -3335,6 +3849,7 @@ export class ProductRequestPageComponent implements OnInit {
             this.HaveSecondFieldSet = false;
             break;
           case 47:
+          case 166:
             this.gridHeight = 49;
             this.tabpanelHeight = 87;
             this.PRIgridHeight = 85;
@@ -3497,14 +4012,6 @@ export class ProductRequestPageComponent implements OnInit {
             this.IsEditable = false;
             break;
           case 52:
-            // this.gridHeight = 39;
-            // this.tabpanelHeight = 83;
-            // this.PRIgridHeight = 81;
-            // this.WfDetailsShowHeight = 50;
-            // this.WFLegendWidth = 9;
-            // this.WfSaveDetailsShow = true;
-            // this.WfDetailsShow = true;
-            // this.WFFieldSetLegend = 'ثبت اطلاعات قرارداد';
             this.ParentDocType = 46;
             // tslint:disable-next-line:no-shadowed-variable
             new Promise((resolve, reject) => {
@@ -3528,7 +4035,55 @@ export class ProductRequestPageComponent implements OnInit {
             }
             this.WorkflowButtonsWidth = 40.8;
             this.ButtonsPlaceWidthPercent = 59;
-            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد درآمدی متقابل دارد؟';
+            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد متقابل دارد؟';
+            this.MakeScRadioTypes();
+            if (!this.IsCost) {
+              this.HasMutualContractQuestion = false;
+            } else {
+              this.HasSecretQuestion = true;
+              this.ShowSave106 = true;
+              this.HasMutualContractQuestion = true;
+              this.MakeMCRadioTypes();
+            }
+            if (this.HaveMutualContract && this.HasMutualContractQuestion) {
+              this.ShowMCSPanel = true;
+              this.MakeMCSRadioTypes();
+              this.PRIgridHeight = 76;
+              this.gridHeight = 30;
+              this.tabpanelHeight = 76;
+            } else {
+              this.ShowMCSPanel = false;
+              this.gridHeight = 48;
+              this.tabpanelHeight = 84;
+              this.PRIgridHeight = 83;
+            }
+            break;
+          case 174: // RFC 62866
+            this.ParentDocType = 46;
+            // tslint:disable-next-line:no-shadowed-variable
+            new Promise((resolve, reject) => {
+              this.GetADocType(46, resolve);
+            }).then((DocType: any) => {
+              this.ArchiveBtnText = DocType.DocumentTypeName;
+            });
+            this.HaveAcceptArchive = true;
+            this.IsEditable = false;
+            this.LetterTypeCodeList.push(3);
+            this.LetterTypeCodeList.push(33);
+            this.HasBtnAutomationLetter = true;
+            // RFC 52153
+            this.HasCreateContractBtn = true;
+            if (this.ProductRequestObject.RegionCode === 200 && this.ProductRequestObject.IsCost) {
+              this.ShowRequestSuggestion = true;
+              this.HaveCompleteInfo = false;
+            } else {
+              this.ShowRequestSuggestion = false;
+              this.HaveCompleteInfo = true;
+              this.HasCompleteInfoBtnText = 'اطلاعات تکمیلی';
+            }
+            this.WorkflowButtonsWidth = 40.8;
+            this.ButtonsPlaceWidthPercent = 59;
+            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد متقابل دارد؟';
             this.MakeScRadioTypes();
             if (!this.IsCost) {
               this.HasMutualContractQuestion = false;
@@ -3661,7 +4216,7 @@ export class ProductRequestPageComponent implements OnInit {
             this.HasCreateContractBtnText = 'ایجاد قرارداد';
             this.HasCompleteInfoBtnText = 'اطلاعات تکمیلی';
             this.HasCreateContractBtn = this.HaveCompleteInfo = true;
-            this.LetterTypeCodeList = [3, 21, 29];
+            this.LetterTypeCodeList = [3, 21, 29, 20, 34];
             this.SetLetterDetails();
             this.ParentDocType = 59;
             // tslint:disable-next-line:no-shadowed-variable
@@ -3695,6 +4250,7 @@ export class ProductRequestPageComponent implements OnInit {
             this.WfSaveDetailsShow = this.WfDetailsShow = false;
             break;
           case 68:
+          case 169: // RFC 61935
             this.gridHeight = 49;
             this.tabpanelHeight = 87;
             this.PRIgridHeight = 85;
@@ -3810,7 +4366,7 @@ export class ProductRequestPageComponent implements OnInit {
             this.HaveAcceptArchive = true;
             this.WfSaveDetailsShow = this.WfDetailsShow = this.HaveCompleteInfo = false;
             this.ISDisabledConfirmAndReturnBtn = true;
-            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد درآمدی متقابل دارد؟';
+            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد متقابل دارد؟';
             this.IsSecretQuestion = true;
             this.MakeScRadioTypes();
             if (!this.IsCost) {
@@ -3843,7 +4399,7 @@ export class ProductRequestPageComponent implements OnInit {
             this.HaveRequestPerson = true;
             this.StartAndEndDateIsEditable = this.ShowRequestSuggestion = this.HaveAcceptArchive = true;
             this.WfSaveDetailsShow = this.WfDetailsShow = this.HaveCompleteInfo = false;
-            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد درآمدی متقابل دارد؟';
+            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد متقابل دارد؟';
             this.IsSecretQuestion = true;
             this.btnConfirmAndReturnName = 'بازگشت';
             this.ShowReturnBtn = true;
@@ -3957,7 +4513,7 @@ export class ProductRequestPageComponent implements OnInit {
             this.HaveAcceptArchive = true;
             this.ISDisabledConfirmAndReturnBtn = true;
             this.HasCompleteInfoBtnText = 'اطلاعات تکمیلی';
-            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد درآمدی متقابل دارد؟';
+            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد متقابل دارد؟';
             this.IsSecretQuestion = true;
             this.MakeScRadioTypes();
             if (this.ProductRequestObject.RegionCode === 200) {
@@ -4034,6 +4590,7 @@ export class ProductRequestPageComponent implements OnInit {
             this.WfSaveDetailsShow = this.HaveCompleteInfo = false;
             this.ISDisabledConfirmAndReturnBtn = true;
             this.LetterTypeCodeList.push(20);
+            this.LetterTypeCodeList.push(34);
             this.HasBtnAutomationLetter = true;
             break;
           case 101:
@@ -4178,6 +4735,9 @@ export class ProductRequestPageComponent implements OnInit {
             break;
           case 100000: // اصلاح درخواست
             this.HaveRequestPerson = true;
+            this.IsUpdateBefore = true;
+            this.IsUpdateBeforeAdevertising = this.ProductRequestObject.IsUpdateBeforeAdevertising;
+            this.MakeIcRadioTypes();
             this.ShowWorkflowButtons = false; // دکمه های ورک فلو نمایش داده نشود
             this.ButtonsPlaceWidthPercent = 100; // عرض دیو دکمه ها کامل شود
             this.HaveSave = true;
@@ -4197,7 +4757,7 @@ export class ProductRequestPageComponent implements OnInit {
             this.HasBtnAutomationLetter = true;
             // RFC 51573
             this.HasSecretQuestion = true;
-            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد درآمدی متقابل دارد؟';
+            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد متقابل دارد؟';
             this.HasMutualContractQuestion = true;
             this.IsSecretQuestion = true;
             this.MakeScRadioTypes();
@@ -4215,7 +4775,7 @@ export class ProductRequestPageComponent implements OnInit {
               this.gridHeight = 30;
               this.tabpanelHeight = 76;
             }
-            this.gridHeight = 42; //RFC 57522
+            this.gridHeight = 42; // RFC 57522
             this.tabpanelHeight = 84;
             this.tabpanelHeight = 80;
             this.PRIgridHeight = 76;
@@ -4264,6 +4824,10 @@ export class ProductRequestPageComponent implements OnInit {
             this.HaveReceiveDoc = true;
             break;
           case 300000: // اصلاح درخواست - ابزار
+            this.IsUpdateBefore = true;
+            this.IsUpdateBeforeAdevertising = this.ProductRequestObject.IsUpdateBeforeAdevertising;
+            this.HasSecretQuestion = true;
+            this.MakeIcRadioTypes();
             this.ShowWorkflowButtons = false;
             this.ButtonsPlaceWidthPercent = 100;
             this.HaveArchive = true;
@@ -4379,7 +4943,7 @@ export class ProductRequestPageComponent implements OnInit {
             this.HaveRequestPerson = true;
             this.StartAndEndDateIsEditable = this.ShowRequestSuggestion = this.HaveAcceptArchive = true;
             this.WfSaveDetailsShow = this.WfDetailsShow = this.HaveCompleteInfo = false;
-            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد درآمدی متقابل دارد؟';
+            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد متقابل دارد؟';
             this.IsSecretQuestion = true;
             this.btnConfirmAndReturnName = 'بازگشت';
             this.ShowReturnBtn = true;
@@ -4483,7 +5047,7 @@ export class ProductRequestPageComponent implements OnInit {
             break;
           case 144:
             this.WfSaveDetailsShow = this.WfDetailsShow = this.IsEditable = false;
-            this.HaveCompleteInfo = this.HaveCommition = this.HaveDigitalSign = true;
+            this.HaveCompleteInfo = this.HaveCommition = this.HaveDigitalSign = this.HaveArticle18DigitalSign = true;
             break;
           case 150: // RFC 58866
           case 154: // RFC 59115
@@ -4566,6 +5130,31 @@ export class ProductRequestPageComponent implements OnInit {
           case 161: // امضا الکترونیک ابلاغ ماده 18
             this.WfSaveDetailsShow = this.WfDetailsShow = this.IsEditable = false;
             this.HaveCompleteInfo = this.HaveCommition = this.HaveArticle18DigitalSign = this.HaveDigitalSign = true;
+            break;
+          case 168: // RFC 61821
+            this.IsEditable = false;
+            this.ArchiveIsReadOnly = true;
+            this.WfSaveDetailsShow = this.WfDetailsShow = false;
+            this.HaveCompleteInfo = true;
+            this.DisableControlles = true;
+            this.IsDisable = false;
+            if (this.RegionParams.selectedObject === 222) {
+              if (!this.IsNew) {
+                this.gridHeight = 41;
+                this.tabpanelHeight = 85;
+                this.PRIgridHeight = 83;
+                this.IsShowContractContentfor222 = true;
+              } // RFC 56864 & 58194
+            }
+            this.ParentDocType = 38;
+            // tslint:disable-next-line:no-shadowed-variable
+            new Promise((resolve, reject) => {
+              this.GetADocType(38, resolve);
+            }).then((DocType: any) => {
+              this.ArchiveBtnText = 'مستندات ';
+            });
+            this.HaveAcceptArchive = true;
+            this.ArchiveIsReadOnly = false;
             break;
           default:
             this.IsEditable = false;
@@ -5059,7 +5648,7 @@ export class ProductRequestPageComponent implements OnInit {
                   HaveThousand: true,
                   width: 120,
                   resizable: true,
-                  cellEditorFramework: NumberFieldEditableComponent,
+                  cellEditorFramework: NumberInputComponentComponent,
                   cellEditorParams: { IsFloat: true, FloatMaxLength: 4 },
                   editable: () => {
                     return this.IsEditable;
@@ -5100,7 +5689,7 @@ export class ProductRequestPageComponent implements OnInit {
                       }
                     }
                   },
-                  cellEditorFramework: NumberFieldEditableComponent,
+                  cellEditorFramework: NumberInputComponentComponent,
                   cellRenderer: 'SeRender',
                   valueFormatter: function currencyFormatter(params) {
                     if (params.value) {
@@ -5150,11 +5739,12 @@ export class ProductRequestPageComponent implements OnInit {
             this.LetterTypeCodeList.push(2);
             this.HasBtnAutomationLetter = true;
             this.HasSecretQuestion = false;
-            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد درآمدی متقابل دارد؟';
+            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد متقابل دارد؟';
             this.HasMutualContractQuestion = true;
             this.IsSecretQuestion = true;
             this.ShowMCSPanel = false;
             this.MakeScRadioTypes();
+            this.MakeIcRadioTypes();
             if (!this.IsCost) {
               this.HasMutualContractQuestion = false;
               this.gridHeight = 40;
@@ -5185,7 +5775,7 @@ export class ProductRequestPageComponent implements OnInit {
             this.DisableControlles = true;
             this.IsNew = false;
             this.IsInsert = false;
-            this.CheckRegionWritable = false;
+            this.CheckRegionWritable = true;
             this.IsDisable = false;
             break;
           default:
@@ -5283,6 +5873,17 @@ export class ProductRequestPageComponent implements OnInit {
             this.WfSaveDetailsShow = this.WfDetailsShow = false;
             break;
         }
+      } else if (this.ModuleCode === 2996) { // RFC 61879
+        switch (this.ModuleViewTypeCode) {
+          case 88888:
+            this.HaveCompleteInfo = true;
+            this.IsEditable = this.ShowWorkflowButtons = false;
+            this.WfSaveDetailsShow = this.WfDetailsShow = false;
+            this.ButtonsPlaceWidthPercent = 100;
+            break;
+          default:
+            break;
+        }
       }
     }
     this.ShowModuleTypeName();
@@ -5295,7 +5896,7 @@ export class ProductRequestPageComponent implements OnInit {
             this.ProductRequestObject.OrdersObject.LastInquiryObject.OrderCommitionObject && this.ProductRequestObject.OrdersObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID > 0 &&
             this.ProductRequestObject.OrdersObject.LastInquiryObject.OrderCommitionObject.OrderCommitionMemberList && this.ProductRequestObject.OrdersObject.LastInquiryObject.OrderCommitionObject.OrderCommitionMemberList.length > 0) {
             this.ProductRequestObject.OrdersObject.LastInquiryObject.OrderCommitionObject.OrderCommitionMemberList.forEach(element => {
-              if (element.FinalSignDate || element.DraftSignDate) {
+              if (element.FinalSignDate) { // RFC 62551
                 this.HasSingDate = true;
               }
             });
@@ -5308,9 +5909,20 @@ export class ProductRequestPageComponent implements OnInit {
 
   }
   SetPRWarrantyReciveDocList() {
-    this.ProductRequest.GetPRCostWarrantyList(this.CostFactorID, null, this.ModuleViewTypeCode).subscribe(res => // RFC 57620
-      this.ReceiveDocRowData = res
-    );
+    this.DisplayColDef();
+    if (this.IsNew) {
+      this.ProductRequest.GetPRCostWarrantyList(this.CostFactorID, null, this.ModuleViewTypeCode).subscribe(res => // RFC 57620
+        this.ReceiveDocRowData = res
+      );
+    } else {
+      this.ProductRequest.GetContractWarrantyList(
+        this.ProductRequestObject.ContractObject.CostFactorId ? 
+        this.ProductRequestObject.ContractObject.CostFactorId : 
+        this.ProductRequestObject.ContractObject.ReceiveFactorID,
+        this.ProductRequestObject.ContractObject.CostFactorId ? true : false).subscribe(res =>
+        this.ReceiveDocRowData = res
+      );
+    }
   }
   SetPRArticle48List() {
     this.ProductRequest.GetRequestArticle48List(this.CostFactorID).subscribe(res => this.Article48RowsData = res);
@@ -5413,6 +6025,9 @@ export class ProductRequestPageComponent implements OnInit {
     }
     if (Param && this.PopUpType === 'global-choose-page') {
       this.OpenSelectedForm(Param);
+    }
+    if (this.PopUpType === 'product-receive-doc') {
+      this.SetPRReciveDocList();
     }
   }
   onGridReady(params: { api: any; }) {
@@ -5816,6 +6431,7 @@ export class ProductRequestPageComponent implements OnInit {
         this.AssetGridApi.stopEditing();
         const ProductRequestObj = {
           // tslint:disable-next-line:max-line-length
+          IsUpdateBeforeAdevertising: this.IsUpdateBeforeAdevertising,//RFC: 63114
           ContractTypeCode: this.ProductRequestObject && this.ProductRequestObject.ContractTypeCode ? this.ProductRequestObject.ContractTypeCode : null,
           CostFactorID: this.ProductRequestObject && this.ProductRequestObject.CostFactorID ? this.ProductRequestObject.CostFactorID : -1,
           RegionCode: this.RegionParams.selectedObject,
@@ -5828,7 +6444,7 @@ export class ProductRequestPageComponent implements OnInit {
           CustomerOrderID: this.CustomerOrderParams.selectedObject,
           ActorID: this.RequestedPersonParams.selectedObject,
           RegionAreaID: this.RegionAreaParams.selectedObject, // ناحیه
-          RegionAreaDistrictID: this.RegionAreaDistrictParams.selectedObject, // محله  
+          RegionAreaDistrictID: this.RegionAreaDistrictParams.selectedObject, // محله
           DistrictDirectionCode: this.DistrictDirectionParams.selectedObject, // محله
           WorkPlaceCode: this.OnFilterRegionParams.selectedObject, // واحد اجرایی محل انجام کار
           Subject: this.Subject,
@@ -5860,15 +6476,24 @@ export class ProductRequestPageComponent implements OnInit {
           IsContractContent: this.ModuleViewTypeCode === 114 && this.ContractParams.selectedObject ?
             this.IsContractContent : false,
           IsTaxValue: this.ProductRequestObject && this.ProductRequestObject.CostFactorID > 0 ? this.ProductRequestObject.IsTaxValue : true,
-          PriceListTopicID: this.ProductRequestObject && this.ProductRequestObject.CostFactorID > 0 ? this.ProductRequestObject.PriceListTopicID : null,
+          PriceListTopicID: this.ProductRequestObject &&
+            this.ProductRequestObject.CostFactorID > 0 ? this.ProductRequestObject.PriceListTopicID : null,
           GradeID: this.ProductRequestObject && this.ProductRequestObject.CostFactorID > 0 ? this.ProductRequestObject.GradeID : null,
           IsConfirm: 0,
+          RequestObjectTypeCode:
+            this.OrginalModuleCode === 2730 ? 1 : // درخواست معامله
+              this.OrginalModuleCode === 2773 ? 3 : // تامین مانده اعتبار
+                this.OrginalModuleCode === 2895 ? 8 : // درخواست مهامله پژوهشی
+                  this.OrginalModuleCode === 2910 ? 10 : // درخواست معامله با گردش
+                    null
         };
         if (this.ModuleCode && this.ModuleCode === 2773) {
           ProductRequestObj.ProvisionContractID = this.ContractParams.selectedObject;
         } else {
           ProductRequestObj.RelatedContractID = this.ContractParams.selectedObject;
         }
+        let CheckStartDate = false;
+        let CheckEndDate = false;
         this.gridApi.forEachNode(node => {
           var keys = Object.keys(node.data);
           const EntityTypeItemIDList = [];
@@ -5891,6 +6516,15 @@ export class ProductRequestPageComponent implements OnInit {
 
             });
           }
+          if (this.ProductRequestObject && this.ProductRequestObject.CostFactorID === -1 && this.IsTransferedContract === true &&
+            (!node.data.ShortStartDate || node.data.ShortStartDate === null)) {
+            CheckStartDate = true;
+          }
+          if (this.ProductRequestObject && this.ProductRequestObject.CostFactorID === -1 && this.IsTransferedContract === true &&
+            (!node.data.ShortStartDate || node.data.ShortEndDate === null)) {
+            CheckEndDate = true;
+          }
+
           const ProductRequestItemObj = {
             ProductRequestItemID: node.data.ProductRequestItemID ? node.data.ProductRequestItemID : -1,
             CostFactorID: ProductRequestObj.CostFactorID,
@@ -5910,6 +6544,14 @@ export class ProductRequestPageComponent implements OnInit {
           };
           ProductRequestList.push(ProductRequestItemObj);
         });
+        if (CheckStartDate) {
+          this.ShowMessageBoxWithOkBtn('تاریخ شروع اقلام درخواست نمیتواند خالی باشد');
+          return;
+        }
+        if (CheckEndDate) {
+          this.ShowMessageBoxWithOkBtn('تاریخ پایان اقلام درخواست نمیتواند خالی باشد');
+          return;
+        }
         const ContractOrderObj = {
           ContractOrderID: -1,
           CostCostFactorID: -1,
@@ -5951,6 +6593,10 @@ export class ProductRequestPageComponent implements OnInit {
           };
           RelatedProductList.push(RelatedProductObj);
         });
+        if (this.ProductRequestObject && this.ProductRequestObject.CostFactorID === -1 && this.IsTransferedContract === true) {
+          this.ShowMessageBoxWithOkBtn('جهت ذخیره اطلاعات لطفا از بخش تکمیل اطلاعات استفاده نمایید');
+          return;
+        }
         if (CheckExceptions) {
           this.ProductRequest.GetSaveExceptions(1,
             this.ModuleCode,
@@ -5994,9 +6640,9 @@ export class ProductRequestPageComponent implements OnInit {
               },
                 err => {
                   this.IsDown = true;
-                  if (!err.error.Message.includes('|')) {
-                    this.ShowMessageBoxWithOkBtn('ثبت با شکست مواجه شد');
-                  }
+                  // if (!err.error.Message.includes('|')) {
+                  //   this.ShowMessageBoxWithOkBtn('ثبت با شکست مواجه شد');
+                  // }
                 });
             }
           });
@@ -6031,9 +6677,9 @@ export class ProductRequestPageComponent implements OnInit {
           },
             err => {
               this.IsDown = true;
-              if (!err.error.Message.includes('|')) {
-                this.ShowMessageBoxWithOkBtn('ثبت با شکست مواجه شد');
-              }
+              // if (!err.error.Message.includes('|')) {
+              //   this.ShowMessageBoxWithOkBtn('ثبت با شکست مواجه شد');
+              // }
             });
         }
       } else {
@@ -6267,17 +6913,46 @@ export class ProductRequestPageComponent implements OnInit {
 
   }
   RequestSuggestion() {
-    // this.ProductRequest.GetProductRequestDealType(this.ProductRequestObject.RegionCode,
-    //   this.ProductRequestDate,
-    //   // tslint:disable-next-line:radix
-    //   this.SumFinalAmount
-    // ).
-    //   subscribe(res => {
-    //     this.ShowSuggestionDialong(res);
-    //   });
     this.ShowSuggestionDialong(this.ProductRequestObject.DealTypeCode);
   }
   ShowSuggestionDialong(DealTypeCode) {
+    if (this.IsTransferedContract === true) {
+      let CheckStartDate = false;
+      let CheckEndDate = false;
+      const ProductRequesrItemList = [];
+      this.gridApi.forEachNode(node => {
+        if (this.ProductRequestObject.CostFactorID === -1 && this.IsTransferedContract === true &&
+          (!node.data.ShortStartDate || node.data.ShortStartDate === null)) {
+          CheckStartDate = true;
+        } else {
+          node.data.StartDate = node.data.ShortStartDate;
+        }
+        if (this.ProductRequestObject.CostFactorID === -1 && this.IsTransferedContract === true &&
+          (!node.data.ShortEndDate || node.data.ShortEndDate === null)) {
+          CheckEndDate = true;
+        } else {
+          node.data.EndDate = node.data.ShortEndDate;
+        }
+        ProductRequesrItemList.push(node.data);
+      });
+      this.ProductRequestObject.ProductRequestItemList = ProductRequesrItemList;
+      if (this.ProductRequestDate) {
+        this.ProductRequestObject.ProductRequestDate = this.ProductRequestDate;
+      }
+      if (!this.ProductRequestObject.ProductRequestDate) {
+        this.ShowMessageBoxWithOkBtn('تاریخ درخواست نمی تواند خالی باشد');
+        return;
+      }
+      if (CheckStartDate) {
+        this.ShowMessageBoxWithOkBtn('تاریخ شروع اقلام درخواست نمی تواند خالی باشد');
+        return;
+      }
+      if (CheckEndDate) {
+        this.ShowMessageBoxWithOkBtn('تاریخ پایان اقلام درخواست نمی تواند خالی باشد');
+        return;
+      }
+    }
+
     if ((this.ProductRequestObject.RegionCode > 0 && this.ProductRequestObject.RegionCode < 22) &&
       (this.ProductRequestObject.SubCostCenterObject && this.ProductRequestObject.SubCostCenterObject.CostCenterObject &&
         this.ProductRequestObject.SubCostCenterObject.CostCenterObject.CostCenterCode === '05') &&
@@ -6307,18 +6982,11 @@ export class ProductRequestPageComponent implements OnInit {
       OrginalModuleCode: this.OrginalModuleCode,
       Amount: this.ProductRequestObject.Amount,
       IsNew: this.IsNew,
-      IsAdmin: this.IsAdmin
+      IsAdmin: this.IsAdmin,
+      IsTransferedContract: this.IsTransferedContract
     };
   }
   btnShowReqDetailsClick() {
-    // this.ProductRequest.GetProductRequestDealType(this.ProductRequestObject.RegionCode,
-    //   this.ProductRequestDate,
-    //   // tslint:disable-next-line:radix
-    //   this.SumFinalAmount
-    // ).
-    //   subscribe(res => {
-    //     this.ShowRequestDetailsDialog(res);
-    //   });
     this.ShowRequestDetailsDialog(this.ProductRequestObject.DealTypeCode);
   }
   ShowRequestDetailsDialog(DealTypeCode) {
@@ -6467,7 +7135,7 @@ export class ProductRequestPageComponent implements OnInit {
     const archiveParam = {
       EntityID: this.CostFactorID,
       TypeCodeStr: this.ParentDocType + '-',
-      DocTypeCode: this.ParentDocType,
+      DocTypeCode: this.ParentDocTypeList && this.ParentDocTypeList.length > 0 ? this.ParentDocTypeList : this.ParentDocType,
       ModuleCode: this.ModuleCode,
       HasCheck: true,
       IsReadOnly: this.ArchiveIsReadOnly,
@@ -6494,6 +7162,152 @@ export class ProductRequestPageComponent implements OnInit {
       this.onSave(true);
       return;
     }
+    if (this.ExistsFile) {
+      if (this.BtnClickedName === 'Article18') {
+        if (event === 'YES') {
+          this.ComonService.GetAllArchiveDetailList(this.OrderCommitionID, 1047, true).subscribe(res => {
+            this.PopUpType = 'pdf-viewer';
+            this.HaveHeader = true;
+            this.isClicked = true;
+            this.startLeftPosition = 40;
+            this.startTopPosition = 0;
+            this.HaveMaxBtn = false;
+            this.OverMainMinwidthPixel = 1295;
+            this.MainMaxwidthPixel = 1300;
+            this.PopupParam = {
+              HeaderName: 'ابلاغ ماده 18',
+              PDFSrc: res ? res.FileBase64 : undefined,
+              FileName: res ? res.FileName : null,
+              OrderCommitionID: this.OrderCommitionID,
+              HaveEstimate: false,
+              HaveSign: true,
+              CostFactorID: this.ProductRequestObject.CostFactorID,
+              RegionCode: this.ProductRequestObject.RegionCode,
+              PDFSignersInfo: res ? res.PDFSignersInfo : null,
+              HasTripleReport: this.HaseEstimate,
+              IsFinal: false,
+              HaveUpload: !res || !res.PDFSignersInfo || res.PDFSignersInfo.length <= 0,
+              SignByFile: false,
+              IsArticle18: true,
+              HasDelBtn: true,
+            };
+          });
+          return;
+        } else if (event === 'NO') {
+          this.ProductRequest.GetMinutesReportPDFContent(
+            this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID,
+            this.ProductRequestObject.CostFactorID,
+            this.ProductRequestObject.RegionCode,
+            1047,
+            this.HaseEstimate,
+            true,
+            this.ModuleViewTypeCode).subscribe(PDFRes => {
+              if (PDFRes) {
+                this.IsDown = true;
+                this.PopUpType = 'pdf-viewer';
+                this.HaveHeader = true;
+                this.isClicked = true;
+                this.startLeftPosition = 40;
+                this.startTopPosition = 0;
+                this.HaveMaxBtn = false;
+                this.OverMainMinwidthPixel = 1295;
+                this.MainMaxwidthPixel = 1300;
+                this.PopupParam = {
+                  HeaderName: 'ابلاغ ماده 18',
+                  PDFSrc: PDFRes.FileBase64,
+                  FileName: PDFRes.FileName,
+                  OrderCommitionID: this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID,
+                  HaveEstimate: false,
+                  HaveSign: true,
+                  CostFactorID: this.ProductRequestObject.CostFactorID,
+                  RegionCode: this.ProductRequestObject.RegionCode,
+                  PDFSignersInfo: PDFRes.PDFSignersInfo,
+                  HasTripleReport: this.HaseEstimate,
+                  IsFinal: false,
+                  IsArticle18: true,
+                  HasDelBtn: true,
+                };
+              } else {
+                this.IsDown = true;
+                this.ShowMessageBoxWithOkBtn('فایل صورتجلسه بارگزاری نشده است.');
+              }
+            });
+        }
+      } else if (this.BtnClickedName === 'TrafficRep') { // RFC 61879
+        if (event === 'YES') {
+          this.ComonService.GetAllArchiveDetailList(this.CostFactorID, 1107, true).subscribe(res => {
+            this.PopUpType = 'pdf-viewer';
+            this.HaveHeader = true;
+            this.isClicked = true;
+            this.startLeftPosition = 40;
+            this.startTopPosition = 0;
+            this.HaveMaxBtn = false;
+            this.OverMainMinwidthPixel = 1295;
+            this.MainMaxwidthPixel = 1300;
+            this.PopupParam = {
+              HeaderName: 'چاپ درخواست معامله',
+              PDFSrc: res ? res.FileBase64 : undefined,
+              FileName: res ? res.FileName : null,
+              OrderCommitionID: -1,
+              HaveEstimate: false,
+              HaveSign: false,
+              CostFactorID: this.ProductRequestObject.CostFactorID,
+              RegionCode: this.ProductRequestObject.RegionCode,
+              PDFSignersInfo: res ? res.PDFSignersInfo : null,
+              HasTripleReport: this.HaseEstimate,
+              IsFinal: false,
+              HaveUpload: false,
+              SignByFile: false,
+              IsArticle18: false,
+              HasDelBtn: false,
+              IsTrafficRep: true,
+            };
+          });
+          return;
+        } else if (event === 'NO') {
+          this.ProductRequest.GetMinutesReportPDFContent(
+            -1,
+            this.ProductRequestObject.CostFactorID,
+            this.ProductRequestObject.RegionCode,
+            1107,
+            this.HaseEstimate,
+            true,
+            this.ModuleViewTypeCode,
+            this.ModuleCode).subscribe(PDFRes => {
+              if (PDFRes) {
+                this.IsDown = true;
+                this.PopUpType = 'pdf-viewer';
+                this.HaveHeader = true;
+                this.isClicked = true;
+                this.startLeftPosition = 40;
+                this.startTopPosition = 0;
+                this.HaveMaxBtn = false;
+                this.OverMainMinwidthPixel = 1295;
+                this.MainMaxwidthPixel = 1300;
+                this.PopupParam = {
+                  HeaderName: 'چاپ درخواست معامله',
+                  PDFSrc: PDFRes.FileBase64,
+                  FileName: PDFRes.FileName,
+                  OrderCommitionID: -1,
+                  HaveEstimate: false,
+                  HaveSign: false,
+                  CostFactorID: this.ProductRequestObject.CostFactorID,
+                  RegionCode: this.ProductRequestObject.RegionCode,
+                  PDFSignersInfo: PDFRes.PDFSignersInfo,
+                  HasTripleReport: this.HaseEstimate,
+                  IsFinal: false,
+                  IsArticle18: false,
+                  HasDelBtn: false,
+                  IsTrafficRep: true,
+                };
+              } else {
+                this.IsDown = true;
+                this.ShowMessageBoxWithOkBtn('فایل صورتجلسه بارگزاری نشده است.');
+              }
+            });
+        }
+      }
+    }
     this.isClicked = false;
     this.PopUpType = '';
     this.BtnClickedName = '';
@@ -6513,32 +7327,6 @@ export class ProductRequestPageComponent implements OnInit {
         this.IsInsert = true;
       }
     }
-    // if (this.PopUpType === 'choosen-request-revocation') {
-    //   this.ProductRequest.RequestRevocation(event.WorkflowID, event.CostFactorID, event.WorkflowTypeCode).subscribe(res => {
-    //     this.ProductRequestObject.ProductRequestStatusCode = res;
-    //     if (res === 3) {
-    //       this.btnRevocationName = 'بازگشت از ابطال';
-    //       this.btnRevocationIcon = 'ok';
-    //       // if (this.ConfirmStatus.includes(29) && this.ModuleViewTypeCode === 4) {
-    //       //   this.btnRevocationName = 'بازگشت از ابطال';
-    //       //   this.btnRevocationIcon = 'ok';
-    //       // } else {
-    //       //   this.HaveRevocation = false;
-    //       // }
-    //       this.ShowMessageBoxWithOkBtn('ابطال درخواست انجام معامله با موفقیت انجام شد');
-    //     } else {
-    //       this.btnRevocationName = 'ابطال';
-    //       this.btnRevocationIcon = 'revocation';
-    //       // if (this.ConfirmStatus.includes(26) && this.ModuleViewTypeCode === 4) {
-    //       //   this.btnRevocationName = 'ابطال';
-    //       //   this.btnRevocationIcon = 'revocation';
-    //       // } else {
-    //       //   this.HaveRevocation = false;
-    //       // }
-    //       this.ShowMessageBoxWithOkBtn('بازگشت از ابطال درخواست انجام معامله با موفقیت انجام شد');
-    //     }
-    //   });
-    // }
     this.ShowModuleTypeName();
     if (this.PopUpType === 'message-box' && this.IsEndFlow === 1 && this.BtnClickedName === 'ConfirmAndSend') {
       this.OnFinalConfirm();
@@ -6571,10 +7359,17 @@ export class ProductRequestPageComponent implements OnInit {
       // return;
     }
     if (this.PopUpType === 'product-request-suggestion') {
+      if (this.IsTransferedContract) {
+        this.ProductRequestCode = event.ProductRequestCode;
+        this.ProductRequestNo = event.ProductRequestNo;
+      }
       if (this.ProductRequestObject.ProductRequestItemList) {
         this.rowsData = this.ProductRequestObject.ProductRequestItemList;
         this.SetEntityDataInDataRow(this.rowsData);
       }
+    }
+    if (this.PopUpType === 'show-contract-list') {
+      this.SetLastContractData(event);
     }
   }
   ConfirmAndSend() {
@@ -6753,13 +7548,14 @@ export class ProductRequestPageComponent implements OnInit {
     } else {
       if (this.gridApi) {
         this.gridApi.forEachNodeAfterFilter(function (node) {
-          if (node.data.FinalAmount) {
-            // tslint:disable-next-line:radix
-            SumFinalAmount = SumFinalAmount + parseFloat(node.data.FinalAmount);
-          }
+          // if (node.data.FinalAmount) {
+          //   // tslint:disable-next-line:radix
+          //   SumFinalAmount = SumFinalAmount + parseFloat(node.data.FinalAmount);
+          // }
           if (node.data.AmountCOEFPact) {
             // tslint:disable-next-line:radix
             SumAmount = SumAmount + parseFloat(node.data.AmountCOEFPact);
+            SumFinalAmount = SumFinalAmount + parseFloat(node.data.AmountCOEFPact); // 62186
           }
         });
         this.SumFinalAmount = SumFinalAmount;
@@ -6925,9 +7721,13 @@ export class ProductRequestPageComponent implements OnInit {
             (item.Note ? item.Note + ' - ' + item.ContractCode : '');
           if (item.QTY === null || item.QTY === 0) {
             item.FinalAmount = item.Amount;
+            item.AmountCOEFPact = !this.IsNew ? null : item.AmountCOEFPact;
+            item.AmountCOEF = !this.IsNew ? null : item.AmountCOEF;
           } else {
             item.FinalAmount = item.Amount;
             item.Amount = item.FinalAmount / ((!item.QTY || item.QTY === 0) ? 1 : item.QTY);
+            item.AmountCOEFPact = !this.IsNew ? null : item.AmountCOEFPact;
+            item.AmountCOEF = !this.IsNew ? null : item.AmountCOEF;
           }
         });
       });
@@ -7005,7 +7805,8 @@ export class ProductRequestPageComponent implements OnInit {
             this.WorkflowObjectCode,
             this.ModuleViewTypeCode,
             this.OrginalModuleCode,
-            this.CartableUserID)
+            this.CartableUserID,
+            this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null)
             .subscribe(res => {
               this.ShowMessageBoxWithOkBtn('عدم تایید درخواست انجام معامله با موفقیت انجام شد');
 
@@ -7173,7 +7974,8 @@ export class ProductRequestPageComponent implements OnInit {
         this.WorkflowObjectCode,
         this.ModuleViewTypeCode,
         this.OrginalModuleCode,
-        this.CartableUserID).
+        this.CartableUserID,
+        this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).
         subscribe(res => {
           if (HasAlert) {
             this.ShowMessageBoxWithOkBtn('تایید درخواست  انجام معامله  با موفقیت انجام شد');
@@ -7220,7 +8022,8 @@ export class ProductRequestPageComponent implements OnInit {
         this.WorkflowObjectCode,
         this.ModuleViewTypeCode,
         this.OrginalModuleCode,
-        this.CartableUserID).subscribe(res => {
+        this.CartableUserID,
+        this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).subscribe(res => {
           if (alert) {
             this.ShowMessageBoxWithOkBtn('عدم تایید برآورد اولیه با موفقیت انجام شد');
           }
@@ -7380,6 +8183,7 @@ export class ProductRequestPageComponent implements OnInit {
         this.PopUpType = 'general-tender';
         this.isClicked = true;
         this.HaveHeader = true;
+        this.OverMainMinwidthPixel = null;
         this.startLeftPosition = 140;
         this.startTopPosition = 14;
         this.HaveMaxBtn = false;
@@ -7770,8 +8574,11 @@ export class ProductRequestPageComponent implements OnInit {
         CostFactorID: this.CostFactorID,
         RoleID: RoleID
       };
+      if (this.IsUpdateBefore) {
+        this.IsUpdateBeforeAdevertising = this.IsUpdateBeforeAdevertising
+      }
       SaveMessage = SaveMessage ? SaveMessage : 'کارشناس امور قرارداد ها';
-      this.ProductRequest.SaveExpertProductRequestPerson(PrPersonObj, this.ModuleCode, this.OrginalModuleCode).subscribe(x => {
+      this.ProductRequest.SaveExpertProductRequestPerson(PrPersonObj, this.IsUpdateBeforeAdevertising, this.ModuleCode, this.OrginalModuleCode).subscribe(x => {
         this.IsExpertSelected = false;
         this.ShowMessageBoxWithOkBtn('ذخیره ' + SaveMessage + ' با موفقیت انجام شد');
       });
@@ -7792,6 +8599,7 @@ export class ProductRequestPageComponent implements OnInit {
         }
       }
     });
+
   }
   onContractStyleOpen(type = 0) {
 
@@ -7907,6 +8715,7 @@ export class ProductRequestPageComponent implements OnInit {
     if (this.ModuleCode === 2730) {
       switch (this.ModuleViewTypeCode) {
         case 7:
+        case 176:
         case 11:
         case 160:
         case 155:
@@ -7919,6 +8728,9 @@ export class ProductRequestPageComponent implements OnInit {
         case 116:
         case 162:
           this.onSaveExpertPerson();
+          break;
+        case 170:
+          this.onSaveExpertPerson(this.ExpertPersonRoleID, 'کارپرداز تدارکات');
           break;
         case 85:
           this.onSaveExpertPerson(this.ExpertPersonRoleID, 'کارشناس سفارشات');
@@ -7983,6 +8795,8 @@ export class ProductRequestPageComponent implements OnInit {
         case 96:
         case 112:
         case 149:
+        case 166:
+        case 169:
           this.onSaveExpertPerson();
           this.onSavePRWarrantyAndValidity();
           break;
@@ -8182,6 +8996,8 @@ export class ProductRequestPageComponent implements OnInit {
         OrginalModuleCode: this.OrginalModuleCode,
         ReadOnlyMode: (this.ModuleViewTypeCode === 100000 ? true : false),
         SaveMode: (this.ModuleViewTypeCode === 100000 ? false : true),
+        ModuleViewTypeCode: this.ModuleViewTypeCode,
+        ProductRequestNo: this.ProductRequestNo
       };
     }
   }
@@ -8623,6 +9439,8 @@ export class ProductRequestPageComponent implements OnInit {
       OrginalModuleCode: this.OrginalModuleCode,
       IsAdmin: this.IsAdmin,
       RegionCode: this.RegionParams.selectedObject,
+      IsNew: this.IsNew,
+      SumFinalAmountStr: this.SumFinalAmountStr
     };
   }
   onReceiveDocEditingStarted(event) {
@@ -8987,10 +9805,64 @@ export class ProductRequestPageComponent implements OnInit {
     this.ngOnInit();
   }
   PRProvisionRepShow() {
-    this.Report.PRProvisionRep(this.ProductRequestObject.RegionCode, this.CostFactorID,
-      this.ModuleCode,
-      'پیشنهاد تامین اعتبار', this.ShowTrafficSign
-    );
+    if ((this.ModuleCode === 2730 && (this.ModuleViewTypeCode === 38 || this.ModuleViewTypeCode === 300000))
+      || (this.ModuleCode === 2996 && this.ModuleViewTypeCode === 88888)) { // RFC 61879
+      this.ComonService.GetAllArchiveDetailList(this.CostFactorID, 1107, true, false).subscribe(res => {
+        if (res) {
+          this.ExistsFile = true;
+          this.BtnClickedName = 'TrafficRep';
+          this.ShowMessageBoxWithYesNoBtn('فایل قبلا ذخیره شده است. آیا مایل به مشاهده آن هستید؟');
+        } else {
+          this.ExistsFile = false;
+          this.IsDown = false;
+          this.ProductRequest.GetMinutesReportPDFContent(
+            -1,
+            this.ProductRequestObject.CostFactorID,
+            this.ProductRequestObject.RegionCode,
+            1107,
+            this.HaseEstimate,
+            false,
+            this.ModuleViewTypeCode,
+            this.ModuleCode).subscribe(PDFRes => {
+              if (PDFRes) {
+                this.IsDown = true;
+                this.PopUpType = 'pdf-viewer';
+                this.HaveHeader = true;
+                this.isClicked = true;
+                this.startLeftPosition = 40;
+                this.startTopPosition = 0;
+                this.HaveMaxBtn = false;
+                this.OverMainMinwidthPixel = 1295;
+                this.MainMaxwidthPixel = 1300;
+                this.PopupParam = {
+                  HeaderName: 'چاپ درخواست معامله',
+                  PDFSrc: PDFRes.FileBase64,
+                  FileName: PDFRes.FileName,
+                  OrderCommitionID: -1,
+                  HaveEstimate: false,
+                  HaveSign: false,
+                  CostFactorID: this.ProductRequestObject.CostFactorID,
+                  RegionCode: this.ProductRequestObject.RegionCode,
+                  PDFSignersInfo: PDFRes.PDFSignersInfo,
+                  HasTripleReport: this.HaseEstimate,
+                  IsFinal: false,
+                  IsArticle18: false,
+                  HasDelBtn: false,
+                  IsTrafficRep: true,
+                };
+              } else {
+                this.IsDown = true;
+                this.ShowMessageBoxWithOkBtn('فایل بارگزاری نشده است.');
+              }
+            });
+        }
+      });
+    } else {
+      this.Report.PRProvisionRep(this.ProductRequestObject.RegionCode, this.CostFactorID,
+        this.ModuleCode,
+        'پیشنهاد تامین اعتبار', this.ShowTrafficSign
+      );
+    }
   }
   HoldOnlineClick(param) {
     this.ProductRequestIsOnline = param;
@@ -9289,6 +10161,7 @@ export class ProductRequestPageComponent implements OnInit {
               this.HaveMaxBtn = false;
               this.startLeftPosition = 520;
               this.startTopPosition = 220;
+              this.OverMainMinwidthPixel = null;
               this.HeightPercentWithMaxBtn = null;
               this.MinHeightPixel = null;
               this.isClicked = true;
@@ -9329,6 +10202,7 @@ export class ProductRequestPageComponent implements OnInit {
               this.HaveMaxBtn = false;
               this.startLeftPosition = 520;
               this.startTopPosition = 220;
+              this.OverMainMinwidthPixel = null;
               this.HeightPercentWithMaxBtn = null;
               this.MinHeightPixel = null;
               this.isClicked = true;
@@ -9363,6 +10237,7 @@ export class ProductRequestPageComponent implements OnInit {
               this.HaveMaxBtn = false;
               this.startLeftPosition = 520;
               this.startTopPosition = 220;
+              this.OverMainMinwidthPixel = null;
               this.HeightPercentWithMaxBtn = null;
               this.MinHeightPixel = null;
               this.isClicked = true;
@@ -9399,6 +10274,7 @@ export class ProductRequestPageComponent implements OnInit {
               this.HaveMaxBtn = false;
               this.startLeftPosition = 520;
               this.startTopPosition = 220;
+              this.OverMainMinwidthPixel = null;
               this.HeightPercentWithMaxBtn = null;
               this.MinHeightPixel = null;
               this.isClicked = true;
@@ -9421,6 +10297,7 @@ export class ProductRequestPageComponent implements OnInit {
               this.HaveMaxBtn = false;
               this.startLeftPosition = 520;
               this.startTopPosition = 220;
+              this.OverMainMinwidthPixel = null;
               this.HeightPercentWithMaxBtn = null;
               this.MinHeightPixel = null;
               this.isClicked = true;
@@ -9461,6 +10338,7 @@ export class ProductRequestPageComponent implements OnInit {
               this.HaveMaxBtn = false;
               this.startLeftPosition = 520;
               this.startTopPosition = 220;
+              this.OverMainMinwidthPixel = null;
               this.HeightPercentWithMaxBtn = null;
               this.MinHeightPixel = null;
               this.isClicked = true;
@@ -9514,6 +10392,8 @@ export class ProductRequestPageComponent implements OnInit {
       case 149:
       case 160:
       case 162:
+      case 166:
+      case 169:
         this.PopUpType = 'app-commition';
         this.isClicked = true;
         this.HaveHeader = true;
@@ -9551,46 +10431,78 @@ export class ProductRequestPageComponent implements OnInit {
       case 142:
       case 82:
       case 164:
-        this.ProductRequest.GetProductRequest(this.CostFactorID).subscribe(res => { // RFC 55833
-          this.ProductRequestObject = res;
-
-          // tslint:disable-next-line: max-line-length
-          const LastInquiryObject = this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.InquiryID > 0 ?
-            this.ProductRequestObject.LastInquiryObject : null;
-          if ((!LastInquiryObject || (LastInquiryObject && !LastInquiryObject.IsWin && !LastInquiryObject.IsReturn)) ||
-            (this.OrginalModuleCode === 2793 || this.OrginalModuleCode === 2756 ||
-              this.OrginalModuleCode === 2838 || this.OrginalModuleCode === 2824)) {
-            this.PopUpType = 'general-tender';
-            this.isClicked = true;
-            this.HaveHeader = true;
-            this.PercentWidth = 81;
-            this.startLeftPosition = 140;
-            this.startTopPosition = 14;
-            this.HaveMaxBtn = false;
-            this.PopupParam = {
-              ProductRequestObject: this.ProductRequestObject,
-              ModuleViewTypeCode: VirtualModuleViewType,
-              InquiryObject: this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.InquiryID > 0 ?
-                this.ProductRequestObject.LastInquiryObject : null,
-              Subject: this.Subject,
-              RegionCode: this.RegionParams.selectedObject,
-              ProductRequestCode: this.ProductRequestNo,
-              ProductRequestDate: this.ProductRequestDate,
-              CostFactorID: this.CostFactorID,
-              IsReadOnly: !this.IsEditable,
-              PRRegionObject: this.currentRegionObject,
-              SumFinalAmount: this.SumFinalAmountStr,
-              CheckRegionWritable: this.CheckRegionWritable,
-              OrginalModuleCode: this.OrginalModuleCode,
-              ModuleCode: this.ModuleCode,
-              UserRegionCode: this.UserRegionCode,
-              IsAdmin: this.IsAdmin,
-              OriginModuleViewTypeCode: this.ModuleViewTypeCode
-            };
-          } else {
-            this.ShowMessageBoxWithOkBtn('مناقصه یا مزایده مورد نظر تعیین تکلبف شده است .');
-          }
-        });
+        if ((this.OrginalModuleCode == 2793 || this.OrginalModuleCode == 2824 || this.OrginalModuleCode == 2838 || this.OrginalModuleCode == 2756) &&
+          (VirtualModuleViewType == 70 || VirtualModuleViewType == 42)) {
+          this.PopUpType = 'app-inquiry-list';
+          this.isClicked = true;
+          this.HaveHeader = true;
+          this.PercentWidth = 55;
+          this.MinHeightPixel = null;
+          this.MainMaxwidthPixel = null;
+          this.startLeftPosition = 315;
+          this.startTopPosition = 130;
+          this.HaveMaxBtn = false;
+          this.PopupParam = {
+            ProductRequestObject: this.ProductRequestObject,
+            Subject: this.Subject,
+            RegionCode: this.RegionParams.selectedObject,
+            ProductRequestCode: this.ProductRequestNo,
+            ProductRequestDate: this.ProductRequestDate,
+            CostFactorID: this.CostFactorID,
+            IsReadOnly: !this.IsEditable,
+            ModuleViewTypeCode: VirtualModuleViewType,
+            PRRegionObject: this.currentRegionObject,
+            SumFinalAmount: this.SumFinalAmountStr,
+            CheckRegionWritable: this.CheckRegionWritable,
+            ModuleCode: this.ModuleCode,
+            FirstModuleCode: this.InputParam.FirstModuleCode,
+            OrginalModuleCode: this.OrginalModuleCode,
+            UserRegionCode: this.UserRegionCode,
+            IsAdmin: this.IsAdmin,
+            OriginModuleViewTypeCode: this.ModuleViewTypeCode
+          };
+        } else {
+          this.ProductRequest.GetProductRequest(this.CostFactorID).subscribe(res => { // RFC 55833
+            this.ProductRequestObject = res;
+            // tslint:disable-next-line: max-line-length
+            const LastInquiryObject = this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.InquiryID > 0 ?
+              this.ProductRequestObject.LastInquiryObject : null;
+            if ((!LastInquiryObject || (LastInquiryObject && !LastInquiryObject.IsWin && !LastInquiryObject.IsReturn)) ||
+              (this.OrginalModuleCode === 2793 || this.OrginalModuleCode === 2756 ||
+                this.OrginalModuleCode === 2838 || this.OrginalModuleCode === 2824)) {
+              this.PopUpType = 'general-tender';
+              this.isClicked = true;
+              this.OverMainMinwidthPixel = null;
+              this.HaveHeader = true;
+              this.PercentWidth = 81;
+              this.startLeftPosition = 140;
+              this.startTopPosition = 14;
+              this.HaveMaxBtn = false;
+              this.PopupParam = {
+                ProductRequestObject: this.ProductRequestObject,
+                ModuleViewTypeCode: VirtualModuleViewType,
+                InquiryObject: this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.InquiryID > 0 ?
+                  this.ProductRequestObject.LastInquiryObject : null,
+                Subject: this.Subject,
+                RegionCode: this.RegionParams.selectedObject,
+                ProductRequestCode: this.ProductRequestNo,
+                ProductRequestDate: this.ProductRequestDate,
+                CostFactorID: this.CostFactorID,
+                IsReadOnly: !this.IsEditable,
+                PRRegionObject: this.currentRegionObject,
+                SumFinalAmount: this.SumFinalAmountStr,
+                CheckRegionWritable: this.CheckRegionWritable,
+                OrginalModuleCode: this.OrginalModuleCode,
+                ModuleCode: this.ModuleCode,
+                UserRegionCode: this.UserRegionCode,
+                IsAdmin: this.IsAdmin,
+                OriginModuleViewTypeCode: this.ModuleViewTypeCode
+              };
+            } else {
+              this.ShowMessageBoxWithOkBtn('مناقصه یا مزایده مورد نظر تعیین تکلبف شده است .');
+            }
+          });
+        }
         break;
       case 23:
       case 27:
@@ -9632,7 +10544,6 @@ export class ProductRequestPageComponent implements OnInit {
         break;
     }
   }
-
   onSendLetter() {
     this.PopUpType = 'send-automation-letter';
     this.isClicked = true;
@@ -9682,7 +10593,9 @@ export class ProductRequestPageComponent implements OnInit {
               RegionCode: this.ProductRequestObject.RegionCode,
               PDFSignersInfo: PDFRes.PDFSignersInfo,
               HasTripleReport: this.HaseEstimate,
-              IsFinal: this.ModuleViewTypeCode === 144 || this.ModuleViewTypeCode === 161 // نهایی
+              IsFinal: this.ModuleViewTypeCode === 144 || this.ModuleViewTypeCode === 161, // نهایی
+              HasDelBtn: false,
+              IsArticle18: false,
             };
           } else {
             this.IsDown = true;
@@ -9797,50 +10710,806 @@ export class ProductRequestPageComponent implements OnInit {
         });
       });
   }
-
   Article18DigitalSign() {
     if (this.ProductRequestObject &&
       this.ProductRequestObject.LastInquiryObject &&
       this.ProductRequestObject.LastInquiryObject.OrderCommitionObject) {
-      this.IsDown = false;
-      this.ProductRequest.GetMinutesReportPDFContent(
-        this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID,
-        this.ProductRequestObject.CostFactorID,
-        this.ProductRequestObject.RegionCode,
-        1047,
-        this.HaseEstimate,
-        false).subscribe(PDFRes => {
-          if (PDFRes) {
-            this.IsDown = true;
-            this.PopUpType = 'pdf-viewer';
-            this.HaveHeader = true;
-            this.isClicked = true;
-            this.startLeftPosition = 40;
-            this.startTopPosition = 0;
-            this.HaveMaxBtn = false;
-            this.OverMainMinwidthPixel = 1295;
-            this.MainMaxwidthPixel = 1300;
-            this.PopupParam = {
-              HeaderName: 'چاپ ابلاغ ماده 18',
-              PDFSrc: PDFRes.FileBase64,
-              FileName: PDFRes.FileName,
-              OrderCommitionID: this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID,
-              HaveEstimate: false,
-              HaveSign: true,
-              CostFactorID: this.ProductRequestObject.CostFactorID,
-              RegionCode: this.ProductRequestObject.RegionCode,
-              PDFSignersInfo: PDFRes.PDFSignersInfo,
-              HasTripleReport: this.HaseEstimate,
-              IsFinal: false,
-              IsArticle18: true,
-            };
-          } else {
-            this.IsDown = true;
-            this.ShowMessageBoxWithOkBtn('فایل صورتجلسه بارگزاری نشده است.');
-          }
-        });
+      this.OrderCommitionID = this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID;
+      this.ComonService.GetAllArchiveDetailList(this.OrderCommitionID, 1047, true, false).subscribe(res => {
+        if (res) {
+          this.ExistsFile = true;
+          this.BtnClickedName = 'Article18';
+          this.ShowMessageBoxWithYesNoBtn('فایل قبلا ذخیره شده است. آیا مایل به مشاهده آن هستید؟');
+        } else {
+          this.ExistsFile = false;
+          this.IsDown = false;
+          this.ProductRequest.GetMinutesReportPDFContent(
+            this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID,
+            this.ProductRequestObject.CostFactorID,
+            this.ProductRequestObject.RegionCode,
+            1047,
+            this.HaseEstimate,
+            false,
+            this.ModuleViewTypeCode).subscribe(PDFRes => {
+              if (PDFRes) {
+                this.IsDown = true;
+                this.PopUpType = 'pdf-viewer';
+                this.HaveHeader = true;
+                this.isClicked = true;
+                this.startLeftPosition = 40;
+                this.startTopPosition = 0;
+                this.HaveMaxBtn = false;
+                this.OverMainMinwidthPixel = 1295;
+                this.MainMaxwidthPixel = 1300;
+                this.PopupParam = {
+                  HeaderName: 'ابلاغ ماده 18',
+                  PDFSrc: PDFRes.FileBase64,
+                  FileName: PDFRes.FileName,
+                  OrderCommitionID: this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID,
+                  HaveEstimate: false,
+                  HaveSign: true,
+                  CostFactorID: this.ProductRequestObject.CostFactorID,
+                  RegionCode: this.ProductRequestObject.RegionCode,
+                  PDFSignersInfo: PDFRes.PDFSignersInfo,
+                  HasTripleReport: this.HaseEstimate,
+                  IsFinal: false,
+                  IsArticle18: true,
+                  HasDelBtn: true,
+                };
+              } else {
+                this.IsDown = true;
+                this.ShowMessageBoxWithOkBtn('فایل صورتجلسه بارگزاری نشده است.');
+              }
+            });
+        }
+      });
     } else {
       this.ShowMessageBoxWithOkBtn('این درخواست فاقد کمیسیون می باشد');
+    }
+  }
+  showcontractlistclick() {
+    this.PopUpType = 'show-contract-list';
+    this.isClicked = true;
+    this.PercentWidth = 98;
+    this.MainMaxwidthPixel = 2000;
+    this.MinHeightPixel = 600;
+    this.HaveHeader = true;
+    this.startLeftPosition = 15;
+    this.startTopPosition = 10;
+    this.HaveMaxBtn = true;
+    this.PopupParam = {
+      RegionCode: this.RegionParams.selectedObject
+    };
+  }
+
+  IsUpdateBeforeAdevertisingRedioClick(IsUpdateBeforeAdevertising) {
+    this.IsUpdateBeforeAdevertising = IsUpdateBeforeAdevertising;
+  }
+
+  ReceiveDocProductRowClick(event) {
+    this.SelectedReceiveDocID = event.data.ReceiveDocID;
+  }
+  onReceiveDocProductGridReady(params) {
+    this.gridApiReceiveDocProduct = params.api;
+  }
+  onReceiveDocProductcellEditingStarted(event) {
+  }
+  onAddReceiveDocClick() {
+    this.PopUpType = 'product-receive-doc';
+    this.HaveHeader = true;
+    this.isClicked = true;
+    this.startLeftPosition = 278;
+    this.startTopPosition = 70;
+    this.PercentWidth = 60;
+    this.OverMainMinwidthPixel = null;
+    this.PopupParam = {
+      ProductRequestObject: this.ProductRequestObject,
+      Subject: this.Subject,
+      RegionCode: this.RegionParams.selectedObject,
+      ModuleCode: this.ModuleCode,
+      ModuleViewTypeCode: this.ModuleViewTypeCode,
+      OrginalModuleCode: this.OrginalModuleCode,
+      ReceiveDocID: -1,
+    };
+  }
+  onEditReceiveDocClick() {
+    this.PopUpType = 'product-receive-doc';
+    this.HaveHeader = true;
+    this.isClicked = true;
+    this.startLeftPosition = 278;
+    this.startTopPosition = 70;
+    this.PercentWidth = 60;
+    this.OverMainMinwidthPixel = null;
+    this.PopupParam = {
+      ProductRequestObject: this.ProductRequestObject,
+      Subject: this.Subject,
+      RegionCode: this.RegionParams.selectedObject,
+      ModuleCode: this.ModuleCode,
+      ModuleViewTypeCode: this.ModuleViewTypeCode,
+      OrginalModuleCode: this.OrginalModuleCode,
+      ReceiveDocID: this.SelectedReceiveDocID
+    };
+
+  }
+  onDeleteReceiveDocclick() {
+    this.ProductRequest.DeletePRReceiveDoc(this.SelectedReceiveDocID).subscribe(res => {
+      this.ShowMessageBoxWithOkBtn('حذف با موفقیت انجام شد');
+      this.SetPRReciveDocList();
+    },
+      err => {
+        this.ShowMessageBoxWithOkBtn('حذف نامه با خطا مواجه شد');
+      });
+  }
+  SetPRReciveDocList() {
+    this.ProductRequest.GetPRReceiveDocList(this.CostFactorID, null, this.ModuleViewTypeCode).subscribe(res => {
+      this.ReceiveDocProductRowData = res;
+    });
+  }
+
+  SetLastContractData(ContractId) {
+    this.IsTransferedContract = true;
+    this.ProductRequest.getProductRequestByContractId(ContractId).subscribe(res => {
+      if (res) {
+        this.IsDisable = false;
+        this.ProductRequestObject = res;
+        this.HasProvisionContractID = this.ProductRequestObject.ProvisionContractID ? true : false;
+        if (this.ProductRequestObject.RelatedContractID) {
+          this.IsNew = false;
+          this.PerecentageChangesLabel = true;
+        }
+        this.FillAllNgSelectByProductRequest(this.ProductRequestObject);
+        if (this.ProductRequestObject && this.ProductRequestObject.ContractTypeCode) {
+          this.IsInsert = true;
+        }
+        if (
+          this.ProductRequestObject.ProductRequestStatusCode &&
+          this.ProductRequestObject.ProductRequestStatusCode !== 3) {
+          this.btnRevocationName = 'ابطال';
+          this.btnRevocationIcon = 'revocation';
+        }
+        if (
+          this.ProductRequestObject.ProductRequestStatusCode &&
+          this.ProductRequestObject.ProductRequestStatusCode === 3) {
+          this.btnRevocationName = 'بازگشت از ابطال';
+          this.btnRevocationIcon = 'cancel';
+        }
+        this.IsCost = this.ProductRequestObject.IsCost;
+        this.ISActLocation = false;
+        this.ResearcherID = this.ProductRequestObject.ResearcherID;
+        this.BoardDecisionsDec = this.ProductRequestObject.BoardDecisions;
+        this.ProductRequestCode = null;
+        this.ProductRequestNo = null;
+        this.ProductRequestObject.ProductRequestCode = null;
+        this.ProductRequestObject.ProductRequestNo = null;
+        this.ProductRequestObject.ProductRequestDate = null;
+        // this.ProductRequestDate = undefined;
+        this.DeadLineDate = this.ProductRequestObject.ShortDeadlineDate;
+        this.Subject = this.ProductRequestObject.Subject;
+        this.Address = this.ProductRequestObject.Address;
+        this.HaveMutualContract = this.ProductRequestObject.HaveMutualContract;
+        this.IsSecret = this.ProductRequestObject.IsSecret;
+        this.HaveHsePlan = this.ProductRequestObject.HaveHsePlan;
+        this.MutualContractStatus = this.ProductRequestObject.MutualContractStatus;
+        if (this.ProductRequestObject && this.ProductRequestObject.ContractObject) {
+          this.ContractSubject = this.ProductRequestObject.ContractObject.Subject;
+          this.ContractCode = this.ProductRequestObject.ContractObject.LetterNo;
+        }
+        this.BriefingReport = this.ProductRequestObject.BriefingReport;
+        this.ContractContentNote = this.ProductRequestObject.ContractContentNote;
+        this.IsContractContent = this.ProductRequestObject.IsContractContent;
+        this.RelatedProductRowData = this.ProductRequestObject.RequestRelatedProductList;
+        this.rowsData = this.ProductRequestObject.ProductRequestItemList;
+        this.SetEntityDataInDataRow(this.rowsData);
+        this.rowsData.forEach(element => {
+          element.StartDate = null;
+          element.PersianStartDate = null;
+          element.EndDate = null;
+          element.PersianEndDate = null;
+          element.ShortEndDate = null;
+          element.ShortStartDate = null;
+        });
+        this.ProductRequestObject.ProductRequestItemList.forEach(element => {
+          element.StartDate = null;
+          element.PersianStartDate = null;
+          element.EndDate = null;
+          element.PersianEndDate = null;
+          element.ShortEndDate = null;
+          element.ShortStartDate = null;
+        });
+        this.AssetRowData = this.ProductRequestObject.AssetList;
+        this.RedioClick(this.IsCost);
+        if (this.ProductRequestObject && this.ProductRequestObject.RelatedContractID) {
+          this.contractpaydetail.GetFirstContractOrder(this.ProductRequestObject.RelatedContractID).subscribe(ress => {
+            ress.forEach(item => {
+              item.FinalAmount = item.Amount;
+              this.SumFinalAmountRelatedContract = this.SumFinalAmountRelatedContract + parseFloat(item.FinalAmount);
+            });
+          });
+          this.contractpaydetail.GetBeforeLastContractOrder(this.ProductRequestObject.RelatedContractID).subscribe(resss => {
+            resss.forEach(item => {
+              item.FinalAmount = item.Amount;
+              this.SumFinalBeforeLastAmountRelatedContract = this.SumFinalBeforeLastAmountRelatedContract + parseFloat(item.FinalAmount);
+            });
+          });
+          if (this.ProductRequestObject.ProductRequestItemList && this.ProductRequestObject.ProductRequestItemList.length > 0) { }
+        }
+        if (this.ProductRequestObject && this.ProductRequestObject.ContractTimeExtension) { // RFC 51373
+          // tslint:disable-next-line: max-line-length
+          this.TimeExtensionDay = this.ProductRequestObject.ContractTimeExtension.Day ? this.ProductRequestObject.ContractTimeExtension.Day : 0;
+          // tslint:disable-next-line: max-line-length
+          this.TimeExtensionMonth = this.ProductRequestObject.ContractTimeExtension.Month ? this.ProductRequestObject.ContractTimeExtension.Month : 0;
+          // tslint:disable-next-line: max-line-length
+          this.TimeExtensionYear = this.ProductRequestObject.ContractTimeExtension.Year ? this.ProductRequestObject.ContractTimeExtension.Year : 0;
+        }
+        this.ProductRequestIsOnline = this.ProductRequestObject.IsOnline ? this.ProductRequestObject.IsOnline : false;
+        this.ProductRequestObject.CostFactorID = -1;
+      }
+    });
+
+  }
+  SetColumnDef() {
+
+  }
+  onDelRecDocClick(row) {
+
+    let GridList = [];
+    this.ReceiveDocGridApi.forEachNode(element => {
+      if (element.data.ItemNo !== row.ItemNo) {
+        GridList.push(element.data);
+      }
+    });
+    this.ReceiveDocRowData = GridList;
+
+  }
+  DisplayColDef() {
+    if (this.IsNew) {
+      this.ReceiveDocColDef = [
+        {
+          headerName: 'ردیف',
+          field: 'ItemNo',
+          width: 70,
+          resizable: true
+        },
+        {
+          headerName: 'مستندات',
+          field: '',
+          width: 80,
+          sortable: false,
+          resizable: false,
+          cellStyle: function (params) {
+            return { 'text-align': 'center' };
+          },
+          cellRendererFramework: TemplateRendererComponent,
+          cellRendererParams: {
+            ngTemplate: this.UploadArchive,
+          }
+        },
+        {
+          headerName: 'قبول / رد',
+          field: 'IsValidity',
+          width: 100,
+          resizable: true,
+          editable: true,
+          cellStyle: function (params) {
+            return { 'text-align': 'center' };
+          },
+          cellEditorFramework: CheckboxFieldEditableComponent,
+          valueFormatter: function isValidFormer(params) {
+            if (params.value) {
+              return 'معتبر';
+            } else {
+              return 'نامعتبر';
+            }
+          },
+          cellRendererFramework: TemplateRendererComponent,
+          cellRendererParams: {
+            ngTemplate: this.IsValidity
+          },
+        },
+        {
+          headerName: 'نام شخص پیشنهاد دهنده',
+          field: 'ActorName',
+          cellEditorFramework: NgSelectVirtualScrollComponent,
+          cellEditorParams: {
+            Params: this.NgSelectProposalParams,
+            Items: [],
+            Owner: this
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.ActorName;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.ActorName) {
+              params.data.ProposalID = params.newValue.ProposalID;
+              params.data.ActorName = params.newValue.ActorName;
+              return true;
+            } else {
+              params.data.ProposalID = null;
+              params.data.ActorName = null;
+              return false;
+            }
+          },
+          editable: true,
+          width: 250,
+          resizable: true
+        },
+        {
+          headerName: 'نوع سند',
+          field: 'ReceiveDocTypeName',
+          cellEditorFramework: NgSelectCellEditorComponent,
+          cellEditorParams: {
+            Items: this.ContractList.GetWarrantyReceiveDocType(),
+            bindLabelProp: 'ReceiveDocTypeName',
+            bindValueProp: 'ReceiveDocTypeCode'
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.ReceiveDocTypeName;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.ReceiveDocTypeName) {
+              params.data.ReceiveDocTypeCode = params.newValue.ReceiveDocTypeCode;
+              params.data.ReceiveDocTypeName = params.newValue.ReceiveDocTypeName;
+
+              if (params.data.ReceiveDocTypeCode === 11) {
+                this.Editable = true;
+              } else {
+                this.Editable = false;
+                params.data.SapamNo = null;
+                params.data.EstateValue = null;
+                params.data.Area = null;
+                params.data.EstateAddress = null;
+                params.data.EstateTypeCode = null;
+                params.data.EstateTypeName = null;
+                params.data.RegRegion = null;
+              }
+              return true;
+            } else {
+              params.data.ProposalID = null;
+              params.data.ReceiveDocTypeName = null;
+              return false;
+            }
+          },
+          editable: true,
+          width: 250,
+          resizable: true
+        },
+        {
+          headerName: 'شماره ضمانت نامه',
+          field: 'ReferenceNo',
+          editable: true,
+          width: 120,
+          resizable: true
+        },
+        {
+          headerName: 'تاریخ ضمانت نامه',
+          field: 'PersianReferenceDate',
+          width: 120,
+          resizable: true,
+          editable: true,
+          cellEditorFramework: JalaliDatepickerComponent,
+          cellEditorParams: {
+            CurrShamsiDateValue: 'PersianReferenceDate',
+            DateFormat: 'YYYY/MM/DD',
+            WidthPx: 120,
+            AppendTo: '.for-append-date'
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.SDate;
+            } else {
+              return '';
+            }
+          },
+        },
+        {
+          headerName: 'مبلغ',
+          field: 'ReceiveDocAmount',
+          width: 120,
+          HaveThousand: true,
+          resizable: true,
+          editable: true,
+          cellEditorFramework: NumberInputComponentComponent,
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value;
+            } else {
+              return '';
+            }
+          },
+        },
+        {
+          headerName: 'توضیحات',
+          field: 'Note',
+          editable: true,
+          width: 440,
+          resizable: true
+        },
+        {
+          headerName: 'شماره سپام',
+          field: 'SapamNo',
+          editable: true,
+          width: 80,
+          resizable: true
+        },
+        {
+          headerName: 'نوع ملک',
+          field: 'EstateTypeName',
+          cellEditorFramework: NgSelectVirtualScrollComponent,
+          cellEditorParams: {
+            Params: this.NgSelectEstateTypeParams,
+            Items: [],
+            Owner: this
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.EstateTypeName;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.EstateTypeName) {
+              params.data.EstateTypeCode = params.newValue.EstateTypeCode;
+              params.data.EstateTypeName = params.newValue.EstateTypeName;
+              return true;
+            } else {
+              params.data.EstateTypeCode = null;
+              params.data.EstateTypeName = null;
+              return false;
+            }
+          },
+          editable: () => {
+            return this.Editable;
+          },
+          width: 120,
+          resizable: true
+        },
+        {
+          headerName: 'ارزش ملک',
+          field: 'EstateValue',
+          editable: () => {
+            return this.Editable;
+          },
+          width: 80,
+          resizable: true
+        },
+        {
+          headerName: 'پلاک ثبتی',
+          field: 'RegRegion',
+          editable: () => {
+            return this.Editable;
+          },
+          width: 80,
+          resizable: true
+        },
+        {
+          headerName: 'متراژ',
+          field: 'Area',
+          editable: () => {
+            return this.Editable;
+          },
+          width: 80,
+          resizable: true
+        },
+        {
+          headerName: 'آدرس ملک',
+          field: 'EstateAddress',
+          editable: () => {
+            return this.Editable;
+          },
+          width: 440,
+          resizable: true
+        },
+      ];
+    } else {
+      this.ReceiveDocColDef = [
+        {
+          headerName: 'ردیف',
+          field: 'ItemNo',
+          width: 70,
+          resizable: true
+        },
+        {
+          headerName: 'مستندات',
+          field: '',
+          width: 80,
+          sortable: false,
+          resizable: false,
+          cellStyle: function (params) {
+            return { 'text-align': 'center' };
+          },
+          cellRendererFramework: TemplateRendererComponent,
+          cellRendererParams: {
+            ngTemplate: this.UploadArchive,
+          },
+        },
+        {
+          headerName: 'قبول / رد',
+          field: 'IsValidity',
+          width: 100,
+          resizable: true,
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          cellStyle: function (params) {
+            return { 'text-align': 'center' };
+          },
+          cellEditorFramework: CheckboxFieldEditableComponent,
+          valueFormatter: function isValidFormer(params) {
+            if (params.value) {
+              return 'معتبر';
+            } else {
+              return 'نامعتبر';
+            }
+          },
+          cellRendererFramework: TemplateRendererComponent,
+          cellRendererParams: {
+            ngTemplate: this.IsValidity
+          },
+        },
+        {
+          headerName: 'نوع سند',
+          field: 'ReceiveDocTypeName',
+          cellEditorFramework: NgSelectCellEditorComponent,
+          cellEditorParams: {
+            Items: this.ContractList.GetWarrantyReceiveDocType(),
+            bindLabelProp: 'ReceiveDocTypeName',
+            bindValueProp: 'ReceiveDocTypeCode'
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.ReceiveDocTypeName;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.ReceiveDocTypeName) {
+              params.data.ReceiveDocTypeCode = params.newValue.ReceiveDocTypeCode;
+              params.data.ReceiveDocTypeName = params.newValue.ReceiveDocTypeName;
+
+              if (params.data.ReceiveDocTypeCode === 11) {
+                this.Editable = true;
+              } else {
+                this.Editable = false;
+                params.data.SapamNo = null;
+                params.data.EstateValue = null;
+                params.data.Area = null;
+                params.data.EstateAddress = null;
+                params.data.EstateTypeCode = null;
+                params.data.EstateTypeName = null;
+                params.data.RegRegion = null;
+              }
+              return true;
+            } else {
+              params.data.ProposalID = null;
+              params.data.ReceiveDocTypeName = null;
+              return false;
+            }
+          },
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          width: 250,
+          resizable: true
+        },
+        {
+          headerName: 'شماره ضمانت نامه',
+          field: 'ReferenceNo',
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          width: 120,
+          resizable: true
+        },
+        {
+          headerName: 'تاریخ ضمانت نامه',
+          field: 'PersianReferenceDate',
+          width: 120,
+          resizable: true,
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          cellEditorFramework: JalaliDatepickerComponent,
+          cellEditorParams: {
+            CurrShamsiDateValue: 'PersianReferenceDate',
+            DateFormat: 'YYYY/MM/DD',
+            WidthPx: 120,
+            AppendTo: '.for-append-date'
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.SDate;
+            } else {
+              return '';
+            }
+          },
+        },
+        {
+          headerName: 'مبلغ',
+          field: 'ReceiveDocAmount',
+          width: 120,
+          HaveThousand: true,
+          resizable: true,
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          cellEditorFramework: NumberInputComponentComponent,
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value;
+            } else {
+              return '';
+            }
+          },
+        },
+        {
+          headerName: 'توضیحات',
+          field: 'Note',
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          width: 440,
+          resizable: true
+        },
+        {
+          headerName: 'شماره سپام',
+          field: 'SapamNo',
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          width: 80,
+          resizable: true
+        },
+        {
+          headerName: 'نوع ملک',
+          field: 'EstateTypeName',
+          cellEditorFramework: NgSelectVirtualScrollComponent,
+          cellEditorParams: {
+            Params: this.NgSelectEstateTypeParams,
+            Items: [],
+            Owner: this
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.EstateTypeName;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.EstateTypeName) {
+              params.data.EstateTypeCode = params.newValue.EstateTypeCode;
+              params.data.EstateTypeName = params.newValue.EstateTypeName;
+              return true;
+            } else {
+              params.data.EstateTypeCode = null;
+              params.data.EstateTypeName = null;
+              return false;
+            }
+          },
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          width: 120,
+          resizable: true
+        },
+        {
+          headerName: 'ارزش ملک',
+          field: 'EstateValue',
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          width: 80,
+          resizable: true
+        },
+        {
+          headerName: 'پلاک ثبتی',
+          field: 'RegRegion',
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          width: 80,
+          resizable: true
+        },
+        {
+          headerName: 'متراژ',
+          field: 'Area',
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          width: 80,
+          resizable: true
+        },
+        {
+          headerName: 'آدرس ملک',
+          field: 'EstateAddress',
+          editable: (params) => {
+            if (params.data.ReceiveDocID > 0) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          width: 440,
+          resizable: true
+        },
+        {
+          headerName: 'حذف',
+          field: '',
+          width: 80,
+          sortable: false,
+          resizable: false,
+          cellStyle: function (params) {
+            return { 'text-align': 'center' };
+          },
+          cellRendererFramework: TemplateRendererComponent,
+          cellRendererParams: {
+            ngTemplate: this.DelRecDoc,
+          }
+        }
+      ];
     }
   }
 }

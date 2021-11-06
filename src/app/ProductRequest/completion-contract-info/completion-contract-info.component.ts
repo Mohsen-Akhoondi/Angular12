@@ -5,7 +5,6 @@ import { ContractListService } from 'src/app/Services/BaseService/ContractListSe
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { isUndefined } from 'util';
@@ -612,7 +611,7 @@ export class CompletionContractInfoComponent implements OnInit {
       this.ShowMessageBoxWithOkBtn('.لطفا فیلد های ستاره دار را پر نمایید');
       return;
     }
-    if (this.OrginalModuleCode === 2944 &&
+    if (this.OrginalModuleCode === 2939 &&
       (!this.ProductRequestSubject || this.ProductRequestSubject === '' ||
         !this.ContractSubject || this.ContractSubject === '')) {
       this.ShowMessageBoxWithOkBtn('.لطفا فیلد های ستاره دار را پر نمایید');
@@ -929,30 +928,7 @@ export class CompletionContractInfoComponent implements OnInit {
       this.DocTypeItems = res;
     });
   }
-  onConfirm() {
-    this.CheckValidate = true;
-    if (this.OrginalModuleCode === 2939 &&
-      ((!this.ProductRequestSubject || this.ProductRequestSubject === '') ||
-        (!this.ContractSubject || this.ContractSubject === '') ||
-        (!this.ContractTypeParams.selectedObject || this.ContractTypeParams.selectedObject === null) ||
-        (!this.ReviewMethodParams.selectedObject || this.ReviewMethodParams.selectedObject === null) ||
-        (!this.NgSelectSuperVisor1Params.selectedObject || this.NgSelectSuperVisor1Params.selectedObject === null) ||
-        (this.Article31Disabled ? !this.Article31Params.selectedObject || this.Article31Params.selectedObject === null : false)
-      )
-    ) {
-      this.ShowMessageBoxWithOkBtn('.لطفا فیلد های ستاره دار را پر نمایید');
-      return;
-    }
-    this.ProductRequest.ChangePRIsIncomplete(this.ProductRequestObject.CostFactorID, this.IsEditable, this.OrginalModuleCode).subscribe(res => {
-      if (res) {
-        if (this.IsEditable) {
-          this.ShowMessageBoxWithOkBtn('تایید با موفقیت انجام شد.');
-        } else {
-          this.ShowMessageBoxWithOkBtn('بازگشت با موفقیت انجام شد.');
-        }
-      }
-    });
-  }
+
   onCellValueChanged(event) {
     const itemsToUpdate = [];
     if (event.newValue && event.newValue.ActorId) {

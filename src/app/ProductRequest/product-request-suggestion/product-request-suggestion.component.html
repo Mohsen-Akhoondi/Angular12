@@ -36,7 +36,7 @@
                   <span class="table-cell-Lable">مدت انجام کار</span>
                   <div style="display: inline-block;width: 60%;">
                     <div style="display: inline-block;width: 34%;">
-                      <app-number-input-component [ReadOnly]="IsDisable || IsShowType95"
+                      <app-number-input-component [ReadOnly]="IsShowType95"
                         [id]="'indicator-label-Duration'" [Value]="DurationYear" [IsFloat]="false" [MaxLength]="1"
                         [FloatMaxLength]="0" [PerCentWidth]="60" [PixelHeight]="25" [CheckValidate]="PopupParam.ModuleViewTypeCode === 89 &&
                          (!DurationYear && !DurationMonth && !DurationDay) ? CheckValidate : false"
@@ -46,7 +46,7 @@
                       <span style="margin-right: 5px;margin-left: 5px;" class="table-cell-Lable">سال</span>
                     </div>
                     <div style="display: inline-block;width: 33%;">
-                      <app-number-input-component [ReadOnly]="IsDisable || IsShowType95"
+                      <app-number-input-component [ReadOnly]="IsShowType95"
                         [id]="'indicator-label-Duration'" [Value]="DurationMonth" [IsFloat]="false" [MaxLength]="2"
                         [FloatMaxLength]="0" [PerCentWidth]="60" [PixelHeight]="25" [CheckValidate]="PopupParam.ModuleViewTypeCode === 89 &&
                         (!DurationYear && !DurationMonth && !DurationDay) ? CheckValidate : false"
@@ -56,9 +56,9 @@
                       <span style="margin-right: 5px;margin-left: 5px;" class="table-cell-Lable">ماه</span>
                     </div>
                     <div style="display: inline-block;width: 33%;">
-                      <app-number-input-component [ReadOnly]="IsDisable || IsShowType95"
+                      <app-number-input-component [ReadOnly]="IsShowType95"
                         [id]="'indicator-label-Duration'" [Value]="DurationDay" [IsFloat]="false"
-                        [MaxLength]="IsAllowed ? 3 : 2" [FloatMaxLength]="0" [PerCentWidth]="65" [PixelHeight]="25"
+                        [MaxLength]="" [FloatMaxLength]="0" [PerCentWidth]="65" [PixelHeight]="25"
                         [CheckValidate]="PopupParam.ModuleViewTypeCode === 89 &&
                         (!DurationYear && !DurationMonth && !DurationDay) ? CheckValidate : false"
                         (ValueChange)="getDurationDay($event)" class="col-form-label" [HaveThousand]="false">
@@ -131,8 +131,9 @@
                     (selectedChange)="onChangePRType($event)">
                   </app-ng-select-virtual-scroll>
                 </td>
-              
+
                 <td style="width: 33%">
+                  <span *ngIf="IsForcePriceList" style="color: red;">*</span>
                   <span class="table-cell-Lable">رسته</span>
                   <app-ng-select-virtual-scroll [Disabled]="IsDisable || !DisableJobCategory"
                     style="display: inline-block;width: 60%;" class="select-general-for-lable"
@@ -141,6 +142,7 @@
                   </app-ng-select-virtual-scroll>
                 </td>
                 <td style="width: 33%">
+                  <span *ngIf="IsForcePriceList" style="color: red;">*</span>
                   <span class="table-cell-Lable">رتبه</span>
                   <app-ng-select-virtual-scroll [Disabled]="IsDisable || !IsDisplay"
                     style="display: inline-block;width: 60%;" class="select-general-for-lable"
@@ -457,7 +459,8 @@
                   </td>
                   <td width="33%">
                     <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 7px;">
-                      <span id="sum-final-estimate-amount" class="table-cell-Lable">جمع کل با ضرایب ردیف(بدون تجهیز کارگاه):</span>
+                      <span id="sum-final-estimate-amount" class="table-cell-Lable">جمع کل با ضرایب ردیف(بدون تجهیز
+                        کارگاه):</span>
                       <label for="sum-final-estimate-amount" style="margin:2px"> {{ SumFinalItemAmountCOEF}} </label>
                     </div>
                   </td>
@@ -739,16 +742,18 @@
                   </tr>
                 </table>
                 <div *ngIf="ShowLetterBtn" style="width: 100%">
-                        <fieldset  [style.height.px]="WfDetailsShowHeight" class="feild-set"
-                        style="margin-right: 6px; padding-top: 0px;margin-top: 3px;min-height: 0px; width: 99%">
-                        <legend [style.width.%]="9" style="width: 10%;" class="legend">
-                          مصوبات هیئت مدیره</legend>
-                        <textarea [(ngModel)]="BoardDecisionsDec" name="BoardDecisionsDec" class="form-control input-style" rows="6"
-                          style="display: inline-block;height: 40px;width: 100%;max-height: 40px; min-height: 40px; max-width: 100%;" readonly>
+                  <fieldset [style.height.px]="WfDetailsShowHeight" class="feild-set"
+                    style="margin-right: 6px; padding-top: 0px;margin-top: 3px;min-height: 0px; width: 99%">
+                    <legend [style.width.%]="9" style="width: 10%;" class="legend">
+                      مصوبات هیئت مدیره</legend>
+                    <textarea [(ngModel)]="BoardDecisionsDec" name="BoardDecisionsDec" class="form-control input-style"
+                      rows="6"
+                      style="display: inline-block;height: 40px;width: 100%;max-height: 40px; min-height: 40px; max-width: 100%;"
+                      readonly>
                         </textarea>
-                      </fieldset>
+                  </fieldset>
                 </div>
-              </div>         
+              </div>
             </div>
 
             <div class="main-form-body"
@@ -836,15 +841,8 @@
           ثبت
         </button>
 
-        <!-- 
-            <button id="btnCoef" (click)="onContractOrderItemCoefClick()" class="btn btn-primary btnGreen">
-              <img width="15px" height="15px" src="assets/Icons/coef1.png" />
-              ضرایب ردیف درخواست
-             </button>
-        -->
-
-
-        <button *ngIf="(this.DealMethodParams.selectedObject === 2 && this.PopupParam.ModuleViewTypeCode !== 89) || (ShowLetterBtn)"  
+        <button
+          *ngIf="(this.DealMethodParams.selectedObject === 2 && this.PopupParam.ModuleViewTypeCode !== 89) || (ShowLetterBtn)"
           id="btnClose" class="btn btn-primary btnGreen" (click)="onAutomationClick()">
           <img width="15px" height="15px" src="assets/Icons/ok.png" />
           اتصال نامه
@@ -863,40 +861,24 @@
           <img width="15px" height="15px" src="assets/Icons/print.png" />
           چاپ برآورد
         </button>
+        <button *ngIf="HasTripleReport" id="btnTenderRep" class="btn btn-primary btnGreen" (click)="onShowInputFormulaPage()">
+          <img width="15px" height="15px" src="assets/Icons/show.png" />
+          مشاهده پیش نویس جزییات
+        </button>
         <button (click)="onClose()" class="btn btn-primary btnGreen">
           <img width="15px" height="15px" src="assets/Icons/exit.png" />
           خروج
         </button>
-        <!-- <button *ngIf="HaveInquiry || CheckRegionWritable" [disabled]="IsDisable || !IsEditConfirm"
-        id="btnRequestSuggestion" class="btn btn-primary btnGreen" (click)="onProposalClick()">
-        <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
-        {{btnProposalName}}
-      </button> -->
-        <!-- <button *ngIf="HaveCompleteInfo" [disabled]="IsDisable || !IsEditConfirm" id="btnShowRequestDetailsPage"
-        class="btn btn-primary btnGreen" (click)="btnShowReqDetailsClick()">
-        <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
-        {{HasCompleteInfoBtnText}}
-      </button> -->
-        <!-- <button *ngIf="(WfSaveDetailsShow && IsEditConfirm)" (click)="onWFSave()" id="btnSave"
-        class="btn btn-primary btnGreen">
-        <img width="15px" height="15px" src="assets/Icons/save.png" />
-        ثبت
-      </button> -->
-        <!-- <button *ngIf="HasWarrantyItem" (click)="onWarrantyItemClick()" id="btnSave" class="btn btn-primary btnGreen">
-        <img width="15px" height="15px" src="assets/Icons/add.png" />
-        بازگشایی تضامین (پاکت الف)
-      </button> -->
-        <!-- <button *ngIf="HaveRevocation" (click)="onRevocation()" id="btn2" class="btn btn-primary btnGreen"
-      style="margin: 2px;" [disabled]="!IsEditConfirm">
-      <img width="15px" height="15px" src="assets/Icons/{{btnRevocationIcon}}.png" />
-      {{btnRevocationName}} </button> -->
       </div>
     </div>
   </div>
-  <app-over-popup *ngIf="isClicked" [PopupType]="PopUpType" [HaveMaxBtn]="HaveMaxBtn" [HeightPercentWithMaxBtn]="95"
+  <app-over-popup *ngIf="isClicked" [PopupType]="PopUpType" [HaveMaxBtn]="HaveMaxBtn"
+    [HeightPercentWithMaxBtn]="PopUpType === 'adjustment-price-range-formulas-input' ? 60 : 95"
     [startLeftPosition]="startLeftPosition" [startTopPosition]="startTopPosition" [PercentWidth]="PercentWidth"
     [MainMaxwidthPixel]="MainMaxwidthPixel"
     [PopupParam]="PopUpType === 'message-box' ?alertMessageParams: PopUpType === 'app-automation' ? LetterPopupParam : PopUpType === 'related-price-list' ? RLPopupParam : PopUpType ==='archive-details' ? ArchiveParam : PopupParam "
     (popupclosed)="popupclosed($event)"
-    (PopupOutPutParam)="PopUpType ==='message-box' ? MessageBoxAction($event) : getOutPutParam($event)">
+    (PopupOutPutParam)="PopUpType ==='message-box' ? MessageBoxAction($event) : getOutPutParam($event)"
+    [PixelWidth]="PopUpType === 'adjustment-price-range-formulas-input' ? 570 : '' "
+    [PixelHeight]="PopUpType === 'adjustment-price-range-formulas-input' ? 150 : '' ">
   </app-over-popup>

@@ -9,7 +9,6 @@ import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { OverPopUpCellEditorComponent } from 'src/app/Shared/OverPopUpcellEditor/over-pop-up-cell-editor.component';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { TreeSelectComponent } from 'src/app/Shared/tree-select/tree-select.component';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
 import { ActivatedRoute } from '@angular/router';
@@ -23,6 +22,8 @@ import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jala
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
 import { environment } from 'src/environments/environment';
 import { AutomationService } from 'src/app/Services/BaseService/AutomationService';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
+
 declare var jquery: any;
 declare var $: any;
 
@@ -511,6 +512,7 @@ export class ProductRequestShowDetailsPageComponent implements OnInit {
   };
   BoardDecisionsDec = '';
   OtherInfo = false;
+  HasTripleReport = false;
 
   constructor(private ProductRequest: ProductRequestService,
     private ArchiveList: ArchiveDetailService,
@@ -836,7 +838,7 @@ export class ProductRequestShowDetailsPageComponent implements OnInit {
         editable: () => {
           return !this.DisableAll;
         },
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
@@ -855,7 +857,7 @@ export class ProductRequestShowDetailsPageComponent implements OnInit {
         editable: () => {
           return !this.DisableAll;
         },
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
@@ -1361,6 +1363,14 @@ export class ProductRequestShowDetailsPageComponent implements OnInit {
       } else {
         this.IsRenewal = true;
       }
+      if (this.ProductRequestObject && this.ProductRequestObject.ProductRequestTypeCode
+        && this.ProductRequestObject.ProductRequestTypeCode !== 3) { // RFC 62290
+        this.ProductRequest.HasProductRequestEstimate(this.ProductRequestObject.CostFactorID).subscribe(res => {
+          if (res) {
+            this.HasTripleReport = true;
+          }
+        });
+      }
     }
   }
   OnCheckBoxChange(event) {
@@ -1665,7 +1675,7 @@ export class ProductRequestShowDetailsPageComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
@@ -1906,7 +1916,7 @@ export class ProductRequestShowDetailsPageComponent implements OnInit {
           width: 120,
           resizable: true,
           editable: true,
-          cellEditorFramework: NumberFieldEditableComponent,
+          cellEditorFramework: NumberInputComponentComponent,
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
             if (params.value) {
@@ -2428,6 +2438,9 @@ export class ProductRequestShowDetailsPageComponent implements OnInit {
         LetterTypeCodeList.push(3);
         LetterTypeCodeList.push(21);
         LetterTypeCodeList.push(29);
+        if (this.PopupParam.ModuleViewTypeCode === 172) { // 62476
+          LetterTypeCodeList.push(33);
+        }
         if (this.ProductRequestObject.DealMethodCode === 11 && this.ProductRequestObject.ConsultantSelectTypeCode
           && this.ProductRequestObject.ConsultantSelectTypeCode === 3) {  // RFC 58762
           LetterTypeCodeList.push(30);
@@ -2454,8 +2467,9 @@ export class ProductRequestShowDetailsPageComponent implements OnInit {
         LetterTypeCodeList: LetterTypeCodeList,
         OrganizationCode: this.currentRegionObject.OrganizationCode,
         AutoClose: true,
-        ReadOnlyMode: true,
+        ReadOnlyMode: this.PopupParam.ModuleViewTypeCode === 172 ? false : true, // 62476
         OrginalModuleCode: this.PageModuleCode,
+        SaveMode: this.PopupParam.ModuleViewTypeCode === 172 ? true : false, // 62476
       };
     }
   }
@@ -2507,5 +2521,19 @@ export class ProductRequestShowDetailsPageComponent implements OnInit {
   }
   SetPRWarrantyReciveDocList() {
     this.ProductRequest.GetPRCostWarrantyList(this.ProductRequestObject.CostFactorID).subscribe(res => this.ReceiveDocRowData = res);
+  }
+  onShowInputFormulaPage() {
+    this.PopUpType = 'adjustment-price-range-formulas-input';
+    this.HaveHeader = true;
+    this.isClicked = true;
+    this.startLeftPosition = 300;
+    this.startTopPosition = 150;
+    this.HaveMaxBtn = false;
+    this.MainMaxwidthPixel = 600;
+    this.MinHeightPixel = 200;
+    this.PopupParam = {
+      HeaderName: 'ورود اطلاعات پایه پیش نویس کمیسیون',
+      ProductRequestObject: this.ProductRequestObject
+    };
   }
 }

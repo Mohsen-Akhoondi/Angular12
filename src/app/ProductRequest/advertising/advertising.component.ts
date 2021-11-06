@@ -2,7 +2,6 @@ import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
 import { ProductRequestEstimateComponent } from '../product-request-estimate/product-request-estimate.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';

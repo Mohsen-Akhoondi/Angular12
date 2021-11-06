@@ -144,7 +144,16 @@
                 class="form-control input-style" rows="2" style="width: 83.5%;" id="indicator-text_note"></textarea>
             </td>
           </tr>
-
+          <tr>
+            <td *ngIf="HaveProposalReadingDate" width="33%">
+              <span style="color: red;" *ngIf="HaveProposalReadingDate">*</span>
+              <span class="table-cell-Lable">تاریخ خواندن پیشنهاد</span>
+              <app-jalali-datepicker [Disabled]="IsWFDisable" [WidthPC]="50" [ShowMode]="ShowMode" [DateFormat]="DateFormat"
+                [CurrMiladiDateValue]="ProposalReadingDate" [CheckValidate]="CheckValidate && HaveProposalReadingDate"
+                (Change)="OnProposalReadingDateChange($event)">
+              </app-jalali-datepicker>
+            </td>
+          </tr>
         </table>
       </fieldset>
       <fieldset *ngIf="ModuleViewTypeCode === 90 || ModuleViewTypeCode === 129 || ModuleViewTypeCode === 130 || ModuleViewTypeCode === 141"
@@ -535,6 +544,10 @@
   <ng-template #UploadArchive let-row>
     <img [ngClass]="'img-def'" width="16px" height="16px" style="cursor: pointer;"
       [src]="'assets/Icons/TechnicalArchive.png'" (click)="onPersonReceiveDocArchiveClick(row)" />
+  </ng-template>
+  <ng-template #CancelReceiveElectronicDocs let-row>
+    <img [ngClass]="'img-def'" width="16px" height="16px" style="cursor: pointer;" [src]="'assets/Icons/uncheck.png'"
+      (click)="onCancelReceiveElectronicDocs(row)" />
   </ng-template>
   <div class="buttons-place" style="margin: unset; margin: 2px;">
     <button *ngIf="!HasWFSave && IsEditable" (click)="onSave()" id="btnSave" class="btn btn-primary btnGreen">

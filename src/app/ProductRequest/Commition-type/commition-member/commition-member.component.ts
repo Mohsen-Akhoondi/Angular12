@@ -10,7 +10,7 @@ import { Router, ActivatedRoute  } from '@angular/router';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { of, forkJoin, Observable } from 'rxjs';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 @Component({
   selector: 'app-commition-member',
   templateUrl: './commition-member.component.html',
@@ -256,7 +256,7 @@ export class CommitionMemberComponent implements OnInit {
         editable: true,
         width: 170,
         resizable: true,
-        cellEditorFramework: NumberFieldEditableComponent
+        cellEditorFramework: NumberInputComponentComponent
       },
       {
         headerName: 'کد عنوان واحد',

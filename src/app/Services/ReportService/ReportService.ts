@@ -77,7 +77,8 @@ export class ReportService {
     FromDate: any,
     ToDate: any,
     ModuleCode: any,
-    ContractOperationID: number = null
+    ContractOperationID: number = null,
+    ReportType: any
   ) {
     const Str = 'RegionCode=' + RegionCode +
       '&ContractCode=' + ContractCode +
@@ -88,7 +89,8 @@ export class ReportService {
       '&FromDate=' + FromDate +
       '&ToDate=' + ToDate +
       '&ModuleCode=' + ModuleCode +
-      '&ContractOperationID=' + ContractOperationID;
+      '&ContractOperationID=' + ContractOperationID +
+      '&ReportType=' + ReportType;
     this.http.get(window.location.origin + '/Report/Encrypt', { Str: Str }).
       subscribe(
         (res) => {
@@ -150,6 +152,7 @@ export class ReportService {
     HeaderName: any,
     HasEstimate: any,
     UranTriplePrint: any,
+    ModuleViewTypeCode: number
   ) {
     const Str =
       'CostFactorID=' + CostFactorID + '&' +
@@ -158,7 +161,8 @@ export class ReportService {
       'RegionCode=' + RegionCode + '&' +
       'HeaderName=' + HeaderName + '&' +
       'HasEstimate=' + HasEstimate + '&' +
-      'UranTriplePrint=' + UranTriplePrint;
+      'UranTriplePrint=' + UranTriplePrint + '&' +
+      'ModuleViewTypeCode=' + ModuleViewTypeCode;
     this.http.get(window.location.origin + '/Report/Encrypt', { Str: Str }).
       subscribe(
         (res) => {
@@ -418,7 +422,8 @@ export class ReportService {
     ToCommitionDate = null,
     FromDocumentDeadlineDate = null,
     ToDocumentDeadlineDate = null,
-    CommitionMemberItemsStr = null
+    CommitionMemberItemsStr = null,
+    DealTypeCode = null,
   ) {
     const Str =
       'RegionCode=' + RegionCode +
@@ -484,7 +489,8 @@ export class ReportService {
       "&ToCommitionDate=" + ToCommitionDate +
       "&FromDocumentDeadlineDate=" + FromDocumentDeadlineDate +
       "&ToDocumentDeadlineDate=" + ToDocumentDeadlineDate +
-      "&CommitionMemberItemsStr=" + CommitionMemberItemsStr;
+      "&CommitionMemberItemsStr=" + CommitionMemberItemsStr +
+      "&DealTypeCode=" + DealTypeCode;
     this.http.get(window.location.origin + '/Report/Encrypt', { Str: Str }).
       subscribe(
         (res) => {
@@ -678,4 +684,29 @@ export class ReportService {
         }
       );
   }
+
+  CostCenterListreport(
+    RegionCode: number,
+    ModuleCode: number,
+    FromCostCenterID,
+    ToCostCenterID,
+    FromSubCostCenterID,
+    ToSubCostCenterID,
+  ) {
+    const Str =
+      'RegionCode=' + RegionCode +
+      '&FromCostCenterID=' + FromCostCenterID +
+      '&ToCostCenterID=' + ToCostCenterID +
+      '&FromSubCostCenterID=' + FromSubCostCenterID +
+      '&ToSubCostCenterID=' + ToSubCostCenterID +
+      '&ModuleCode=' + ModuleCode;
+
+    this.http.get(window.location.origin + '/Report/Encrypt', { Str: Str }).
+      subscribe(
+        (res) => {
+          window.open(window.location.origin + '/Report/Print?' + res, '_blank');
+        }
+      );
+  };
+
 }

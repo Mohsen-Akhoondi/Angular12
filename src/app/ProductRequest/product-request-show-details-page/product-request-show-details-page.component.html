@@ -737,6 +737,10 @@
         <img width="15px" height="15px" src="assets/Icons/TechnicalArchive.png" />
         {{ArchiveBtnText}}
       </button>
+      <button *ngIf="HasTripleReport" id="btnTenderRep" class="btn btn-primary btnGreen" (click)="onShowInputFormulaPage()">
+        <img width="15px" height="15px" src="assets/Icons/show.png" />
+        مشاهده پیش نویس جزییات
+      </button>
       <button (click)="onClose()" class="btn btn-primary btnGreen">
         <img width="15px" height="15px" src="assets/Icons/exit.png" />
         خروج

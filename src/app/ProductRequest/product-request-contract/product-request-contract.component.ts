@@ -8,9 +8,8 @@ import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
-
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 @Component({
   selector: 'app-product-request-contract',
   templateUrl: './product-request-contract.component.html',
@@ -267,7 +266,7 @@ export class ProductRequestContractComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
@@ -397,7 +396,7 @@ export class ProductRequestContractComponent implements OnInit {
     this.ContractsignApi.stopEditing();
     this.ComitionMemberApi.stopEditing();
     let ValidateForm = true;
-    const promise = new Promise<void>((resolve, reject) => {
+    const promise = new Promise((resolve, reject) => {
       this.RequiredComponents.forEach((element, index, array) => {
         if (element.Required && !element.selectedObject && element.selectedObject !== 0) {
           ValidateForm = false;

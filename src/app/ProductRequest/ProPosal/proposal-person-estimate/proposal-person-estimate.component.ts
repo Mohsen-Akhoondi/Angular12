@@ -12,10 +12,10 @@ import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { OverPopUpCellEditorComponent } from 'src/app/Shared/OverPopUpcellEditor/over-pop-up-cell-editor.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 declare var jquery: any;
 declare var $: any;
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 
 @Component({
   selector: 'app-proposal-person-estimate',
@@ -300,7 +300,7 @@ export class ProposalPersonEstimateComponent implements OnInit {
           HaveThousand: true,
           resizable: true,
           editable: true,
-          cellEditorFramework: NumberFieldEditableComponent,
+          cellEditorFramework: NumberInputComponentComponent,
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
             if (params.value) {

@@ -1,8 +1,8 @@
 import { Component, OnInit, Output, EventEmitter} from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { OrderService } from 'src/app/Services/ProductRequest/OrderService';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 @Component({
   selector: 'app-commition-type',
   templateUrl: './commition-type.component.html',
@@ -39,7 +39,7 @@ export class CommitionTypeComponent implements OnInit {
         width: 100,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent
+        cellEditorFramework: NumberInputComponentComponent
       },
       {
         headerName: 'نام کميسيون',
@@ -54,7 +54,7 @@ export class CommitionTypeComponent implements OnInit {
         width: 120,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent
+        cellEditorFramework: NumberInputComponentComponent
       }
     ];
   }

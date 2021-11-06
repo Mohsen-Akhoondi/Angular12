@@ -8,7 +8,6 @@ import { ActivatedRoute } from '@angular/router';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { isUndefined } from 'util';
 declare var jquery: any;
 declare var $: any;

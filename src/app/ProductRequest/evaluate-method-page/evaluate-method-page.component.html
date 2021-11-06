@@ -1,15 +1,8 @@
 <div class="main-form-body" style="margin-top: 5px; height: 85%;">
   <div id="container" style="clear: both;padding-bottom: 5px;height:100%;">
     <div class="box-dev" style=" width: 100%;" [style.height.%]="100">
-      <app-grid
-      [columns]="columnDef"
-      [rowsData]="RowData"
-      [gridHeight]="92"
-      (GridReady)="onGridReady($event)"
-      [IsEditable]="true"
-      [AutoNumberField] = "'EvaluateMethodCode'"
-      (RowClick)="RowClick($event)"
-      ></app-grid>
+      <app-grid [columns]="columnDef" [rowsData]="RowData" [gridHeight]="92" (GridReady)="onGridReady($event)"
+        [IsEditable]="true" [AutoNumberField]="'EvaluateMethodCode'" (RowClick)="RowClick($event)"></app-grid>
     </div>
   </div>
 </div>
@@ -22,11 +15,6 @@
     <img width="15px" height="15px" src="assets/Icons/exit.png" />
     خروج</button>
 </div>
-<app-over-popup
-  *ngIf="btnclicked"
-  [PopupType]="type"
-  [startLeftPosition]="449"
-  [startTopPosition]="247"
-  (popupclosed)="popupclosed($event)"
-  [PopupParam]="alertMessageParams">
+<app-over-popup *ngIf="btnclicked" [PopupType]="type" [startLeftPosition]="449" [startTopPosition]="247"
+  (popupclosed)="popupclosed($event)" [PopupParam]="alertMessageParams">
 </app-over-popup>

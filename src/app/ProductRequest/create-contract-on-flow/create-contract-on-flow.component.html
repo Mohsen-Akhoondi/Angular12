@@ -7,7 +7,7 @@
           style="height: 100%; margin-bottom: 5px;">
           <div class="main-form-body" style="display: inherit">
             <table style="width: 100%;margin-bottom: 3px;">
-              <tr *ngIf="!DisableDate">
+              <tr >
                 <td style="width: 50%">
                   <span class="table-cell-Lable">تاريخ شروع قرارداد</span>
                   <app-jalali-datepicker [WidthPC]="60" [CurrMiladiDateValue]="StartDate"
@@ -35,12 +35,18 @@
                 </td>
               </tr>
               <tr>
-                <td colspan="2" style="width: 100%">
+                <td style="width: 50%">
                   <span class="table-cell-Lable">{{SignerStr}}</span>
-                  <app-ng-select-virtual-scroll (Open)="onSignersOpen()" style="display: inline-block;width: 80%;"
+                  <app-ng-select-virtual-scroll (Open)="onSignersOpen()" style="display: inline-block;width: 60%;"
                     [NgSelectParams]="ContractSignParams" (FetchMore)="FetchMoreSigners($event)"  [Disabled]="Disabled"
                     (doSearch)="doSignersSearch($event)" [Items]="ContractSignItems" [multiple]="true">
                   </app-ng-select-virtual-scroll>
+                </td>
+                <td style="width: 50%">
+                  <span class="table-cell-Lable">{{SumProposalName}}</span>
+                  <input style="width: 60%; " class="form-control input-style" type="text" name="SumFinalAmountStr"
+                  [disabled]="true" [(ngModel)]="SumFinalAmountStr" />
+                 
                 </td>
               </tr>
               <tr *ngIf="HasContractor">
@@ -142,7 +148,7 @@
     <div style="margin: 5px;">
       <div class="buttons-place" style="float: right;margin: auto;margin-bottom: 5px;width: 100%;">
 
-        <button [disabled]="Disabled" (click)="onSave()" id="btn2" class="btn btn-primary btnGreen">
+        <button *ngIf="!Disabled"  [disabled]="Disabled" (click)="onSave()" id="btn2" class="btn btn-primary btnGreen">
           <img width="15px" height="15px" src="assets/Icons/save.png" />
           ثبت
         </button>

@@ -25,15 +25,11 @@
   <button *ngIf="NoIsIncomplete" (click)="Btnclick('insert')" id="btn2" class="btn btn-primary btnGreen">
     <img width="15px" height="15px" src="assets/Icons/add.png" />
     ایجاد</button>
-  <button *ngIf="ModuleCode !== 2944 && ModuleCode !== 2952" (click)="Btnclick('update')" id="btn2" class="btn btn-primary btnGreen">
+  <button (click)="Btnclick('update')" id="btn2" class="btn btn-primary btnGreen">
     <img width="15px" height="15px" src="assets/Icons/show.png" />
     اصلاح
   </button>
-  <button *ngIf="ModuleCode === 2944 || ModuleCode === 2952" (click)="OnShowIncomplete()"  id="btn2" class="btn btn-primary btnGreen">
-    <img width="15px" height="15px" src="assets/Icons/show.png" />
-     مشاهده
-  </button>
-  <button *ngIf="ModuleCode === 2944 || ModuleCode === 2952" (click)="OnCallExternalServiceClick()" id="btn2" class="btn btn-primary btnGreen">
+  <button *ngIf="ModuleCode === 2939 || ModuleCode === 2951" (click)="OnCallExternalServiceClick()" id="btn2" class="btn btn-primary btnGreen">
     <img width="15px" height="15px" src="assets/Icons/Upload.png" />
     تایید و ارسال به سامانه شفاف
   </button>

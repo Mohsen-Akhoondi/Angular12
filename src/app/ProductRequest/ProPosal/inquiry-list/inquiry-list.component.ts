@@ -159,7 +159,7 @@ export class InquiryListComponent implements OnInit {
 
   onShowClick() {
     if (!this.SelectedInquiry) { // RFC 53805
-      this.ShowMessageBoxWithOkBtn('ردیفی جهت اصلاح انتخاب نشده.');
+      this.ShowMessageBoxWithOkBtn('ردیفی جهت مشاهده انتخاب نشده.');
       return;
     }
     const TopPos = this.PopupParam.ModuleViewTypeCode && this.PopupParam.ModuleViewTypeCode === 23 ? 160 : 4;
@@ -268,7 +268,8 @@ export class InquiryListComponent implements OnInit {
       OrginalModuleCode: this.PopupParam.OrginalModuleCode,
       ModuleCode: this.PopupParam.ModuleCode,
       UserRegionCode: this.PopupParam.UserRegionCode,
-      IsAdmin: this.PopupParam.IsAdmin
+      IsAdmin: this.PopupParam.IsAdmin,
+      OriginModuleViewTypeCode: this.PopupParam.OriginModuleViewTypeCode
     };
   }
 

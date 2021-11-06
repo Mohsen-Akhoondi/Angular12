@@ -90,6 +90,7 @@ export class CreateContractOnFlowComponent implements OnInit {
   LetterDateStr = 'تاريخ';
   LetterNoStr = 'شماره';
   SignerStr = 'امضا کنندگان';
+  SumProposalName = 'مبلغ پیشنهادی برنده';
   Disabled = false;
   StartDate;
   EndDate;
@@ -97,6 +98,9 @@ export class CreateContractOnFlowComponent implements OnInit {
   disabledLetterDate = false;
   IsException = false;
   DisableDate = false;
+  SumProposalItemPrice: any;
+  IsNew: any;
+  SumFinalAmountStr: any;
   constructor(private ProductRequest: ProductRequestService,
     private ContractList: ContractListService,
     private Actor: ActorService,
@@ -115,6 +119,17 @@ export class CreateContractOnFlowComponent implements OnInit {
     this.PRContractObject = this.PopupParam.ProductRequestObject.ContractObject;
     this.ModuleViewTypeCode = this.PopupParam.ModuleViewTypeCode;
     this.SumFinalAmount = this.PopupParam.SumFinalAmount;
+    this.IsNew = this.PopupParam.IsNew;
+
+    if (this.IsNew) {
+      this.SumProposalName = 'مبلغ پیشنهادی برنده';
+      this.SumFinalAmountStr = this.ProductRequestObject.WinnerProposalObject ?
+        this.ProductRequestObject.WinnerProposalObject.SumProposalItemPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : null;
+    } else {
+      this.SumProposalName = 'مبلغ کل قرارداد';
+      this.SumFinalAmountStr = this.PopupParam.SumFinalAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
     this.AmountType = this.ProductRequestObject.IsFindCost;
     this.StartType = this.ProductRequestObject.StartTypeCode;
     this.WorkStartDate = this.ProductRequestObject.ActualStartDateString;
@@ -130,24 +145,19 @@ export class CreateContractOnFlowComponent implements OnInit {
           this.Disabled = true;
         }
       } else {
-        // this.ContractLetterDate = this.PRContractObject.LastContractOrderObject.ShortOrderDate;
-        // this.ContractLetterNo = this.PRContractObject.LastContractOrderObject.LetterCode;
-        this.StartDate = this.PRContractObject.FromContractDateString;
-        this.EndDate = this.PRContractObject.ToContractDateString;
+
         this.DisableDate = true;
         this.ContractList.GetOrderDate(this.ProductRequestObject.CostFactorID).subscribe(res => {
 
           if (res) {
             this.ContractLetterDate = res.ShortOrderDate;
             this.ContractLetterNo = res.LetterCode;
+            this.StartDate = res.ShortMinStartDate;
+            this.EndDate = res.ShortMaxEndDate;
           }
         });
       }
     }
-    // if (this.WorkStartDate && this.ProductRequestTypeCode === 3) {
-    //   this.ContractLetterDate = this.WorkStartDate;
-    //   this.disabledLetterDate = true;
-    // } // RFC 53522
     this.onSignersOpen(1);
     if (this.ModuleViewTypeCode === 21) {
       this.HasContractor = false;
@@ -160,7 +170,8 @@ export class CreateContractOnFlowComponent implements OnInit {
       this.LetterDateStr = 'تاريخ انعقاد قرارداد';
       this.LetterNoStr = 'شماره قرارداد';
     }
-    if (this.ModuleViewTypeCode === 52) {
+    if (this.ModuleViewTypeCode === 52
+      || this.ModuleViewTypeCode === 174) {
       this.HasContractor = false;
       this.HasContractStyle = false;
       this.LetterDateStr = 'تاريخ انعقاد قرارداد';
@@ -174,7 +185,9 @@ export class CreateContractOnFlowComponent implements OnInit {
       this.LetterNoStr = 'شماره الحاقيه';
       this.SignerStr = 'امضا کنندگان الحاقيه';
     }
-    if ((this.ModuleViewTypeCode === 21 || this.ModuleViewTypeCode === 52) // RFC 52153
+    if ((this.ModuleViewTypeCode === 21
+      || this.ModuleViewTypeCode === 52
+      || this.ModuleViewTypeCode === 174) // RFC 52153
       && this.ProductRequestObject.RegionCode === 200 && this.PopupParam.IsCost
       && this.PopupParam.OrginalModuleCode === 2730) {
       this.ShowMessageBoxWithOkBtn('لطفا اطلاعات قرارداد متقابل، در تب قراردادهاي مرتبط در فرم تکميل اطلاعات بررسي شود.');
@@ -187,6 +200,9 @@ export class CreateContractOnFlowComponent implements OnInit {
     if (this.ModuleViewTypeCode === 222) {
       this.Disabled = true;
       this.disabledLetterDate = true;
+    }
+    if (this.ProductRequestObject.WinnerProposalObject) { // RFC 61950
+      this.SumProposalItemPrice = this.ProductRequestObject.WinnerProposalObject.SumProposalItemPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     }
   }
 
@@ -528,7 +544,10 @@ export class CreateContractOnFlowComponent implements OnInit {
               this.ModuleViewTypeCode).subscribe(res => {
                 this.ProductRequestObject = res;
                 this.PopupOutPut.emit(this.ProductRequestObject);
-                if ((this.ModuleViewTypeCode !== 66 && this.ModuleViewTypeCode !== 21 && this.ModuleViewTypeCode !== 52)
+                if ((this.ModuleViewTypeCode !== 66
+                  && this.ModuleViewTypeCode !== 21
+                  && this.ModuleViewTypeCode !== 52
+                  && this.ModuleViewTypeCode !== 174)
                   && this.ModuleCode !== 2793) { // RFC 52153
                   this.Disabled = true;
                 }
@@ -548,7 +567,10 @@ export class CreateContractOnFlowComponent implements OnInit {
         this.ModuleViewTypeCode).subscribe(res => {
           this.ProductRequestObject = res;
           this.PopupOutPut.emit(this.ProductRequestObject);
-          if ((this.ModuleViewTypeCode !== 66 && this.ModuleViewTypeCode !== 21 && this.ModuleViewTypeCode !== 52)
+          if ((this.ModuleViewTypeCode !== 66
+            && this.ModuleViewTypeCode !== 21
+            && this.ModuleViewTypeCode !== 52
+            && this.ModuleViewTypeCode !== 174)
             && this.ModuleCode !== 2793) { // RFC 52153
             this.Disabled = true;
           }

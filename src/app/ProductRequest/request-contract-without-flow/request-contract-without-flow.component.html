@@ -51,11 +51,22 @@
                 <td style="width: 40%">
                   <span style="color: red;">*</span>
                   <span class="table-cell-Lable">روش انجام معامله</span>
-                  <app-ng-select-virtual-scroll style="display: inline-block;width: 79%;"
-                    (selectedChange)="onChangeDealMethod($event)" class="select-general-for-lable"
-                    [Disabled]="IsNotNew || HasRelContract || RahbariShow" [CheckValidate]="CheckValidate"
-                    [NgSelectParams]="DealMethodParams" [Items]="DealMethodItems">
-                  </app-ng-select-virtual-scroll>
+                  <div style="display: inline-block; width: 79%;">
+                    <div style="display: inline-block; width: 40%;">
+                      <app-ng-select-virtual-scroll style="display: inline-block;width: 100%;"
+                        (selectedChange)="onChangeDealMethod($event)" class="select-general-for-lable"
+                        [Disabled]="IsNotNew || HasRelContract || RahbariShow" [CheckValidate]="CheckValidate"
+                        [NgSelectParams]="DealMethodParams" [Items]="DealMethodItems">
+                      </app-ng-select-virtual-scroll>
+                    </div>
+                    <div style="display: inline-block; width: 60%;">
+                      <span class="table-cell-Lable">روش انتخاب مشاور</span>
+                      <app-ng-select-virtual-scroll style="display: inline-block;width: 50%;"
+                        class="select-general-for-lable" [Disabled]=" (!IsEditable || HasRelContract) || !IsConsultant"
+                        [NgSelectParams]="ConsultantSelectedWayParams" [Items]="ConsultantSelectWayItems">
+                      </app-ng-select-virtual-scroll>
+                    </div>
+                  </div>
                 </td>
                 <td style="width: 26%">
                   <span class="table-cell-Lable">علت ترک تشريفات</span>
@@ -106,11 +117,11 @@
                     readonly />
                 </td>
                 <td width="25%">
-                  <span style="color: red;">*</span>
+                  <!-- <span style="color: red;">*</span> -->
                   <span class="table-cell-Lable">سال مالي</span>
                   <app-ng-select-virtual-scroll style="display: inline-block;width: 60%;"
                     [Disabled]="!IsEditable || HasRelContract" class="select-general-for-lable"
-                    [CheckValidate]="CheckValidate" [NgSelectParams]="FinYearParams" [Items]="FinYearItems">
+                    [NgSelectParams]="FinYearParams" [Items]="FinYearItems">
                   </app-ng-select-virtual-scroll>
                 </td>
                 <td width="25%">
@@ -249,13 +260,13 @@
                 </td>
 
                 <td colspan="2" style="width: 50%">
-                  <span style="color: red;">*</span>
+                  <!-- <span style="color: red;">*</span> -->
                   <span class="table-cell-Lable">طرف قرارداد </span>
                   <app-ng-select-virtual-scroll [PageCount]="ContractorPageCount" [style.width.%]="ContractorWidth"
                     [TotalItemCount]="ContractorTotalItemCount" style="display: inline-block;"
-                    class="select-general-for-lable" [CheckValidate]="CheckValidate"
-                    [Disabled]="!IsEditable || HasRelContract" [NgSelectParams]="NgSelectContractorParams"
-                    [Items]="ContractorItems" (FetchMore)="FetchMoreContractor($event)" (Open)="OpenContractor($event)"
+                    class="select-general-for-lable" [Disabled]="!IsEditable || HasRelContract"
+                    [NgSelectParams]="NgSelectContractorParams" [Items]="ContractorItems"
+                    (FetchMore)="FetchMoreContractor($event)" (Open)="OpenContractor($event)"
                     (doSearch)="doContractorSearch($event)">
                   </app-ng-select-virtual-scroll>
                   <img *ngIf="!IsUseProviders" width="15px" height="15px" src="assets/Icons/add.png"
@@ -297,14 +308,15 @@
             </table>
           </div>
 
-          <ul style="margin-top: 5px" class="nav nav-tabs" role="tablist">         
+          <ul style="margin-top: 5px" class="nav nav-tabs" role="tablist">
             <li class="nav-item">
               <a class="nav-link" [ngClass]="{'active': IsEditable}" href="#relation" role="tab"
                 data-toggle="tab">قراردادهاي مرتبط</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#supplier" role="tab" data-toggle="tab">طرف قرارداد</a> </li>
-              <li class="nav-item">
+              <a class="nav-link" href="#supplier" role="tab" data-toggle="tab">طرف قرارداد</a>
+            </li>
+            <li class="nav-item">
               <a class="nav-link" href="#ContractSign" role="tab" data-toggle="tab">امضاکنندگان</a>
             </li>
             <li class="nav-item">
@@ -321,7 +333,7 @@
             </li>
             <li class="nav-item" *ngIf="TabRahbari">
               <a class="nav-link" href="#questions" role="tab" data-toggle="tab">راهبری</a>
-            </li>        
+            </li>
           </ul>
           <div class="tab-content" style="margin-top: 5px;" [style.height.%]="50">
 
@@ -529,7 +541,8 @@
                     </td>
                     <td width="35%">
                       <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 7px;">
-                        <span id="sum-final-estimate-amount" class="table-cell-Lable">جمع کل با ضرایب ردیف(بدون تجهیز کارگاه):</span>
+                        <span id="sum-final-estimate-amount" class="table-cell-Lable">جمع کل با ضرایب ردیف(بدون تجهیز
+                          کارگاه):</span>
                         <label for="sum-final-estimate-amount" style="margin:2px"> {{ SumFinalItemAmountCOEF}} </label>
                       </div>
                     </td>
@@ -722,11 +735,11 @@
           <img width="15px" height="15px" src="assets/Icons/coef1.png" />
           ضرايب درخواست
         </button>
-        <button [disabled]="!IsValidContract" (click)="BtnArchiveClick()" id="btn1" class="btn btn-primary btnGreen">
+        <!-- <button [disabled]="!IsValidContract" (click)="BtnArchiveClick()" id="btn1" class="btn btn-primary btnGreen">
           <img width="15px" height="15px" src="assets/Icons/TechnicalArchive.png" />
           مستندات
-        </button>
-        <button *ngIf="IsDisplay && ProposalShow" id="btnRequestSuggestion" class="btn btn-primary btnGreen"
+        </button> -->
+        <!-- <button *ngIf="IsDisplay && ProposalShow" id="btnRequestSuggestion" class="btn btn-primary btnGreen"
           (click)="onProposalClick()">
           <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
           {{btnRequestSuggestionName}}
@@ -735,7 +748,7 @@
           (click)="onCommitionClick()">
           <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
           کمیسیون
-        </button>
+         </button>  62010 -  و طبق صحبت با خانم احمدی -->
         <button id="btnPrint" class="btn btn-primary btnGreen" (click)="PRProvisionRepShow()">
           <img width="15px" height="15px" src="assets/Icons/print.png" />
           چاپ
@@ -767,6 +780,7 @@
 <app-over-popup *ngIf="isClicked" [PopupType]="PopUpType" [HaveMaxBtn]="HaveMaxBtn" [HeightPercentWithMaxBtn]="95"
   [startLeftPosition]="startLeftPosition" [startTopPosition]="startTopPosition" [PercentWidth]="PercentWidth"
   [MainMaxwidthPixel]="MainMaxwidthPixel" [minHeightPixel]="MinHeightPixel" [MainMinwidthPixel]="MainMinwidthPixel"
-  [PopupParam]="PopUpType === 'message-box' ? alertMessageParams : PopUpType ==='archive-details' ? ArchiveParam :PopupParam" (popupclosed)="popupclosed($event)"
+  [PopupParam]="PopUpType === 'message-box' ? alertMessageParams : PopUpType ==='archive-details' ? ArchiveParam :PopupParam"
+  (popupclosed)="popupclosed($event)"
   (PopupOutPutParam)="PopUpType ==='message-box' ? MessageBoxAction($event) : getOutPutParam($event)">
 </app-over-popup>

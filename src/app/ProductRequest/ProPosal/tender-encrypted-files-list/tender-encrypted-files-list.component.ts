@@ -214,7 +214,9 @@ export class TenderEncryptedFilesListComponent implements OnInit {
           HaveSign: false,
           CostFactorID: null,
           RegionCode: null,
-          PDFSignersInfo: res.PDFSignersInfo
+          PDFSignersInfo: res.PDFSignersInfo,
+          HasDelBtn: false,
+          IsArticle18: false,
         };
       });
     }

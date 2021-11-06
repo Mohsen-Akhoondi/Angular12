@@ -46,7 +46,8 @@ export class CommitionPrintComponent implements OnInit {
           this.PopupParam.ModuleCode,
           this.PopupParam.RegionCode,
           'صورتجلسه مناقصه',
-          false,1);
+          false, 1,
+          this.PopupParam.ModuleViewTypeCode ? this.PopupParam.ModuleViewTypeCode : 0);
       }
       if (this.SelectFirstAttach) {
         this.report.TenderProceedingsReport(
@@ -55,7 +56,8 @@ export class CommitionPrintComponent implements OnInit {
           this.PopupParam.ModuleCode,
           this.PopupParam.RegionCode,
           'ضمیمه شماره یک',
-          false,1);
+          false, 1,
+          this.PopupParam.ModuleViewTypeCode ? this.PopupParam.ModuleViewTypeCode : 0);
       }
       if (this.SelectSecondAttach) {
         this.report.TenderProceedingsReport(
@@ -64,7 +66,8 @@ export class CommitionPrintComponent implements OnInit {
           this.PopupParam.ModuleCode,
           this.PopupParam.RegionCode,
           'ضمیمه شماره دو',
-          false,1);
+          false, 1,
+          this.PopupParam.ModuleViewTypeCode ? this.PopupParam.ModuleViewTypeCode : 0);
       }
     } else {
       this.Select = true;
