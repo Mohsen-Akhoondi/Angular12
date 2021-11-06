@@ -1,6 +1,5 @@
-import { Injectable, Output, EventEmitter, Directive } from '@angular/core';
+import { Injectable, Output, EventEmitter } from '@angular/core';
 
-@Directive()
 @Injectable()
 export class RefreshServices {
   @Output() WorkListChange: EventEmitter<any> = new EventEmitter<any>();

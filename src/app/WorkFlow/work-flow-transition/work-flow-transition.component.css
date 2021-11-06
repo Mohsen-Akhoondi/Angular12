@@ -1,0 +1,9 @@
+.NodeTop{
+ margin-top: 5px;
+}
+
+  g.node rect {
+    height: 50px;
+    max-width: 50px;
+  }
+

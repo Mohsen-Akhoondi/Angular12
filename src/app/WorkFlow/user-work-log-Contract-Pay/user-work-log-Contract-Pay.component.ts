@@ -1089,9 +1089,9 @@ export class UserWorkLogContractPayComponent implements OnInit {
         ByDetail,                                     //  دکمه به ریز یا به سرجمع
         this.NgSelectContractorParams.selectedObject,  //  پیمانکار
         this.ContractOperation                        // نوع صورت وضعیت  60460
-        ).subscribe(res => {
-        this.rowData = res; 
-      });  
+      ).subscribe(res => {
+        this.rowData = res;
+      });
     }
   }
 
@@ -1154,7 +1154,7 @@ export class UserWorkLogContractPayComponent implements OnInit {
       this.paramObj = this.ContractPayPopupParam;
       if (this.selectedRow.data.ContractOperationID === 3) {
         if (this.ContractTypeCode === 26 || this.ContractTypeCode === 29) {
-          this.type = 'contract-pay-item-hour';
+          this.type = 'contract-pay-details'; // 'contract-pay-item-hour';
           return;
         }
         if (this.ContractTypeCode === 27 || this.ContractTypeCode === 28) {
@@ -1168,7 +1168,8 @@ export class UserWorkLogContractPayComponent implements OnInit {
         if (this.PriceListPatternID &&
           this.ContractTypeCode !== 26 &&
           this.ContractTypeCode !== 29) {
-          this.type = 'contract-pay-item-estimate-page';
+          // this.type = 'contract-pay-item-estimate-page';
+          this.type = 'contract-pay-details';
           return;
         }
       } else {
@@ -1259,7 +1260,7 @@ export class UserWorkLogContractPayComponent implements OnInit {
       this.ContractPayPopupParam.SelectedCPCostFactorID = -1;
       this.ContractPayPopupParam.selectedRow = this.PopupParam.selectedRow.data;
       this.ContractPayPopupParam.RegionCode = this.NgSelectRegionParams.selectedObject
-      this.type = 'contract-pay-item-hour';
+      this.type = 'contract-pay-details'; // 'contract-pay-item-hour';
       this.HaveMaxBtn = true;
       this.ContractPayPopupParam.Mode = 'InsertMode';
       return;
@@ -1286,15 +1287,20 @@ export class UserWorkLogContractPayComponent implements OnInit {
       this.type === 'contract-pay-types' &&
       this.ContractTypeCode !== 26 &&
       this.ContractTypeCode !== 29) {
+      // this.ContractPayPopupParam.ContractOperationID = ContractOperationID;
+      // this.ContractPayPopupParam.PriceListPatternID = this.PriceListPatternID;
+      // this.ContractPayPopupParam.CostListFinYearCode = this.CostListFinYearCode;
+      // this.ContractPayPopupParam.PriceListTypeCode = this.PriceListTypeCode;
+      // this.ContractPayPopupParam.PriceListFineYearName = this.PriceListFineYearName;
+      // this.ContractPayPopupParam.PriceListTypeName = this.PriceListTypeName;
+      // this.ContractPayPopupParam.SelectedCPCostFactorID = -1;
+      // this.ContractPayPopupParam.selectedRow = this.PopupParam.selectedRow.data;
+      // this.type = 'contract-pay-item-estimate-page';
+      // this.HaveMaxBtn = true;
+      // this.ContractPayPopupParam.Mode = 'InsertMode';
       this.ContractPayPopupParam.ContractOperationID = ContractOperationID;
-      this.ContractPayPopupParam.PriceListPatternID = this.PriceListPatternID;
-      this.ContractPayPopupParam.CostListFinYearCode = this.CostListFinYearCode;
-      this.ContractPayPopupParam.PriceListTypeCode = this.PriceListTypeCode;
-      this.ContractPayPopupParam.PriceListFineYearName = this.PriceListFineYearName;
-      this.ContractPayPopupParam.PriceListTypeName = this.PriceListTypeName;
-      this.ContractPayPopupParam.SelectedCPCostFactorID = -1;
       this.ContractPayPopupParam.selectedRow = this.PopupParam.selectedRow.data;
-      this.type = 'contract-pay-item-estimate-page';
+      this.type = 'contract-pay-details';
       this.HaveMaxBtn = true;
       this.ContractPayPopupParam.Mode = 'InsertMode';
       return;

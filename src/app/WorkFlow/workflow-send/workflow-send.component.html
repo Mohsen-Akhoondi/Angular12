@@ -5,7 +5,7 @@
       <div id="div1" class="box-dev left-dev" [style.height.px]="gridHeightPxel ? gridHeightPxel : ''">
         <app-grid [defaultSelectedRowIndex]="0" [columns]="columnDef" [rowsData]="rowData" (RowClick)="RowClick($event)"
           (GridReady)="onWFSendGridReady($event)" [gridHeight]=82 [RowHeightFunc]="getRowHeight"
-          [GridMaxHeight]="'152px'" [defaultSelectedRowIndex]="0"></app-grid>
+          [GridMaxHeight]="'152px'" [defaultSelectedRowIndex]="0" (cellEditingStarted)="onCellEditingStarted($event)" ></app-grid>
       </div>
       <div class="input-with-lable" style="display: flex;margin-top: 5px;">
         <label for="indicator-text_note" class="">توضیحات</label>
@@ -36,6 +36,6 @@
 <app-over-popup *ngIf="isClicked" [PopupType]="PopUptype"
   [PopupParam]="PopUptype === 'message-box' ? alertMessageParams : PopUpParams" (popupclosed)="popupclosed($event)"
   [startLeftPosition]="startLeftPosition" [startTopPosition]="startTopPosition" [HaveHeader]="true"
-  [HaveMaxBtn]="PopUptype !== 'message-box'" [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn" [minHeightPixel]="MinHeightPixel"
+  [HaveMaxBtn]="PopUptype !== 'message-box'" [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn" [minHeightPixel]="MinHeightPixel" 
   [MainMinwidthPixel]="type === 'message-box' ? '' : MainMinwidthPixel">
 </app-over-popup>

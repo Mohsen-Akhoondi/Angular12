@@ -26,7 +26,6 @@ export class UserDetailComponent implements OnInit {
   OverPixelHeight;
   IsAdvertising;
   PopupType;
-  IsLogOut = false;
   constructor(private UserDetail: UserSettingsService, private router: Router,
     private CommonService: CommonServices,
     private AuthServices: AuthService,
@@ -34,32 +33,24 @@ export class UserDetailComponent implements OnInit {
 
   ngOnInit() {
     this.IsAdvertising = environment.IsAdvertising;
-    this.IsLogin = this.AuthServices.CheckAuth();
-    if (this.IsLogin) {
-      this.GetUserInfo();
-    } else {
-      this.UserDetail.GetDateDetail()
-        .subscribe(ures => {
-          this.FullCurrentDate = ures.FullCurrentDate;
-          this.FullPersianUserName = '';
-          this.UserImage = null;
-          this.MCurrentDate = ures.MCurrentDate;
-          this.SCurrentDate = ures.SCurrentDate;
-        });
-    }
+    this.AuthServices.CheckAuth().subscribe(res => {
+      this.IsLogin = res;
+      if (res) {
+        this.GetUserInfo();
+      } else {
+        this.UserDetail.GetDateDetail()
+          .subscribe(ures => {
+            this.FullCurrentDate = ures.FullCurrentDate;
+            this.FullPersianUserName = '';
+            this.UserImage = null;
+            this.MCurrentDate = ures.MCurrentDate;
+            this.SCurrentDate = ures.SCurrentDate;
+          });
+      }
+    });
     this.RefreshService.LoginDetailsChange.subscribe(IsLogin => {
       if (IsLogin) {
         this.GetUserInfo();
-      } else {
-        this.FullPersianUserName = '';
-        this.UserImage = null;
-        localStorage.removeItem('UserJWTInfo');
-        if (this.IsLogOut) {
-          this.IsLogOut = false;
-          this.router.navigate([{ outlets: { primary: 'Login', PopUp: null } }]);
-        } else {
-          this.ShowLoginPage();
-        }
       }
       this.IsLogin = IsLogin;
     }
@@ -78,22 +69,18 @@ export class UserDetailComponent implements OnInit {
   LogOut() {
     if (this.IsLogin) {
       this.UserDetail.LogOutUser().subscribe(res => {
-        this.IsLogOut = true;
-        this.RefreshService.RefreshLoginDetails(false);
+        window.location.href = window.location.origin + '/Account/login';
       });
     } else {
-      this.ShowLoginPage();
+      this.LoginParam = {};
+      this.LoginParam.HeaderName = 'فرم ورود به سامانه';
+      this.overStartLeftPosition = 420;
+      this.OverStartTopPosition = 130;
+      this.OverPixelWidth = 500;
+      this.OverPixelHeight = null;
+      this.PopupType = 'advertising-login';
+      this.btnclicked = true;
     }
-  }
-  ShowLoginPage() {
-    this.LoginParam = {};
-    this.LoginParam.HeaderName = 'فرم ورود به سامانه';
-    this.overStartLeftPosition = 420;
-    this.OverStartTopPosition = 130;
-    this.OverPixelWidth = 500;
-    this.OverPixelHeight = null;
-    this.PopupType = 'login-page';
-    this.btnclicked = true;
   }
   popupclosed() {
     this.PopupType = null;

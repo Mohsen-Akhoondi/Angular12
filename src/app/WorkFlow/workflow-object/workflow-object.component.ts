@@ -1,36 +1,30 @@
-import { Component, OnInit, Input, Output } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { GridOptions } from 'ag-grid-community';
+import { Component, Input, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
+
 declare var jquery: any;
 declare var $: any;
 
 @Component({
-  selector: 'app-workflow-status-page',
-  templateUrl: './workflow-status-page.component.html',
-  styleUrls: ['./workflow-status-page.component.css']
+  selector: 'app-workflow-object',
+  templateUrl: './workflow-object.component.html',
+  styleUrls: ['./workflow-object.component.css']
 })
-export class WorkflowStatusPageComponent implements OnInit {
+export class WorkflowObjectComponent implements OnInit {
+
   @Input() PopupParam;
   private gridColumnApi;
   columnDef;
-  private defaultColDef;
-  private rowSelection;
   btnclicked = false;
   selectedRow: any;
-  type: string;
-  paramObj;
-  HaveHeader: boolean;
-  alertMessageParams = { HaveOkBtn: true, message: '' };
-  OverstartLeftPosition: number;
-  OverstartTopPosition: number;
-  WorkflowStatusRow: any;
-  HaveSave = false;
-  HaveDelete = false;
   private gridApi;
   ModuleCode;
+  WorkflowObjectRow: any;
+  type: string;
+  HaveHeader: boolean;
+  alertMessageParams = { HaveOkBtn: true, message: '' };
 
   constructor(
     private Workflow: WorkflowService,
@@ -39,34 +33,23 @@ export class WorkflowStatusPageComponent implements OnInit {
     private User: UserSettingsService
   ) {
     this.columnDef = [
+
       {
-        headerName: 'ردیف',
-        field: 'ItemNo',
-        width: 90,
-        resizable: true,
-      },
-      {
-        headerName: 'کد وضعیت گردش کار ',
-        field: 'WorkflowStatusCode',
-        width: 125,
+        headerName: 'کد شي  ',
+        field: 'WorkflowObjectCode',
+        width:100,
         resizable: true,
         maxlength: 3,
         editable: true,
       },
       {
-        headerName: 'نام وضعیت گردش کار ',
-        field: 'WorkflowStatusName',
-        width: 130,
+        headerName: 'نام شي  ',
+        field: 'WorkflowObjectName',
+        width: 250,
         resizable: true,
         editable: true
       },
-      {
-        headerName: 'توضیحات ',
-        field: 'Note',
-        width: 350,
-        resizable: true,
-        editable: true
-      }
+
     ];
     this.route.params.subscribe(params => {
       this.ModuleCode = +params['ModuleCode'];
@@ -78,27 +61,22 @@ export class WorkflowStatusPageComponent implements OnInit {
   }
   ngOnInit() {
     this.getRowData();
-    this.User.GetModulOPByUser(this.ModuleCode).subscribe(res => {
-      this.HaveSave = false;
-      this.HaveDelete = false;
-      res.forEach(node => {
-        switch (node.OperationCode) {
-          case 7:
-            this.HaveSave = true;
-            break;
-          default:
-            break;
-        }
-      });
 
-    });
   }
   getRowData() {
-    this.WorkflowStatusRow = this.Workflow.GetWorkflowStatus();
+
+    this.Workflow.GetWorkflowObject().subscribe(res => {
+      this.WorkflowObjectRow = res;
+    
+    })
   }
+
+
+
   RowClick(InputValue) {
     this.selectedRow = InputValue;
   }
+
   onSave() {
     this.gridApi.stopEditing();
 
@@ -106,10 +84,10 @@ export class WorkflowStatusPageComponent implements OnInit {
     this.gridApi.forEachNode(function (node) {
       rowData.push(node.data);
     });
-    this.Workflow.SaveWorkflowStatus(rowData).subscribe(res => {
+    this.Workflow.SaveWorkflowObject(rowData).subscribe(res => {
       this.btnclicked = true;
       this.type = 'message-box';
-     this.HaveHeader = true;
+      this.HaveHeader = true;
       this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
     },
       err => {
@@ -119,6 +97,8 @@ export class WorkflowStatusPageComponent implements OnInit {
         this.alertMessageParams.message = 'ثبت با مشکل مواجه شد';
       });
   }
+
+
   closeModal() {
     this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
   }
@@ -127,3 +107,5 @@ export class WorkflowStatusPageComponent implements OnInit {
   }
 
 }
+
+

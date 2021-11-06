@@ -9,12 +9,12 @@ import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsSe
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { isUndefined } from 'util';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { resolve } from 'q';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 declare var jquery: any;
 declare var $: any;
 
@@ -28,6 +28,9 @@ export class WorkflowTransitionPageComponent implements OnInit {
   private gridApi;
   columnDef;
   RowData: any;
+  PercentWidth;
+  MainMaxwidthPixel;
+  HeightPercentWithMaxBtn;
   WorkflowTypeListSet = [];
   NgSelectWorkflowTypeParams = {
     Items: [],
@@ -137,7 +140,7 @@ export class WorkflowTransitionPageComponent implements OnInit {
     private RefreshModuleViewTypeItems: RefreshServices,
     private RefreshToWorkflowNodeItems: RefreshServices,
     private RegionList: RegionListService,
-    private Product: ProductRequestService
+    private Product: ProductRequestService 
   ) {
     this.route.params.subscribe(params => {
       this.CModuleCode = +params['ModuleCode'];
@@ -504,7 +507,7 @@ export class WorkflowTransitionPageComponent implements OnInit {
         headerName: 'حداقل تعداد ارسال',
         field: 'MinimumPosting',
         width: 120,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 2 },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
@@ -521,7 +524,7 @@ export class WorkflowTransitionPageComponent implements OnInit {
         headerName: 'حداقل تعداد دریافت',
         field: 'MinimumReceiving',
         width: 120,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 2 },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
@@ -538,7 +541,7 @@ export class WorkflowTransitionPageComponent implements OnInit {
         headerName: 'حداقل تعداد برگشت',
         field: 'MinimumReturn',
         width: 120,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 2 },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
@@ -957,4 +960,20 @@ export class WorkflowTransitionPageComponent implements OnInit {
   closeModal() {
     this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
   }
+  Btnclick(){
+   this.gridApi.stopEditing();
+    this.type = 'work-flow-transition';
+    this.btnclicked = true;
+    this.HaveHeader = true;
+    this.HaveMaxBtn = true;
+    this.HeightPercentWithMaxBtn =91;
+    this.OverstartTopPosition =30;
+    this.OverstartLeftPosition = 116;
+    this.PercentWidth = 82;
+    this.paramObj = {
+     HeaderName: 'مشاهده مسیر گردش کار',
+    workFlowTypeCodeSelected : this.NgSelectWorkflowTypeParams.selectedObject,
+    };
+  }
+
 }

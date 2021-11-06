@@ -223,6 +223,12 @@
     <img width="16px" height="16px" src="assets/Icons/printer-icon.png" />
     چاپ گردش
   </button>
+
+  <button (click)="BtnVeiwclick()"  class="btn btn-primary btnGreen">
+    <img width="15px" height="15px" src="assets/Icons/show.png" />
+   مشاهده گراف جزئیات گردش کار
+  </button>
+
   <button (click)="closeModal()" style="float:right;" class="btn btn-primary btnGreen">
     <img width="15px" height="15px" src="assets/Icons/exit.png" />
     خروج
@@ -242,5 +248,6 @@
   [startTopPosition]="startTopPosition" [minHeightPixel]="MinHeightPixel" [PopupType]="type"
   [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn"
   [PopupParam]="type === 'message-box' ? alertMessageParams : paramObj" [HaveHeader]="HaveHeader"
-  (PopupOutPutParam)="type ==='message-box' ? MessageBoxAction($event) : ''" (popupclosed)="popupclosed($event)">
+  (PopupOutPutParam)="type ==='message-box' ? MessageBoxAction($event) : 'user-work-log-detail-graph'" (popupclosed)="popupclosed($event)"
+  [HaveMaxBtn]="HaveMaxBtn" [PercentWidth]="PercentWidth" >
 </app-over-popup>

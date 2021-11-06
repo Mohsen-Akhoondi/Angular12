@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, TemplateRef, Input } from '@angular/core';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
+import { forkJoin } from 'rxjs/internal/observable/forkJoin';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { DealsHallService } from 'src/app/Services/ContractService/DealsHall/DealsHallService';
@@ -8,7 +9,6 @@ import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRe
 import { Router, ActivatedRoute } from '@angular/router';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
-import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-urban-services-activities-log',
@@ -616,10 +616,9 @@ export class UrbanServicesActivitiesLogComponent implements OnInit {
     if (this.selectedRow == null) {
       this.ShowMessageBoxWithOkBtn('ابتدا قرارداد هاي مورد نظر را انتخاب نماييد');
     } else {
-      if (this.selectedRow.data.ModuleCode === 2730 ||
-        this.selectedRow.data.ModuleCode === 2773 ||
-        this.selectedRow.data.ModuleCode === 2787 ||
-        !this.selectedRow.data.ModuleCode) {
+      if (this.selectedRow.data.RequestObjectTypeCode === 1 ||
+        this.selectedRow.data.RequestObjectTypeCode === 3 ||
+        !this.selectedRow.data.RequestObjectTypeCode) {
         this.type = 'product-request-page';
         this.btnclicked = true;
         this.HaveHeader = true;
@@ -631,7 +630,8 @@ export class UrbanServicesActivitiesLogComponent implements OnInit {
         this.OverPixelWidth = 1280;
         this.paramObj = {
           HeaderName: this.ModuleName,
-          ModuleCode: this.selectedRow.data.ModuleCode,
+          ModuleCode: this.selectedRow.data.RequestObjectTypeCode === 1 ? 2730 :
+          this.selectedRow.data.RequestObjectTypeCode === 3 ? 2773 : 2730,
           selectedRow: this.selectedRow,
           CostFactorID: this.selectedRow.data.ProductRequestID,
           HaveSave: true,
@@ -643,7 +643,7 @@ export class UrbanServicesActivitiesLogComponent implements OnInit {
           ModuleViewTypeCode: 800000,
         };
       }
-      if (this.selectedRow.data.ModuleCode === 2776) {
+      if (this.selectedRow.data.RequestObjectTypeCode === 7) {
         this.type = 'product-request-page-without-flow';
         this.btnclicked = true;
         this.HaveHeader = true;
@@ -654,7 +654,7 @@ export class UrbanServicesActivitiesLogComponent implements OnInit {
         this.startTopPosition = 5;
         this.paramObj = {
           HeaderName: this.ModuleName,
-          ModuleCode: this.selectedRow.data.ModuleCode,
+          ModuleCode: 2776,
           selectedRow: this.selectedRow,
           CostFactorID: this.selectedRow.data.ProductRequestID,
           HaveSave: true,
@@ -666,7 +666,7 @@ export class UrbanServicesActivitiesLogComponent implements OnInit {
           ModuleViewTypeCode: 800000,
         };
       }
-      if (this.selectedRow.data.ModuleCode === 2739) {
+      if (this.selectedRow.data.RequestObjectTypeCode === 2) {
         this.type = 'product-request-page-without-flow';
         this.btnclicked = true;
         this.HaveHeader = true;
@@ -677,7 +677,7 @@ export class UrbanServicesActivitiesLogComponent implements OnInit {
         this.startTopPosition = 5;
         this.paramObj = {
           HeaderName: this.ModuleName,
-          ModuleCode: this.selectedRow.data.ModuleCode,
+          ModuleCode: 2739,
           selectedRow: this.selectedRow,
           CostFactorID: this.selectedRow.data.ProductRequestID,
           HaveSave: true,

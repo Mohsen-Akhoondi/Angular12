@@ -3,6 +3,11 @@ import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServi
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
+import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
+import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
+import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
+import { CommonService } from 'src/app/Services/CommonService/CommonService';
+import { single } from 'rxjs/operators';
 
 @Component({
   selector: 'app-workflow-send',
@@ -52,8 +57,36 @@ export class WorkflowSendComponent implements OnInit {
   CartableUserID;
   CurrWorkFlow: any;
   OverMainMinwidthPixel;
+  ActorName;
+  LogInName;
+  IsEditable;
+  WorkflowActionTypeCode;
+  UserImage: string;
+
+  NgSelectActorCSMParams = {
+    bindLabelProp: 'ActorName',
+    bindValueProp: 'ActorID',
+    placeholder: '',
+    MinWidth: '170px',
+    PageSize: 30,
+    PageCount: 0,
+    TotalItemCount: 0,
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: true,
+    IsDisabled: false,
+    DropDownMinWidth: '300px',
+    type: 'Actor-MCP',
+  }
+
+  IsEditableActorName = false;
   constructor(private Cartable: CartableServices,
-    private RefreshCartable: RefreshServices) {
+    private RefreshCartable: RefreshServices,
+    private Workflow : WorkflowService,
+    private RefreshEquipmentTypeItems: RefreshServices,
+    private CommonService: CommonServices,
+    private Common: CommonService,
+    ) {
   }
 
   ngOnInit() {
@@ -68,6 +101,12 @@ export class WorkflowSendComponent implements OnInit {
       if (this.rowData && this.rowData.length > 3) {
         this.gridHeightPxel = 250;
       }
+
+      if(this.rowData && this.rowData.length ==1 && this.rowData[0].WorkflowActionTypeCode === 2 
+        && !this.rowData[0].ActorName && !this.rowData[0].AfterFlow){
+        this.IsEditableActorName = true;
+      }
+
       this.SetDefaultRowIndex();
       this.defaultSelectedRowIndex = 0;
       this.OperationCode = this.InputParam.OperationCode;
@@ -163,8 +202,40 @@ export class WorkflowSendComponent implements OnInit {
       {
         headerName: 'نام و نام خانوادگی',
         field: 'ActorName',
-        width: 190,
-        resizable: true
+        width: 210,
+        resizable: true ,
+        cellEditorFramework : NgSelectVirtualScrollComponent,
+        cellEditorParams: {
+          Params: this.NgSelectActorCSMParams,
+          Items: [],
+          Owner: this
+
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.ActorName;
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) =>
+        {
+          if (params.newValue && params.newValue.ActorName){
+            params.data.ActorID = params.newValue.ActorID;
+            params.data.ActorName = params.newValue.ActorName;
+            params.data.DesUserID = params.newValue.UserID;
+            params.data.UserImage = params.newValue.UserImage;
+            return true;
+          }else {
+            params.data.ActorID = null;
+            params.data.ActorName = '';
+            return false;
+          }
+        },
+        editable: () => {
+          return this.IsEditableActorName ;
+        },
       },
       {
         headerName: 'عکس کاربر',
@@ -207,42 +278,42 @@ export class WorkflowSendComponent implements OnInit {
       switch (this.OperationCode) {
 
         case 1:
-          if (this.InputParam.MinimumPosting && this.InputParam.MinimumPosting !== GridrowData.length) {
-            this.PopUptype = 'message-box';
-            this.startLeftPosition = 449;
-            this.startTopPosition = 87;
-            this.isClicked = true;
-            this.IsDisable = false;
-            this.alertMessageParams.message = 'تعداد ردیف های انتخاب شده باید ' + this.InputParam.MinimumPosting + ' ردیف باشد';
-            return;
-          }
-          this.Cartable.UserConfirmBatchWorkFlow(
-            this.CurrWorkFlow,
-            this.WorkFlowID,
-            this.ObjectNo,
-            this.WorkflowTypeName,
-            this.WorkflowTypeCode,
-            this.ObjectID,
-            GridrowData,
-            this.WorkflowObjectCode,
-            this.InputParam.OrginalModuleCode,
-            this.ModuleViewTypeCode,
-            this.CartableUserID)
-            .subscribe(res => {
-              this.RefreshCartable.RefreshCartable();
-              this.ISworkFlowSend.emit(true);
-              this.close();
-            },
-              err => {
-                if (!err.error.Message.includes('|')) {
-                  this.IsDisable = false;
-                  this.PopUptype = 'message-box';
-                  this.startLeftPosition = 449;
-                  this.startTopPosition = 87;
-                  this.alertMessageParams.message = 'خطای پیش بینی نشده';
-                  this.isClicked = true;
-                }
-              });
+            if (this.InputParam.MinimumPosting && this.InputParam.MinimumPosting !== GridrowData.length) {
+              this.PopUptype = 'message-box';
+              this.startLeftPosition = 449;
+              this.startTopPosition = 87;
+              this.isClicked = true;
+              this.IsDisable = false;
+              this.alertMessageParams.message = 'تعداد ردیف های انتخاب شده باید ' + this.InputParam.MinimumPosting + ' ردیف باشد';
+              return;
+            }
+            this.Cartable.UserConfirmBatchWorkFlow(
+              this.CurrWorkFlow,
+              this.WorkFlowID,
+              this.ObjectNo,
+              this.WorkflowTypeName,
+              this.WorkflowTypeCode,
+              this.ObjectID,
+              GridrowData,
+              this.WorkflowObjectCode,
+              this.InputParam.OrginalModuleCode,
+              this.ModuleViewTypeCode,
+              this.CartableUserID)
+              .subscribe(res => {
+                this.RefreshCartable.RefreshCartable();
+                this.ISworkFlowSend.emit(true);
+                this.close();
+              },
+                err => {
+                  if (!err.error.Message.includes('|')) {
+                    this.IsDisable = false;
+                    this.PopUptype = 'message-box';
+                    this.startLeftPosition = 449;
+                    this.startTopPosition = 87;
+                    this.alertMessageParams.message = 'خطای پیش بینی نشده';
+                    this.isClicked = true;
+                  }
+                });
           break;
         case 2:
           if (this.CurrWorkFlow.MinimumReturn && this.CurrWorkFlow.MinimumReturn !== ReturnGridrowData.length) {
@@ -306,7 +377,7 @@ export class WorkflowSendComponent implements OnInit {
 
         if (this.InputParam.CurrWorkFlow.ObjectTypeCode === 2) {
           if (this.InputParam.ContractTypeCode === 26 || this.InputParam.ContractTypeCode === 29) {
-            this.PopUptype = 'contract-pay-item-hour';
+            this.PopUptype ='contract-pay-details'; // 'contract-pay-item-hour';
             this.startLeftPosition = 59;
             this.startTopPosition = 20;
           }
@@ -326,8 +397,12 @@ export class WorkflowSendComponent implements OnInit {
           if (this.InputParam.PriceListPatternID &&
             this.InputParam.ContractTypeCode !== 26 &&
             this.InputParam.ContractTypeCode !== 29) {
-            this.PopUpParams.WorkFlowID = this.SelectedRow.data.WorkFlowLogID;
-            this.PopUptype = 'contract-pay-item-estimate-page';
+            // this.PopUpParams.WorkFlowID = this.SelectedRow.data.WorkFlowLogID;
+            // this.PopUptype = 'contract-pay-item-estimate-page';
+            // this.startLeftPosition = 59;
+            // this.startTopPosition = 20;
+            this.PopUptype = 'contract-pay-details';
+            this.PopUpParams.ShowReportsSign = false;
             this.startLeftPosition = 59;
             this.startTopPosition = 20;
           }
@@ -363,8 +438,9 @@ export class WorkflowSendComponent implements OnInit {
         this.PopUptype = 'product-request-page-without-flow';
         this.HeightPercentWithMaxBtn = 97;
         this.MinHeightPixel = 645;
-        this.startLeftPosition = 59;
-        this.startTopPosition = 20;
+        this.startLeftPosition = 10;
+        this.startTopPosition = 5;
+        this.MainMinwidthPixel = 1350;
       }
       if (this.InputParam.selectedRow && this.InputParam.selectedRow.data.WorkflowObjectCode === 8) {
         this.PopUptype = 'ground-delivery-minutes';
@@ -405,6 +481,14 @@ export class WorkflowSendComponent implements OnInit {
       if (this.InputParam.CurrWorkFlow &&
         (this.InputParam.CurrWorkFlow.WorkflowObjectCode === 17)) {
         this.PopUptype = 'single-sale-invoice';
+        this.startLeftPosition = 10;
+        this.startTopPosition = 0;
+        this.HeightPercentWithMaxBtn = 97;
+        this.MinHeightPixel = 645;
+      }
+      if (this.InputParam.CurrWorkFlow &&
+        (this.InputParam.CurrWorkFlow.WorkflowObjectCode === 25)) {
+        this.PopUptype = 'customer-order';
         this.startLeftPosition = 10;
         this.startTopPosition = 0;
         this.HeightPercentWithMaxBtn = 97;
@@ -533,6 +617,21 @@ export class WorkflowSendComponent implements OnInit {
         }
       }
       this.SetDefaultRowIndex();
+    }
+  }
+  onCellEditingStarted(event) {
+    if (event.colDef && event.colDef.field === 'ActorName') {
+      this.Workflow.GetFindWorkFlowUser(event.data.WorkFlowTransitionID,this.WorkFlowID).subscribe(res => {
+        if (res != null && res.length > 0) {
+          res.forEach(element => {
+            element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
+          });
+        }
+        this.RefreshEquipmentTypeItems.RefreshItemsVirtualNgSelect({
+          List: res,
+          type: 'Actor-MCP'
+        });
+      });
     }
   }
 }

@@ -15,14 +15,14 @@
         <div class="main-form-body" style="padding-top: 3px !important; padding-bottom: 3px !important;">
           <table style="width: 100%;">
             <tr>
-              <td *ngIf="ModuleCode !== 2980" width="19%">
+              <td *ngIf="!IsShowMultipeRegion" width="19%">
                 <span class="table-cell-Lable">واحد اجرایی</span>
                 <app-ng-select-virtual-scroll [multiple]="IsCollective"
                   style="display: inline-block;width: 58%; min-height: 25;" [NgSelectParams]="NgSelectRegionParams"
                   (selectedChange)="onChangeReigonObj($event)" [Items]="ReigonListSet">
-                </app-ng-select-virtual-scroll>
+                </app-ng-select-virtual-scroll>                                         
               </td>
-              <td *ngIf="ModuleCode === 2980" width="19%">
+              <td *ngIf="IsShowMultipeRegion" width="19%">
                 <span class="table-cell-Lable">واحد اجرایی</span>
                 <app-ng-select-virtual-scroll [multiple]="true"
                   style="display: inline-block;width: 50%; margin-left: 1px;" [NgSelectParams]="NgSelectRegionParams"
@@ -32,7 +32,7 @@
                   (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'Select22َArea')" title="انتخاب مناطق 22 گانه"
                   [isSelected]="Select22Area">
                 </app-custom-check-box>
-              </td>
+              </td>             
               <td width="19%">
                 <span class="table-cell-Lable">محل هزینه</span>
                 <app-ng-select-virtual-scroll (Open)="OnOpenNgSelect('ExeUnit')"
@@ -102,7 +102,7 @@
               <td width="19%">
                 <span class="table-cell-Lable">نوع درخواست</span>
                 <app-ng-select-virtual-scroll style="display: inline-block;width: 57%;"
-                  [NgSelectParams]="RequestTypesParams" [Items]="RequestTypes" [Disabled]="IsEstateSearch">
+                  [NgSelectParams]="RequestTypesParams" [Items]="RequestTypes" [Disabled]="IsEstateSearch || IsRepSearch">
                 </app-ng-select-virtual-scroll>
               </td>
               <td width="24%">
@@ -439,11 +439,29 @@
                   [NgSelectParams]="RenewedtenderParams" [Items]="RenewedtenderItems" [Disabled]="!Renewedtender">
                 </app-ng-select-virtual-scroll>
               </td>
-              <td width="75%" colspan="3">
-                <span style="vertical-align: super" class="table-cell-Lable">امضا دیجیتال</span>
-                <app-ng-select-virtual-scroll style="display: inline-block;width: 86.8%;"
+              <td width="25%" >
+                <span  class="table-cell-Lable">امضا دیجیتال</span>
+                <app-ng-select-virtual-scroll style="display: inline-block;width:60%;"
                   (Open)="OnOpenNgSelect('CommitionMember')" [NgSelectParams]="CommitionMemberParams"
                   [Items]="CommitionMemberItems" [multiple]="true" (doSearch)="CommitionMemberSearch($event)">
+                </app-ng-select-virtual-scroll>
+              </td>
+              <td width="25%" >
+                <span class="table-cell-Lable" style="vertical-align: super" >حد معامله </span>
+                <app-ng-select-virtual-scroll style="display: inline-block;width: 56%;"
+                (Open)="OnOpenNgSelect('DealType')"   [NgSelectParams]="DealTypeParams" [Items]="DealTypeItems">
+                </app-ng-select-virtual-scroll>
+            </tr>
+            <tr *ngIf="ModuleCode === 2756">
+              <td width="25%">
+                <span class="table-cell-Lable">شماره تامین</span>
+                <input name="ProvisionCode" style="display: inline-block;width: 60%;" class="form-control input-style"
+                  [(ngModel)]="ProvisionCode" type="text" />
+              </td>
+              <td width="25%">
+                <span style="vertical-align: super" class="table-cell-Lable">سال مالی تامین</span>
+                <app-ng-select-virtual-scroll style="display: inline-block;width: 60%;" [NgSelectParams]="ProvisionFinYearParams"
+                  [Items]="ProvisionFinYearItems" [multiple]="true">
                 </app-ng-select-virtual-scroll>
               </td>
             </tr>
@@ -503,13 +521,13 @@
             <img width="15px" height="15px" src="assets/Icons/Search.png" />
             جستجو به خلاصه
           </button>
-          <button *ngIf="true" title="در این جستجو به ازای هر مرحله ی قرارداد یک سطر نمایش داده می شود" type="submit"
+          <button *ngIf="true" [disabled]="IsRepSearch"  title="در این جستجو به ازای هر مرحله ی قرارداد یک سطر نمایش داده می شود" type="submit"
             (click)="partialSearch()" style="width: 150px;height: 30px;"
             class="select-general-for-lable btn-gray-border btn btn-primary btnGreen">
             <img width="15px" height="15px" src="assets/Icons/Search.png" />
             جستجو به ریز
           </button>
-          <button type="submit" (click)="SearchMoreInfo()" style="width: 170px;height: 30px;"
+          <button type="submit" [disabled]="IsRepSearch" (click)="SearchMoreInfo()" style="width: 170px;height: 30px;"
             class="select-general-for-lable btn-gray-border btn btn-primary btnGreen">
             <img width="15px" height="15px" src="assets/Icons/Search.png" />
             جستجو با جزئیات بیشتر
@@ -612,5 +630,5 @@
   [PopupParam]="type === 'message-box' ? alertMessageParams : paramObj" [HaveHeader]="HaveHeader"
   [PixelWidth]="type === 'message-box'? '' : OverPixelWidth"
   [MainMaxwidthPixel]="type === 'message-box'? '' : OverPixelWidth" (popupclosed)="popupclosed($event)"
-  (PopupOutPutParam)="type ==='message-box' ? MessageBoxAction($event) : ''">
+  (PopupOutPutParam)="type ==='message-box' ? MessageBoxAction($event) : getOutPutParam($event)">
 </app-over-popup>

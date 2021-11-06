@@ -39,7 +39,7 @@ export class UpdateWorkflowStatusComponent implements OnInit {
     if (this.InputParam.WorkflowObjectCode === 2) {
 
       if (this.InputParam.ContractTypeCode === 26 || this.InputParam.ContractTypeCode === 29) {
-        this.type = 'contract-pay-item-hour';
+        this.type ='contract-pay-details'; // 'contract-pay-item-hour';
       }
       if (this.InputParam.ContractTypeCode === 27 || this.InputParam.ContractTypeCode === 28) {
         this.type = 'contract-pay-details';
@@ -51,7 +51,8 @@ export class UpdateWorkflowStatusComponent implements OnInit {
       if (this.InputParam.PriceListPatternID &&
         this.InputParam.ContractTypeCode !== 26 &&
         this.InputParam.ContractTypeCode !== 29) {
-        this.type = 'contract-pay-item-estimate-page';
+        // this.type = 'contract-pay-item-estimate-page';
+        this.type = 'contract-pay-details';
       }
       this.startLeftPosition = 59;
       this.startTopPosition = 20;

@@ -88,6 +88,7 @@ export class UserWorkLogProductRequestComponent implements OnInit {
   ContractItems;
   ContractTotalItemCount;
   ContractPageCount;
+  IsShowMultipeRegion = false;
   RequestTypes = [
     {
       RequestTypesName: 'درخواست معامله',
@@ -270,6 +271,20 @@ export class UserWorkLogProductRequestComponent implements OnInit {
     IsDisabled: false,
     Required: true
   };
+
+  DealTypeItems = [];
+  DealTypeParams = {
+    bindLabelProp: 'DealTypeName',
+    bindValueProp: 'DealTypeCode',
+    placeholder: '',
+    MinWidth: '130px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    Required: true
+  };
+
   StartDateTypeItems = [
     {
       StartDateName: 'از تاریخ شروع',
@@ -959,6 +974,20 @@ export class UserWorkLogProductRequestComponent implements OnInit {
       ItemNoWidth: 16
     }
   };
+  ProvisionCode;
+  ProvisionFinYearItems;
+  ProvisionFinYearParams = {
+    bindLabelProp: 'FinYearCode',
+    bindValueProp: 'FinYearCode',
+    placeholder: '',
+    MinWidth: '130px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    Required: true
+  };
+  IsRepSearch = false;
 
   constructor(private router: Router,
     private Workflow: WorkflowService,
@@ -982,6 +1011,7 @@ export class UserWorkLogProductRequestComponent implements OnInit {
     this.BgtTopicCode = '';
     this.sub = this.route.params.subscribe(params => {
       this.ModuleCode = +params['ModuleCode'];
+      if (this.ModuleCode === 2980 || this.ModuleCode === 2896) { this.IsShowMultipeRegion = true }
     });
 
   }
@@ -1038,8 +1068,15 @@ export class UserWorkLogProductRequestComponent implements OnInit {
     });
     if (this.ModuleCode === 2980) { // RFC 60260
       this.RequestTypesParams.selectedObject = 2776;
-      this.NgSelectRegionParams.MinWidth = '112px';
       this.IsEstateSearch = true;
+    }
+    if (this.ModuleCode === 2980 || this.ModuleCode === 2896) {
+      this.NgSelectRegionParams.MinWidth = '112px';
+    }
+
+    if (this.ModuleCode === 2996) { // RFC 62697
+      this.RequestTypesParams.selectedObject = 2730;
+      this.IsRepSearch = true;
     }
   }
   FullDeleteProdReq() {
@@ -1089,7 +1126,7 @@ export class UserWorkLogProductRequestComponent implements OnInit {
         width: 50,
         sortable: false,
         resizable: false,
-        hide: this.ModuleCode === 2793 ? false : true,
+        hide: (this.ModuleCode === 2793 || this.ModuleCode === 2824) ? false : true, // 62923
         cellStyle: function (params) {
           return { 'text-align': 'center' };
         },
@@ -1316,7 +1353,29 @@ export class UserWorkLogProductRequestComponent implements OnInit {
         field: 'StatusContractorName',
         width: 120,
         resizable: true
-      }
+      },
+      {
+        headerName: 'حد معامله',
+        field: 'DealTypeName',
+        width: 120,
+        resizable: true
+      },
+      {
+        headerName: 'شماره تامین',
+        field: 'ProvisionCode',
+        hide: this.ModuleCode === 2756 ? false : true,
+        width: 100,
+        resizable: true,
+        sortable: true,
+      },
+      {
+        headerName: 'سال مالی تامین',
+        field: 'ProvisionFinYearCode',
+        hide: this.ModuleCode === 2756 ? false : true,
+        width: 100,
+        resizable: true,
+        sortable: true,
+      },
     ];
   }
   getNewData(): void {
@@ -1326,7 +1385,7 @@ export class UserWorkLogProductRequestComponent implements OnInit {
       this.ContractService.GetContractStatusList()
       // this.Actor.GetAllActorsPaging(1, 30, '', 'IdentityNo', this.TypeContractor, false, false, this.ContractorId)
     ]).subscribe(res => {
-      this.FinYearItems = res[0];
+      this.ProvisionFinYearItems = this.FinYearItems = res[0];
       this.ReigonListSet = res[1];
       this.NgSelectRegionParams.selectedObject = res[1][0].RegionCode;
       this.ContractStatusList = res[2];
@@ -1467,6 +1526,13 @@ export class UserWorkLogProductRequestComponent implements OnInit {
           }
         });
         break;
+      case 'DealType':
+        this.ProductRequest.GetDealTypeList().subscribe(res =>
+          this.DealTypeItems = res
+
+        );
+        break;
+
       default:
         break;
     }
@@ -1496,9 +1562,9 @@ export class UserWorkLogProductRequestComponent implements OnInit {
         case 1:
           this.UploadContractInClarification();
           break;
-        case 2:
-          this.UploadInRecentAllClarification();
-          break;
+        // case 2:
+        //   this.UploadInRecentAllClarification();
+        //   break;
         case 3:
           this.UploadContractInProjectControl();
           break;
@@ -1562,7 +1628,7 @@ export class UserWorkLogProductRequestComponent implements OnInit {
         width: 50,
         sortable: false,
         resizable: false,
-        hide: this.ModuleCode === 2793 ? false : true,
+        hide: (this.ModuleCode === 2793 || this.ModuleCode === 2824) ? false : true, // 62923
         cellStyle: function (params) {
           return { 'text-align': 'center' };
         },
@@ -1803,6 +1869,35 @@ export class UserWorkLogProductRequestComponent implements OnInit {
         field: 'StatusContractorName',
         width: 120,
         resizable: true
+      },
+      {
+        headerName: 'حد معامله',
+        field: 'DealTypeName',
+        width: 120,
+        resizable: true
+      },
+      {
+        headerName: 'شماره تامین',
+        field: 'ProvisionCode',
+        hide: this.ModuleCode === 2756 ? false : true,
+        width: 100,
+        resizable: true,
+        sortable: true,
+      },
+      {
+        headerName: 'سال مالی تامین',
+        field: 'ProvisionFinYearCode',
+        hide: this.ModuleCode === 2756 ? false : true,
+        width: 100,
+        resizable: true,
+        sortable: true,
+      },
+      {
+        headerName: 'ضریب پیشنهادی',
+        field: 'ContractCoef',
+        width: 120,
+        resizable: true,
+        hide: (this.ModuleCode === 2756 || this.ModuleCode === 2896) ? false : true,
       }
     ];
 
@@ -1885,7 +1980,10 @@ export class UserWorkLogProductRequestComponent implements OnInit {
       this.ToCommitionDate,
       this.FromDocumentDeadlineDate,
       this.ToDocumentDeadlineDate,
-      this.CommitionMemberParams.selectedObject
+      this.CommitionMemberParams.selectedObject,
+      this.DealTypeParams.selectedObject,
+      this.ProvisionCode,
+      this.ProvisionFinYearParams.selectedObject,
     ).subscribe(res => {
       this.rowData = res;
     });
@@ -1919,7 +2017,7 @@ export class UserWorkLogProductRequestComponent implements OnInit {
         width: 50,
         sortable: false,
         resizable: false,
-        hide: this.ModuleCode === 2793 ? false : true,
+        hide: (this.ModuleCode === 2793 || this.ModuleCode === 2824) ? false : true, // 62923
         cellStyle: function (params) {
           return { 'text-align': 'center' };
         },
@@ -2160,7 +2258,29 @@ export class UserWorkLogProductRequestComponent implements OnInit {
         field: 'StatusContractorName',
         width: 120,
         resizable: true
-      }
+      },
+      {
+        headerName: 'حد معامله',
+        field: 'DealTypeName',
+        width: 120,
+        resizable: true
+      },
+      {
+        headerName: 'شماره تامین',
+        field: 'ProvisionCode',
+        hide: this.ModuleCode === 2756 ? false : true,
+        width: 100,
+        resizable: true,
+        sortable: true,
+      },
+      {
+        headerName: 'سال مالی تامین',
+        field: 'ProvisionFinYearCode',
+        hide: this.ModuleCode === 2756 ? false : true,
+        width: 100,
+        resizable: true,
+        sortable: true,
+      },
     ];
 
     this.selectedRow = null;
@@ -2242,7 +2362,10 @@ export class UserWorkLogProductRequestComponent implements OnInit {
       this.ToCommitionDate,
       this.FromDocumentDeadlineDate,
       this.ToDocumentDeadlineDate,
-      this.CommitionMemberParams.selectedObject
+      this.CommitionMemberParams.selectedObject,
+      this.DealTypeParams.selectedObject,
+      this.ProvisionCode,
+      this.ProvisionFinYearParams.selectedObject,
     ).subscribe(res => {
       this.rowData = res;
     });
@@ -2277,7 +2400,7 @@ export class UserWorkLogProductRequestComponent implements OnInit {
         width: 50,
         sortable: false,
         resizable: false,
-        hide: this.ModuleCode === 2793 ? false : true,
+        hide: (this.ModuleCode === 2793 || this.ModuleCode === 2824) ? false : true, // 62923
         cellStyle: function (params) {
           return { 'text-align': 'center' };
         },
@@ -2530,7 +2653,29 @@ export class UserWorkLogProductRequestComponent implements OnInit {
         field: 'StatusContractorName',
         width: 120,
         resizable: true
-      }
+      },
+      {
+        headerName: 'حد معامله',
+        field: 'DealTypeName',
+        width: 120,
+        resizable: true
+      },
+      {
+        headerName: 'شماره تامین',
+        field: 'ProvisionCode',
+        hide: this.ModuleCode === 2756 ? false : true,
+        width: 100,
+        resizable: true,
+        sortable: true,
+      },
+      {
+        headerName: 'سال مالی تامین',
+        field: 'ProvisionFinYearCode',
+        hide: this.ModuleCode === 2756 ? false : true,
+        width: 100,
+        resizable: true,
+        sortable: true,
+      },
     ];
 
     this.selectedRow = null;
@@ -2613,7 +2758,10 @@ export class UserWorkLogProductRequestComponent implements OnInit {
       this.ToCommitionDate,
       this.FromDocumentDeadlineDate,
       this.ToDocumentDeadlineDate,
-      this.CommitionMemberParams.selectedObject
+      this.CommitionMemberParams.selectedObject,
+      this.DealTypeParams.selectedObject,
+      this.ProvisionCode,
+      this.ProvisionFinYearParams.selectedObject,
     ).subscribe(res => {
       this.rowData = res;
     });
@@ -3049,7 +3197,8 @@ export class UserWorkLogProductRequestComponent implements OnInit {
     }
 
     const ContractorId = this.NgSelectContractorParams.selectedObject;
-    this.rprt.ShowContractRequestListReport(this.NgSelectRegionParams.selectedObject,
+    this.rprt.ShowContractRequestListReport(
+      this.NgSelectRegionParams.selectedObject,
       this.ModuleCode,
       HeaderName,
       VWExeUnitItem,
@@ -3113,7 +3262,8 @@ export class UserWorkLogProductRequestComponent implements OnInit {
       this.ToCommitionDate,
       this.FromDocumentDeadlineDate,
       this.ToDocumentDeadlineDate,
-      CommitionMemberItemsStr
+      CommitionMemberItemsStr,
+      this.DealTypeParams.selectedObject
     );
   }
 
@@ -3447,6 +3597,9 @@ export class UserWorkLogProductRequestComponent implements OnInit {
     } else if (this.BtnClickedName === 'FullDelProdReq' && ActionResult === 'YES') {
       const CostFactorID = this.selectedRow.data.ProductRequestID;
       this.FullDeleteProductRequest(CostFactorID, this.ModuleCode);
+    } else if (this.BtnClickedName === 'BtnRevoke' && ActionResult === 'YES') {
+      const ProductRequestID = this.selectedRow.data.ProductRequestID;
+      this.RevokeProductRequest(ProductRequestID);
     } else {
       this.Closed.emit(true);
     }
@@ -3467,7 +3620,10 @@ export class UserWorkLogProductRequestComponent implements OnInit {
   FullDeleteProductRequest(CostFactorID: number, ModuleCode: number) {
     this.ProductRequest.DeleteProductRequestWithFlowAndArchives(CostFactorID, ModuleCode).subscribe(res => {
       this.ShowMessageBoxWithOkBtn('حذف موفقیت آمیز بود');
-    });
+    },
+      err => {
+        this.ShowMessageBoxWithOkBtn('حذف با شکست مواجه شد.');
+      });
   }
 
   ShowMessageBoxWithYesNoBtn(message) {
@@ -3793,16 +3949,27 @@ export class UserWorkLogProductRequestComponent implements OnInit {
       );
   }
 
-  UploadInRecentAllClarification() {
-    this.ContractService.UploadInRecentAllClarification(this.NgSelectRegionParams.selectedObject).subscribe(res => {
-      if (res === '') {
-        this.ShowMessageBoxWithOkBtn('ارسال مجدد به سامانه شفاف برای این واحد اجرایی با موفقیت انجام شد.');
-      } else {
-        this.StartLeft = 106;
-        this.ShowMessageBoxWithOkBtn(res);
-        this.alertMessageParams.IsMultiLine = true;
-      }
-    });
+  UploadInRecentAllClarification(event) {
+    let FromAuditDate = null;
+    let ToAuditDate = null;
+    if (event && event.FromDate) {
+      FromAuditDate = event.FromDate;
+    }
+    if (event && event.ToDate) {
+      ToAuditDate = event.ToDate;
+    }
+    this.ContractService.UploadInRecentAllClarification(this.NgSelectRegionParams.selectedObject,
+      this.ModuleCode,
+      FromAuditDate,
+      ToAuditDate).subscribe(res => {
+        if (res === '') {
+          this.ShowMessageBoxWithOkBtn('ارسال به سامانه شفاف برای این واحد اجرایی با موفقیت انجام شد.');
+        } else {
+          this.StartLeft = 106;
+          this.ShowMessageBoxWithOkBtn(res);
+          this.alertMessageParams.IsMultiLine = true;
+        }
+      });
   }
 
   BtnShowHasContract() {
@@ -3976,19 +4143,23 @@ export class UserWorkLogProductRequestComponent implements OnInit {
       RadioItems: [
         {
           title: 'ارسال به سامانه شفاف',
-          type: 1
+          type: 1,
+          ShowDate: false
         },
         {
-          title: 'ارسال مجدد تمامی درخواست های ارسال شده به شفاف برای واحد اجرایی انتخابی',
-          type: 2
+          title: 'ارسال تمامی درخواست ها به شفاف برای واحد اجرایی انتخابی', // RFC 61284
+          type: 2,
+          ShowDate: true
         },
         {
           title: 'ارسال به کنترل پروژه',
-          type: 3
+          type: 3,
+          ShowDate: false
         },
         {
           title: 'ارسال به سامانه صورت وضعیت',
-          type: 4
+          type: 4,
+          ShowDate: false
         }
       ]
     };
@@ -4022,7 +4193,7 @@ export class UserWorkLogProductRequestComponent implements OnInit {
     if (row == null) {
       this.ShowMessageBoxWithOkBtn('ابتدا قرارداد های مورد نظر را انتخاب نمایید');
     } else {
-      if (row.ModuleCode === 2730 || !row.ModuleCode) {
+      if (row.RequestObjectTypeCode === 1 || !row.RequestObjectTypeCode) {
         this.type = 'product-request-page';
         this.btnclicked = true;
         this.HaveHeader = true;
@@ -4034,7 +4205,34 @@ export class UserWorkLogProductRequestComponent implements OnInit {
         this.OverPixelWidth = null;
         this.paramObj = {
           HeaderName: this.ModuleName,
-          ModuleCode: row.ModuleCode ? row.ModuleCode : 2730,
+          ModuleCode: this.ModuleCode === 2996 ? 2996 : 2730,
+          row: row,
+          CostFactorID: row.ProductRequestID,
+          HaveSave: true,
+          IsViewable: true,
+          IsEditable: true,
+          IsShow: true,
+          SelectedContractID: row.ContractID,
+          FirstModuleCode: this.ModuleCode,
+          // tslint:disable-next-line: max-line-length
+          ModuleViewTypeCode: ((this.ModuleCode === 2793) ? 100000
+            : (this.ModuleCode === 2824 && row.ContractSatusCode === 2 && !row.PRRelatedContractID) ? 500000 :
+              (this.ModuleCode === 2824) ? 300000 : (this.ModuleCode === 2996) ? 88888 : 500000),
+        };
+      }
+      if (row.RequestObjectTypeCode === 3) {
+        this.type = 'product-request-page';
+        this.btnclicked = true;
+        this.HaveHeader = true;
+        this.HaveMaxBtn = true;
+        this.HeightPercentWithMaxBtn = 97;
+        this.MinHeightPixel = 645;
+        this.startLeftPosition = 10;
+        this.startTopPosition = 0;
+        this.OverPixelWidth = null;
+        this.paramObj = {
+          HeaderName: this.ModuleName,
+          ModuleCode: 2773,
           row: row,
           CostFactorID: row.ProductRequestID,
           HaveSave: true,
@@ -4049,61 +4247,7 @@ export class UserWorkLogProductRequestComponent implements OnInit {
               (this.ModuleCode === 2824) ? 300000 : 500000),
         };
       }
-      if (row.ModuleCode === 2824) {
-        this.type = 'product-request-page';
-        this.btnclicked = true;
-        this.HaveHeader = true;
-        this.HaveMaxBtn = true;
-        this.HeightPercentWithMaxBtn = 97;
-        this.MinHeightPixel = 645;
-        this.startLeftPosition = 10;
-        this.startTopPosition = 0;
-        this.OverPixelWidth = null;
-        this.paramObj = {
-          HeaderName: this.ModuleName,
-          ModuleCode: row.ModuleCode ? row.ModuleCode : 2730,
-          row: row,
-          CostFactorID: row.ProductRequestID,
-          HaveSave: true,
-          IsViewable: true,
-          IsEditable: true,
-          IsShow: true,
-          SelectedContractID: row.ContractID,
-          FirstModuleCode: this.ModuleCode,
-          // tslint:disable-next-line: max-line-length
-          ModuleViewTypeCode: ((this.ModuleCode === 2793) ? 100000
-            : (this.ModuleCode === 2824 && row.ContractSatusCode === 2 && !row.PRRelatedContractID) ? 500000 :
-              (this.ModuleCode === 2824) ? 300000 : 500000),
-        };
-      }
-      if (row.ModuleCode === 2773) {
-        this.type = 'product-request-page';
-        this.btnclicked = true;
-        this.HaveHeader = true;
-        this.HaveMaxBtn = true;
-        this.HeightPercentWithMaxBtn = 97;
-        this.MinHeightPixel = 645;
-        this.startLeftPosition = 10;
-        this.startTopPosition = 0;
-        this.OverPixelWidth = null;
-        this.paramObj = {
-          HeaderName: this.ModuleName,
-          ModuleCode: row.ModuleCode,
-          row: row,
-          CostFactorID: row.ProductRequestID,
-          HaveSave: true,
-          IsViewable: true,
-          IsEditable: true,
-          IsShow: true,
-          SelectedContractID: row.ContractID,
-          FirstModuleCode: this.ModuleCode,
-          // tslint:disable-next-line: max-line-length
-          ModuleViewTypeCode: ((this.ModuleCode === 2793) ? 100000
-            : (this.ModuleCode === 2824 && row.ContractSatusCode === 2 && !row.PRRelatedContractID) ? 500000 :
-              (this.ModuleCode === 2824) ? 300000 : 500000),
-        };
-      }
-      if (row.ModuleCode === 2776) {
+      if (row.RequestObjectTypeCode === 7) {
         this.type = 'product-request-page-without-flow';
         this.btnclicked = true;
         this.HaveHeader = true;
@@ -4114,7 +4258,7 @@ export class UserWorkLogProductRequestComponent implements OnInit {
         this.startTopPosition = 5;
         this.paramObj = {
           HeaderName: this.ModuleName,
-          ModuleCode: row.ModuleCode,
+          ModuleCode: 2776,
           row: row,
           CostFactorID: row.ProductRequestID,
           HaveSave: true,
@@ -4129,7 +4273,7 @@ export class UserWorkLogProductRequestComponent implements OnInit {
               (this.ModuleCode === 2824) ? 300000 : (this.ModuleCode === 2756 || this.ModuleCode === 2838 || this.ModuleCode === 2980) ? 500000 : 7,
         };
       }
-      if (row.ModuleCode === 2739 || row.ModuleCode === 2840) {
+      if (row.RequestObjectTypeCode === 2 || row.RequestObjectTypeCode === 5) {
         this.type = 'product-request-page-without-flow';
         this.btnclicked = true;
         this.HaveHeader = true;
@@ -4140,7 +4284,7 @@ export class UserWorkLogProductRequestComponent implements OnInit {
         this.startTopPosition = 5;
         this.paramObj = {
           HeaderName: this.ModuleName,
-          ModuleCode: row.ModuleCode,
+          ModuleCode: row.RequestObjectTypeCode === 2 ? 2739 : 2840,
           row: row,
           CostFactorID: row.ProductRequestID,
           HaveSave: true,
@@ -4167,6 +4311,10 @@ export class UserWorkLogProductRequestComponent implements OnInit {
         this.LetterTypeCodeList = res;
         this.LetterTypeCodeList.push(7); // RFC 57522
         this.LetterTypeCodeList.push(3); // RFC 57827
+        if (this.ModuleCode === 2756 || this.ModuleCode === 2838) { // RFC 63151
+          this.LetterTypeCodeList.push(20);
+          this.LetterTypeCodeList.push(34);
+        }
         this.btnclicked = true;
         this.type = 'app-automation';
         this.HaveHeader = true;
@@ -4200,11 +4348,17 @@ export class UserWorkLogProductRequestComponent implements OnInit {
     if (row == null) {
       this.ShowMessageBoxWithOkBtn('ابتدا ردیف مورد نظر را انتخاب نمایید');
     } else {
-      this.ProductRequest.RevokeProductRequest(row.ProductRequestID, this.ModuleCode).subscribe(res => {
-        this.ShowMessageBoxWithOkBtn('درخواست با موفقیت ابطال شد');
-      });
+      this.BtnClickedName = 'BtnRevoke';
+      this.ShowMessageBoxWithYesNoBtn('آیا مایل به ابطال درخواست انتخاب شده می باشید؟');
     }
   }
+
+  RevokeProductRequest(ProductRequestID) {
+    this.ProductRequest.RevokeProductRequest(ProductRequestID, this.ModuleCode, this.selectedRow.data.ContractID, this.selectedRow.data.ContractSatusCode).subscribe(res => {
+      this.ShowMessageBoxWithOkBtn('درخواست با موفقیت ابطال شد');
+    });
+  }
+
   FetchMoreFromContract(event) {
     this.NgSelectContractParamsFrom.loading = true;
     const ResultList = [];
@@ -4261,5 +4415,11 @@ export class UserWorkLogProductRequestComponent implements OnInit {
         this.CommitionMemberItems = res;
       }
     });
+  }
+
+  getOutPutParam(param) {
+    if (this.type === 'global-choose-page') {
+      this.UploadInRecentAllClarification(param);
+    }
   }
 }

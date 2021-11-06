@@ -5,7 +5,6 @@ import { of } from 'rxjs';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 declare var jquery: any;
 declare var $: any;

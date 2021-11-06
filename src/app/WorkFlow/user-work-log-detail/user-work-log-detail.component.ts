@@ -31,6 +31,9 @@ export class UserWorkLogDetailComponent implements OnInit {
   @Input() PopupParam;
   HasSave: boolean;
   Subject: any;
+  PercentWidth;
+  paramObj;
+  HeightPercentWithMaxBtn;
   LetterNo: any;
   DisableRevoke = false;
   FinYearCode: any;
@@ -444,7 +447,39 @@ export class UserWorkLogDetailComponent implements OnInit {
         editable: false,
       },
       {
-        headerName: 'گردش کار',
+        headerName: 'نوع گردش کار',
+        field: 'WorkflowTypeName',
+        cellEditorFramework: NgSelectVirtualScrollComponent,
+        cellEditorParams: {
+          Params: this.NgSelectWorkflowTypeParams,
+          Items: [],
+          Owner: this
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.WorkflowTypeName;
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.WorkflowTypeName) {
+            params.data.WorkflowTypeName = params.newValue.WorkflowTypeName;
+            params.data.ToWorkflowTypeCode = params.newValue.WorkflowTypeCode;
+            return true;
+          } else {
+            params.data.WorkflowTypeName = '';
+            params.data.ToWorkflowTypeCode = null;
+            return false;
+          }
+        },
+        width: 180,
+        resizable: true,
+        editable: this.HasSave,
+      },
+      {
+        headerName: 'مسیر گردش کار',
         field: 'TransitionIDTypeName',
         cellEditorFramework: NgSelectVirtualScrollComponent,
         cellEditorParams: {
@@ -532,38 +567,6 @@ export class UserWorkLogDetailComponent implements OnInit {
           } else {
             params.data.WorkflowLogIDStatusName = '';
             params.data.RelatedWorkflowLogID = null;
-            return false;
-          }
-        },
-        width: 180,
-        resizable: true,
-        editable: this.HasSave,
-      },
-      {
-        headerName: 'نوع گردش کار',
-        field: 'WorkflowTypeName',
-        cellEditorFramework: NgSelectVirtualScrollComponent,
-        cellEditorParams: {
-          Params: this.NgSelectWorkflowTypeParams,
-          Items: [],
-          Owner: this
-        },
-        cellRenderer: 'SeRender',
-        valueFormatter: function currencyFormatter(params) {
-          if (params.value) {
-            return params.value.WorkflowTypeName;
-          } else {
-            return '';
-          }
-        },
-        valueSetter: (params) => {
-          if (params.newValue && params.newValue.WorkflowTypeName) {
-            params.data.WorkflowTypeName = params.newValue.WorkflowTypeName;
-            params.data.ToWorkflowTypeCode = params.newValue.WorkflowTypeCode;
-            return true;
-          } else {
-            params.data.WorkflowTypeName = '';
-            params.data.ToWorkflowTypeCode = null;
             return false;
           }
         },
@@ -996,7 +999,7 @@ export class UserWorkLogDetailComponent implements OnInit {
     }
 
     if (event.colDef && event.colDef.field === 'TransitionIDTypeName') {
-      this.Workflow.ListAllTransition().subscribe(res => {
+      this.Workflow.ListAllTransition(event.data.ToWorkflowTypeCode).subscribe(res => {
         this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
           List: res,
           type: 'transition'
@@ -1014,7 +1017,15 @@ export class UserWorkLogDetailComponent implements OnInit {
     }
 
     if (event.colDef && event.colDef.field === 'WorkflowLogIDStatusName') {
-      this.Workflow.ListAllWorkLog().subscribe(res => {
+      const WorkflowLogList = [];
+      if (this.gridApiLog) {
+        this.gridApiLog.forEachNode(worklog => {
+          if (worklog.data && worklog.data.WorkflowLogID) {
+            WorkflowLogList.push(worklog.data.WorkflowLogID);
+          }
+        });
+      }
+      this.Workflow.ListAllWorkLog(this.WorkFlowInstanceId, WorkflowLogList).subscribe(res => {
         this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
           List: res,
           type: 'related'
@@ -1145,9 +1156,30 @@ export class UserWorkLogDetailComponent implements OnInit {
   onClickRevoke() {
     const ObjectID = this.ParentModuleCode === 2948 ? this.PopupParam.InvoiceID :
       this.ParentModuleCode === 2793 ? this.ProductRequestID : null;
-    this.ProductService.RevokeProductRequest(ObjectID, this.PopupParam.ParentModuleCode).subscribe(res => {
+    this.ProductService.RevokeProductRequest(
+      ObjectID, 
+      this.PopupParam.ParentModuleCode,
+      null,
+      null,
+      this.WorkFlowInstanceId).subscribe(res => {
       this.ShowMessageBoxWithOkBtn('درخواست با موفقیت ابطال شد');
     });
   }
+  BtnVeiwclick(){
+    this.gridApiHistory.stopEditing();
+     this.type = 'user-work-log-detail-graph';
+     this.btnclicked = true;
+     this.HaveHeader = true;
+     this.HaveMaxBtn = true;
+     this.startTopPosition =30;
+     this.startLeftPosition = 116;
+     this.PercentWidth = 83;
+     this.HaveMaxBtn = true;
+     this.HeightPercentWithMaxBtn =91;
+     this.paramObj = {
+      HeaderName: 'مشاهده گراف جزئیات گردش کار',
+      WorkFlowInstanceIdSelected :  this.WorkFlowInstanceId
+     };
+   }
 }
 
