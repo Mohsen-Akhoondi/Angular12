@@ -117,11 +117,12 @@ export class PriceListComponent implements OnInit {
   IsDisable = false;
   HasArchiveAccess: any;
   ArchiveBtnText = '';
+  TreeInputParam = { Owner: this, GetChildren: this.GetChildren, GetRoots: this.GetRoots };
   constructor(
     private PriceList: PriceListService,
     config: NgSelectConfig,
     private ArchiveList: ArchiveDetailService,
-    private Report: ReportService
+    private Report: ReportService,
   ) {
     config.notFoundText = 'موردی یافت نشد';
   }
@@ -578,5 +579,47 @@ export class PriceListComponent implements OnInit {
     this.PriceList.GetPriceList(PriceListPatternID, IsLoading, IsStar).subscribe(res => {
       this.gridrows = res;
     });
+  }
+
+  GetChildren(event) {
+
+    return new Promise((resolve, reject) => {
+      event.Owner.PriceList.GetPriceListChildren(event.ParentID).subscribe(data => {
+        const children = [];
+        data.forEach(item => {
+          children.push({
+            name: item.PriceListTopiCodeName,
+            id: item.PriceListPatternID.toString(),
+            hasChildren: !item.IsLeaf,
+            levelCode: item.PriceListLevelCode,
+            TopicCode: item.PriceListTopiCode
+          });
+        });
+        resolve(children);
+      });
+    });
+
+  }
+
+ GetRoots(event)  {
+    let nodes = [];
+  return new Promise((resolve, reject) => {
+      event.Owner.PriceList.GetPriceListRoots(event.FirstID, event.SecondID).subscribe(res => {
+       nodes = [];
+        res.forEach(item => {
+          nodes.push({
+            name: item.PriceListTopiCodeName,
+            id: item.PriceListPatternID,
+            hasChildren: !item.IsLeaf,
+            levelCode: item.PriceListLevelCode,
+            TopicCode: item.PriceListTopiCode
+          });
+        });
+       resolve(nodes);
+      });
+
+
+     // return nodes;
+   });
   }
 }

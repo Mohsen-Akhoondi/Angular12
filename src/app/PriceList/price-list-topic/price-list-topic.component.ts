@@ -3,9 +3,9 @@ import { PriceListService } from 'src/app/Services/BaseService/PriceListService'
 import { of } from 'rxjs';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 
 @Component({
   selector: 'app-price-list-topic',
@@ -63,7 +63,7 @@ export class PriceListTopicComponent implements OnInit {
         width: 120,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 16 },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
@@ -87,7 +87,7 @@ export class PriceListTopicComponent implements OnInit {
         width: 130,
         resizable: true,
         editable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 1 },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
