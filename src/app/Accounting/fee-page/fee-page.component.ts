@@ -39,7 +39,7 @@ export class FeePageComponent implements OnInit {
   HaveMaxBtn = false;
   startLeftPosition: number;
   startTopPosition: number;
-  alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false }
+  alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false };
 
   BtnClickedName;
   IsDown = false;
@@ -150,7 +150,7 @@ export class FeePageComponent implements OnInit {
   }
   ngOnInit() {
     if (this.InputParam) {
-      this.onDisplay();      
+      this.onDisplay();
       this.CurrWorkFlow = this.InputParam.CurrWorkFlow;
       this.IsEndFlow = this.CurrWorkFlow.IsEnd === 1;
       this.FeeID = this.InputParam.CurrWorkFlow.ObjectID;
@@ -174,7 +174,7 @@ export class FeePageComponent implements OnInit {
       });
       console.log(res);
       console.log(this.SumPaymentAmount);
-    })
+    });
 
     this.MyAccountingService.GetFeeDeductionByFee(this.FeeID).subscribe(res => {
       this.rowDataD = res;
@@ -182,7 +182,7 @@ export class FeePageComponent implements OnInit {
         this.SumDeductionAmount += element.DeductionAmount;
       });
       console.log(this.SumDeductionAmount);
-    })
+    });
 
     this.MyAccountingService.GetFeeByFeeId(this.FeeID).subscribe(res => {
       this.RegionCode = res[0].RegionCode;
@@ -193,7 +193,7 @@ export class FeePageComponent implements OnInit {
       this.ActorName = res[0].ActorName;
       this.Note = res[0].Note;
       this.Subject = res[0].Subject;
-    })
+    });
   }
   // tslint:disable-next-line:use-life-cycle-interface
   ngAfterViewInit(): void {
@@ -338,7 +338,6 @@ export class FeePageComponent implements OnInit {
             res => {
               this.IsDown = true;
               if (res != null && res.length > 0) {
-
                 if (this.IsEndFlow) {
                   this.WorkFlowTransitionID = res[0].WorkFlowTransitionID;
                   // tslint:disable-next-line:max-line-length
@@ -392,7 +391,8 @@ export class FeePageComponent implements OnInit {
       this.CurrWorkFlow.WorkflowObjectCode,
       this.ModuleViewTypeCode,
       null,
-      this.CurrWorkFlow.CartableUserID).
+      this.CurrWorkFlow.CartableUserID,
+      this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).
       subscribe(res => {
         if (HasAlert) {
           this.ShowMessageBoxWithOkBtn('تایید چک الکترونیک با موفقیت انجام شد');
@@ -474,7 +474,8 @@ export class FeePageComponent implements OnInit {
       this.CurrWorkFlow.WorkflowObjectCode,
       this.ModuleViewTypeCode,
       null,
-      this.CurrWorkFlow.CartableUserID).subscribe(res => {
+      this.CurrWorkFlow.CartableUserID,
+      this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).subscribe(res => {
         if (alert) {
           this.ShowMessageBoxWithOkBtn('عدم تایید چک الکترونیک موفقیت انجام شد');
         }
@@ -515,7 +516,9 @@ export class FeePageComponent implements OnInit {
   RowClick(row) {
     this.IsDown = false;
     this.MyAccountingService.GetElChequeInfo(
-      this.FeeID).subscribe(PDFRes => {
+      this.FeeID,
+      row.ChequeNo
+      ).subscribe(PDFRes => {
         this.IsDown = true;
         this.type = 'pdf-viewer';
         this.HaveHeader = true;
@@ -534,116 +537,10 @@ export class FeePageComponent implements OnInit {
           HaveSign: true,
           RegionCode: this.RegionCode,
           PDFSignersInfo: PDFRes.PDFSignersInfo,
-          IsFinal: true // نهایی
+          IsFinal: true, // نهایی
+          HasDelBtn: false,
+          IsArticle18: false
         };
       });
   }
-
-  // DOFinalConfirm() {
-  //   this.Cartable.UserFinalConfirmWorkFlow(
-  //     this.CurrWorkFlow,
-  //     this.WorkFlowID,
-  //     10,
-  //     '',
-  //     this.ObjectNo,
-  //     this.WorkflowTypeName,
-  //     this.ObjectID,
-  //     this.WorkflowTypeCode,
-  //     this.ReadyToConfirm === null || this.ReadyToConfirm === 0,
-  //     this.WorkflowObjectCode ,
-  //     null,
-  //     this.CartableUserID
-  //   )
-  //   .subscribe(res2 => {
-  //       if (this.ReadyToConfirm && this.ReadyToConfirm === 1) {
-  //         this.ShowMessageBoxWithOkBtn('بازگشت از تایید نهایی صورتجلسه تحویل زمین با موفقیت انجام شد');
-  //         this.ReadyToConfirm = 0;
-  //         this.btnConfirmName = 'تایید نهایی';
-  //         this.btnConfirmIcon = 'ok';
-  //       } else {
-  //         this.ShowMessageBoxWithOkBtn('تایید نهایی صورتجلسه تحویل زمین با موفقیت انجام شد');
-  //         this.ReadyToConfirm = 1;
-  //         this.btnConfirmName = 'بازگشت از تایید نهایی';
-  //         this.btnConfirmIcon = 'cancel';
-  //       }
-  //   },
-  //     err => {
-  //       const str = err.error.split('|');
-  //       if (str[1]) {
-  //         this.ShowMessageBoxWithOkBtn(str[1]);
-  //       } else {
-  //         this.ShowMessageBoxWithOkBtn('خطای پیش بینی نشده');
-  //       }
-  //     });
-  // }
-  // onConfirm() {
-  //   this.BtnClickedName = 'BtnConfirm';
-  //   if (!this.IsEndFlow) {
-  //     if (!this.ReadyToConfirm || this.ReadyToConfirm === null || this.ReadyToConfirm === 0) {
-  //      this.DOConfirm();
-  //     } else {
-  //       this.Cartable.UserUpdateWorkFlow(this.WorkFlowID,
-  //         this.FeeID,
-  //         this.InputParam.RegionCode,
-  //         this.InputParam.ModuleCode,
-  //         0,
-  //         this.WorkflowObjectCode,
-  //         null,null,
-  //         this.CartableUserID).subscribe(res => {
-  //           this.ShowMessageBoxWithOkBtn('عدم تاييد درخواست صورتجلسه تحویل زمین با موفقيت انجام شد');
-
-  //           this.ReadyToConfirm = 0;
-  //           this.btnConfirmName = 'تاييد';
-  //           this.btnConfirmIcon = 'ok';
-  //         }
-  //         );
-  //     }
-  //   } else {
-  //     this.DOFinalConfirm();
-  //   }
-  // }   
-  // SignFinal() {
-  //     const Str =
-  //       'ModuleCode=' + 41 + '&' +
-  //       'FeeId=' + 2810435; //this.FeeID;
-
-  //     this.http.get(window.location.origin + '/Report/Encrypt', { Str: Str }).
-  //       subscribe(
-  //         (res) => {
-  //           window.open(window.location.origin + '/Report/Print?' + res, '_blank');
-  //         }
-  //       );
-
-  // }
-
-  // onDigitalSingClick() {
-  //   this.type = 'global-choose-page';
-  //   this.HaveHeader = true;
-  //   this.HaveMaxBtn = false;
-  //   this.PixelWidth = null;
-  //   this.startLeftPosition = 520;
-  //   this.startTopPosition = 220;
-  //   this.HeightPercentWithMaxBtn = null;
-  //   this.MinHeightPixel = null;
-  //   this.isClicked = true;
-  //   this.ParamObj = {
-  //     HeaderName: 'انتخاب نوع فایل',
-  //     RadioItems: [
-  //       {
-  //         title: 'امضای نسخه پیش نویس',
-  //         type: 1
-  //       },
-  //       {
-  //         title: 'امضای نسخه نهایی',
-  //         type: 2
-  //       }
-  //     ]
-  //   };
-  // }
-
 }
-
-
-  // OnFeeDateChange(ADate) {
-  //   this.FeeDate = ADate.MDate;
-  // }

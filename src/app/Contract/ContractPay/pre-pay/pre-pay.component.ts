@@ -10,6 +10,9 @@ import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { forkJoin } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/lib/custom-checkbox.model';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-pre-pay',
@@ -104,7 +107,6 @@ export class PrePayComponent implements OnInit {
   ModuleCode: any;
   SelectedProductName;
   SelectedContractPayItemID;
-  ContractOrderID;
   IsDown = false;
   Subject;
   IsNotFound = false;
@@ -148,10 +150,16 @@ export class PrePayComponent implements OnInit {
   LetterNo;
   LetterDatePersian;
   ContractNo;
-  ContractOrderId;
   DisplayWorkflow = true;
   ShowSendBtn = false;
   CheckValidate = false;
+  IsConfirm = 0;
+  CustomCheckBoxConfig: CustomCheckBoxModel = new CustomCheckBoxModel();
+  ShowConfimChekBox = false;
+  ContractorAmount; // 62433 sh
+  IsContractorAgent: boolean = false;
+  IsAdminToolsModule: boolean;
+  ShowContractorAmount = false;
 
   constructor(
     private contractpaydetail: ContractPayDetailsService,
@@ -159,11 +167,15 @@ export class PrePayComponent implements OnInit {
     private User: UserSettingsService,
     private Cartable: CartableServices,
     private RefreshCartable: RefreshServices,
-    private ContractStima: ContractEstimateService,
     private FlowService: WorkflowService,
     private CommonService: CommonServices,
     private ProductRequest: ProductRequestService,
-    private Report: ReportService) {
+    private Report: ReportService,
+    private route: ActivatedRoute,) {
+          this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+      this.OrginalModuleCode = +params['ModuleCode'];
+    });
   }
 
   ngOnInit() {
@@ -174,9 +186,15 @@ export class PrePayComponent implements OnInit {
     this.ContractCode = this.PopupParam.ContractCode;
     this.Subject = this.PopupParam.Subject;
     this.ContractorName = this.PopupParam.ContractorName;
+    this.CustomCheckBoxConfig.color = 'state p-primary';
+    this.CustomCheckBoxConfig.icon = 'fa fa-check';
+    this.CustomCheckBoxConfig.styleCheckBox = 'pretty p-icon p-rotate';
+    this.CustomCheckBoxConfig.AriaWidth = 20;
     // tslint:disable-next-line: max-line-length
     this.ModuleCode = this.ModuleCode ? this.ModuleCode : 2516;
-
+    this.RegionCode = this.PopupParam.RegionCode;
+    this.ShowContractorAmount = (this.RegionCode >= 0 && this.RegionCode < 23) ? true : false;
+    
     if (this.PopupParam.Mode === 'InsertMode') {
       this.InsertModeNgInit();
       return;
@@ -236,6 +254,11 @@ export class PrePayComponent implements OnInit {
     this.contractpaydetail.GetContractOperationName(this.PopupParam.ContractOperationID).subscribe(res => {
       this.ContractOperationName = res;
     });
+    new Promise((StartedWFResolve, reject) => { 
+      this.SetStartedWFInfo(StartedWFResolve);
+    }).then(() => {
+      this.ViewTypeChange();
+    });
   }
 
   EditModeNgInit() {
@@ -262,6 +285,7 @@ export class PrePayComponent implements OnInit {
         this.ContractorName = this.PopupParam.CurrWorkFlow.ObjectActorName;
         this.CartableUserID = this.PopupParam.CartableUserID;
       }
+      this.ShowConfimChekBox = this.ModuleCode === 2875 ? true : false;
       this.User.GetModulOPByUser(2516).subscribe(res => {
         res.forEach(node => {
           switch (node.OperationCode) {
@@ -340,6 +364,8 @@ export class PrePayComponent implements OnInit {
         this.selectedContractPayTypeObj = this.ContractDetails.ContractPayTypeCode;
         this.ContractOperationId = this.ContractDetails.ContractOperationId;
         this.ContractOperationName = this.ContractDetails.ContractOperationName;
+        this.IsConfirm = this.ContractDetails.IsConfirm;
+        this.ContractorAmount = this.ContractDetails.ContractorAmount;       
         if (this.ContractDetails.ContractOperationId === 2 && this.PopupParam.ShowSendBtn === 'YES') {
           this.DisplayWorkflow = false;
         }
@@ -378,7 +404,7 @@ export class PrePayComponent implements OnInit {
     if (ADate.FullDate !== '' && !this.EditModeInit) {
       this.ContractPayDate = ADate.MDate;
       this.contractpaydetail.GetContractOrder(this.PopupParam.SelectedContractID,
-        this.ContractPayNo, ADate.MDate, null, 1, true).subscribe(
+        this.ContractPayNo, ADate.MDate, null, 1, true,this.ContractOperationId).subscribe(
           ress => {
             ress.forEach(item => {
               item.ContractOrderEstimateList = [];
@@ -404,30 +430,26 @@ export class PrePayComponent implements OnInit {
       this.ShowMessageBoxWithOkBtn('سال مالی نمی تواند خالی باشد');
       return;
     }
-    if (!this.ContractPayAmount || this.ContractPayAmount == null) {
+
+    if ((!this.ContractPayAmount || this.ContractPayAmount == null) && !this.IsContractorAgent) {
       this.ShowMessageBoxWithOkBtn('مبلغ پرداخت نمی تواند خالی باشد');
       return;
     }
+
     if (this.ContractPayAmount <= 0) { // RFC 58767
       this.ShowMessageBoxWithOkBtn('مبلغ پرداخت معتبر نمی باشد');
       return;
     }
+
     if (this.PopupParam.Mode === 'InsertMode') {
       this.SaveContractPay();
       return;
     }
+
     if (this.PopupParam.Mode === 'EditMode') {
-      if (this.PopupParam.selectedRow.LastContractOrderID) {
-        this.ContractOrderID = this.PopupParam.selectedRow.LastContractOrderID;
         this.UpdateContractPay();
-      } else {
-        this.ContractStima.GetContractOrderIDByContractPay(this.ContractPayDate, this.ContractDetails.ContractPayId).subscribe(res => {
-          this.ContractOrderID = res;
-          this.UpdateContractPay();
-        });
+        return;
       }
-      return;
-    }
   }
 
   UpdateContractPay() {
@@ -443,15 +465,21 @@ export class PrePayComponent implements OnInit {
       EndDate: this.ContractPayEndDate,
       ContractPayTypeCode: this.selectedContractPayTypeObj,
       Note: this.Note,
-      ContractPayAmount: this.ContractPayAmount,
+      ContractPayAmount: (this.IsContractorAgent) ? this.ContractorAmount : this.ContractPayAmount,
       ContractPayTechnicalCode: this.ContractPayTechnicalCode,
-      ContractOperationId: this.PopupParam.ContractOperationID,
-      IsConfirm: 0,
+      ContractOperationId: this.ContractOperationId ? this.ContractOperationId : this.PopupParam.ContractOperationID,
+      IsConfirm: this.IsConfirm,
+      ContractorAmount: this.ContractorAmount,
     };
     this.contractpaydetail.UpdateContractPay(ContractPayObj,
       ContractPayItemList,
       this.selectedContractAgentObj,
-      2516
+      this.ModuleCode,
+      false,
+      false,
+      null,
+      false,
+      null
     ).subscribe(res => {
       this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
       this.ChangeDetection = false;
@@ -521,9 +549,10 @@ export class PrePayComponent implements OnInit {
       ContractPayTypeCode: this.selectedContractPayTypeObj,
       Note: this.Note,
       ContractPayTechnicalCode: this.ContractPayTechnicalCode,
-      ContractPayAmount: this.ContractPayAmount,
+      ContractPayAmount: (this.IsContractorAgent) ? this.ContractorAmount : this.ContractPayAmount,
       ContractOperationId: this.PopupParam.ContractOperationID,
       IsConfirm: 0,
+      ContractorAmount: this.ContractorAmount,
     };
     this.contractpaydetail.SaveContractPayAmount(ContractPayObj).subscribe(res => {
       this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
@@ -563,7 +592,10 @@ export class PrePayComponent implements OnInit {
           this.WorkflowObjectCode,
           this.ModuleViewTypeCode,
           this.OrginalModuleCode,
-          this.CartableUserID)
+          this.CartableUserID,
+          this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null,
+          null,
+          this.IsEndFlow)
           .subscribe(res => {
             this.ShowMessageBoxWithOkBtn('عدم تاييد درخواست انجام معامله با موفقيت انجام شد');
             this.ReadyToConfirm = 0;
@@ -630,6 +662,7 @@ export class PrePayComponent implements OnInit {
     switch (this.ModuleViewTypeCode) {
       case 1:
         this.IsEditable = true;
+        this.IsContractorAgent = (this.RegionCode >= 0 && this.RegionCode < 23) ? true : false;
         break;
       case 2:
         this.IsEditable = false;
@@ -639,6 +672,9 @@ export class PrePayComponent implements OnInit {
         this.HaveSave = false;
         this.IsEditable = false;
         this.HaveConfirm = false;
+        break;
+      case 100000:
+        this.IsAdminToolsModule = true;
         break;
       default:
         break;
@@ -657,7 +693,10 @@ export class PrePayComponent implements OnInit {
       this.WorkflowObjectCode,
       this.ModuleViewTypeCode,
       this.OrginalModuleCode,
-      this.CartableUserID).
+      this.CartableUserID,
+      this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null,
+      null,
+      this.IsEndFlow).
       subscribe(res => {
         if (HasAlert) {
           this.ShowMessageBoxWithOkBtn('تاييد درخواست پرداخت با موفقيت انجام شد');
@@ -667,7 +706,7 @@ export class PrePayComponent implements OnInit {
         this.btnConfirmName = 'عدم تاييد';
         this.btnConfirmIcon = 'cancel';
         this.IsEditConfirm = false;
-        resolve(true);
+        resolve(res);
       },
         err => {
           if (err.error.Message.includes('|')) {
@@ -720,7 +759,7 @@ export class PrePayComponent implements OnInit {
     // tslint:disable-next-line:no-shadowed-variable
     const promise = new Promise((resolve, reject) => {
       this.DOConfirm(false, resolve);
-    }).then((IsDown) => {
+    }).then((IsDown: any) => {
       if (IsDown) {
         new Promise((StartedWFResolve, reject) => {
           this.SetStartedWFInfo(StartedWFResolve);
@@ -760,7 +799,7 @@ export class PrePayComponent implements OnInit {
                       WorkflowTypeName: this.WorkflowTypeName,
                       WorkflowTypeCode: this.WorkflowTypeCode,
                       WorkflowObjectCode: this.WorkflowObjectCode,
-                      MinimumPosting: this.PopupParam.MinimumPosting,
+                      MinimumPosting: this.PopupParam.WorkFlowID ? this.PopupParam.MinimumPosting : IsDown.MinimumPosting,
                       OrginalModuleCode: this.ModuleCode,
                       CartableUserID: this.CartableUserID
                     };
@@ -778,7 +817,6 @@ export class PrePayComponent implements OnInit {
     });
   }
   DoUnConfirm(alert = true, resolve = null) { // RFC 52262
-
     this.Cartable.UserUpdateWorkFlow(this.WorkFlowID,
       this.CostFactorID,
       this.RegionCode,
@@ -787,7 +825,10 @@ export class PrePayComponent implements OnInit {
       this.WorkflowObjectCode,
       this.ModuleViewTypeCode,
       this.OrginalModuleCode,
-      this.CartableUserID).subscribe(res => {
+      this.CartableUserID,
+      this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null,
+      null,
+      this.IsEndFlow).subscribe(res => {
         if (alert) {
           this.ShowMessageBoxWithOkBtn('عدم تاييد درخواست پرداخت با موفقيت انجام شد');
         }
@@ -889,6 +930,10 @@ export class PrePayComponent implements OnInit {
       this.ModuleCode,
       true,
       'گزارش پیش نویس صورت وضعیت');
+  }
+  OnChangeCheckBoxValue(Ischeck) {
+    this.IsConfirm = Ischeck;
+
   }
 }
 

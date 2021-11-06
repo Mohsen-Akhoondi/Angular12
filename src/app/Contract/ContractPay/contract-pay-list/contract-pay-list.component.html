@@ -74,8 +74,8 @@
         <img width="15px" height="15px" src="assets/Icons/update.png" />
         اصلاح
       </button>
-      <button *ngIf="(IsEditable && IsEndRow && HaveDelete) || IsAdmin" [disabled]="IsDisable " (click)="onDelete()"
-        id="btnDelete" class="btn btn-primary btnGreen">
+      <button *ngIf="(IsEditable && IsEndRow && HaveDelete) || IsAdmin" [disabled]="IsDisable "
+        (click)="onDeleteContractPay()" id="btnDelete" class="btn btn-primary btnGreen">
         <!--RFC 54198-->
         <img width="15px" height="15px" src="assets/Icons/delete.png" />
         حذف
@@ -113,10 +113,11 @@
 </div>
 <app-over-popup *ngIf="isClicked" [PopupType]="PopUpType" [HaveMaxBtn]="HaveMaxBtn"
   [HeightPercentWithMaxBtn]="PopUpType === 'contract-pay-item-estimate-page' ? 98 : PopUpType === 'pre-pay' ? 50 : 95"
-  [MainMinwidthPixel]="PopUpType === 'contract-pay-item-estimate-page' ? 1190 : ''" (popupclosed)="popupclosed($event)"
-  [PixelWidth]="PixelWidth" [startLeftPosition]="startLeftPosition" [startTopPosition]="startTopPosition"
+  [MainMinwidthPixel]="PopUpType === 'contract-pay-item-estimate-page' ? 1190 : PopUpType === 'contract-pay-details' ? 1335 : ''"
+  (popupclosed)="popupclosed($event)" [PixelWidth]="PixelWidth" [startLeftPosition]="startLeftPosition"
+  [startTopPosition]="startTopPosition"
   [PopupParam]="PopUpType === 'message-box' ?alertMessageParams : ContractPayPopupParam"
-  (PopupOutPutParam)="ReturendContractOperation($event)" [HaveHeader]="HaveHeader"
-  [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn" [PixelHeight]="PixelHeight"
+  (PopupOutPutParam)="PopUpType ==='message-box' ? MessageBoxAction($event) : ReturendContractOperation($event)"
+  [HaveHeader]="HaveHeader" [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn" [PixelHeight]="PixelHeight"
   [minHeightPixel]="PopUpType === 'user-work-log-details' ? MinHeightPixel : ''">
 </app-over-popup>

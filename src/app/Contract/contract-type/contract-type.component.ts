@@ -1,5 +1,4 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
@@ -7,6 +6,8 @@ import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsSe
 import { GridOptions } from 'ag-grid-community';
 import { of } from 'rxjs';
 import { Router, ActivatedRoute } from '@angular/router';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
+
 
 
 @Component({
@@ -50,7 +51,7 @@ export class ContractTypeComponent implements OnInit {
         headerName: 'کد نوع قرارداد',
         field: 'ContractTypeCode',
         width: 100,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 3 },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {

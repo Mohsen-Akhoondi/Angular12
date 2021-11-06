@@ -12,11 +12,15 @@ export class AuthGuard implements CanActivate {
     constructor(private router: Router, private AAuthService: AuthService, private UserSettings: UserSettingsService) { }
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-    if (this.AAuthService.CheckAuth()) {
-        return true;
-      } else {
-        this.router.navigate([{ outlets: { primary: 'Login', PopUp: null } }]);
-        return false;
-      }
+     return forkJoin([
+        this.AAuthService.CheckAuth()
+       ]).pipe(map(res => {
+        if (!res[0]) {
+          window.location.href = window.location.origin
+                                + '/Account/login?returnUrl=%2FFinance'
+                                + state.url.replace('/', '%2F');
+        }
+        return res[0];
+       }));
     }
 }

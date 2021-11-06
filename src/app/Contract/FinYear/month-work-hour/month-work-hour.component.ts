@@ -3,8 +3,7 @@ import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { FinYearService } from 'src/app/Services/BaseService/FinYearService';
 import { of } from 'rxjs';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
-
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 @Component({
   selector: 'app-month-work-hour',
   templateUrl: './month-work-hour.component.html',
@@ -56,7 +55,7 @@ export class MonthWorkHourComponent implements OnInit {
         headerName: 'ساعت کارکرد عادی ماه',
         field: 'WorkHour',
         width: 180,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 3 },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {

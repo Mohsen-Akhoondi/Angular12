@@ -6,12 +6,12 @@ import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetail
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { ProductService } from 'src/app/Services/BaseService/ProductService';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 declare var jquery: any;
 declare var $: any;
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 
 @Component({
   selector: 'app-contract-estimate-view',
@@ -72,7 +72,7 @@ export class ContractEstimateViewComponent implements OnInit {
   ArchiveBtnTextOrder;
 
   NgSelectVSParams = {
-    bindLabelProp: 'ProductName',
+    bindLabelProp: 'ProductCodeName',
     bindValueProp: 'ProductID',
     placeholder: '',
     MinWidth: '150px',
@@ -150,7 +150,7 @@ export class ContractEstimateViewComponent implements OnInit {
       },
       {
         headerName: 'کالا/خدمت',
-        field: 'ProductName',
+        field: 'ProductCodeName',
         cellEditorFramework: NgSelectVirtualScrollComponent,
         cellEditorParams: {
           Params: this.NgSelectVSParams,
@@ -163,7 +163,7 @@ export class ContractEstimateViewComponent implements OnInit {
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
-            return params.value.ProductName;
+            return params.value.ProductCodeName;
           } else {
             return '';
           }
@@ -229,7 +229,7 @@ export class ContractEstimateViewComponent implements OnInit {
         width: 100,
         editable: this.HaveSave,
         resizable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
@@ -245,7 +245,7 @@ export class ContractEstimateViewComponent implements OnInit {
         width: 100,
         editable: this.HaveSave,
         resizable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
@@ -261,7 +261,7 @@ export class ContractEstimateViewComponent implements OnInit {
         width: 100,
         editable: this.HaveSave,
         resizable: true,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
@@ -278,7 +278,7 @@ export class ContractEstimateViewComponent implements OnInit {
         HaveThousand: true,
         resizable: true,
         editable: this.HaveSave,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
@@ -666,7 +666,7 @@ export class ContractEstimateViewComponent implements OnInit {
         ItemNo: node.data.ItemNo,
         ContractOrderItemID: node.data.ContractOrderItemID ? node.data.ContractOrderItemID : 0,
         // tslint:disable-next-line:max-line-length
-        ProductID: node.data.ProductName && node.data.ProductName.ProductID ? node.data.ProductName.ProductID : (node.data.ProductID ? node.data.ProductID : null),
+        ProductID: node.data.ProductCodeName && node.data.ProductCodeName.ProductID ? node.data.ProductCodeName.ProductID : (node.data.ProductID ? node.data.ProductID : null),
         // tslint:disable-next-line:max-line-length
         StartDate: node.data.PersianStartDate && node.data.PersianStartDate.SDate ? node.data.PersianStartDate.SDate : node.data.PersianStartDate,
         // tslint:disable-next-line:max-line-length
@@ -691,21 +691,8 @@ export class ContractEstimateViewComponent implements OnInit {
   }
 
   onCellValueChanged(event) {
-    // if (event.newValue && event.colDef && event.colDef.field === 'ProductTypeName') {
-    // tslint:disable-next-line:max-line-length
-    //   this.columnDef1[2].cellEditorParams.Items = this.ProductList.GetProductList(event.newValue.ProductTypeCode === '1' ? true : false, this.Region);
-    //   const itemsToUpdate = [];
-    //   this.gridApi1.forEachNode(node => {
-    //     if (node.rowIndex === event.rowIndex) {
-    //       node.data.ProductName = '';
-    //       node.data.ScaleName = '';
-    //       itemsToUpdate.push(node.data);
-    //     }
-    //   });
-    //   this.gridApi1.updateRowData({ update: itemsToUpdate });
-    // }
 
-    if (event.colDef && event.colDef.field === 'ProductName') {
+    if (event.colDef && event.colDef.field === 'ProductCodeName') {
       if (event.newValue && event.newValue.ProductID) {
         this.ProductRequest.GetProductScaleName(event.newValue.ProductID).subscribe(res => {
           const itemsToUpdate = [];
@@ -814,7 +801,7 @@ export class ContractEstimateViewComponent implements OnInit {
       }
     });
 
-    if (event.colDef && event.colDef.field === 'ProductName') {
+    if (event.colDef && event.colDef.field === 'ProductCodeName') {
       this.columnDef1[2].cellEditorParams.Params.loading = true;
       this.ProductRequest.GetProductList(0,
         this.Region,

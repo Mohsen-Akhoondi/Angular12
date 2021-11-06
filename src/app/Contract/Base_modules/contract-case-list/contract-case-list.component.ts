@@ -4,7 +4,7 @@ import { RegionListService } from 'src/app/Services/BaseService/RegionListServic
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { NgSelectConfig } from 'src/app/Shared/ng-select';
 import { GridOptions } from 'ag-grid-community';
-import { of } from 'rxjs';
+import { of, Subscriber } from 'rxjs';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
 
 @Component({
@@ -16,6 +16,7 @@ export class ContractCaseListComponent implements OnInit {
   @Input() ModuleCode;
   @Input() ModuleName;
   columnDef;
+  TotalRecordCount;
   CustomCheckBoxConfig: CustomCheckBoxModel = new CustomCheckBoxModel();
   HaveEstimate = false;
   HavePayEstimate = false;
@@ -50,7 +51,8 @@ export class ContractCaseListComponent implements OnInit {
   startTopPosition: number;
   selectedPriceListPatternID = -1;
   HasRegion: boolean;
-  BoxDevHeight = 84;
+  BoxDevHeight = 88;
+  gridHeight = 86;
   MinHeightPixel: number;
   constructor(
     private router: Router,
@@ -162,14 +164,28 @@ export class ContractCaseListComponent implements OnInit {
         this.getContractListData(this.RegionParams.selectedObject);
       } else {
         this.BoxDevHeight = 100;
+        this.gridHeight = 89;
         this.getContractListData(-1);
       }
     });
   }
 
   getContractListData(region): void {
-    this.rowData = of([]);
-    this.rowData = this.ContractList.GetContractList(region, this.ModuleCode, this.HaveEstimate, this.HavePayEstimate, this.HavePay);
+    this.rowData = [];
+    this.ContractList.GetContractListPaging(
+      1,
+      30,
+      null,
+      null,
+      region,
+      this.ModuleCode,
+      this.HaveEstimate,
+      this.HavePayEstimate,
+      this.HavePay).subscribe(
+        (res: any) => {
+          this.rowData = res.List;
+          this.TotalRecordCount = res.TotalItemCount;
+        });
   }
 
   Btnclick(InputValue) {
@@ -199,8 +215,8 @@ export class ContractCaseListComponent implements OnInit {
             ProductRequestID: this.selectedRow.data.ProductRequestID,
             selectedRegion: this.RegionParams.selectedObject,
             RegionCode: this.RegionParams.selectedObject
-           };
-           this.btnclicked = true;
+          };
+          this.btnclicked = true;
           break;
         default:
           break;
@@ -229,5 +245,68 @@ export class ContractCaseListComponent implements OnInit {
     this.HavePayEstimate = type === 'HavePayEstimate' ? event : this.HavePayEstimate;
     this.HavePay = type === 'HavePay' ? event : this.HavePay;
     this.getContractListData(this.RegionParams.selectedObject);
+  }
+  OnChangePage(ChangeParam) {
+    this.rowData = [];
+    this.ContractList.GetContractListPaging(
+      ChangeParam.PageNumber,
+      ChangeParam.PageSize,
+      null,
+      null,
+      this.RegionParams.selectedObject,
+      this.ModuleCode,
+      this.HaveEstimate,
+      this.HavePayEstimate,
+      this.HavePay).subscribe(
+        (res: any) => {
+          this.rowData = res.List;
+        });
+  }
+  OnSortChange(param) {
+    console.log(param);
+    this.rowData = [];
+    this.ContractList.GetContractListPaging(
+      param.PageNumber,
+      param.PageSize,
+      param.SortModels,
+      null,
+      this.RegionParams.selectedObject,
+      this.ModuleCode,
+      this.HaveEstimate,
+      this.HavePayEstimate,
+      this.HavePay).subscribe(
+        (res: any) => {
+          this.rowData = res.List;
+        });
+  }
+  OnFilterChange(param) {
+    this.ContractList.GetContractListPaging(
+      1,
+      30,
+      null,
+      param,
+      this.RegionParams.selectedObject,
+      this.ModuleCode,
+      this.HaveEstimate,
+      this.HavePayEstimate,
+      this.HavePay).subscribe(
+        (res: any) => {
+          this.rowData = res.List;
+          this.TotalRecordCount = res.TotalItemCount;
+          setTimeout(() => {
+            param.forEach(element => {
+              const countryFilterComponent = this.gridApi.getFilterInstance(element.FieldName);
+              const model = {
+                filter: element.FilterText,
+                filterType: 'text',
+                type: element.FilterType
+              };
+              countryFilterComponent.setModel(model);
+            });
+          }, 10);
+        });
+  }
+  onGridReady(params: { api: any; }) {
+    this.gridApi = params.api;
   }
 }

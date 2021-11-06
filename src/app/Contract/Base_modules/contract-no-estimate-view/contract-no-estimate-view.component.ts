@@ -11,7 +11,7 @@ import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { ActivatedRoute } from '@angular/router';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 
 @Component({
   selector: 'app-contract-no-estimate-view',
@@ -67,7 +67,7 @@ export class ContractNoEstimateViewComponent implements OnInit {
   ArchiveBtnTextOrder;
   RegionCode;
   NgSelectVSParams = {
-    bindLabelProp: 'ProductName',
+    bindLabelProp: 'ProductCodeName',
     bindValueProp: 'ProductID',
     placeholder: '',
     MinWidth: '150px',
@@ -189,7 +189,7 @@ export class ContractNoEstimateViewComponent implements OnInit {
         },
         {
           headerName: 'کالا/خدمت',
-          field: 'ProductName',
+          field: 'ProductCodeName',
           cellEditorFramework: NgSelectVirtualScrollComponent,
           cellEditorParams: {
             Params: this.NgSelectVSParams,
@@ -202,7 +202,7 @@ export class ContractNoEstimateViewComponent implements OnInit {
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
             if (params.value) {
-              return params.value.ProductName;
+              return params.value.ProductCodeName;
             } else {
               return '';
             }
@@ -355,7 +355,7 @@ export class ContractNoEstimateViewComponent implements OnInit {
         },
         {
           headerName: 'کالا/خدمت',
-          field: 'ProductName',
+          field: 'ProductCodeName',
           cellEditorFramework: NgSelectVirtualScrollComponent,
           cellEditorParams: {
             Params: this.NgSelectVSParams,
@@ -368,7 +368,7 @@ export class ContractNoEstimateViewComponent implements OnInit {
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
             if (params.value) {
-              return params.value.ProductName;
+              return params.value.ProductCodeName;
             } else {
               return '';
             }
@@ -459,7 +459,7 @@ export class ContractNoEstimateViewComponent implements OnInit {
           editable: true,
           HaveThousand: true,
           resizable: true,
-          cellEditorFramework: NumberFieldEditableComponent,
+          cellEditorFramework: NumberInputComponentComponent,
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
             if (params.value) {
@@ -476,7 +476,7 @@ export class ContractNoEstimateViewComponent implements OnInit {
           editable: this.HaveSave,
           HaveThousand: true,
           resizable: true,
-          cellEditorFramework: NumberFieldEditableComponent,
+          cellEditorFramework: NumberInputComponentComponent,
           cellEditorParams: { IsFloat: true, FloatMaxLength: 4 },
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
@@ -494,7 +494,7 @@ export class ContractNoEstimateViewComponent implements OnInit {
           HaveThousand: true,
           resizable: true,
           editable: this.HaveSave,
-          cellEditorFramework: NumberFieldEditableComponent,
+          cellEditorFramework: NumberInputComponentComponent,
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
             if (params.value) {
@@ -511,7 +511,7 @@ export class ContractNoEstimateViewComponent implements OnInit {
           HaveThousand: true,
           resizable: true,
           editable: this.HaveSave,
-          cellEditorFramework: NumberFieldEditableComponent,
+          cellEditorFramework: NumberInputComponentComponent,
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
             if (params.value) {
@@ -759,7 +759,7 @@ export class ContractNoEstimateViewComponent implements OnInit {
         Weight: parseInt(node.data.Weight),
         ContractOrderItemID: node.data.ContractOrderItemID ? node.data.ContractOrderItemID : 0,
         // tslint:disable-next-line:max-line-length
-        ProductID: node.data.ProductName && node.data.ProductName.ProductID ? node.data.ProductName.ProductID : (node.data.ProductID ? node.data.ProductID : null),
+        ProductID: node.data.ProductCodeName && node.data.ProductCodeName.ProductID ? node.data.ProductCodeName.ProductID : (node.data.ProductID ? node.data.ProductID : null),
         // tslint:disable-next-line:max-line-length
         StartDate: node.data.ShortStartDate,
         // tslint:disable-next-line:max-line-length
@@ -782,7 +782,7 @@ export class ContractNoEstimateViewComponent implements OnInit {
     // });
   }
   onCellValueChanged(event) {
-    if (event.colDef && event.colDef.field === 'ProductName') {
+    if (event.colDef && event.colDef.field === 'ProductCodeName') {
       if (event.newValue && event.newValue.ProductID) {
         this.ProductRequest.GetProductScaleName(event.newValue.ProductID).subscribe(res => {
           const itemsToUpdate = [];
@@ -979,7 +979,7 @@ export class ContractNoEstimateViewComponent implements OnInit {
       }
     });
 
-    if (event.colDef && event.colDef.field === 'ProductName') {
+    if (event.colDef && event.colDef.field === 'ProductCodeName') {
       this.columnDef[2].cellEditorParams.Params.loading = true;
       this.ProductRequest.GetProductList(0,
         this.RegionCode,

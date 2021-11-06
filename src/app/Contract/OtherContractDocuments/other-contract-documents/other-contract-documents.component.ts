@@ -426,7 +426,8 @@ export class OtherContractDocumentsComponent implements OnInit {
             this.WorkflowObjectCode,
             null,
             null,
-            this.CartableUserID).subscribe(res => {
+            this.CartableUserID,
+            this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).subscribe(res => {
               this.ShowMessageBoxWithOkBtn('عدم تاييد درخواست صورتجلسه تحویل زمین با موفقيت انجام شد');
 
               this.ReadyToConfirm = 0;
@@ -448,7 +449,8 @@ export class OtherContractDocumentsComponent implements OnInit {
         this.WorkflowObjectCode,
         this.ModuleViewTypeCode,
         null,
-        this.CartableUserID).
+        this.CartableUserID,
+        this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).
         subscribe(res => {
           if (HasAlert) {
             this.ShowMessageBoxWithOkBtn('تایید درخواست صورتجلسه تحویل زمین با موفقیت انجام شد');
@@ -648,7 +650,8 @@ export class OtherContractDocumentsComponent implements OnInit {
         this.WorkflowObjectCode,
         this.ModuleViewTypeCode,
         null,
-        this.CartableUserID).subscribe(res => {
+        this.CartableUserID,
+        this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).subscribe(res => {
           if (alert) {
             this.ShowMessageBoxWithOkBtn('عدم تایید صورتجلسه تحویل زمین با موفقیت انجام شد');
           }

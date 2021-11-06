@@ -5,9 +5,10 @@ import { PriceListService } from 'src/app/Services/BaseService/PriceListService'
 import { AnalayzePriceTypeService } from 'src/app/Services/BaseService/AnalayzePriceTypeService';
 import { of } from 'rxjs';
 import { AnalayzePriceListService } from 'src/app/Services/BaseService/AnalayzePriceListService';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { round } from 'lodash';
 import { isUndefined } from 'util';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
+
 @Component({
   selector: 'app-contract-pay-distance-result',
   templateUrl: './contract-pay-distance-result.component.html',
@@ -74,7 +75,7 @@ export class ContractPayDistanceResultComponent implements OnInit {
           }
         },
         cellEditorParams: { IsFloat: true },
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
@@ -109,7 +110,7 @@ export class ContractPayDistanceResultComponent implements OnInit {
           }
         },
         cellEditorParams: { IsFloat: true },
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {

@@ -12,10 +12,10 @@ export class ContractEstimateService {
         );
     }
     GetAllWithContractOrderItemID(ContractOrderId: number) {
-        return this.http.post(window.location.origin + '/ContractOrderEstimate/GetAllWithContractOrderItemID', { ContractOrderId });
+        return this.http.get(window.location.origin + '/ContractOrderEstimate/GetAllWithContractOrderItemID', { ContractOrderId });
     }
     GetContractOrderIDByContractPay(ContractPayDate, ContractPayID) {
         // tslint:disable-next-line:max-line-length
-        return this.http.post(window.location.origin + '/ContractOrderEstimate/GetContractOrderIDByContractPay', { ContractPayDate, ContractPayID }, true);
+        return this.http.get(window.location.origin + '/ContractOrderEstimate/GetContractOrderIDByContractPay', { ContractPayDate, ContractPayID }, true);
     }
 }

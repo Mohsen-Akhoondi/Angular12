@@ -1,0 +1,92 @@
+<div id="container" style="clear: both;padding: 5px">
+  <div id="price-list-sidebar" malihu-scrollbar [scrollbarOptions]="scrollbarOptions"
+    style="width: 475px !important;min-width: 475px !important;">
+    <div style="margin: 5px;">
+      <table width="100%">
+        <tr>
+          <span class="table-cell-Lable">گروه واحد اجرایی</span>
+          <td width="80%">
+            <app-ng-select-virtual-scroll style="display: inline-block;width:100%;" [NgSelectParams]="NgSelectParams"
+              [Items]="RegionGroupItems" (selectedChange)="onChangeRegionGroup($event)">
+            </app-ng-select-virtual-scroll>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div id="content">
+      <div class="main-content" [style.height.%]="MainContentHeight">
+        <app-customized-tree [TreeHeight]="treeHeight" [SecondID]="" [InputParam]="TreeInputParam"
+          [FirstID]="NgSelectParams.selectedObject" (selectedchange)="tree_selectedchange($event)">
+        </app-customized-tree>
+
+        <div class="buttons-place" style="margin-bottom: 0%;">
+          <button *ngIf="!NeedSelected" id="btn5" class="btn btn-primary btnGreen"
+            (click)="OnCreateProductPatternEntry()"  [disabled]="hasCreate">
+            <img width="15px" height="15px" src="assets/Icons/ok.png" />
+            ایجاد
+          </button>
+          <button *ngIf="!NeedSelected" (click)="Btnclick('update')" id="btn2" class="btn btn-primary btnGreen">
+            <img width="15px" height="15px" src="assets/Icons/show.png" />
+            اصلاح
+          </button>
+          <button id="btn5" class="btn btn-primary btnGreen" (click)="OnDeleteProductPatternEntry()" 
+          [disabled]="hasCreate">
+            <img width="15px" height="15px" src="assets/Icons/delete.png" />
+            حذف
+          </button>
+
+        </div>
+      </div>
+    </div>
+    <app-customized-tree [TreeHeight]="treeHeight" [SecondID]="" [InputParam]="TreeInputParam"
+      [FirstID]="NgSelectParams.selectedObject" (selectedchange)="tree_selectedchange($event)"
+      [HasFilter]="false">
+    </app-customized-tree>
+
+  </div>
+  <div id="content">
+    <div class="main-content" [style.height.%]="MainContentHeight">
+      <div id="data-grid" class="data-grid">
+        <app-grid [columns]="gridcolumns" [rowsData]="gridrows" [isPagination]="false" [gridHeight]="93"
+          (GridReady)="onGridReady($event)" (RowDoubleClick)="onRowDoubleClicked($event)" (RowClick)="RowClick($event)">
+        </app-grid>
+      </div>
+
+      <div class="buttons-place">
+        <button *ngIf="!NeedSelected" [disabled]="hasChildren" id="btn5" class="btn btn-primary btnGreen"
+          (click)="OnCreatePriceListTopic()">
+          <img width="15px" height="15px" src="assets/Icons/ok.png" />
+          ایجاد ردیف
+        </button>
+        <button *ngIf="!NeedSelected" [disabled]="hasChildren" id="btn5" class="btn btn-primary btnGreen"
+          (click)="OnDeletePriceListTopic()">
+          <img width="15px" height="15px" src="assets/Icons/delete.png" />
+          حذف ردیف
+        </button>
+
+
+        <button *ngIf="NeedSelected" id="btn5" class="btn btn-primary btnGreen" (click)="onOkClick()">
+          <img width="15px" height="15px" src="assets/Icons/ok.png" />
+          تایید
+        </button>
+
+      </div>
+    </div>
+  </div>
+</div>
+<app-over-popup *ngIf="btnclicked" [HaveMaxBtn]="HaveMaxBtn" [startLeftPosition]="startLeftPosition"
+  [startTopPosition]="startTopPosition" [PopupType]="type" [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn"
+  [PercentWidth]="PercentWidth" [PopupParam]="type === 'message-box' ? alertMessageParams : paramObj"
+  [HaveHeader]="HaveHeader" (popupclosed)="popupclosed($event)"
+  (PopupOutPutParam)="type ==='message-box' ? MessageBoxAction($event) : getOutPutParam($event)">
+</app-over-popup>
+
+<!-- <app-over-popup *ngIf="btnclicked" [PopupType]="type" [HaveMaxBtn]="type === 'PriceListAnalayze' && ModuleCode === 2501"
+  [startLeftPosition]="OverstartLeftPosition" [startTopPosition]="OverstartTopPosition"
+  [PixelHeight]="type === 'child-price-list-topic-page'? 550 :'' "
+  [PixelWidth]="type === 'child-price-list-topic-page'? 1100 :'' "
+  [PopupParam]="type === 'message-box' ? alertMessageParams : paramObj" [HaveHeader]="HaveHeader"
+  (PopupOutPutParam)="type === 'price-list-topic-dataentry-page' ? IsChangedPrcieListTopic($event) : ''"
+  (popupclosed)="popupclosed($event)">
+</app-over-popup> -->

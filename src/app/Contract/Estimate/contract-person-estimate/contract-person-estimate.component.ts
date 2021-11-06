@@ -657,7 +657,8 @@ export class ContractPersonEstimateComponent implements OnInit {
       1,
       this.WorkflowObjectCode,
       null,null,
-      this.CartableUserID).subscribe(res => {
+      this.CartableUserID,
+      this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).subscribe(res => {
         this.ShowMessageBoxWithOkBtn('تایید برآورد اولیه با موفقیت انجام شد');
         this.RefreshCartable.RefreshCartable();
         if (this.CancelCode === 22) {
@@ -695,7 +696,8 @@ export class ContractPersonEstimateComponent implements OnInit {
           0,
           this.WorkflowObjectCode,
           null,null,
-          this.CartableUserID).subscribe(res => {
+          this.CartableUserID,
+          this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).subscribe(res => {
             this.ShowMessageBoxWithOkBtn('عدم تایید برآورد اولیه با موفقیت انجام شد');
             if (this.ConfirmCode === 21) {
               this.ReadyToConfirm = 0;

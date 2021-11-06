@@ -28,6 +28,7 @@ export class InvoiceDataModel {
     AdministratorActorID: number;
     ShortInvoiceDate: string;
     IsReturn: boolean;
+    IsMultiInvoice: boolean;
    public Init() {
         this.RegionCode = null;
         this.FinYearCode = null;
@@ -56,5 +57,6 @@ export class InvoiceDataModel {
         this.AdministratorActorID = null;
         this.ShortInvoiceDate = null;
         this.IsReturn = false;
+        this.IsMultiInvoice = false;
     }
 }
