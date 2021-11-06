@@ -12,6 +12,9 @@ export class WorkflowService {
     GetWorkflowType() {
         return this.http.get(window.location.origin + '/Workflow/GetWorkflowType', null, false);
     }
+    GetWorkflowActionType() {
+        return this.http.get(window.location.origin + '/Workflow/GetWorkflowActionType', null, false);
+    }
     GetToWorkflowType() {
         return this.http.get(window.location.origin + '/Workflow/GetToWorkflowType', null, false);
     }
@@ -20,6 +23,14 @@ export class WorkflowService {
     }
     GetWorkflowStatus() {
         return this.http.get(window.location.origin + '/Workflow/GetWorkflowStatus', null);
+    }
+
+    GetWorkflowObject() {
+        return this.http.get(window.location.origin + '/Workflow/GetWorkflowObject', null);
+    }
+
+    SaveWorkflowObject(AWorkflowObjectServiceList: any) {
+        return this.http.post(window.location.origin + '/Workflow/SaveWorkflowObject', { AWorkflowObjectServiceList });
     }
     SaveWorkflowStatus(AWorkflowStatusList: any) {
         return this.http.post(window.location.origin + '/Workflow/SaveWorkflowStatus', { AWorkflowStatusList });
@@ -106,7 +117,7 @@ export class WorkflowService {
             { WorkFlowTypeCode: WorkFlowTypeCode });
     }
     GetStartModuleViewTypeCode(RegionCode, ModuleCode, WorkflowTypeCode, ObjectID) {
-        return this.http.get(window.location.origin + '/Workflow/GetStartModuleViewTypeCode',
+        return this.http.post(window.location.origin + '/Workflow/GetStartModuleViewTypeCode',
             { RegionCode, ModuleCode, WorkflowTypeCode, ObjectID });
     }
     // GetWorkFlowType(RegionCode, ModuleCode) {
@@ -126,12 +137,15 @@ export class WorkflowService {
             { ToWorkflowTypeCode }, false);
     }
 
-    ListAllTransition() {
-        return this.http.get(window.location.origin + '/Workflow/ListAllTransition', null);
+    ListAllTransition(WorkflowTypeCode: number = null) {
+        return this.http.get(window.location.origin + '/Workflow/ListAllTransition', { WorkflowTypeCode });
     }
 
-    ListAllWorkLog() {
-        return this.http.get(window.location.origin + '/Workflow/ListAllWorkLog', null);
+    ListAllWorkLog(WorkFlowInstanceId: number = null, WorkflowLogList: any = []) {
+        return this.http.get(window.location.origin + '/Workflow/ListAllWorkLog', {
+            WorkFlowInstanceId,
+            WorkflowLogList
+        });
     }
 
     GetWorkflowStatusListForNg() {
@@ -156,8 +170,8 @@ export class WorkflowService {
     RunAfterActionMethod(WorkListDetailList: any) {
         return this.http.post(window.location.origin + '/Workflow/RunAfterActionMethod', { WorkListDetailList });
     }
-    GetWfInstanceIDByObjIDAndRegionCode(ObjectID: number, RegionCode: number) {
-        return this.http.get(window.location.origin + '/Workflow/GetWfInstanceIDByObjIDAndRegionCode', { ObjectID, RegionCode });
+    GetWfInstanceIDByObjIDAndRegionCode(ObjectID: number, RegionCode: number, CheckIsNotCancel = false) {
+        return this.http.get(window.location.origin + '/Workflow/GetWfInstanceIDByObjIDAndRegionCode', { ObjectID, RegionCode, CheckIsNotCancel });
     }
     GetWfActionTypeList() {
         return this.http.get(window.location.origin + '/Workflow/GetWfActionTypeList', null, false);
@@ -173,5 +187,21 @@ export class WorkflowService {
             {
                 IsPerson, RegionCode, WorkflowObjectCode, FromDate, ToDate, WorkflowNodeID
             }, true);
+    }
+    SaveWorkflowActionType(AWorkflowActionTypeList: any) {
+        return this.http.post(window.location.origin + '/Workflow/SaveWorkflowActionType', { AWorkflowActionTypeList });
+    }
+
+    SaveNewWorkflowStatus(AWorkflowStatusList: any) {
+        return this.http.post(window.location.origin + '/Workflow/SaveNewWorkflowStatus', { AWorkflowStatusList });
+    }
+    GetNodesByInstance(WorkFlowInstanceID: number) {
+        return this.http.get(window.location.origin + '/Workflow/GetNodesByInstance', { WorkFlowInstanceID });
+    }
+    GetEdgesByInstance(WorkFlowInstanceID: number) {
+        return this.http.get(window.location.origin + '/Workflow/GetEdgesByInstance', { WorkFlowInstanceID });
+    }
+    GetFindWorkFlowUser(WorkflowTransitionID,WorkflowLogID){
+        return this.http.get(window.location.origin + '/Workflow/FindWorkFlowUser' , {WorkflowTransitionID , WorkflowLogID});
     }
 }

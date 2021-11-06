@@ -174,14 +174,28 @@
     [src]="row.WorkflowOperationCode === 2 || row.WorkflowOperationCode === 4 ? 'assets/Icons/Return2.png': ''" 
     title="بازگشتی"/>
 </ng-template>
-<app-over-popup *ngIf="isClicked" [PopupType]="type"
+<app-over-popup *ngIf="isClicked" 
+  [PopupType]="type"
   [PopupParam]="type === 'message-box' ? alertMessageParams : type ==='user-select' ? '' : paramObj"
-  (popupclosed)="popupclosed($event)" [HaveMaxBtn]="HaveMaxBtn" [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn"
-  (PopupOutPutParam)="getOutPutParam($event)" [startLeftPosition]="startLeftPosition"
-  [startTopPosition]="startTopPosition" [HaveHeader]="HaveHeader"
+  (popupclosed)="popupclosed($event)" 
+  [HaveMaxBtn]="HaveMaxBtn" 
+  [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn"
+  (PopupOutPutParam)="getOutPutParam($event)" 
+  [startLeftPosition]="startLeftPosition"
+  [startTopPosition]="startTopPosition" 
+  [HaveHeader]="HaveHeader"
   [minHeightPixel]="type === 'product-request-page' || type === 'ground-delivery-minutes' || type === 'user-work-log-details' ? MinHeightPixel :''"
   [minWidthPixel]="type === 'application-note' ? MinWidthPixel : ''"
   [PercentWidth]="type === 'user-select' || type === 'ground-delivery-minutes' || type === 'corporate2' || type === 'person2'? PercentWidth : ''"
   [MainMaxwidthPixel]="type === 'ground-delivery-minutes' ? MainMaxwidthPixel : type === 'application-note' ? 850: ''"
   [MainMinwidthPixel]="type === 'message-box' ? '' : MainMinwidthPixel">
+</app-over-popup>
+<app-over-popup
+  *ngIf="btnclicked"
+  [PopupType]="PopupType"
+  [startLeftPosition]="450"
+  [startTopPosition]="240"
+  (popupclosed)="popupMessageclosed($event)"
+  [PopupParam]="alertMessageParams"
+  (PopupOutPutParam)= "MessageBoxAction($event)" >
 </app-over-popup>
