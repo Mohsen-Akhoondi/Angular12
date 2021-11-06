@@ -164,7 +164,10 @@ export class CartableServices {
         WorkflowObjectCode: number,
         ModuleViewTypeCode: number,
         OrginalModuleCode?: any,
-        CartableUserID?: number) {
+        CartableUserID?: number,
+        JoinWorkflowLogID?: string,
+        IsFromProvider = null,
+        IsEndFlow = null) {
         return this.http.post(window.location.origin + '/Home/UserUpdateWorkFlow', {
             WorkFlowID,
             ObjectID,
@@ -174,7 +177,10 @@ export class CartableServices {
             WorkflowObjectCode,
             ModuleViewTypeCode,
             OrginalModuleCode,
-            CartableUserID
+            CartableUserID,
+            IsFromProvider,
+            JoinWorkflowLogID,
+            IsEndFlow
         });
     }
 
@@ -221,7 +227,7 @@ export class CartableServices {
         return this.http.post(window.location.origin + '/Workflow/SaveWorkflowTypeModule', { AWorkflowTypeModuleList });
     }
     GetFinWorkFlowByWorkLogDetailID(WorkLogIDs: any[]) {
-        return this.http.post(window.location.origin + '/Home/GetFinWorkFlowByWorkLogDetailID', { WorkLogIDs });
+        return this.http.get(window.location.origin + '/Home/GetFinWorkFlowByWorkLogDetailID', { WorkLogIDs });
     }
 
     GetApplicationNote() {
@@ -231,5 +237,11 @@ export class CartableServices {
         return this.http.get(window.location.origin + '/Workflow/FreeWorkFlow', {
             WorkFlowID
         });
+    }
+    checkQuestionLink() {
+        return this.http.get(window.location.origin + '/Home/checkQuestionLink', null);
+    }
+    RedirectToSurveyPage() {
+        return this.http.get(window.location.origin + '/Home/OpenSurveyPage', null);
     }
 }
