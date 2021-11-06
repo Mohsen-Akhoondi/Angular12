@@ -93,7 +93,7 @@ export class ArchiveYearDocumentComponent implements OnInit {
         });
       this.Users.GetActiveActorID().subscribe(res => {
         if (res) {
-          this.ActorID = res;
+          this.ActorID = res.ActorID;
         }
       });
     });

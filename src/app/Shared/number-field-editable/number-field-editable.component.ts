@@ -14,6 +14,7 @@ export class NumberFieldEditableComponent
   IsFloat = false;
   Value;
   OldIndexOfDot = 0;
+  GetMinusNumber = false;
   constructor() { }
   @ViewChild('inputRef') inputCellEditorElement;
   ngOnInit() { }
@@ -43,6 +44,7 @@ export class NumberFieldEditableComponent
           keycode === 8 ||
           keycode === 37 ||
           keycode === 39 ||
+          (this.GetMinusNumber === true ? keycode === 45 : false) ||
           (keycode >= 48 && keycode <= 57) &&
           !(this.FloatMaxLength &&
             !isUndefined(this.Value) &&
@@ -75,6 +77,7 @@ export class NumberFieldEditableComponent
     this.MaxLength = params.MaxLength;
     this.IsFloat = params.IsFloat;
     this.FloatMaxLength = params.FloatMaxLength;
+    this.GetMinusNumber = params.GetMinusNumber;
     if (params.value) {
       this.Value = params.value;
     }

@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 
 @Component({
@@ -21,10 +22,30 @@ export class ChooseReportCOntractPayItemEstimateComponent implements OnInit {
   ChooseReportClosed: any;
   RegionCode: number;
   SumFinalAmountCOEFPact = 0;
+  ContractAgentParams = {
+    bindLabelProp: 'ContractAgentName',
+    bindValueProp: 'ContractAgentCode',
+    placeholder: '',
+    MinWidth: '130px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    Required: true,
+    clearable: false
+  };
+  ContractAgentSet = [];
 
-  constructor(private Report: ReportService) { }
+  constructor(private Report: ReportService,
+    private contractpaydetail: ContractPayDetailsService,) { }
 
   ngOnInit() {
+    this.contractpaydetail.GetContractAgent().subscribe(res => {
+      this.ContractAgentSet = res;
+      if (!this.ContractAgentParams.selectedObject) {
+        this.ContractAgentParams.selectedObject = res[0].ContractAgentCode;
+      }
+    });
   }
 
   onPrint() {
@@ -39,7 +60,7 @@ export class ChooseReportCOntractPayItemEstimateComponent implements OnInit {
     this.RegionCode = this.ReportParam.RegionCode;
     const ContractID = this.ReportParam.SelectedContractID;
     const CPCostfactorID = this.ReportParam.SelectedCostFactorID;
-    const ContractAgentCode = this.ReportParam.ContractAgentCode;
+    const ContractAgentCode = this.ContractAgentParams.selectedObject;
     this.SumFinalAmountCOEFPact = this.ReportParam.SumFinalAmountCOEFPact;
     const HeaderName = 'متره درخواست پرداخت';
 

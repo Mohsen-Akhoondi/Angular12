@@ -488,14 +488,14 @@ export class ContractListPageComponent implements OnInit {
           field: 'RegionAreaCode',
           cellEditorFramework: NgSelectVirtualScrollComponent,
           cellEditorParams: {
-            Params: this.RegionAreaParams, 
+            Params: this.RegionAreaParams,
             Items: [],
             Owner: this
           },
           cellRenderer: 'SeRender',
           valueFormatter: function currencyFormatter(params) {
             if (params.value) {
-              return params.value.RegionAreaCode;             
+              return params.value.RegionAreaCode;
             } else {
               return '';
             }
@@ -613,40 +613,52 @@ export class ContractListPageComponent implements OnInit {
   }
 
   getNewData(): void {
-    this.Workflow.GetFinYearList().subscribe(res => {
-      this.FinYearItems = res;
-      this.FromFinYearParams.selectedObject = this.FinYearItems[0].UserFinYearCode;
-      this.ToFinYearParams.selectedObject = this.FinYearItems[0].UserFinYearCode;
-    });
-    if (this.InputParam && this.InputParam.RegionList && this.InputParam.RegionList.length > 0) {
-      this.HasRegion = true;
-      this.ReigonListSet = this.InputParam.RegionList;
-      this.RegionParams.selectedObject = this.InputParam.RegionList[0].RegionCode;
-      this.selectedRegion = this.InputParam.RegionList[0].RegionCode;
+    if (this.InputParam && this.InputParam.IsProviderContractList) {
+      this.ActorID = this.InputParam.ActorID;
+      this.gridHeight = 92.7;
+        this.BoxDevHeight = 100;
+        this.ContractList.GetProviderContractList(null, this.ModuleCode,this.IsCost, this.ActorID).subscribe(res =>
+            this.rowData = res);
+       
     } else {
-      this.HasRegion = false;
-    }
-    if (this.HasRegion) {
-      if (!this.ISIRVersion && this.ModuleCode === 2645 || this.ModuleCode === 2516) {
-        this.BoxDevHeight = 55;
-        this.gridHeight = 87;
+
+      this.Workflow.GetFinYearList().subscribe(res => {
+        this.FinYearItems = res;
+        this.FromFinYearParams.selectedObject = this.FinYearItems[0].UserFinYearCode;
+        this.ToFinYearParams.selectedObject = this.FinYearItems[0].UserFinYearCode;
+      });
+      if (this.InputParam && this.InputParam.RegionList && this.InputParam.RegionList.length > 0) {
+        this.HasRegion = true;
+        this.ReigonListSet = this.InputParam.RegionList;
+        this.RegionParams.selectedObject = this.InputParam.RegionList[0].RegionCode;
+        this.selectedRegion = this.InputParam.RegionList[0].RegionCode;
       } else {
-        this.BoxDevHeight = this.ModuleCode === 2875 ? 60 : 66;
-        this.gridHeight = 90;
+        this.HasRegion = false;
       }
-    } else if (this.ModuleCode === 2785 || this.ModuleCode === 2872) {
-      if (this.InputParam && this.InputParam.ActorID) {
-        this.ActorID = this.InputParam.ActorID;
+      if (this.HasRegion) {
+        if (!this.ISIRVersion && this.ModuleCode === 2645 || this.ModuleCode === 2516) {
+          this.BoxDevHeight = 55;
+          this.gridHeight = 87;
+        } else {
+          this.BoxDevHeight = this.ModuleCode === 2875 ? 60 : 66;
+          this.gridHeight = 90;
+        }
+      } else if (this.ModuleCode === 2785 || this.ModuleCode === 2872) {
+        if (this.InputParam && this.InputParam.ActorID) {
+          this.ActorID = this.InputParam.ActorID;
+        }
+        this.gridHeight = 92.7;
+        this.BoxDevHeight = 100;
+        this.getContractListData(null);
+      } else {
+        this.gridHeight = 92.7;
+        this.BoxDevHeight = 90;
+        this.getContractListData(-1);
       }
-      this.gridHeight = 92.7;
-      this.BoxDevHeight = 100;
-      this.getContractListData(null);
-    } else {
-      this.gridHeight = 92.7;
-      this.BoxDevHeight = 90;
-      this.getContractListData(-1);
     }
+
   }
+
   getContractListData(region): void {
     this.ContractList.GetContractList(region, this.ModuleCode, false, false, false, this.IsCost,
       null, null, null, null, null, null, null, this.ActorID).subscribe(res =>
@@ -698,7 +710,7 @@ export class ContractListPageComponent implements OnInit {
           this.type === 'PriceList_contract_estimate' &&
           (this.ModuleCode === 2501 || this.ModuleCode === 2645 || this.ModuleCode === 2300 || this.ModuleCode === 2755
             || this.ModuleCode === 2516 || this.ModuleCode === 2769 || this.ModuleCode === 2875 || this.ModuleCode === 2876); // rfc 52104
-        this.PixelHeight = this.type === 'PriceList_contract_estimate' ? 630:530;
+        this.PixelHeight = this.type === 'PriceList_contract_estimate' ? 630 : 530;
         this.HeightPercentWithMaxBtn =
           this.type === 'PriceList_contract_estimate' && this.ModuleCode === 2501 ? 98 :
             // tslint:disable-next-line:max-line-length
@@ -784,7 +796,7 @@ export class ContractListPageComponent implements OnInit {
           IsEditable: false,
           SelectedContractID: this.selectedRow.data.ContractId,
           ProductRequestID: this.selectedRow.data.ProductRequestID,
-          ModuleViewTypeCode : 5555,
+          ModuleViewTypeCode: 5555,
           BeforPageTypeName: 'contract-list-page'
         };
         this.btnclicked = true;
@@ -1014,7 +1026,7 @@ export class ContractListPageComponent implements OnInit {
     }
 
     if (event.colDef && event.colDef.field === 'RegionAreaCode') {
-  
+
       this.ProductRequest.GetRegionAreaList(event.data.WorkPlaceCode).subscribe(res => {
         this.RefreshCartable.RefreshItemsVirtualNgSelect({
           List: res,

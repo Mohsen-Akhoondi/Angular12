@@ -2,9 +2,7 @@
   class="row for-append-date" style="clear: both ; ">
   <div id="content" style="width: 100%;height: 99%;">
     <div id="mainformbody" class="main-form-body" [style.height.%]="87" style="margin: 5px; padding:2px 10px">
-
       <div id="tabcontent" class="tab-content" style="margin-top: 5px;" [style.height.%]="100">
-
         <div role="tabpanel" id="shenasnameh" class="tab-pane fade show active"
           style="height: 100%; margin-bottom: 5px;">
           <fieldset class="feild-set" style="display: inherit">
@@ -25,7 +23,7 @@
                     readonly />
                 </td>
                 <td style="width: 25%;">
-                  <span class="table-cell-Lable"> تاريخ پايان قرارداد</span><input style="width: 60%; "
+                  <span class="table-cell-Lable"> تاريخ پايان قرارداد</span><input style="width: 55%; "
                     class="form-control input-style" type="text" name="first" value="{{ ToContractDatePersian}}"
                     readonly />
                 </td>
@@ -39,19 +37,17 @@
                   <span class="table-cell-Lable">مبلغ قرارداد</span><input style="width: 60%; "
                     class="form-control input-style" type="text" name="first" value="{{ ContractAmount }}" readonly />
                 </td>
-
                 <td style="width: 25%">
                   <span class="table-cell-Lable"> شماره نامه</span><input style="width: 55%; "
                     class="form-control input-style" type="text" name="first" value="{{ LetterNo }}" readonly />
                 </td>
                 <td style="width: 25%">
-                  <span class="table-cell-Lable"> تاريخ نامه</span><input style="width: 60%; "
+                  <span class="table-cell-Lable"> تاريخ نامه</span><input style="width: 55%; "
                     class="form-control input-style" type="text" name="first" value="{{ LetterDatePersian }}"
                     readonly />
                 </td>
               </tr>
               <tr>
-
                 <td style="width: 25%">
                   <span class="table-cell-Lable"> مبلغ پيش پرداخت </span><input style="width: 60%; "
                     class="form-control input-style" type="text" name="first" value="{{ PrePayAmount }}" readonly />
@@ -66,7 +62,7 @@
                     readonly />
                 </td>
                 <td style="width: 25%">
-                  <span class="table-cell-Lable">تاريخ شروع استهلاک</span><input style="width: 60%; "
+                  <span class="table-cell-Lable">تاريخ شروع استهلاک</span><input style="width: 55%; "
                     class="form-control input-style" type="text" name="first" value="{{ DepreciationStartDatePersian }}"
                     readonly />
                 </td>
@@ -77,47 +73,59 @@
                     class="form-control input-style" type="text" name="first" value="{{ ActLocationName }}" readonly />
                 </td>
                 <td style="width: 25%">
-                  <span class="table-cell-Lable">مرکز هزينه</span><input style="width: 55%; "
-                    class="form-control input-style" type="text" name="first" value="{{ SubCostCenterName }}"
-                    readonly />
+                  <span class="table-cell-Lable">تاریخ شروع آخرین مرحله</span>
+                  <input style="width: 55%; " class="form-control input-style" type="text" name="first"
+                    value="{{ MinStartDate }}" readonly />
                 </td>
                 <td style="width: 25%">
-                  <span style="margin: 0;margin-left: 10px" class="table-cell-Lable">قرارداد حجمی</span>
-                  <div style="display: inline-block; width: 60%; text-align: right;">
-                    <app-custom-check-box style="vertical-align: sub; " [configurationInfo]="CustomCheckBoxConfig" 
-                    [isSelected]="IsVolumetric" (PrettyCheckBoxChange)="OnChIsVolumetricChange($event)">
-                    </app-custom-check-box> 
-                  </div>               
+                  <span class="table-cell-Lable">تاریخ پایان آخرین مرحله</span>
+                  <input style="width: 55%; " class="form-control input-style" type="text" name="first"
+                    value="{{ MaxEndDate }}" readonly />
                 </td>
               </tr>
               <tr>
-
                 <td style="width: 100%" colspan="2">
                   <span class="table-cell-Lable">موضوع</span><input style="width: 80%" class="form-control input-style"
                     type="text" name="first" value="{{ Subject }}" readonly />
                 </td>
                 <td style="width: 25%">
                   <span class="table-cell-Lable"> مبلغ آخرین مرحله</span><input style="width: 55%; "
-                    class="form-control input-style" type="text" name="first" value="{{ sumFinalAmountStr }}" readonly />
+                    class="form-control input-style" type="text" name="first" value="{{ sumFinalAmountStr }}"
+                    readonly />
+                </td>
+                <td style="width: 25%">
+                  <span style="margin: 0;margin-left: 10px" class="table-cell-Lable">قرارداد تجمیعی</span>
+                  <app-custom-check-box style="vertical-align: sub; " [configurationInfo]="CustomCheckBoxConfig"
+                    [isSelected]="IsCumulative" (PrettyCheckBoxChange)="OnChIsCumulativeChange($event)">
+                  </app-custom-check-box>
+                  <span style="margin: 0;margin-left: 10px" class="table-cell-Lable">قرارداد حجمی</span>
+                  <app-custom-check-box style="vertical-align: sub; " [configurationInfo]="CustomCheckBoxConfig2"
+                    [isSelected]="IsVolumetric" (PrettyCheckBoxChange)="OnChIsVolumetricChange($event)">
+                  </app-custom-check-box>
                 </td>
               </tr>
               <tr>
                 <td style="width: 100%" colspan="2">
-                  <span class="table-cell-Lable">توضيحات</span><input style="width: 80%"
-                    class="form-control input-style" type="text" name="first" value="{{ Note }}" readonly />
-                </td>
-                <td style="width: 25%">
-                  <span class="table-cell-Lable">تاریخ شروع آخرین مرحله</span><input style="width: 55%; "
-                    class="form-control input-style" type="text" name="first" value="{{ MinStartDate }}"
+                  <span class="table-cell-Lable">توضیحات</span>
+                  <input style="width: 80%" class="form-control input-style" type="text" name="first" value="{{ Note }}"
                     readonly />
                 </td>
                 <td style="width: 25%">
-                  <span class="table-cell-Lable">تاریخ پایان آخرین مرحله</span><input style="width: 55%; "
-                    class="form-control input-style" type="text" name="first" value="{{ MaxEndDate }}"
+                  <span class="table-cell-Lable">مرکز هزينه</span><input style="width: 55%; "
+                    class="form-control input-style" type="text" name="first" value="{{ SubCostCenterName }}"
                     readonly />
+                </td>
+                <td style="width: 25%" *ngIf="ModuleCode === 3008">
+                  <span class="table-cell-Lable">عدم کنترل تاریخ</span>
+                  <app-custom-check-box style="vertical-align: sub; " [configurationInfo]="CustomCheckBoxConfig1"
+                    [isSelected]="NotControllingPayDatePeriod" (PrettyCheckBoxChange)="OnChIsNotContollingPayDatePeriodChange($event)">
+                  </app-custom-check-box>
+                  <span class="table-cell-Lable">نشانگر چند فاکتوری</span>
+                  <app-custom-check-box style="vertical-align: sub; " [configurationInfo]="CustomCheckBoxConfig2"
+                    [isSelected]="IsMultiInvoice" (PrettyCheckBoxChange)="OnChIsMultiInvoiceChange($event)">
+                  </app-custom-check-box>
                 </td>
               </tr>
-
             </table>
           </fieldset>
           <ul style="margin-top: 5px" class="nav nav-tabs" role="tablist">
@@ -132,19 +140,20 @@
               <a class="nav-link" href="#referencess-{{BeforPageTypeName}}" role="tab" data-toggle="tab">عوامل تعديل</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#referencesss-{{BeforPageTypeName}}" role="tab" data-toggle="tab">اطلاعات مالي</a>
+              <a class="nav-link" href="#referencesss-{{BeforPageTypeName}}" role="tab" data-toggle="tab">اطلاعات
+                مالي</a>
             </li>
             <li *ngIf="IsInCome" class="nav-item">
               <a class="nav-link" href="#AssetIncome-{{BeforPageTypeName}}" role="tab" data-toggle="tab">منبع درآمد</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#RelatedProduct-{{BeforPageTypeName}}" role="tab" data-toggle="tab">اقلام تعرفه</a>
+              <a class="nav-link" href="#RelatedProduct-{{BeforPageTypeName}}" role="tab" data-toggle="tab">اقلام
+                تعرفه</a>
             </li>
           </ul>
           <div class="tab-content" style="margin-top: 5px;" [style.height.%]="OuterDivPanelHeight">
-
-            <div role="tabpanel" class="tab-pane fade show active" id="profilee-{{BeforPageTypeName}}" [style.height.%]="PanelHeightInTab"
-              style=" margin-bottom: 5px;">
+            <div role="tabpanel" class="tab-pane fade show active" id="profilee-{{BeforPageTypeName}}"
+              [style.height.%]="PanelHeightInTab" style=" margin-bottom: 5px;">
               <div style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);"
                 [style.height.%]="T11HeightPercent">
                 <!-- شماره مرحله تاريخ  -->
@@ -153,19 +162,20 @@
                 </app-grid>
               </div>
             </div>
-
-            <div role="tabpanel" class="tab-pane fade" id="buzzz-{{BeforPageTypeName}}" [style.height.%]="PanelHeightInTab"
-              style="margin-bottom: 5px;">
+            <div role="tabpanel" class="tab-pane fade" id="buzzz-{{BeforPageTypeName}}"
+              [style.height.%]="PanelHeightInTab" style="margin-bottom: 5px;">
               <div [style.height.%]="T12HeightPercent"
                 style="border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
                 <!-- نام نقش نوع نقش  -->
                 <app-grid (RowClick)="ContractPersonRowClick($event)" (GridReady)="onGridReady($event)"
                   [columns]="adContractPersoncol" [IsEditable]="IsEditable" [rowsData]="ContractPersonListData"
-                  (CellValueChanged)="onCellValueChanged($event)" [gridHeight]="GridHeight"></app-grid>
+                  [gridHeight]="GridHeight"
+                  (cellEditingStarted)="onContractPersoncellEditingStarted($event)"></app-grid>
               </div>
             </div>
 
-            <div role="tabpanel" class="tab-pane fade" id="referencess-{{BeforPageTypeName}}" [style.height.%]="PanelHeightInTab">
+            <div role="tabpanel" class="tab-pane fade" id="referencess-{{BeforPageTypeName}}"
+              [style.height.%]="PanelHeightInTab">
               <div [style.height.%]="T13HeightPercent" style="width: 100%; margin-bottom: 5px;">
                 <div class="bntBox" style="height: 98%; padding: 0 1% 0 0;">
                   <div class="card-block" style="padding: 4px 5px 0px 5px;margin: 5px;">
@@ -174,29 +184,36 @@
                         <tr>
                           <td>
                             <label style="margin-right: 5px" for="s-1" class="col-form-label FontSize12">سال
-                              مبنا</label></td>
+                              مبنا</label>
+                          </td>
                           <td>
-                            <div class="col-md-2">                           
-                              <app-ng-select-virtual-scroll style="display: inline-block;width: 55%; min-width: 180px;margin-right: 0px;"
-                                [Disabled]="!IsEditable" class="select-general-for-lable" [NgSelectParams]="PriceListTopicParams"
-                                [Items]="PriceListTopicsSet" (selectedChange)="onChangePriceListTopicObj($event)">
+                            <div class="col-md-2">
+                              <app-ng-select-virtual-scroll
+                                style="display: inline-block;width: 55%; min-width: 180px;margin-right: 0px;"
+                                [Disabled]="!IsEditable" class="select-general-for-lable"
+                                [NgSelectParams]="PriceListTopicParams" [Items]="PriceListTopicsSet"
+                                (selectedChange)="onChangePriceListTopicObj($event)">
                               </app-ng-select-virtual-scroll>
                             </div>
                           </td>
                           <td>
                             <label style="margin-right: 5px" for="s-1" class="col-form-label FontSize12">نوع فهرست
-                              بها</label></td>
+                              بها</label>
+                          </td>
                           <td>
-                            <div class="col-md-2">                           
-                              <app-ng-select-virtual-scroll style="display: inline-block;width: 55%; min-width: 180px;margin-right: 0px;" [Disabled]="!IsEditable"
-                                class="select-general-for-lable" [NgSelectParams]="PriceListTypeParams" [Items]="PriceListTypeSet"
+                            <div class="col-md-2">
+                              <app-ng-select-virtual-scroll
+                                style="display: inline-block;width: 55%; min-width: 180px;margin-right: 0px;"
+                                [Disabled]="!IsEditable" class="select-general-for-lable"
+                                [NgSelectParams]="PriceListTypeParams" [Items]="PriceListTypeSet"
                                 (selectedChange)="onChangePriceListTypeObj($event)">
                               </app-ng-select-virtual-scroll>
                             </div>
                           </td>
                           <td>
                             <label style="margin-right: 5px" for="s-1" class="col-form-label FontSize12">تاريخ شروع به
-                              کار</label></td>
+                              کار</label>
+                          </td>
                           <td>
                             <div class="col-md-2" style="padding-right: 15px;">
                               <app-jalali-datepicker [WidthPx]="180" [Disabled]="!IsDisplay">
@@ -207,7 +224,8 @@
                         <tr>
                           <td>
                             <label style="margin-right: 5px" for="s-1" class="col-form-label FontSize12">سه ماه
-                              مبنا</label></td>
+                              مبنا</label>
+                          </td>
                           <td>
                             <div class="col-md-2" style="padding-right: 10px;">
                               <app-ng-select-virtual-scroll [Disabled]="!IsEditable"
@@ -219,7 +237,8 @@
                           </td>
                           <td>
                             <label style="margin-right: 20px" for="s-1" class="col-form-label FontSize12">ضريب محاسبه
-                              تعديل</label></td>
+                              تعديل</label>
+                          </td>
                           <td>
                             <div class="col-md-2">
                               <input style="height: 28px; min-width: 180px;" class="form-control input-style fontsize"
@@ -228,11 +247,14 @@
                           </td>
                           <td>
                             <label style="margin-right: 34px" for="s-1" class="col-form-label FontSize12">نوع شاخص
-                              تعديل</label></td>
+                              تعديل</label>
+                          </td>
                           <td>
                             <div class="col-md-2">
-                              <app-ng-select-virtual-scroll style="display: inline-block; min-width: 180px;margin-right: 0px;"
-                                [Disabled]="!IsEditable" class="select-general-for-lable" [NgSelectParams]="LevelParams" [Items]="LevelSet">
+                              <app-ng-select-virtual-scroll
+                                style="display: inline-block; min-width: 180px;margin-right: 0px;"
+                                [Disabled]="!IsEditable" class="select-general-for-lable" [NgSelectParams]="LevelParams"
+                                [Items]="LevelSet">
                               </app-ng-select-virtual-scroll>
                             </div>
                           </td>
@@ -244,8 +266,8 @@
               </div>
             </div>
 
-            <div role="tabpanel" class="tab-pane fade" id="referencesss-{{BeforPageTypeName}}" style="margin-bottom: 5px;"
-              [style.height.%]="PanelHeightInTab">
+            <div role="tabpanel" class="tab-pane fade" id="referencesss-{{BeforPageTypeName}}"
+              style="margin-bottom: 5px;" [style.height.%]="PanelHeightInTab">
               <div [style.height.%]="99" class="info-div">
 
                 <table style="width: 100%;">
@@ -308,41 +330,43 @@
                 </table>
               </div>
             </div>
-            <div role="tabpanel" class="tab-pane fade" id="AssetIncome-{{BeforPageTypeName}}" [style.height.%]="PanelHeightInTab"
-              style=" margin-bottom: 5px;">
+            <div role="tabpanel" class="tab-pane fade" id="AssetIncome-{{BeforPageTypeName}}"
+              [style.height.%]="PanelHeightInTab" style=" margin-bottom: 5px;">
               <div style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);"
                 [style.height.%]="T11HeightPercent">
-                <app-grid (GridReady)="onContractAssetIncomeGridReady($event)"
-                  [columns]="ContractAssetIncomecol" [IsEditable]="IsEditable" [rowsData]="ContractAssetIncomeListData"
-                  (CellValueChanged)="onContractAssetIncomeCellValueChanged($event)" [gridHeight]="GridHeight"></app-grid>
+                <app-grid (GridReady)="onContractAssetIncomeGridReady($event)" [columns]="ContractAssetIncomecol"
+                  [IsEditable]="IsEditable" [rowsData]="ContractAssetIncomeListData"
+                  (CellValueChanged)="onContractAssetIncomeCellValueChanged($event)" [gridHeight]="GridHeight">
+                </app-grid>
               </div>
-            </div> 
-            <div role="tabpanel" class="tab-pane fade" id="RelatedProduct-{{BeforPageTypeName}}" [style.height.%]="PanelHeightInTabRelated"
-            style="margin-bottom: 5px;">
-            <div [style.height.%]="T12HeightPercent"
-              style="border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
-              <app-grid (RowClick)="RelatedProductRowClick($event)" (GridReady)="onRelatedProductGridReady($event)"
-                [columns]="RelatedProductCol" [IsEditable]="true" [rowsData]="RelatedProductRowData"
-                [gridHeight]="GridHeightRelated"
-                (cellEditingStarted)="oncellEditingStarted($event)">
-              </app-grid>
             </div>
-            <div *ngIf="!HaveSave && !IsDisplay" class="buttons-place" style="margin: unset; margin: 3px;">
-                <button  (click)="onSaveRelatedProduct()" id="btnSave" class="btn btn-primary btnGreen">
-                    <img width="15px" height="15px" src="assets/Icons/save.png" />
-                    ثبت
+            <div role="tabpanel" class="tab-pane fade" id="RelatedProduct-{{BeforPageTypeName}}"
+              [style.height.%]="PanelHeightInTabRelated" style="margin-bottom: 5px;">
+              <div [style.height.%]="T12HeightPercent"
+                style="border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
+                <app-grid (RowClick)="RelatedProductRowClick($event)" (GridReady)="onRelatedProductGridReady($event)"
+                  [columns]="RelatedProductCol" [IsEditable]="true" [rowsData]="RelatedProductRowData"
+                  [gridHeight]="GridHeightRelated" (cellEditingStarted)="oncellEditingStarted($event)">
+                </app-grid>
+              </div>
+              <div *ngIf="!HaveSave && !IsDisplay" class="buttons-place" style="margin: unset; margin: 3px;">
+                <button (click)="onSaveRelatedProduct()" id="btnSave" class="btn btn-primary btnGreen">
+                  <img width="15px" height="15px" src="assets/Icons/save.png" />
+                  ثبت
                 </button>
+              </div>
             </div>
-          </div>
           </div>
         </div>
       </div>
     </div>
     <ng-template #ShowRequest let-row>
-      <img style="cursor: pointer;" width="16px" height="16px" [src]="'assets/Icons/show.png'" (click)="onShowProductRequestClick(row)"  />
+      <img style="cursor: pointer;" width="16px" height="16px" [src]="'assets/Icons/show.png'"
+        (click)="onShowProductRequestClick(row)" />
     </ng-template>
     <ng-template #PrintFlow let-row>
-      <img style="cursor: pointer;" width="16px" height="16px" [src]="'assets/Icons/print.png'" (click)="onPrintFlowClick(row)" />
+      <img style="cursor: pointer;" width="16px" height="16px" [src]="'assets/Icons/print.png'"
+        (click)="onPrintFlowClick(row)" />
     </ng-template>
     <div class="buttons-place" style="margin: unset; margin: 5px;">
 

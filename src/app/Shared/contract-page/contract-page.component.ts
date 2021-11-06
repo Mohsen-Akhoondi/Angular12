@@ -31,12 +31,15 @@ export class ContractPageComponent implements OnInit {
   @ViewChild('ShowRequest') ShowRequest: TemplateRef<any>;
   @ViewChild('PrintFlow') PrintFlow: TemplateRef<any>;
   CustomCheckBoxConfig: CustomCheckBoxModel = new CustomCheckBoxModel();
+  CustomCheckBoxConfig1: CustomCheckBoxModel = new CustomCheckBoxModel();
+  CustomCheckBoxConfig2: CustomCheckBoxModel = new CustomCheckBoxModel();
   sumFinalAmountStr = '0';
   MaxEndDate;
   MinStartDate;
   ContractTypeCode;
   ContractID;
   IsVolumetric = false;
+  IsCumulative = false;
   HaveSave = false;
   HaveDelete = false;
   selectedContractID;
@@ -182,7 +185,7 @@ export class ContractPageComponent implements OnInit {
   ProductTypeList = [{ ProductTypeCode: 1, ProductTypeName: 'کالا' },
   { ProductTypeCode: 2, ProductTypeName: 'خدمت' }];
   NgSelectVSParams = {
-    bindLabelProp: 'ProductName',
+    bindLabelProp: 'ProductCodeName',
     bindValueProp: 'ProductID',
     placeholder: '',
     MinWidth: '150px',
@@ -213,7 +216,7 @@ export class ContractPageComponent implements OnInit {
   ProdcutTypeCode: any;
   ProductIDs = [];
   RelatedProductList: any;
-  RelatedProductRowData  = [];
+  RelatedProductRowData = [];
   PanelHeightInTabRelated;
   GridHeightRelated;
   PriceListTypeParams = {
@@ -238,6 +241,39 @@ export class ContractPageComponent implements OnInit {
     IsDisabled: false,
     Required: true
   };
+  NgSelectContractPersonParams = { // 62280
+    bindLabelProp: 'ActorName',
+    bindValueProp: 'ActorID',
+    placeholder: '',
+    MinWidth: '150px',
+    PageSize: 30,
+    PageCount: 0,
+    TotalItemCount: 0,
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: true,
+    IsDisabled: false,
+    DropDownMinWidth: '300px',
+    type: 'ContractPerson',
+    AdvanceSearch: {
+      SearchLabel: 'جستجو براساس :',
+      SearchItemDetails:
+        [{ HeaderCaption: 'کدملی/شناسه', HeaderName: 'IdentityNo', width: 35, TermLenght: 10, SearchOption: 'IdentityNo' },
+        { HeaderCaption: 'نام', HeaderName: 'ActorName', width: 53, MinTermLenght: 3, SearchOption: 'ActorName' }],
+      SearchItemHeader:
+        [{ HeaderCaption: 'کدملی/شناسه', width: 35, },
+        { HeaderCaption: 'نام', width: 53, }],
+      HaveItemNo: true,
+      ItemNoWidth: 16
+    }
+  };
+  SelectedRoleId;
+  NotControllingPayDatePeriod = false;
+  IsMultiInvoice = false;
+  PersonTypeList: any;
+  IsPerson = true;
+  ContractPersonSelectedRow: any;
+
   constructor(private ContractList: ContractListService,
     private route: ActivatedRoute,
     private Actor: ActorService,
@@ -258,6 +294,8 @@ export class ContractPageComponent implements OnInit {
         { SeasonCode: 3, SeasonName: 'فصل سوم' },
         { SeasonCode: 4, SeasonName: 'فصل جهارم' },
       ];
+      this.PersonTypeList = [{ PersonTypeName: 'حقیقی', PersonTypeCode: 1 },
+      { PersonTypeName: 'حقوقی', PersonTypeCode: 2 }];
 
     this.adContractPersoncol = [
       {
@@ -284,32 +322,106 @@ export class ContractPageComponent implements OnInit {
             return '';
           }
         },
+        valueSetter: (params) => {
+          if (params.newValue) {
+            params.data.RoleName = params.newValue.RoleName;
+            params.data.RoleID = params.newValue.RoleID;
+            params.data.ActorID = null;
+            params.data.ActorName = null;
+            return true;
+          } else {
+            params.data.RoleName = '';
+            params.data.RoleID = null;
+            params.data.ActorID = null;
+            params.data.ActorName = null;
+            return false;
+          }
+        },
         editable: this.IsEditable,
         width: 200,
         resizable: true
       },
       {
-        headerName: ' نام شخص  ',
-        field: 'ActorNameType',
+        headerName: 'حقیقی / حقوقی',
+        field: 'PersonTypeName',
         cellEditorFramework: NgSelectCellEditorComponent,
         cellEditorParams: {
-          Items: of([]),
-          bindLabelProp: 'ActorNameType',
-          // multiField: 'PersonName',
-          // firsField: 'FirstName',
-          // nextField: 'LastName',
-          bindValueProp: 'ActorID'
+          HardCodeItems: this.PersonTypeList,
+          bindLabelProp: 'PersonTypeName',
+          bindValueProp: 'PersonTypeCode'
         },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
-            return params.value.ActorNameType;
+            return params.value.PersonTypeName;
           } else {
             return '';
           }
         },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.PersonTypeName) {
+            params.data.PersonTypeName = params.newValue.PersonTypeName;
+            params.data.PersonTypeCode = params.newValue.PersonTypeCode;
+            if (params.data.PersonTypeCode === 1) {
+              this.IsPerson = true;
+              this.NgSelectContractPersonParams.AdvanceSearch.SearchItemDetails[0].HeaderCaption = 'کد ملي';
+              this.NgSelectContractPersonParams.AdvanceSearch.SearchItemDetails[1].HeaderCaption = 'نام و نام خانوادگي';
+              this.NgSelectContractPersonParams.AdvanceSearch.SearchItemDetails[0].MinTermLenght = 10;
+              this.NgSelectContractPersonParams.AdvanceSearch.SearchItemDetails[0].TermLenght = 10;
+              this.NgSelectContractPersonParams.AdvanceSearch.SearchItemHeader[0].HeaderCaption = 'کد ملي';
+              this.NgSelectContractPersonParams.AdvanceSearch.SearchItemHeader[1].HeaderCaption = 'نام و نام خانوادگي';
+            } else {
+              this.IsPerson = false;
+              this.NgSelectContractPersonParams.AdvanceSearch.SearchItemDetails[0].HeaderCaption = 'شناسه ملي ';
+              this.NgSelectContractPersonParams.AdvanceSearch.SearchItemDetails[1].HeaderCaption = 'نام';
+              this.NgSelectContractPersonParams.AdvanceSearch.SearchItemDetails[0].MinTermLenght = 10;
+              this.NgSelectContractPersonParams.AdvanceSearch.SearchItemDetails[0].TermLenght = 11;
+              this.NgSelectContractPersonParams.AdvanceSearch.SearchItemHeader[0].HeaderCaption = 'شناسه ملي ';
+              this.NgSelectContractPersonParams.AdvanceSearch.SearchItemHeader[1].HeaderCaption = 'نام';
+            }
+            return true;
+          } else {
+            params.data.PersonTypeName = null;
+            params.data.PersonTypeCode = null;
+            return false;
+          }
+        },
         editable: this.IsEditable,
-        width: 300,
+        width: 100,
+        resizable: true
+      },
+      {
+        headerName: ' نام شخص  ',
+        field: 'ActorName',
+        cellEditorFramework: NgSelectVirtualScrollComponent,
+        cellEditorParams: {
+          Params: this.NgSelectContractPersonParams,
+          Items: [],
+          MoreFunc: this.FetchMoreContractPerson,
+          FetchByTerm: this.FetchContractPersonByTerm,
+          Owner: this
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.ActorName;
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue) {
+            params.data.ActorID = params.newValue.ActorID;
+            params.data.ActorName = params.newValue.ActorName;
+            return true;
+          } else {
+            params.data.ActorID = null;
+            params.data.ActorName = null;
+            return false;
+          }
+        },
+        editable: this.IsEditable,
+        width: 400,
         resizable: true
       },
       {
@@ -325,9 +437,19 @@ export class ContractPageComponent implements OnInit {
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
             return params.value.ProductName;
-
           } else {
             return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.ProductName) {
+            params.data.ProductName = params.newValue.ProductName;
+            params.data.ContractOrderItemID = params.newValue.ContractOrderItemID;
+            return true;
+          } else {
+            params.data.ProductName = '';
+            params.data.ContractOrderItemID = null;
+            return false;
           }
         },
         editable: this.IsEditable,
@@ -461,14 +583,22 @@ export class ContractPageComponent implements OnInit {
     };
   }
 
-  ngOnInit() { 
+  ngOnInit() {
     if (this.PopupParam) {
       this.RegionCode = this.PopupParam.RegionCode;
     }
     this.CustomCheckBoxConfig.color = 'state p-primary';
     this.CustomCheckBoxConfig.icon = 'fa fa-check';
     this.CustomCheckBoxConfig.styleCheckBox = 'pretty p-icon p-rotate';
-    this.CustomCheckBoxConfig.AriaWidth = 50;
+    this.CustomCheckBoxConfig.AriaWidth = 27;
+    this.CustomCheckBoxConfig1.color = 'state p-primary';
+    this.CustomCheckBoxConfig1.icon = 'fa fa-check';
+    this.CustomCheckBoxConfig1.styleCheckBox = 'pretty p-icon p-rotate';
+    this.CustomCheckBoxConfig1.AriaWidth = 14.5;
+    this.CustomCheckBoxConfig2.color = 'state p-primary';
+    this.CustomCheckBoxConfig2.icon = 'fa fa-check';
+    this.CustomCheckBoxConfig2.styleCheckBox = 'pretty p-icon p-rotate';
+    this.CustomCheckBoxConfig2.AriaWidth = 5;
     if (this.PopupParam && this.PopupParam.BeforPageTypeName) {
       this.BeforPageTypeName = this.PopupParam.BeforPageTypeName;
     }
@@ -520,17 +650,17 @@ export class ContractPageComponent implements OnInit {
     } else if (this.PopupParam.selectedRow && this.PopupParam.selectedRow.data) {
       if (this.PopupParam.selectedRow.data.ContractId) {
         this.selectedContractID = this.PopupParam.selectedRow.data.ContractId;
-        this.adContractPersoncol[3].cellEditorParams.Items = this.ContractList.GetContractOrderProduct(this.selectedContractID , false);
-        this.ProductList = this.adContractPersoncol[3].cellEditorParams.Items;
-      } else if (this.PopupParam.selectedRow.data.ContractID) {       
+        this.adContractPersoncol[4].cellEditorParams.Items = this.ContractList.GetContractOrderProduct(this.selectedContractID, false);
+        this.ProductList = this.adContractPersoncol[4].cellEditorParams.Items;
+      } else if (this.PopupParam.selectedRow.data.ContractID) {
         this.selectedContractID = this.PopupParam.selectedRow.data.ContractID;
-        this.adContractPersoncol[3].cellEditorParams.Items = this.ContractList.GetContractOrderProduct(this.selectedContractID, false);
-        this.ProductList = this.adContractPersoncol[3].cellEditorParams.Items;
+        this.adContractPersoncol[4].cellEditorParams.Items = this.ContractList.GetContractOrderProduct(this.selectedContractID, false);
+        this.ProductList = this.adContractPersoncol[4].cellEditorParams.Items;
       }
       if (this.PopupParam.selectedRow.data.ContractID != null) { // RFC 51561
         this.selectedContractID = this.PopupParam.selectedRow.data.ContractID;
-        this.adContractPersoncol[3].cellEditorParams.Items = this.ContractList.GetContractOrderProduct(this.selectedContractID, false);
-        this.ProductList = this.adContractPersoncol[3].cellEditorParams.Items;
+        this.adContractPersoncol[4].cellEditorParams.Items = this.ContractList.GetContractOrderProduct(this.selectedContractID, false);
+        this.ProductList = this.adContractPersoncol[4].cellEditorParams.Items;
       }
     }
 
@@ -567,6 +697,9 @@ export class ContractPageComponent implements OnInit {
       this.SeasonListParams.selectedObject = res[0].SeasonCode;
       this.IsDown = true;
       this.IsVolumetric = res[0].IsVolumetric;
+      this.IsCumulative = res[0].IsCumulative;
+      this.NotControllingPayDatePeriod = res[0].NotControllingPayDatePeriod;
+      this.IsMultiInvoice = res[0].IsMultiInvoice;
       this.ProductRequestID = res[0].ProductRequestID;
       this.RelatedProductRowData = res[0].RequestRelatedProductList;
       if (this.ProductRequestID && this.ProductRequestID != null) {
@@ -577,7 +710,7 @@ export class ContractPageComponent implements OnInit {
     this.ReceiveFactorID = this.PopupParam.selectedRow && this.PopupParam.selectedRow.data ? this.PopupParam.selectedRow.data.ReceiveFactorID : null;
     if (this.ReceiveFactorID) {
       this.IsInCome = true;
-      this.AssetIncomeItems = this.ContractList.GetContractAssetIncome(this.ReceiveFactorID , false);
+      this.AssetIncomeItems = this.ContractList.GetContractAssetIncome(this.ReceiveFactorID, false);
       this.ContractAssetIncomecol[1].cellEditorParams.Items = this.AssetIncomeItems;
       this.ContractList.GetContractAssetIncomeList(this.ReceiveFactorID).subscribe(ress => {
         this.ContractAssetIncomeListData = ress;
@@ -592,95 +725,95 @@ export class ContractPageComponent implements OnInit {
       this.MaxEndDate = res.PersianEndDate;
       this.sumFinalAmountStr = res.FinalAmount;
     });
-    this.ProductRequestServices.GetCurrentDate().subscribe(res => {this.ContractPayDate = res});
+    this.ProductRequestServices.GetCurrentDate().subscribe(res => { this.ContractPayDate = res });
     this.RelatedProductCol = [
-          {
-            headerName: 'ردیف',
-            field: 'ItemNo',
-            width: 70,
-            resizable: true
-          },
-          {
-            headerName: 'نوع درخواستی',
-            field: 'ProductTypeName',
-            cellEditorFramework: NgSelectCellEditorComponent,
-            cellEditorParams: {
-              HardCodeItems: this.ProductTypeList,
-              bindLabelProp: 'ProductTypeName',
-              bindValueProp: 'ProductTypeCode'
-            },
-            cellRenderer: 'SeRender',
-            valueFormatter: function currencyFormatter(params) {
-              if (params.value) {
-                return params.value.ProductTypeName;
-              } else {
-                return '';
-              }
-            },
-            valueSetter: (params) => {
-              if (params.newValue) {
-                if (params.newValue.ProductTypeName !== params.oldValue) {
-                  params.data.ProductTypeName = params.newValue.ProductTypeName;
-                  params.data.ProductTypeCode = params.newValue.ProductTypeCode;
-                  params.data.ScaleName = null;
-                  params.data.ProductID = null;
-                  params.data.ProductCodeName = null;
-                  return true;
-                }
-              } else {
-                params.data.ProductTypeName = null;
-                params.data.ProductTypeCode = null;
-                params.data.ScaleName = null;
-                params.data.ProductID = null;
-                params.data.ProductCodeName = null;
-                return false;
-              }
-            },
-            editable: true,
-            width: 120,
-            resizable: true
-          },
-          {
-            headerName: 'کالا/خدمت',
-            field: 'ProductName',
-            cellEditorFramework: NgSelectVirtualScrollComponent,
-            cellEditorParams: {
-              Params: this.NgSelectVSParams,
-              Items: [],
-              MoreFunc: this.FetchMoreProduct,
-              FetchByTerm: this.FetchProductByTerm,
-              RedioChangeFunc: this.RedioSelectedChange,
-              Owner: this
-            },
-            cellRenderer: 'SeRender',
-            valueFormatter: function currencyFormatter(params) {
-              if (params.value) {
-                return params.value.ProductCodeName;
-    
-              } else {
-                return '';
-              }
-            },
-            valueSetter: (params) => {
-              if (params.newValue && params.newValue.ProductName) {
-                params.data.ProductName = params.newValue.ProductName;
-                params.data.ProductID = params.newValue.ProductID;
-                params.data.ScaleName = params.newValue.ScaleName;
-                return true;
-              } else {
-                params.data.ProductCodeName = '';
-                params.data.ProductID = null;
-                params.data.ScaleName = '';
-                return false;
-              }
-            },
-            editable: true,
-            width: 420,
-            resizable: true
-          },
-      ];
-      this.PanelHeightInTabRelated = this.PopupParam.ModuleCode === 2687 ? 77 : 100;
-      this.GridHeightRelated = this.PopupParam.ModuleCode === 2687 ? 85 : 88;
+      {
+        headerName: 'ردیف',
+        field: 'ItemNo',
+        width: 70,
+        resizable: true
+      },
+      {
+        headerName: 'نوع درخواستی',
+        field: 'ProductTypeName',
+        cellEditorFramework: NgSelectCellEditorComponent,
+        cellEditorParams: {
+          HardCodeItems: this.ProductTypeList,
+          bindLabelProp: 'ProductTypeName',
+          bindValueProp: 'ProductTypeCode'
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.ProductTypeName;
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue) {
+            if (params.newValue.ProductTypeName !== params.oldValue) {
+              params.data.ProductTypeName = params.newValue.ProductTypeName;
+              params.data.ProductTypeCode = params.newValue.ProductTypeCode;
+              params.data.ScaleName = null;
+              params.data.ProductID = null;
+              params.data.ProductCodeName = null;
+              return true;
+            }
+          } else {
+            params.data.ProductTypeName = null;
+            params.data.ProductTypeCode = null;
+            params.data.ScaleName = null;
+            params.data.ProductID = null;
+            params.data.ProductCodeName = null;
+            return false;
+          }
+        },
+        editable: true,
+        width: 120,
+        resizable: true
+      },
+      {
+        headerName: 'کالا/خدمت',
+        field: 'ProductCodeName',
+        cellEditorFramework: NgSelectVirtualScrollComponent,
+        cellEditorParams: {
+          Params: this.NgSelectVSParams,
+          Items: [],
+          MoreFunc: this.FetchMoreProduct,
+          FetchByTerm: this.FetchProductByTerm,
+          RedioChangeFunc: this.RedioSelectedChange,
+          Owner: this
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.ProductCodeName;
+
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.ProductCodeName) {
+            params.data.ProductCodeName = params.newValue.ProductCodeName;
+            params.data.ProductID = params.newValue.ProductID;
+            params.data.ScaleName = params.newValue.ScaleName;
+            return true;
+          } else {
+            params.data.ProductCodeName = '';
+            params.data.ProductID = null;
+            params.data.ScaleName = '';
+            return false;
+          }
+        },
+        editable: true,
+        width: 420,
+        resizable: true
+      },
+    ];
+    this.PanelHeightInTabRelated = this.PopupParam.ModuleCode === 2687 ? 77 : 100;
+    this.GridHeightRelated = this.PopupParam.ModuleCode === 2687 ? 85 : 88;
   }
   // tslint:disable-next-line:use-life-cycle-interface
   ngAfterViewInit(): void {
@@ -762,8 +895,8 @@ export class ContractPageComponent implements OnInit {
         });
       }
       this.ContractOrderListData = res[1];
-      if (this.PopupParam.RegionCode === 222 &&  this.ContractTypeCode === 2) { // RFC 57340
-      this.ContractPersonListData = [{ RoleID : 1301 , RoleName : 'درخواست کننده معامله ـ حمل و نقل'}];
+      if (this.PopupParam.RegionCode === 222 && this.ContractTypeCode === 2) { // RFC 57340
+        this.ContractPersonListData = [{ RoleID: 1301, RoleName: 'درخواست کننده معامله ـ حمل و نقل' }];
       } else {
         this.ContractPersonListData = res[2];
       }
@@ -777,21 +910,6 @@ export class ContractPageComponent implements OnInit {
     this.onAddRow();
   }
 
-  BtnUpdateclick(InputValue) {
-    if (!this.selectedContractPersonRow) {
-      alert('رديفي جهت اصلاح انتخاب نشده است');
-      return;
-    }
-    this.isClicked = true;
-    this.isAdd = false;
-    switch (InputValue) {
-      case 'contract-person':
-        this.type = 'contract-person';
-        break;
-      default:
-        break;
-    }
-  }
   popupclosed() {
     this.isClicked = false;
   }
@@ -850,14 +968,12 @@ export class ContractPageComponent implements OnInit {
   }
 
   ContractPersonRowClick(InputValue) {
-    this.selectedContractPersonRow = InputValue;
-    // tslint:disable-next-line:max-line-length
     if (InputValue.data.RoleName.RoleID) {
-      this.adContractPersoncol[2].cellEditorParams.Items = this.Actor.GetActorWithRoleID(InputValue.data.RoleName.RoleID, false);
+      this.SelectedRoleId = InputValue.data.RoleName.RoleID;
     } else {
-      this.adContractPersoncol[2].cellEditorParams.Items = this.Actor.GetActorWithRoleID(InputValue.data.RoleID, false);
+      this.SelectedRoleId = InputValue.data.RoleID;
     }
-
+    this.ContractPersonSelectedRow = InputValue.data;
   }
 
   onSave() {
@@ -879,11 +995,6 @@ export class ContractPageComponent implements OnInit {
         let RoleID;
         let ContractOrderItemID;
 
-        if (item.ActorNameType && item.ActorNameType.ActorID) {
-          ActorID = item.ActorNameType.ActorID;
-        } else {
-          ActorID = item.ActorID;
-        }
 
         if (item.RoleName && item.RoleName.RoleID) {
           RoleID = item.RoleName.RoleID;
@@ -905,7 +1016,7 @@ export class ContractPageComponent implements OnInit {
 
         const obj = {
           ContractPersonID: item.ContractPersonID,
-          ActorID: ActorID,
+          ActorID: item.ActorID,
           RoleID: RoleID,
           ContractOrderItemID: ContractOrderItemID
         };
@@ -927,8 +1038,8 @@ export class ContractPageComponent implements OnInit {
 
         const obj = {
           ContractPersonID: 0,
-          ActorID: item.ActorNameType.ActorID,
-          RoleID: item.RoleName.RoleID,
+          ActorID: item.ActorID,
+          RoleID: item.RoleID,
           ContractOrderItemID: ContractOrderItemID
         };
         ContractpersonList.push(obj);
@@ -941,15 +1052,27 @@ export class ContractPageComponent implements OnInit {
     });
     this.RelatedProductRowData.forEach(res => {
       const RelatedProduct = {
-        RequestRelatedProductID : res.RequestRelatedProductID,
-        CostFactorID : this.ProductRequestID,
-        ProductID : res.ProductID,
+        RequestRelatedProductID: res.RequestRelatedProductID,
+        CostFactorID: this.ProductRequestID,
+        ProductID: res.ProductID,
       };
       this.RelatedProductList.push(RelatedProduct);
     });
     if (!this.IsInCome) {
-      // tslint:disable-next-line:max-line-length
-      this.ContractList.SaveContractPerson(this.selectedContractID, this.PriceListTopicParams.selectedObject, this.PriceListTypeParams.selectedObject, this.SeasonListParams.selectedObject, this.IsVolumetric, ContractpersonList, this.ReigonCode, this.RelatedProductList, this.ProductRequestID)
+      this.ContractList.SaveContractPerson(
+        this.selectedContractID,
+        this.PriceListTopicParams.selectedObject,
+        this.PriceListTypeParams.selectedObject,
+        this.SeasonListParams.selectedObject,
+        this.IsVolumetric,
+        this.IsCumulative,
+        ContractpersonList,
+        this.ReigonCode,
+        this.RelatedProductList,
+        this.ProductRequestID,
+        this.ModuleCode,
+        this.NotControllingPayDatePeriod,
+        this.IsMultiInvoice)
         .subscribe(res => {
           this.showMessageBox('ثبت با موفقيت انجام شد');
           //  this.ContractPersonListData = this.ContractList.GetContractPersonList(this.selectedContractID, false);
@@ -973,8 +1096,22 @@ export class ContractPageComponent implements OnInit {
         ContractAssetIncomeList.push(ContractAssetIncomeObj);
       });
       // tslint:disable-next-line:max-line-length
-      this.ContractList.SaveIncomeContractPerson(this.selectedContractID, this.PriceListTopicParams.selectedObject, this.PriceListTypeParams.selectedObject, this.SeasonListParams.selectedObject, this.IsVolumetric, ContractpersonList, this.ReigonCode, ContractAssetIncomeList,
-        this.ModuleCode, this.ReceiveFactorID, this.RelatedProductList, this.ProductRequestID)
+      this.ContractList.SaveIncomeContractPerson(
+        this.selectedContractID,
+        this.PriceListTopicParams.selectedObject,
+        this.PriceListTypeParams.selectedObject,
+        this.SeasonListParams.selectedObject,
+        this.IsVolumetric,
+        this.IsCumulative,
+        ContractpersonList,
+        this.ReigonCode,
+        ContractAssetIncomeList,
+        this.ModuleCode,
+        this.ReceiveFactorID,
+        this.RelatedProductList,
+        this.ProductRequestID,
+        this.NotControllingPayDatePeriod,
+        this.IsMultiInvoice)
         .subscribe(res => {
           this.showMessageBox('ثبت با موفقيت انجام شد');
         },
@@ -1008,38 +1145,41 @@ export class ContractPageComponent implements OnInit {
   onChangePriceListTypeObj(event) {
     this.PriceListTypeParams.selectedObject = event;
   }
-  onCellValueChanged(event) {
-    if (event.newValue && event.colDef && event.colDef.field === 'RoleName') {
-      this.adContractPersoncol[2].cellEditorParams.Items = this.Actor.GetActorWithRoleID(event.newValue.RoleID, false);
-      const itemsToUpdate = [];
-      this.gridApi.forEachNode(node => {
-        if (node.rowIndex === event.rowIndex) {
-          node.data.ActorNameType = '';
-          node.data.RoleName = event.newValue;
-          itemsToUpdate.push(node.data);
-        }
-      });
-      this.gridApi.updateRowData({ update: itemsToUpdate });
-    } else if (event.newValue && event.colDef && event.colDef.field === 'ActorNameType') {// For InvalidSelected When Old IsValid
-      const itemsToUpdate = [];
-      this.gridApi.forEachNode(node => {
-        if (node.rowIndex === event.rowIndex) {
-          node.data.ActorNameType = event.newValue;
-          itemsToUpdate.push(node.data);
-        }
-      });
-      this.gridApi.updateRowData({ update: itemsToUpdate });
-    } else if (event.newValue && event.colDef && event.colDef.field === 'ProductName') {// For InvalidSelected When Old IsValid
-      const itemsToUpdate = [];
-      this.gridApi.forEachNode(node => {
-        if (node.rowIndex === event.rowIndex) {
-          node.data.ProductName = event.newValue;
-          itemsToUpdate.push(node.data);
-        }
-      });
-      this.gridApi.updateRowData({ update: itemsToUpdate });
-    }
-  }
+  // onCellValueChanged(event) {
+
+  //   if (event.newValue && event.colDef && event.colDef.field === 'RoleName') {
+  //     this.Actor.GetActorWithRoleID(event.newValue.RoleID, false).subscribe( res => {
+  //       this.adContractPersoncol[2].cellEditorParams.Items = res;
+  //     });
+  //     const itemsToUpdate = [];
+  //     this.gridApi.forEachNode(node => {
+  //       if (node.rowIndex === event.rowIndex) {
+  //         node.data.ActorNameType = '';
+  //         node.data.RoleName = event.newValue;
+  //         itemsToUpdate.push(node.data);
+  //       }
+  //     });
+  //     this.gridApi.updateRowData({ update: itemsToUpdate });
+  //   } else if (event.newValue && event.colDef && event.colDef.field === 'ActorNameType') {// For InvalidSelected When Old IsValid
+  //     const itemsToUpdate = [];
+  //     this.gridApi.forEachNode(node => {
+  //       if (node.rowIndex === event.rowIndex) {
+  //         node.data.ActorNameType = event.newValue;
+  //         itemsToUpdate.push(node.data);
+  //       }
+  //     });
+  //     this.gridApi.updateRowData({ update: itemsToUpdate });
+  //   } else if (event.newValue && event.colDef && event.colDef.field === 'ProductName') {// For InvalidSelected When Old IsValid
+  //     const itemsToUpdate = [];
+  //     this.gridApi.forEachNode(node => {
+  //       if (node.rowIndex === event.rowIndex) {
+  //         node.data.ProductName = event.newValue;
+  //         itemsToUpdate.push(node.data);
+  //       }
+  //     });
+  //     this.gridApi.updateRowData({ update: itemsToUpdate });
+  //   }
+  // }
   // tslint:disable-next-line:use-life-cycle-interface
   ngOnChanges(changes): void {
     if (changes.PopupMaximized && !isUndefined(changes.PopupMaximized.currentValue)) {
@@ -1153,7 +1293,7 @@ export class ContractPageComponent implements OnInit {
           IsEditable: false,
           SelectedContractID: this.PopupParam.selectedRow.data.ContractId,
           ProductRequestID: this.PopupParam.selectedRow.data.ProductRequestID,
-          ModuleViewTypeCode : 5555,
+          ModuleViewTypeCode: 5555,
           BeforPageTypeName: 'contract-page'
         };
         this.isClicked = true;
@@ -1191,9 +1331,7 @@ export class ContractPageComponent implements OnInit {
   }
   onShowProductRequestClick(row) {
     if (row.ProductRequestID) {
-      if (this.PopupParam.ModuleCode === 2730 ||
-        this.PopupParam.ModuleCode === 2773 ||
-        !this.PopupParam.ModuleCode || this.ModuleCode === 2793) {
+      if (row.RequestObjectTypeCode === 1 || !row.RequestObjectTypeCode) {
         this.type = 'product-request-page';
         this.isClicked = true;
         this.HaveHeader = true;
@@ -1204,58 +1342,87 @@ export class ContractPageComponent implements OnInit {
         this.startTopPosition = 0;
         this.OverPixelWidth = 1280;
         this.paramObj = {
-          ModuleCode: this.PopupParam.ModuleCode,
+          ModuleCode: 2730,
+          row: row,
           CostFactorID: row.ProductRequestID,
           HaveSave: true,
           IsViewable: true,
           IsEditable: true,
           IsShow: true,
           SelectedContractID: this.selectedContractID,
+          FirstModuleCode: this.ModuleCode,
           // tslint:disable-next-line: max-line-length
-          ModuleViewTypeCode: 600000,
+          ModuleViewTypeCode: 500000,
         };
-      } else
-        if (this.PopupParam.ModuleCode === 2776) {
-          this.type = 'product-request-page-without-flow';
-          this.isClicked = true;
-          this.HaveHeader = true;
-          this.HaveMaxBtn = true;
-          this.HeightPercentWithMaxBtn = 97;
-          this.MinHeightPixel = 645;
-          this.startLeftPosition = 110;
-          this.startTopPosition = 5;
-          this.paramObj = {
-            ModuleCode: this.PopupParam.ModuleCode,
-            CostFactorID: row.ProductRequestID,
-            HaveSave: true,
-            IsViewable: true,
-            IsEditable: true,
-            IsShow: false,
-            SelectedContractID: this.selectedContractID,
-            // tslint:disable-next-line: max-line-length
-            ModuleViewTypeCode: 600000,
-          };
-        } else {
-          this.type = 'product-request-page-without-flow';
-          this.isClicked = true;
-          this.HaveHeader = true;
-          this.HaveMaxBtn = true;
-          this.HeightPercentWithMaxBtn = 97;
-          this.MinHeightPixel = 645;
-          this.startLeftPosition = 110;
-          this.startTopPosition = 5;
-          this.paramObj = {
-            ModuleCode: this.PopupParam.ModuleCode,
-            CostFactorID: row.ProductRequestID,
-            HaveSave: true,
-            IsViewable: true,
-            IsEditable: true,
-            IsShow: false,
-            SelectedContractID: this.selectedContractID,
-            // tslint:disable-next-line: max-line-length
-            ModuleViewTypeCode: 600000,
-          };
-        }
+      }
+      if (row.RequestObjectTypeCode === 3) {
+        this.type = 'product-request-page';
+        this.isClicked = true;
+        this.HaveHeader = true;
+        this.HaveMaxBtn = true;
+        this.HeightPercentWithMaxBtn = 97;
+        this.MinHeightPixel = 645;
+        this.startLeftPosition = 10;
+        this.startTopPosition = 0;
+        this.OverPixelWidth = null;
+        this.paramObj = {
+          ModuleCode: 2773,
+          row: row,
+          CostFactorID: row.ProductRequestID,
+          HaveSave: true,
+          IsViewable: true,
+          IsEditable: true,
+          IsShow: true,
+          SelectedContractID: this.selectedContractID,
+          FirstModuleCode: this.ModuleCode,
+          // tslint:disable-next-line: max-line-length
+          ModuleViewTypeCode: 500000,
+        };
+      }
+      if (row.RequestObjectTypeCode === 7) {
+        this.type = 'product-request-page-without-flow';
+        this.isClicked = true;
+        this.HaveHeader = true;
+        this.HaveMaxBtn = true;
+        this.HeightPercentWithMaxBtn = 97;
+        this.MinHeightPixel = 645;
+        this.startLeftPosition = 110;
+        this.startTopPosition = 5;
+        this.paramObj = {
+          ModuleCode: 2776,
+          row: row,
+          CostFactorID: row.ProductRequestID,
+          HaveSave: true,
+          IsViewable: true,
+          IsEditable: true,
+          IsShow: false,
+          SelectedContractID: this.selectedContractID,
+          // tslint:disable-next-line: max-line-length
+          ModuleViewTypeCode: 500000,
+        };
+      }
+      if (row.RequestObjectTypeCode === 2 || row.RequestObjectTypeCode === 5) {
+        this.type = 'product-request-page-without-flow';
+        this.isClicked = true;
+        this.HaveHeader = true;
+        this.HaveMaxBtn = true;
+        this.HeightPercentWithMaxBtn = 97;
+        this.MinHeightPixel = 645;
+        this.startLeftPosition = 110;
+        this.startTopPosition = 5;
+        this.paramObj = {
+          ModuleCode: row.RequestObjectTypeCode === 2 ? 2739 : 2840,
+          row: row,
+          CostFactorID: row.ProductRequestID,
+          HaveSave: true,
+          IsViewable: true,
+          IsEditable: true,
+          IsShow: false,
+          SelectedContractID: this.selectedContractID,
+          // tslint:disable-next-line: max-line-length
+          ModuleViewTypeCode: 500000,
+        };
+      }
     } else {
       this.showMessageBox('درخواست این مرحله قراداد مشخص نمی باشد');
     }
@@ -1412,6 +1579,15 @@ export class ContractPageComponent implements OnInit {
   OnChIsVolumetricChange(event) {
     this.IsVolumetric = event;
   }
+  OnChIsCumulativeChange(event) {
+    this.IsCumulative = event;
+  }
+  OnChIsNotContollingPayDatePeriodChange(event) {
+    this.NotControllingPayDatePeriod = event;
+  }
+  OnChIsMultiInvoiceChange(event) {
+    this.IsMultiInvoice = event;
+  }
   onPrintFlowClick(row) {
     if (row.ProductRequestID) {
       this.ProductRequestServices.GetProductRequest(row.ProductRequestID).subscribe(res => {
@@ -1448,13 +1624,13 @@ export class ContractPageComponent implements OnInit {
     });
     this.RelatedProductRowData.forEach(res => {
       const RelatedProduct = {
-        RequestRelatedProductID : res.RequestRelatedProductID,
-        CostFactorID : this.ProductRequestID,
-        ProductID : res.ProductID,
+        RequestRelatedProductID: res.RequestRelatedProductID,
+        CostFactorID: this.ProductRequestID,
+        ProductID: res.ProductID,
       };
       this.RelatedProductList.push(RelatedProduct);
     });
-    this.ContractList.SaveRequestRelatedProduct(this.RelatedProductList, this.ProductRequestID) .subscribe(res => {
+    this.ContractList.SaveRequestRelatedProduct(this.RelatedProductList, this.ProductRequestID).subscribe(res => {
       this.showMessageBox('ثبت با موفقيت انجام شد');
     },
       err => {
@@ -1473,55 +1649,28 @@ export class ContractPageComponent implements OnInit {
           : node.data.ProductTypeCode ? node.data.ProductTypeCode : 0;
       }
     });
-    if (event.colDef && event.colDef.field === 'ProductName') {
-        this.ProductRequestServices.GetIsVolumetricProductList(0,
-          this.RegionCode,
-          '',
-          1,
-          30,
-          this.ProdcutTypeCode,
-          true,
-          this.ContractPayDate,
-          null).
-          subscribe(res => {
-            this.RefreshCartable.RefreshItemsVirtualNgSelect({
-              List: res.List,
-              TotalItemCount: res.TotalItemCount,
-              PageCount: Math.ceil(res.TotalItemCount / 30)
-            });
+    if (event.colDef && event.colDef.field === 'ProductCodeName') {
+      this.ProductRequestServices.GetIsVolumetricProductList(0,
+        this.RegionCode,
+        '',
+        1,
+        30,
+        this.ProdcutTypeCode,
+        true,
+        this.ContractPayDate,
+        null).
+        subscribe(res => {
+          this.RefreshCartable.RefreshItemsVirtualNgSelect({
+            List: res.List,
+            TotalItemCount: res.TotalItemCount,
+            PageCount: Math.ceil(res.TotalItemCount / 30)
           });
-      } 
-}
+        });
+    }
+  }
   FetchMoreProduct(event) {
     const ResultList = [];
-      const promise = new Promise((resolve, reject) => {
-        event.Owner.ProductRequestServices.GetIsVolumetricProductList(event.SearchOption,
-          event.Owner.RegionCode,
-          event.term,
-          event.PageNumber,
-          event.PageSize,
-          event.Owner.ProdcutTypeCode,
-          true,
-          event.Owner.ContractPayDate,
-          null).subscribe(res => {
-            event.CurrentItems.forEach(el => {
-              ResultList.push(el);
-            });
-            res.List.forEach(element => {
-              ResultList.push(element);
-            });
-            resolve(res.TotalItemCount);
-          });
-      }).then((TotalItemCount: number) => {
-        event.Owner.RefreshCartable.RefreshItemsVirtualNgSelect({
-          List: ResultList,
-          term: event.term,
-          TotalItemCount: TotalItemCount,
-          PageCount: Math.ceil(TotalItemCount / 30)
-        });
-      });
-  }
-  FetchProductByTerm(event) {
+    const promise = new Promise((resolve, reject) => {
       event.Owner.ProductRequestServices.GetIsVolumetricProductList(event.SearchOption,
         event.Owner.RegionCode,
         event.term,
@@ -1530,29 +1679,116 @@ export class ContractPageComponent implements OnInit {
         event.Owner.ProdcutTypeCode,
         true,
         event.Owner.ContractPayDate,
-        null).
-        subscribe(res => {
-          event.Owner.RefreshCartable.RefreshItemsVirtualNgSelect({
-            List: res.List,
-            term: event.term,
-            TotalItemCount: res.TotalItemCount,
-            PageCount: Math.ceil(res.TotalItemCount / 30)
+        null).subscribe(res => {
+          event.CurrentItems.forEach(el => {
+            ResultList.push(el);
           });
+          res.List.forEach(element => {
+            ResultList.push(element);
+          });
+          resolve(res.TotalItemCount);
         });
+    }).then((TotalItemCount: number) => {
+      event.Owner.RefreshCartable.RefreshItemsVirtualNgSelect({
+        List: ResultList,
+        term: event.term,
+        TotalItemCount: TotalItemCount,
+        PageCount: Math.ceil(TotalItemCount / 30)
+      });
+    });
+  }
+  FetchProductByTerm(event) {
+    event.Owner.ProductRequestServices.GetIsVolumetricProductList(event.SearchOption,
+      event.Owner.RegionCode,
+      event.term,
+      event.PageNumber,
+      event.PageSize,
+      event.Owner.ProdcutTypeCode,
+      true,
+      event.Owner.ContractPayDate,
+      null).
+      subscribe(res => {
+        event.Owner.RefreshCartable.RefreshItemsVirtualNgSelect({
+          List: res.List,
+          term: event.term,
+          TotalItemCount: res.TotalItemCount,
+          PageCount: Math.ceil(res.TotalItemCount / 30)
+        });
+      });
   }
   RedioSelectedChange(event) {
-      event.Owner.ProductRequestServices.GetIsVolumetricProductList(event.SearchOption,
-        event.Owner.RegionCode,
-        '',
-        1,
-        30,
-        event.Owner.ProdcutTypeCode, true, event.Owner.ContractPayDate, null).
-        subscribe(res => {
-          event.Owner.RefreshCartable.RefreshItemsVirtualNgSelect({
-            List: res.List,
-            TotalItemCount: res.TotalItemCount,
-            PageCount: Math.ceil(res.TotalItemCount / 30)
-          });
+    event.Owner.ProductRequestServices.GetIsVolumetricProductList(event.SearchOption,
+      event.Owner.RegionCode,
+      '',
+      1,
+      30,
+      event.Owner.ProdcutTypeCode, true, event.Owner.ContractPayDate, null).
+      subscribe(res => {
+        event.Owner.RefreshCartable.RefreshItemsVirtualNgSelect({
+          List: res.List,
+          TotalItemCount: res.TotalItemCount,
+          PageCount: Math.ceil(res.TotalItemCount / 30)
         });
-      }
+      });
+  }
+  FetchMoreContractPerson(event) { // 62280
+    this.IsPerson = event.Owner.ContractPersonSelectedRow.PersonTypeCode === 1 ? true : false;
+    event.Owner.adContractPersoncol[3].cellEditorParams.Params.loading = true;
+    const ResultList = [];
+    const promise = new Promise((resolve, reject) => {
+      event.Owner.Actor.GetActorPaging(event.PageNumber, event.PageSize, event.term,
+        event.SearchOption, this.IsPerson, false, true).subscribe(res => {
+          event.CurrentItems.forEach(el => {
+            ResultList.push(el);
+          });
+          res.List.forEach(element => {
+            element.ActorID = element.ActorId;
+            ResultList.push(element);
+          });
+          resolve(res.TotalItemCount);
+        });
+    }).then((TotalItemCount: number) => {
+      event.Owner.RefreshCartable.RefreshItemsVirtualNgSelect({
+        List: ResultList,
+        term: event.term,
+        TotalItemCount: TotalItemCount,
+        PageCount: Math.ceil(TotalItemCount / 30),
+        type: 'ContractPerson'
+      });
+    });
+  }
+  FetchContractPersonByTerm(event) { // 62280
+    this.IsPerson = event.Owner.ContractPersonSelectedRow.PersonTypeCode === 1 ? true : false;
+    event.Owner.adContractPersoncol[3].cellEditorParams.Params.loading = true;
+    event.Owner.Actor.GetActorPaging(event.PageNumber, event.PageSize, event.term, event.SearchOption,
+      this.IsPerson, false, true).subscribe(res => {
+        res.List.forEach(el => {
+          el.ActorID = el.ActorId;
+        });
+        event.Owner.RefreshCartable.RefreshItemsVirtualNgSelect({
+          List: res.List,
+          term: event.term,
+          TotalItemCount: res.TotalItemCount,
+          PageCount: Math.ceil(res.TotalItemCount / 30),
+          type: 'ContractPerson'
+        });
+      });
+  }
+  onContractPersoncellEditingStarted(event) { // 62280
+    this.IsPerson = event.data.PersonTypeCode === 1 ? true : false;
+    if (event.colDef && event.colDef.field === 'ActorName') {
+      this.adContractPersoncol[3].cellEditorParams.Params.loading = true;
+      this.Actor.GetActorPaging(1, 30, '', '', this.IsPerson, false, true).subscribe(res => {
+        res.List.forEach(el => {
+          el.ActorID = el.ActorId;
+        });
+        this.RefreshCartable.RefreshItemsVirtualNgSelect({
+          List: res.List,
+          TotalItemCount: res.TotalItemCount,
+          PageCount: Math.ceil(res.TotalItemCount / 30),
+          type: 'ContractPerson'
+        });
+      });
+    }
+  }
 }

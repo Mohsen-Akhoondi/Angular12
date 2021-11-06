@@ -41,6 +41,18 @@
               <label class="custom-control-label redio-label" for="LevelRadio6">به تفکیک فعالیت</label>
             </div>
           </div>
+          <div class="thirdLine">
+            <table style="width: 100%;">
+              <tr>
+                <td style="width: 80%;">
+                  <span style="margin: 0px; margin-left: 5px" class="table-cell-Lable">عامل قرارداد</span>
+                  <app-ng-select-virtual-scroll style="display: inline-block;width: 80% ; min-width: 150px;"
+                    class="select-general-for-lable" [NgSelectParams]="ContractAgentParams"
+                    [Items]="ContractAgentSet">
+                  </app-ng-select-virtual-scroll></td>
+              </tr>
+            </table>
+          </div>
         </div>
 
       </div>

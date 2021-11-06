@@ -48,6 +48,7 @@ export class GridComponent implements OnInit {
   @Input() HeaderWidth;
   @Input() HasMaximizeBtn = true;
   @Input() HaveDelete = true;
+  @Input() RowHeight;
   @Output() Delete: EventEmitter<any> =
     new EventEmitter<any>();
   @Output() RowClick: EventEmitter<any> =
@@ -62,7 +63,9 @@ export class GridComponent implements OnInit {
     new EventEmitter<any>();
   @Output() GridReady: EventEmitter<any> =
     new EventEmitter<any>();
-  @Output() FilterChanged: EventEmitter<any> =
+  @Output() FilterChange: EventEmitter<any> =
+    new EventEmitter<any>();
+  @Output() SortChange: EventEmitter<any> =
     new EventEmitter<any>();
   @Output() GroupBtnClick: EventEmitter<any> =
     new EventEmitter<any>();
@@ -77,6 +80,8 @@ export class GridComponent implements OnInit {
   @Output() GeneralBtnClick: EventEmitter<any> =
     new EventEmitter<any>();
   @Output() RowAdded: EventEmitter<any> =
+    new EventEmitter<any>();
+  @Output() ChangePage: EventEmitter<any> =
     new EventEmitter<any>();
   constructor(private excelService: ExcelService,
     private PriceList: PriceListService,
@@ -93,6 +98,16 @@ export class GridComponent implements OnInit {
   ImageArrowUpSrc = 'assets/Icons/ArrowUp.png';
   gridApi;
   gridColumnApi;
+  SortModels;
+  FilterModelList;
+  // Paging
+  @Input() IsServerPaging;
+  FirstRowOnPage = 0;
+  LastRowOnPage = 0;
+  @Input() TotalRecordCount = 0;
+  CurrentPageNumber = 0;
+  TotalPageCount = 0;
+  //
   localeText = {
     // for filter panel
     page: 'صفحه',
@@ -242,6 +257,7 @@ export class GridComponent implements OnInit {
       this.gridOptions.getRowStyle = this.GridOptionsRowStyle.getRowStyle;
     }
     let itemNo = 1;
+    itemNo = this.FirstRowOnPage && this.FirstRowOnPage > 1 ? this.FirstRowOnPage : 1;
     if (this.rows) {
       const Sub = this.rows.subscribe(res => {
         for (const i of res) {
@@ -251,6 +267,8 @@ export class GridComponent implements OnInit {
           itemNo++;
         }
         this.rowData = res;
+        this.FilterModelList = [];
+        this.SortModels = [];
       },
         () => { },
         () => { if (Sub) { Sub.unsubscribe(); } });
@@ -262,6 +280,8 @@ export class GridComponent implements OnInit {
         itemNo++;
       }
       this.rowData = this.rowsData;
+      this.FilterModelList = [];
+      this.SortModels = [];
     }
     this.columnDefs = this.columns;
     this.defaultColDef = this.defaultCol;
@@ -300,6 +320,12 @@ export class GridComponent implements OnInit {
         }
       });
     });
+    if (this.TotalRecordCount && this.paginationPageSize) {
+      this.FirstRowOnPage = 1;
+      this.LastRowOnPage = this.paginationPageSize;
+      this.CurrentPageNumber = 1;
+      this.TotalPageCount = Math.ceil(this.TotalRecordCount / this.paginationPageSize);
+    }
   }
 
   formatNumber(number) {
@@ -322,6 +348,25 @@ export class GridComponent implements OnInit {
   // tslint:disable-next-line:use-life-cycle-interface
   ngOnChanges(changes: SimpleChanges) {
     let itemNo = 1;
+    itemNo = this.FirstRowOnPage && this.FirstRowOnPage > 1 ? this.FirstRowOnPage : 1;
+    if (changes.TotalRecordCount && changes.TotalRecordCount.currentValue) {
+      this.TotalRecordCount = changes.TotalRecordCount.currentValue;
+      if (this.TotalRecordCount && this.paginationPageSize) {
+        this.FirstRowOnPage = 1;
+        this.LastRowOnPage = this.paginationPageSize;
+        this.CurrentPageNumber = 1;
+        this.TotalPageCount = Math.ceil(this.TotalRecordCount / this.paginationPageSize);
+      }
+    }
+    if (changes.paginationPageSize && changes.paginationPageSize.currentValue) {
+      this.paginationPageSize = changes.paginationPageSize.currentValue;
+      if (this.TotalRecordCount && this.paginationPageSize) {
+        this.FirstRowOnPage = 1;
+        this.LastRowOnPage = this.paginationPageSize;
+        this.CurrentPageNumber = 1;
+        this.TotalPageCount = Math.ceil(this.TotalRecordCount / this.paginationPageSize);
+      }
+    }
     if (changes.columns && changes.columns.currentValue) {
       this.columnDefs = changes.columns.currentValue;
       this.columnDefs.forEach(element => {
@@ -352,6 +397,8 @@ export class GridComponent implements OnInit {
           itemNo++;
         }
         this.rowData = res;
+        this.FilterModelList = [];
+        this.SortModels = [];
       });
     } else if (changes.rowsData && changes.rowsData.currentValue) {
       for (const i of changes.rowsData.currentValue) {
@@ -361,6 +408,8 @@ export class GridComponent implements OnInit {
         itemNo++;
       }
       this.rowData = changes.rowsData.currentValue;
+      this.FilterModelList = [];
+      this.SortModels = [];
     }
     if (changes.defaultCol && changes.defaultCol.currentValue) {
       this.defaultColDef = this.defaultCol.currentValue;
@@ -511,6 +560,7 @@ export class GridComponent implements OnInit {
   }
   RefreshItemNo() {
     let CurrItemNo = 0;
+    CurrItemNo = this.FirstRowOnPage && this.FirstRowOnPage > 1 ? this.FirstRowOnPage : 0;
     const itemsToUpdate = [];
     this.gridApi.forEachNode(function (node) {
       // if (node.data.ItemNo) {
@@ -574,8 +624,31 @@ export class GridComponent implements OnInit {
     });
     this.gridApi.updateRowData({ update: itemsToUpdate });
   }
-  OnFilterChanged() {
-    this.FilterChanged.emit(true);
+  OnFilterChanged(param) {
+    const FilterModel = param.api.getFilterModel();
+    this.FilterModelList = [];
+    Object.keys(FilterModel).forEach(p => {
+      this.FilterModelList.push({
+        FieldName: p,
+        FilterType: FilterModel[p].type,
+        FilterText: FilterModel[p].filter
+      });
+    });
+    this.FilterChange.emit(this.FilterModelList);
+  }
+  OnSortChanged(param) {
+    this.SortModels = [];
+    const SortChangeResult = { SortModels: [], PageNumber: this.CurrentPageNumber, PageSize: this.paginationPageSize };
+    param.api.getSortModel().forEach(p => {
+      this.SortModels.push(
+        {
+          FieldName: p.colId,
+          ISDescending: p.sort !== 'asc'
+        }
+      );
+    });
+    SortChangeResult.SortModels = this.SortModels;
+    this.SortChange.emit(SortChangeResult);
   }
   onmouseover(Type) {
     if (!this.IsDisable) {
@@ -635,5 +708,40 @@ export class GridComponent implements OnInit {
   }
   onGeneralBtnClick(event) {
     this.GeneralBtnClick.emit(event);
+  }
+  onChangePage() {
+    this.ChangePage.emit({
+      PageNumber: this.CurrentPageNumber,
+      PageSize: this.paginationPageSize,
+      SortModels: this.SortModels,
+      FilterModelList: this.FilterModelList
+    });
+    this.FirstRowOnPage = ((this.CurrentPageNumber - 1) * this.paginationPageSize) + 1;
+    this.LastRowOnPage = this.CurrentPageNumber === this.TotalPageCount ?
+      this.TotalRecordCount : this.CurrentPageNumber * this.paginationPageSize;
+  }
+  onFirst() {
+    if (this.CurrentPageNumber > 1) {
+      this.CurrentPageNumber = 1;
+      this.onChangePage();
+    }
+  }
+  onPrevious() {
+    if (this.CurrentPageNumber > 1) {
+      this.CurrentPageNumber--;
+      this.onChangePage();
+    }
+  }
+  onNext() {
+    if (this.CurrentPageNumber < this.TotalPageCount) {
+      this.CurrentPageNumber++;
+      this.onChangePage();
+    }
+  }
+  onLast() {
+    if (this.CurrentPageNumber < this.TotalPageCount) {
+      this.CurrentPageNumber = this.TotalPageCount;
+      this.onChangePage();
+    }
   }
 }

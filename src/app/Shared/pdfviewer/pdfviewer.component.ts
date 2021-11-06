@@ -5,6 +5,7 @@ import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsSe
 import { DealsHallService } from 'src/app/Services/ContractService/DealsHall/DealsHallService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { isUndefined } from 'util';
+import { CommonService } from 'src/app/Services/CommonService/CommonService';
 declare var Dastine: any;
 @Component({
   selector: 'app-pdfviewer',
@@ -22,12 +23,25 @@ export class PDFViewerComponent implements OnInit {
   HaveHeader;
   DocTypeCode;
   DastineisNotInstalled;
+  IsSaved: boolean;
+  ContractorType: boolean;
+  PopupParam;
+  HaveMaxBtn = false;
+  AssignedSignature = false;
+  MinHeightPixel;
+  HeightPercentWithMaxBtn;
+  PercentWidth: number;
+  MainMaxwidthPixel: any;
+  BtnClickedName = '';
+  SignerActorID: any;
   alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false };
+  HasDelBtn = false;
   constructor(private DealsHall: DealsHallService,
     private CommonService: CommonServices,
     private ProductRequest: ProductRequestService,
     private HomeServices: UserSettingsService,
-    private ArchiveDetail: ArchiveDetailService) { }
+    private ArchiveDetail: ArchiveDetailService,
+    private ComonService: CommonService) { }
   IsDown = false;
   IsFinal = false;
 
@@ -35,49 +49,99 @@ export class PDFViewerComponent implements OnInit {
     this.DastineisNotInstalled = !Dastine.isInstalled;
     this.IsDown = this.PDFParam.HaveUpload;
     this.IsFinal = this.PDFParam.IsFinal;
+    this.HasDelBtn = this.PDFParam.HasDelBtn;
     if (this.PDFParam.ChequeNo) {
       this.DocTypeCode = 682;
     } else if (this.IsFinal) {
       this.DocTypeCode = 661;
+    } else if (!isUndefined(this.PDFParam.IsArticle18) && this.PDFParam.IsArticle18 !== null && this.PDFParam.IsArticle18) {
+      this.DocTypeCode = 1047;
+    } else if (!isUndefined(this.PDFParam.IsTrafficRep) && this.PDFParam.IsTrafficRep !== null && this.PDFParam.IsTrafficRep) {
+      this.DocTypeCode = 1107;
     } else {
       this.DocTypeCode = 601;
-    }
-    if (!isUndefined(this.PDFParam.IsArticle18) && this.PDFParam.IsArticle18 !== null && this.PDFParam.IsArticle18) {
-      this.DocTypeCode = 1047;
     }
   }
   ShowMessageBoxWithOkBtn(message, LeftPosition = 530) {
     this.isClicked = true;
     this.PopUpType = 'message-box';
     this.HaveHeader = true;
+    this.HaveMaxBtn = false;
     this.startLeftPosition = LeftPosition;
     this.startTopPosition = 200;
     this.alertMessageParams.message = message;
     this.alertMessageParams.HaveOkBtn = true;
     this.alertMessageParams.HaveYesBtn = false;
     this.alertMessageParams.HaveNoBtn = false;
+    this.HeightPercentWithMaxBtn = null;
+    this.PercentWidth = null;
+    this.MainMaxwidthPixel = null;
+    this.MinHeightPixel = null;
   }
   popupclosed(inputParam) {
-    if (this.PopUpType === 'message-box' && inputParam === 'YES' && this.DocTypeCode === 682) {
-      this.SignCheque();
-    } else {
-      if (this.PopUpType === 'message-box' && inputParam === 'YES') {
-        this.SignDocument();
+    if (this.PopUpType === 'message-box') {
+      if (inputParam === 'YES') {
+        if (this.DocTypeCode === 682) {
+          this.SignCheque();
+          this.isClicked = false;
+          this.PopUpType = null;
+          return;
+        } else if (this.BtnClickedName === 'Signer') {
+          this.PopUpType = 'users-organization-sign';
+          this.isClicked = true;
+          this.startLeftPosition = 208;
+          this.startTopPosition = 5;
+          this.HaveMaxBtn = true;
+          this.HeightPercentWithMaxBtn = 90;
+          this.PercentWidth = 75;
+          this.MainMaxwidthPixel = 1200;
+          this.MinHeightPixel = 600;
+          this.PopupParam = {
+            RegionCode: this.PDFParam.RegionCode,
+            ActorID: this.SignerActorID,
+            ContractorType: this.ContractorType
+          };
+          this.BtnClickedName = '';
+          return;
+
+        } else {
+          this.SignDocument();
+          this.isClicked = false;
+          this.PopUpType = null;
+          return;
+        }
+      } else if (inputParam === 'OK' && this.BtnClickedName === 'DelDoc') {
+        this.PopUpType = '';
+        this.BtnClickedName = '';
+        this.isClicked = false;
+        this.Closed.emit(true);
+        return;
       }
     }
+    this.BtnClickedName = '';
     this.isClicked = false;
-    this.PopUpType = null;
+    this.HaveMaxBtn = false;
+    this.PopUpType = '';
+    this.HeightPercentWithMaxBtn = null;
+    this.PercentWidth = null;
+    this.MainMaxwidthPixel = null;
+    this.MinHeightPixel = null;
   }
   ShowMessageBoxWithYesNoBtn(message) {
     this.isClicked = true;
     this.PopUpType = 'message-box';
     this.HaveHeader = true;
+    this.HaveMaxBtn = false;
     this.startLeftPosition = 335;
     this.startTopPosition = 180;
     this.alertMessageParams.message = message;
     this.alertMessageParams.HaveOkBtn = false;
     this.alertMessageParams.HaveYesBtn = true;
     this.alertMessageParams.HaveNoBtn = true;
+    this.HeightPercentWithMaxBtn = null;
+    this.PercentWidth = null;
+    this.MainMaxwidthPixel = null;
+    this.MinHeightPixel = null;
   }
   onDigitalSingClick() {
     if (!Dastine.isInstalled) {
@@ -110,6 +174,10 @@ export class PDFViewerComponent implements OnInit {
             this.IsDown = true;
             if (SelectedCertificate === '11') {
               this.ShowMessageBoxWithOkBtn('گواهی انتخاب نشده است');
+              return;
+            }
+            if (SelectedCertificate === '80') {
+              this.ShowMessageBoxWithOkBtn('پیکر بندی دستینه با مشکل مواجه گردید با راهبر تماس حاصل فرمایید');
               return;
             }
             this.HomeServices.GetPDFDigestForDigitalSign(SelectedCertificate)
@@ -160,37 +228,50 @@ export class PDFViewerComponent implements OnInit {
               this.ShowMessageBoxWithOkBtn('گواهی انتخاب نشده است');
               return;
             }
+            if (SelectedCertificate === '80') {
+              this.ShowMessageBoxWithOkBtn('پیکر بندی دستینه با مشکل مواجه گردید با راهبر تماس حاصل فرمایید');
+              return;
+            }
             this.ProductRequest.GetPDFDigestMinutesReport(this.PDFParam.OrderCommitionID,
               SelectedCertificate,
               this.DocTypeCode)
-              .subscribe(digestRes => {
-                Dastine.Sign(digestRes, 'SHA1', (SignResult) => {
-                  const SignRes = SignResult.data.Result;
-                  if (SignRes === '18') {
-                    this.ShowMessageBoxWithOkBtn('عملیات لغو شد');
-                    return;
-                  }
-                  if (SignRes === '14') {
-                    this.ShowMessageBoxWithOkBtn('رمز عبور گواهی انتخاب شده صحیح نمی باشد');
-                    return;
-                  }
-                  this.ProductRequest.SignedPDFMinutesReport(
-                    this.PDFParam.OrderCommitionID,
-                    SelectedCertificate,
-                    SignRes,
-                    this.DocTypeCode)
-                    .subscribe((SignedPDFRes: any) => {
-                      this.PDFParam.FileName = SignedPDFRes.FileName;
-                      this.PDFParam.PDFSignersInfo = SignedPDFRes.PDFSignersInfo;
-                      // tslint:disable-next-line:max-line-length
-                      this.ShowMessageBoxWithOkBtn('امضای الکترونیک صورتجلسه با موفقیت انجام شد', 400);
-                    },
-                      (err) => {
-                        if (!err.error.Message.includes('|')) {
-                          this.ShowMessageBoxWithOkBtn('امضای الکترونیک صورتجلسه با مشکل مواجه شد');
-                        }
-                      });
-                });
+              .subscribe((Res: any) => {
+                if (Res.SignerImageList && !this.AssignedSignature) {
+                  this.SignerActorID = Res.SignerActorID;
+                  this.ContractorType = Res.ContractorType;
+                  this.BtnClickedName = 'Signer';
+                  this.ShowMessageBoxWithYesNoBtn('امضا کننده دارای بیش از یک نقش امضا فعال می باشد آیا مایل به تعیین نقش امضا می باشید؟');
+                  return;
+                } else {
+                  Dastine.Sign(Res, 'SHA1', (SignResult) => {
+                    const SignRes = SignResult.data.Result;
+                    if (SignRes === '18') {
+                      this.ShowMessageBoxWithOkBtn('عملیات لغو شد');
+                      return;
+                    }
+                    if (SignRes === '14') {
+                      this.ShowMessageBoxWithOkBtn('رمز عبور گواهی انتخاب شده صحیح نمی باشد');
+                      return;
+                    }
+                    this.ProductRequest.SignedPDFMinutesReport(
+                      this.PDFParam.OrderCommitionID,
+                      SelectedCertificate,
+                      SignRes,
+                      this.DocTypeCode)
+                      .subscribe((SignedPDFRes: any) => {
+                        this.PDFParam.FileName = SignedPDFRes.FileName;
+                        this.PDFParam.PDFSignersInfo = SignedPDFRes.PDFSignersInfo;
+                        this.PDFParam.PDFSrc = SignedPDFRes.FileBase64;
+                        // tslint:disable-next-line:max-line-length
+                        this.ShowMessageBoxWithOkBtn('امضای الکترونیک صورتجلسه با موفقیت انجام شد', 400);
+                      },
+                        (err) => {
+                          if (!err.error.Message.includes('|')) {
+                            this.ShowMessageBoxWithOkBtn('امضای الکترونیک صورتجلسه با مشکل مواجه شد');
+                          }
+                        });
+                  });
+                }
               },
                 (err) => {
                   if (!err.error.Message.includes('|')) {
@@ -211,6 +292,10 @@ export class PDFViewerComponent implements OnInit {
           this.IsDown = true;
           if (SelectedCertificate === '11') {
             this.ShowMessageBoxWithOkBtn('گواهی انتخاب نشده است');
+            return;
+          }
+          if (SelectedCertificate === '80') {
+            this.ShowMessageBoxWithOkBtn('پیکر بندی دستینه با مشکل مواجه گردید با راهبر تماس حاصل فرمایید');
             return;
           }
           this.ProductRequest.GetPDFDigestMinutesReport(this.PDFParam.ChequeNo,
@@ -330,5 +415,32 @@ export class PDFViewerComponent implements OnInit {
     this.DealsHall.DownloadHelpArchiveFile(747).subscribe(res => {
       this.CommonService.downloadFile(res);
     });
+  }
+
+  getOutPutParam(event) {
+    if (this.PopUpType === 'users-organization-sign') {
+      this.IsSaved = event;
+      if (this.IsSaved) {
+        this.isClicked = false;
+        this.PopUpType = null;
+        this.AssignedSignature = true;
+        this.SignDocument();
+      }
+    }
+  }
+
+  OnDelete() {
+    let archiveDetailCode = 0;
+    if (this.DocTypeCode === 1047) {
+      archiveDetailCode = this.PDFParam.OrderCommitionID;
+    } else {
+      archiveDetailCode = this.PDFParam.CostFactorID;
+    }
+    this.ComonService.DeleteArchiveDetailDocuments(archiveDetailCode,
+      this.DocTypeCode,
+      2730).subscribe(res => {
+        this.BtnClickedName = 'DelDoc';
+        this.ShowMessageBoxWithOkBtn('حذف با موفقیت انجام شد');
+      });
   }
 }

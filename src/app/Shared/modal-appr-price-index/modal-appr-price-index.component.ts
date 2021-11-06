@@ -404,6 +404,18 @@ export class ModalApprPriceIndexComponent implements OnInit {
               ngTemplate: this.IsDefinite
             },
           },
+          {
+            headerName: 'شاخص راه',
+            field: 'RoadIndexValue',
+            width: 130,
+            editable: true
+          },
+          {
+            headerName: 'شاخص آب',
+            field: 'WaterIndexValue',
+            width: 130,
+            editable: true
+          },
         ];
         break;
       case 5: // فصل
@@ -572,6 +584,18 @@ export class ModalApprPriceIndexComponent implements OnInit {
             cellRendererParams: {
               ngTemplate: this.IsDefinite
             },
+          },
+          {
+            headerName: 'شاخص راه',
+            field: 'RoadIndexValue',
+            width: 130,
+            editable: true
+          },
+          {
+            headerName: 'شاخص آب',
+            field: 'WaterIndexValue',
+            width: 130,
+            editable: true
           },
         ];
         break;
@@ -772,6 +796,18 @@ export class ModalApprPriceIndexComponent implements OnInit {
             cellRendererParams: {
               ngTemplate: this.IsDefinite
             },
+          },
+          {
+            headerName: 'شاخص راه',
+            field: 'RoadIndexValue',
+            width: 130,
+            editable: true
+          },
+          {
+            headerName: 'شاخص آب',
+            field: 'WaterIndexValue',
+            width: 130,
+            editable: true
           },
         ];
         break;

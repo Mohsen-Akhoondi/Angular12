@@ -6,7 +6,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { of, forkJoin, Observable } from 'rxjs';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
-import { ContractPayService } from 'src/app/Services/ContractService/ContractPayServices/ContractPayService'
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 
 @Component({
@@ -23,7 +22,6 @@ export class ComprehensiveStatusReportComponent implements OnInit {
     private RegionList: RegionListService,
     private route: ActivatedRoute,
     private Actor: ActorService,
-    private ContractPayService: ContractPayService,
     private Report: ReportService
   ) {
     this.route.params.subscribe(params => {
@@ -42,7 +40,7 @@ export class ComprehensiveStatusReportComponent implements OnInit {
     IsDisabled: false,
     Required: true
   };
-  CostCenterItems
+  CostCenterItems;
   RegionParams = {
     bindLabelProp: 'RegionName',
     bindValueProp: 'RegionCode',
@@ -182,8 +180,24 @@ export class ComprehensiveStatusReportComponent implements OnInit {
       this.FromDate,
       this.ToDate,
       2922,
-      this.ContractOperationID
-    )
+      this.ContractOperationID,
+      'چاپ به ریز'
+    );
+  }
+  PrintToAggregate() {
+    this.Report.ComprehensiveStatusReport(
+      this.RegionParams.selectedObject,
+      this.NgSelectContractParamsFrom.selectedObject,
+      this.CostCenterParams.selectedObject,
+      this.SubCostCenterParams.selectedObject,
+      this.TypeContractor,
+      this.NgSelectPersonReqParams.selectedObject,
+      this.FromDate,
+      this.ToDate,
+      2922,
+      this.ContractOperationID,
+      'چاپ به سر جمع'
+    );
   }
   closeModal() {
     this.Closed.emit(true);
@@ -192,7 +206,7 @@ export class ComprehensiveStatusReportComponent implements OnInit {
     switch (type) {
       case 'Region':
         {
-          this.RegionList.GetRegionList(this.ModuleCode, true).subscribe(res => {
+          this.RegionList.GetRegionList(this.ModuleCode, false).subscribe(res => { // 62686
             this.RegionItems = res;
           });
           this.NgSelectContractParamsFrom.selectedObject = null;

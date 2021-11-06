@@ -62,6 +62,7 @@ export class OverPopupComponent implements OnInit {
         this.MainMaxwidthPixel = 913;
         break;
       case 'editor-select-price-list':
+      case 'product-pattern':
         this.HeightPercentWithMaxBtn = 97;
         break;
       case 'workflow-type':
@@ -74,6 +75,13 @@ export class OverPopupComponent implements OnInit {
       case 'pure-product-request-page':
       case 'single-sale-invoice':
         if (!this.minWidthPixel) {
+          this.minWidthPixel = 1345;
+          this.MainMaxwidthPixel = 2000;
+          this.PercentWidth = 90;
+        }
+        break;
+      case 'contract-pay-details':
+        {
           this.minWidthPixel = 1345;
           this.MainMaxwidthPixel = 2000;
           this.PercentWidth = 90;

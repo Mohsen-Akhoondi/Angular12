@@ -41,7 +41,7 @@
 
             <app-contract-page (ContractEstimateClosed)="closeModal()" [PopupMaximized]="popupMaximized"
                 [PopupParam]="PopupParam"
-                *ngIf="PopupType == 'PriceList_contract_estimate' && ModuleCode == 2501 || PopupType == 'contract-page'">
+                *ngIf="PopupType == 'PriceList_contract_estimate' && (ModuleCode == 2501 || ModuleCode == 3008) || PopupType == 'contract-page'">
             </app-contract-page>
 
             <app-contract-person-page (ContractEstimateClosed)="closeModal()" [rowSelected]="PopupParam"
@@ -448,8 +448,9 @@
                 (DealDetailsClosed)="closeModal()">
             </app-deal-details>
 
-            <app-login-page *ngIf="PopupType == 'login-page'" [IsPopUp]= "true" (LoginClosed)="closeModal($event)">
-            </app-login-page>
+            <app-login *ngIf="PopupType == 'advertising-login'" [InputParams]="PopupParam"
+                (LoginClosed)="closeModal($event)">
+            </app-login>
 
             <app-deal-upload-docs *ngIf="PopupType == 'deal-upload-docs'" [InputParams]="PopupParam"
                 (DealDetailsClosed)="closeModal($event)">
@@ -544,7 +545,7 @@
             </app-pure-product-request-page>
 
             <app-global-choose-page *ngIf="PopupType == 'global-choose-page'" [InputParam]="PopupParam"
-                (CloseChoosePage)="closeModal($event)">
+                (CloseChoosePage)="closeModal($event)" (PopupOutPutParam)="getOutPutParam($event)">
             </app-global-choose-page>
 
             <app-person2 *ngIf="PopupType == 'person2'" (Closed)="closeModal()" [InputParam]="PopupParam"
@@ -658,10 +659,66 @@
                 (Closed)="closeModal()" [PopupParam]="PopupParam">
             </app-adjustment-price-range-formulas>
 
-            <app-file-viwer-page *ngIf="PopupType == 'file-viwer-page'"
-            (Closed)="closeModal()" [InputParam]="PopupParam">
+            <app-file-viwer-page *ngIf="PopupType == 'file-viwer-page'" (Closed)="closeModal()"
+                [InputParam]="PopupParam">
             </app-file-viwer-page>
 
+            <app-users-organization-sign *ngIf="PopupType=='users-organization-sign'" [InputParam]="PopupParam"
+                (Closed)="closeModal()" (Output)="getOutPutParam($event)">
+            </app-users-organization-sign>
+
+            <app-goods-request *ngIf="PopupType == 'app-goods-request'" [InputParam]="PopupParam"
+                (Closed)="closeModal()">
+            </app-goods-request>
+
+            <app-input-adjustment-price-range *ngIf="PopupType == 'adjustment-price-range-formulas-input'"
+                (AdjustmentInputClosed)="closeModal()" [PopupParam]="PopupParam">
+            </app-input-adjustment-price-range>
+
+            <app-current-suppliers-contract *ngIf="PopupType == 'current-suppliers-contract'" (Closed)="closeModal()"
+                [PopupParam]="PopupParam">
+            </app-current-suppliers-contract>
+
+            <app-work-flow-transition *ngIf="PopupType == 'work-flow-transition'" [InputParam]="PopupParam"
+                (Closed)="closeModal()" [PopupMaximized]="popupMaximized">
+            </app-work-flow-transition>
+
+            <app-customer-order *ngIf="PopupType == 'customer-order'" [InputParam]="PopupParam" (Closed)="closeModal()"
+                (OutPutParam)="getOutPutParam($event)">
+            </app-customer-order>
+
+            <!-- <app-graph-detail *ngIf="PopupType == 'graph-hover'" 
+            [InputParam]="PopupParam">
+            </app-graph-detail> -->
+
+            <app-user-work-log-detail-graph *ngIf="PopupType == 'user-work-log-detail-graph'" [InputParam]="PopupParam"
+                (Closed)="closeModal()" [PopupMaximized]="popupMaximized">
+            </app-user-work-log-detail-graph>
+
+            <app-product-pattern-product-entry *ngIf="PopupType == 'product-pattern-product-entry'"
+                [InputParam]="PopupParam" (Closed)="closeModal()" (OutPutParam)="getOutPutParam($event)">
+            </app-product-pattern-product-entry>
+
+            <app-product-pattern *ngIf="PopupType == 'product-pattern'" [PopUpParam]="PopupParam" [treeHeight]="80"
+                [NeedSelected]="true" [MainContentHeight]="98" (RowSelected)="getOutPutParam($event)"
+                (Closed)="closeModal()">
+            </app-product-pattern>
+
+            <app-show-contract-list *ngIf="PopupType == 'show-contract-list'" [InputParam]="PopupParam"
+                (Closed)="closeModal()" (Output)="getOutPutParam($event)">
+            </app-show-contract-list>
+
+            <app-product-pattern-entry *ngIf="PopupType == 'product-pattern-entry'" [InputParam]="PopupParam"
+                (Closed)="closeModal()" (OutPutParam)="getOutPutParam($event)">
+            </app-product-pattern-entry>
+
+            <app-product-receive-doc 
+            *ngIf="PopupType == 'product-receive-doc'" 
+            [InputParam]="PopupParam" (Closed)="closeModal()"
+            (OutPutParam)="getOutPutParam($event)">
+            </app-product-receive-doc>
+
+            <app-customer-order-product-request *ngIf="PopupType == 'customer-order-product-request'" (Closed)="closeModal()" [InputParam]="PopupParam"></app-customer-order-product-request>
         </div>
     </div>
 </div>

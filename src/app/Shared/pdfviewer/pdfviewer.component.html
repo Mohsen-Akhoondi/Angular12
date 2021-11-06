@@ -92,6 +92,10 @@
       <img width="15px" height="15px" src="assets/Icons/Download.png" />
       دریافت فایل
     </button>
+    <button *ngIf="HasDelBtn" [disabled]="!PDFParam.PDFSrc" (click)="OnDelete()" id="btnTenderRep" class="btn btn-primary btnGreen">
+      <img width="15px" height="15px" src="assets/Icons/delete.png" />
+       حذف فایل {{PDFParam.HeaderName}}
+    </button>
     <button *ngIf="PDFParam.HaveSign" [disabled]="!PDFParam.PDFSrc" (click)="onDigitalSingClick()" id="btnTenderRep"
       class="btn btn-primary btnGreen">
       <img width="15px" height="15px" src="assets/Icons/SigneDoc.png" />
@@ -104,6 +108,9 @@
   </div>
 </div>
 <app-over-popup *ngIf="isClicked" [PopupType]="PopUpType" [HaveMaxBtn]="HaveMaxBtn"
-  [startLeftPosition]="startLeftPosition" [startTopPosition]="startTopPosition"
-  [PopupParam]="PopUpType === 'message-box' ?alertMessageParams:PopupParam" (popupclosed)="popupclosed($event)">
+  [startLeftPosition]="startLeftPosition" [startTopPosition]="startTopPosition" [minHeightPixel]="MinHeightPixel" [PercentWidth]="PercentWidth"
+  [MainMaxwidthPixel]="MainMaxwidthPixel" [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn"
+  [PopupParam]="PopUpType === 'message-box' ? alertMessageParams: PopupParam" 
+  (PopupOutPutParam)="PopUpType ==='message-box' ? MessageBoxAction($event) : getOutPutParam($event)"
+  (popupclosed)="popupclosed($event)">
 </app-over-popup>

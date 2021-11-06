@@ -491,7 +491,7 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
     }
 
     filter(term: string) {
-        term = term.replace('ی', 'ي');
+      term = term.replace('ی', 'ي');
         this.filterValue = term;
         this.open();
 

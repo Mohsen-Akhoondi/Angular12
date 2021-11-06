@@ -116,8 +116,9 @@ export class ContractEstimatePageComponent implements OnInit {
   PriceListTypeCodeName;
   PriceListTopicCodeName;
   ActorControl = false;
+  colDef2: any;
   @Output() ContractEstimateClosed: EventEmitter<boolean> = new EventEmitter<boolean>();
-  Excel_Header_Param: { colDef2: any };
+  Excel_Header_Param;
   ArchiveParam;
   IsDeActive = true;
   CalcFunction;
@@ -170,6 +171,7 @@ export class ContractEstimatePageComponent implements OnInit {
   };
   SumFinalItemAmount1 = '0';
   SumFinalItemAmountCOEF = '0';
+  HasCOIEntity = false;
   constructor(private router: Router,
     private ContractList: ContractListService,
     private Cartable: CartableServices,
@@ -583,6 +585,10 @@ export class ContractEstimatePageComponent implements OnInit {
         this.type = 'app-excel-load-data';
         this.OverstartLeftPosition = 400;
         this.OverstartTopPosition = 200;
+        this.Excel_Header_Param = {
+          colDef2: this.colDef2,
+          ModuleCode: this.ModuleCode
+        }
         break;
       case 'choose-report':
         this.type = 'choose-report';
@@ -611,7 +617,6 @@ export class ContractEstimatePageComponent implements OnInit {
         this.ArchiveParam = archiveOrderParam;
       }
         break;
-
       case 'archive-contract-estimate': {
         this.type = 'archive-details';
         this.HaveHeader = true;
@@ -627,7 +632,6 @@ export class ContractEstimatePageComponent implements OnInit {
         this.ArchiveParam = archiveEstimateParam;
       }
         break;
-
       case 'Related':
         if (this.selectedRow == null) {
           this.type = 'message-box';
@@ -1181,18 +1185,21 @@ export class ContractEstimatePageComponent implements OnInit {
     this.ChangeDetection = true;
     // if (event.newValue) {value = event.newValue; } else {value = event.oldValue; }
     if (event.colDef && event.colDef.field === 'PriceListNo') {
-      // const PriceListNovalue = (typeof (value) === 'object') ? value[0] : value;
-      // const TemprowData = [];
-      // this.gridApi.forEachNode(res => {
-      //   TemprowData.push(res);
-      // });
-      // const IsDuplicate = TemprowData.filter(x => x.rowIndex !== event.rowIndex && x.data.PriceListNo === PriceListNovalue).length > 0;
+      const PriceListNovalue = (typeof (value) === 'object') ? value[0] : value;
+      const TemprowData = [];
+      this.gridApi.forEachNode(res => {
+        TemprowData.push(res);
+      });
+      const IsDuplicate = TemprowData.filter(x => x.rowIndex !== event.rowIndex && x.data.PriceListNo === PriceListNovalue).length > 0;
+      if (IsDuplicate && !this.HasCOIEntity) { // RFC 61094-Item3
+        this.ShowMessageBoxWithOkBtn('امکان درج ردیف تکراری وجود ندارد.');
+      }
       itemsToUpdate = [];
       this.gridApi.forEachNode(node => {
         if (node.rowIndex === event.rowIndex) {
           node.data.PriceListPatternID = '';
           node.data.PriceListNo = value;
-          // node.data.PriceListNo = IsDuplicate ? '' : PriceListNovalue;
+          node.data.PriceListNo = IsDuplicate && !this.HasCOIEntity ? '' : PriceListNovalue;
           node.data.PriceListName = '';
           node.data.WorkUnitName = '';
           node.data.Amount = '';
@@ -1204,9 +1211,9 @@ export class ContractEstimatePageComponent implements OnInit {
         }
       });
       this.gridApi.updateRowData({ update: itemsToUpdate });
-      // if (IsDuplicate) {
-      //   return;
-      // }
+      if (IsDuplicate && !this.HasCOIEntity) {
+        return;
+      }
       const Values = [];
       if (value != null && value !== '') {
         Values.push(value);
@@ -1661,7 +1668,8 @@ export class ContractEstimatePageComponent implements OnInit {
         this.WorkflowObjectCode,
         null,
         null,
-        this.CartableUserID).subscribe(res => {
+        this.CartableUserID,
+        this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).subscribe(res => {
           if (alert) {
             this.ShowMessageBoxWithOkBtn('تایید برآورد اولیه با موفقیت انجام شد');
           }
@@ -1696,7 +1704,8 @@ export class ContractEstimatePageComponent implements OnInit {
       this.WorkflowObjectCode,
       null,
       null,
-      this.CartableUserID).subscribe(res => {
+      this.CartableUserID,
+      this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).subscribe(res => {
         if (alert) {
           this.ShowMessageBoxWithOkBtn('عدم تایید برآورد اولیه با موفقیت انجام شد');
         }
@@ -2097,6 +2106,13 @@ export class ContractEstimatePageComponent implements OnInit {
     if (this.EntityList.length === 0 && this.selectedContractID) {
       this.ProductRequest.GetProductRequestEntityList(this.selectedContractID, null, null).subscribe(
         res => {
+          if (res && res.length > 0) { // RFC 61094-item3
+            this.HasCOIEntity = true;
+          } else if (res && res.length === 0) {
+            this.HasCOIEntity = false;
+          } else {
+            this.HasCOIEntity = false;
+          }
           this.EntityList = res;
           this.EntityList.forEach(i => {
             if (i.ProductID === this.SelectedProductID) {
@@ -2132,6 +2148,7 @@ export class ContractEstimatePageComponent implements OnInit {
     }
 
     if (this.EntityList.length > 0) {
+      this.HasCOIEntity = true;
       this.EntityList.forEach(i => {
         if (i.ProductID === this.SelectedProductID) {
           this.columnDef2 = [];
@@ -2174,6 +2191,7 @@ export class ContractEstimatePageComponent implements OnInit {
     this.Excel_Header_Param = {
       colDef2: this.ExceleColDef
     };
+    this.colDef2 = this.ExceleColDef;
 
     if (this.PopupParam && this.PopupParam.ModuleViewTypeCode === 2 && this.PopupParam.PrivateType === 'Cartable') {
       this.DisabledComponents = true;

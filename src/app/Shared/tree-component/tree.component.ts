@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, Output, EventEmitter, SimpleChanges, Input } from '@angular/core';
-import { TreeComponent, TreeNode } from '@circlon/angular-tree-component';
+import { TreeNode, TreeComponent } from '@circlon/angular-tree-component';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
 declare var jquery: any;
 declare var $: any;
@@ -9,10 +9,14 @@ declare var $: any;
   styleUrls: ['./tree.component.css']
 })
 export class MyTreeComponent implements OnInit {
-  @Input() PriceListTopicID = 0;
-  @Input() DefPriceListPatternID;
+  @Input() FirstID = 0;
+  @Input() SecondID;
+  @Input() InputParam;
+  @Input() HasFilter = false;
+  FilterText ;
   public scrollbarOptions = { axis: 'y', theme: 'inset-2-dark', scrollButtons: { enable: true } };
-  constructor(private _PriceListService: PriceListService) { }
+  constructor() {
+   }
   nodes = [];
   FirstSelected = true;
   children = [];
@@ -23,25 +27,12 @@ export class MyTreeComponent implements OnInit {
   options = {
     rtl: true,
     getChildren: (node: TreeNode) => {
-      return new Promise((resolve, reject) => {
-        this.GetChildren(node.id).subscribe(data => {
-          this.children = [];
-          data.forEach(item => {
-            this.children.push({
-              name: item.PriceListTopiCodeName,
-              id: item.PriceListPatternID.toString(),
-              hasChildren: !item.IsLeaf,
-              levelCode: item.PriceListLevelCode,
-              TopicCode: item.PriceListTopiCode
-            });
-          });
-          resolve(this.children);
-        });
-      });
+      this.children = this.GetChildren(node.id);
+      return this.children;
     }
   };
   GetChildren(ParentID) {
-    return this._PriceListService.GetPriceListChildren(ParentID);
+    return this.InputParam.GetChildren({ Owner: this.InputParam.Owner, ParentID: ParentID });
   }
   ngOnInit() {
   }
@@ -58,40 +49,34 @@ export class MyTreeComponent implements OnInit {
     }
   }
   // tslint:disable-next-line:use-life-cycle-interface
-  ngOnChanges(changes: SimpleChanges) {
+  async ngOnChanges(changes: SimpleChanges) {
     this.FirstSelected = true;
-    if (changes.DefPriceListPatternID && changes.DefPriceListPatternID.currentValue) {
+    if (changes.SecondID && changes.SecondID.currentValue) {
       this.nodes = [];
-      this._PriceListService.GetPriceListRoots(null, changes.DefPriceListPatternID.currentValue).subscribe(res => {
-        res.forEach(item => {
-          this.nodes.push({
-            name: item.PriceListTopiCodeName,
-            id: item.PriceListPatternID,
-            hasChildren: !item.IsLeaf,
-            levelCode: item.PriceListLevelCode,
-            TopicCode: item.PriceListTopiCode
-          });
-          this.tree.treeModel.update();
-          this.tree.treeModel.getFirstRoot().toggleActivated();
-        });
-      });
-    } else {
-      if (changes.PriceListTopicID && changes.PriceListTopicID.currentValue) {
-        this.nodes = [];
-        this._PriceListService.GetPriceListRoots(changes.PriceListTopicID.currentValue, null).subscribe(res => {
-          res.forEach(item => {
-            this.nodes.push({
-              name: item.PriceListTopiCodeName,
-              id: item.PriceListPatternID,
-              hasChildren: !item.IsLeaf,
-              levelCode: item.PriceListLevelCode,
-              TopicCode: item.PriceListTopiCode
-            });
+      this.InputParam.GetRoots({ Owner: this.InputParam.Owner, FirstID: null, SecondID: changes.SecondID.currentValue })
+        .then((nodes) => {
+          nodes.forEach(node => {
+            this.nodes.push(node);
             this.tree.treeModel.update();
             this.tree.treeModel.getFirstRoot().toggleActivated();
           });
         });
+    } else {
+      if (changes.FirstID && changes.FirstID.currentValue) {
+        this.nodes = [];
+        this.InputParam.GetRoots({ Owner: this.InputParam.Owner, FirstID: changes.FirstID.currentValue, SecondID: null })
+          .then((nodes) => {
+            nodes.forEach(node => {
+              this.nodes.push(node);
+              this.tree.treeModel.update();
+              this.tree.treeModel.getFirstRoot().toggleActivated();
+            });
+          });
       }
     }
+  }
+
+  Filterkeyup(event) {
+      this.tree.treeModel.filterNodes(this.FilterText);
   }
 }

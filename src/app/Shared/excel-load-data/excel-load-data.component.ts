@@ -26,7 +26,6 @@ export class ExcelLoadDataComponent implements OnInit {
   current_row: any[];
   jsonData = {};
   isLoading = false;
-
   isClicked = false;
   HaveHeader = true;
   alertMessageParams = { HaveOkBtn: true, message: '' };
@@ -34,10 +33,14 @@ export class ExcelLoadDataComponent implements OnInit {
   messageBoxResult: any;
   startLeftPosition: number;
   startTopPosition: number;
+  ModuleCode: number;
 
   constructor(private excelService: ExcelService, private Loading: LoadingService) { }
 
   ngOnInit() {
+    if (this.Excel_Header_Param && this.Excel_Header_Param.ModuleCode) {
+      this.ModuleCode = this.Excel_Header_Param.ModuleCode;
+    }
     $(document).ready(function () {
       $('.custom-file-input').on('change', function () {
         const fileName = $(this)
@@ -105,21 +108,23 @@ export class ExcelLoadDataComponent implements OnInit {
             if (typeof nextCell === 'undefined') {
               this.current_row.push(void 0);
             } else {
-              // RFC 61129
-              if (rowNum > 0 && (colNum === 0)) {
-                if (nextCell.w.includes(' ') || isNaN(nextCell.w)) {
-                  this.ShpoMessage(' در ردیف ' + rowNum + ' مقدار ردیف  فهرست اشتباه وارد شده است ');
-                  return;
-                }
-              } else if (rowNum > 0 && colNum === 2) {
-                if (nextCell.w.includes(' ') || isNaN(nextCell.w)) {
-                  this.ShpoMessage(' در ردیف ' + rowNum + ' مقدار مبلغ واحد اشتباه وارد شده است ');
-                  return;
-                }
-              } else if (rowNum > 0 && colNum === 3) {
-                if (nextCell.w.includes(' ') || isNaN(nextCell.w)) {
-                  this.ShpoMessage(' در ردیف ' + rowNum + ' مقدار اشتباه وارد شده است ');
-                  return;
+              if (this.ModuleCode === 2645) {
+                // RFC 61129
+                if (rowNum > 0 && (colNum === 0)) {
+                  if (nextCell.w.includes(' ') || isNaN(nextCell.w)) {
+                    this.ShpoMessage(' در ردیف ' + rowNum + ' مقدار ردیف  فهرست اشتباه وارد شده است ');
+                    return;
+                  }
+                } else if (rowNum > 0 && colNum === 2) {
+                  if (nextCell.w.includes(' ') || isNaN(nextCell.w)) {
+                    this.ShpoMessage(' در ردیف ' + rowNum + ' مقدار مبلغ واحد اشتباه وارد شده است ');
+                    return;
+                  }
+                } else if (rowNum > 0 && colNum === 3) {
+                  if (nextCell.w.includes(' ') || isNaN(nextCell.w)) {
+                    this.ShpoMessage(' در ردیف ' + rowNum + ' مقدار اشتباه وارد شده است ');
+                    return;
+                  }
                 }
               }
 
@@ -157,14 +162,16 @@ export class ExcelLoadDataComponent implements OnInit {
 
   getTemplate() {
     const ColumnTemp = {};
-    this.Excel_Header_Param.colDef2.forEach(element => {
-      if (element.editable) {
-        ColumnTemp[element.headerName] = '';
-      }
-    });
-    this.excelService.exportAsExcelFile([ColumnTemp], 'Template');
+    if (this.Excel_Header_Param && this.Excel_Header_Param.colDef2) {
+      this.Excel_Header_Param.colDef2.forEach(element => {
+        if (element.editable) {
+          ColumnTemp[element.headerName] = '';
+        }
+      });
+      this.excelService.exportAsExcelFile([ColumnTemp], 'Template');
+    }
   }
-  
+
   ShpoMessage(message) {
     this.type = 'message-box';
     this.HaveHeader = true;

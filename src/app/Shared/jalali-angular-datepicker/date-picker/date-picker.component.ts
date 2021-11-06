@@ -19,7 +19,26 @@ import {TimeSelectService} from '../time-select/time-select.service';
 import {IDatePickerConfig, IDatePickerConfigInternal} from './date-picker-config.model';
 import {IDpDayPickerApi} from './date-picker.api';
 import {DatePickerService} from './date-picker.service';
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, forwardRef, HostBinding, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild, ViewEncapsulation, Renderer2 } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  EventEmitter,
+  forwardRef,
+  HostBinding,
+  HostListener,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  Renderer,
+  SimpleChanges,
+  ViewChild,
+  ViewEncapsulation
+} from '@angular/core';
 import {
   ControlValueAccessor,
   FormControl,
@@ -181,7 +200,7 @@ export class DatePickerComponent implements OnChanges,
   constructor(private readonly dayPickerService: DatePickerService,
               private readonly domHelper: DomHelper,
               private readonly elemRef: ElementRef,
-              private readonly renderer: Renderer2,
+              private readonly renderer: Renderer,
               private readonly utilsService: UtilsService,
               public readonly cd: ChangeDetectorRef) {
   }
@@ -335,8 +354,8 @@ export class DatePickerComponent implements OnChanges,
   handleInnerElementClick(element: HTMLElement) {
     this.handleInnerElementClickUnlisteners.push(
       this.renderer.listen(element, 'click', () => {
-    this.hideStateHelper = true;
-})
+        this.hideStateHelper = true;
+      })
     );
   }
 
@@ -461,14 +480,14 @@ export class DatePickerComponent implements OnChanges,
   startGlobalListeners() {
     this.globalListnersUnlisteners.push(
       this.renderer.listen(document, 'keydown', (e: KeyboardEvent) => {
-    this.onKeyPress(e);
-}),
+        this.onKeyPress(e);
+      }),
       this.renderer.listen(document, 'scroll', () => {
-    this.onScroll();
-}),
+        this.onScroll();
+      }),
       this.renderer.listen(document, 'click', () => {
-    this.onBodyClick();
-})
+        this.onBodyClick();
+      })
     );
   }
 

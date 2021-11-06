@@ -17,7 +17,16 @@
     top:0px;
     right: -1.5rem;
 }
-.secondLine {
+.secondLine{
     margin-top: 10px;
     margin-right: 28px;
 }
+
+.thirdLine {
+    margin-top: 10px;
+    margin-right: 10px;
+}
+.table-cell-Lable {
+    margin: 10px 0px;
+  }
+    

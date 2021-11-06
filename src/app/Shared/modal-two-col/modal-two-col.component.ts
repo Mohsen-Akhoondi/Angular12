@@ -55,6 +55,7 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
           this.heightPC = 82;
           break;
         case 2677:
+        case 3000:
         case 2935:
         case 2691:
         case 2692:
@@ -70,6 +71,9 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
         case 2902:
         case 2904:
         case 2924:
+        case 3002:
+        case 1271:
+        case 3001:
           this.widthPX = 510;
           this.heightPC = 85;
           break;
@@ -113,7 +117,11 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
         case 2895: // Pajooheshi
         case 2934: // Pajooheshi-chabook
         case 2910: // Datkhast-e Moameleye Ba Gardesh
+        case 1273:
+        case 3017:
         case 2980: // جستجوی درخواست معامله ملکی
+        case 2996: // جستجوی چاپ مجدد
+        case 1618:
           this.MainwidthPC = 95;
           this.heightPC = 98;
           this.widthPX = 1290;
@@ -172,6 +180,8 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
         case 2730:
         case 1206:
         case 2785:
+        case 3010:
+        case 3011:
           this.MainwidthPC = 95;
           this.heightPC = 98;
           this.widthPX = 1390;
@@ -184,8 +194,15 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
           this.minwidthPX = 1290;
           break;
         case 1204:
+        case 3012:
           // this.MainwidthPC = 95;
-          this.maxheightPX = 345;
+          this.maxheightPX = 445;
+          this.widthPX = 900;
+          this.minwidthPX = 900;
+          break;
+        case 2999:
+          // this.MainwidthPC = 95;
+          this.maxheightPX = 600;
           this.widthPX = 900;
           this.minwidthPX = 900;
           break;
@@ -216,7 +233,7 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
           this.widthPX = 1140;
           break;
         case 2850:
-          case 2987:
+        case 2987:
           this.widthPX = 940;
           this.heightPC = 90;
           break;
@@ -239,7 +256,9 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
         case 2864:
           this.MainwidthPC = 60;
           break;
-        case 2897:
+        case 3025:
+        case 3003:
+        case 3004:
           this.widthPX = 620;
           this.heightPC = 20;
           break;
@@ -264,6 +283,8 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
         case 2769:
         case 2921:
         case 2687:
+        case 3008:
+        case 3005:
           this.widthPX = 1140;
           this.heightPC = 90;
           let RegionList = [];
@@ -300,6 +321,11 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
           this.MainwidthPC = 97;
           this.minwidthPX = 1340;
           break;
+        case 3007:
+          this.heightPC = 33;
+          this.widthPX = 595;
+          this.minwidthPX = 500;
+          break;
         case 2979: // Gozaresh_Kholase_Vaziat_e_Gharadad
           this.heightPC = 15;
           this.widthPX = 550;
@@ -307,6 +333,13 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
           this.minheightPX = 185;
           this.TopPX = 200;
           break;
+          case 3009:
+            this.heightPC = 40;
+            this.widthPX = 850;
+            this.minwidthPX = 840;
+            this.minheightPX = 330;
+            this.TopPX = 100;
+             break;
         default:
           this.widthPX = 1140;
           this.heightPC = 90;

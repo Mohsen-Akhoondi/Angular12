@@ -42,10 +42,10 @@
         انتخاب دسته ای
       </button>
       <button *ngIf="IsContractOrderBtn && IsEditable" [disabled]="IsDisable" (click)="onAddRowItems('ContractOrder')"
-      id="btn3" class="btn btn-primary editaible-grid-btn">
-      <img width="15px" height="15px" src="assets/Icons/MultiAdd.png" />
-      نقل از قرارداد
-     </button>
+        id="btn3" class="btn btn-primary editaible-grid-btn">
+        <img width="15px" height="15px" src="assets/Icons/MultiAdd.png" />
+        نقل از قرارداد
+      </button>
       <button *ngIf="IsNeedRowBtn && IsEditable" [disabled]="IsDisable" (click)="onAddRowItems('RowItems')" id="btn3"
         class="btn btn-primary editaible-grid-btn">
         <img width="15px" height="15px" src="assets/Icons/MultiAdd.png" />
@@ -100,8 +100,27 @@
     (gridReady)="onGridReady($event)" (rowClicked)="onRowClicked($event)" (rowDataChanged)="onRowDataChanged()"
     (rowDataUpdated)="onRowDataUpdated()" (rowDoubleClicked)="onRowDoubleClicked($event)"
     (cellEditingStarted)="onCellEditingStarted($event)" (cellValueChanged)="onCellValueChanged($event)"
-    (filterChanged)="OnFilterChanged()" [getRowHeight]="RowHeightFunc">
+    (filterChanged)="OnFilterChanged($event)" (sortChanged)="OnSortChanged($event)" [getRowHeight]="RowHeightFunc"
+    [rowHeight] = "RowHeight ? RowHeight : ''">
   </ag-grid-angular>
+  <div *ngIf="IsServerPaging" class="ag-theme-balham">
+    <div class="ag-rtl">
+      <div class="ag-paging-panel ag-font-style">
+        <span ref="eSummaryPanel" class="ag-paging-row-summary-panel">
+          <span ref="lbFirstRowOnPage">{{FirstRowOnPage}}</span> تا <span ref="lbLastRowOnPage">{{LastRowOnPage}}</span>
+          از <span ref="lbRecordCount">{{TotalRecordCount}}</span>
+        </span>
+        <span class="ag-paging-page-summary-panel">
+          <button type="button" class="ag-paging-button" (click)="onFirst()" ref="btFirst">اولین</button>
+          <button type="button" class="ag-paging-button" (click)="onPrevious()" ref="btPrevious">قبلی</button>
+          صفحه <span ref="lbCurrent">{{CurrentPageNumber}}</span> از <span ref="lbTotal">{{TotalPageCount}}</span>
+          <button type="button" class="ag-paging-button" (click)="onNext()" ref="btNext">بعدی</button>
+          <button type="button" class="ag-paging-button" (click)="onLast()" ref="btLast">آخرین</button>
+        </span>
+
+      </div>
+    </div>
+  </div>
 </div>
 <!-- <ag-grid-angular
             style="width: 100%; height: 40px"
