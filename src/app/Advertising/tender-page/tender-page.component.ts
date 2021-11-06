@@ -19,6 +19,8 @@ export class TenderPageComponent implements OnInit {
   @ViewChild('Download') Download: TemplateRef<any>;
   @ViewChild('Upload') Upload: TemplateRef<any>;
   rowData = [];
+  gridApi;
+  TotalRecordCount;
   ShowAccordion = true;
   IsDown = false;
   selectedRow;
@@ -101,6 +103,7 @@ export class TenderPageComponent implements OnInit {
         headerName: 'ردیف',
         field: 'ItemNo',
         width: 50,
+        sortable: false,
         resizable: true
       },
       {
@@ -175,7 +178,7 @@ export class TenderPageComponent implements OnInit {
         width: 130,
         resizable: true,
         filter: 'agTextColumnFilter',
-        sortable: true
+        sortable: false
       },
       {
         headerName: 'مبلغ برآورد',
@@ -205,6 +208,7 @@ export class TenderPageComponent implements OnInit {
       {
         headerName: 'تاریخ انتشار',
         field: 'PersianRegisterDate',
+        colId: 'RegisterDate',
         width: 95,
         resizable: true,
         filter: 'agTextColumnFilter',
@@ -213,6 +217,7 @@ export class TenderPageComponent implements OnInit {
       {
         headerName: 'تاریخ انقضا',
         field: 'PersianExpireDate',
+        colId: 'ExpireDate',
         width: 95,
         resizable: true,
         filter: 'agTextColumnFilter',
@@ -224,7 +229,7 @@ export class TenderPageComponent implements OnInit {
         width: 70,
         resizable: true,
         filter: 'agTextColumnFilter',
-        sortable: true
+        sortable: false
       }
     ];
   }
@@ -271,13 +276,15 @@ export class TenderPageComponent implements OnInit {
     }
   }
   LoadLimitedTender() {
-      if (!this.AuthServices.CheckAuth()) {
+    this.AuthServices.CheckAuth().subscribe(res => {
+      if (!res) {
         this.ContractLimitedTenderCount = '-';
       } else {
         this.DealsHall.GetCountContractLimitedTender().subscribe(CountRes => {
           this.ContractLimitedTenderCount = CountRes;
         });
       }
+    });
   }
   RefreshByRegionGroup(RegionGroupCode) {
     this.RegionCodes = [];
@@ -295,7 +302,7 @@ export class TenderPageComponent implements OnInit {
     this.RefreshByRegionGroup(selectedObject);
   }
   popupclosed(param) {
-    if (this.PopupType === 'login-page' && param === 'IsLogin') {
+    if (this.PopupType === 'advertising-login' && param === 'IsLogin') {
       if (this.BtnClickName === 'upload-archive-click') {
         this.OverPixelWidth = 800;
         this.OverPixelHeight = 530;
@@ -308,7 +315,7 @@ export class TenderPageComponent implements OnInit {
         this.LoadLimitedTender();
         this.ReloadData();
       }
-    } if (this.PopupType === 'login-page' && param !== 'IsLogin') {
+    } if (this.PopupType === 'advertising-login' && param !== 'IsLogin') {
       this.btnclicked = false;
       this.PopupType = null;
       this.IsDown = true;
@@ -323,8 +330,6 @@ export class TenderPageComponent implements OnInit {
     }
   }
   tree_selectedchange(event) {
-  }
-  onGridReady(params: { api: any; }) {
   }
   GetType(params) {
     if (params === 'tender') {
@@ -382,76 +387,122 @@ export class TenderPageComponent implements OnInit {
     this.DealsDetailParam.RegionCode = this.RegionGroupParams.selectedObject;
     this.btnclicked = true;
   }
-  ReloadData() {
+  ReloadData(PageNumber = 1, PageSize = 30, SortModelList = null, FilterModelList = null, resolve = null) {
     this.IsDown = false;
     switch (this.ENType) {
       case 'auction':
-        forkJoin([
-          this.DealsHall.GetContractAuction(
-            this.RegionGroupParams.selectedObject,
-            this.RegionCodes,
-            this.SubCostCenterCodes,
-            this.CostCenterCodes,
-            this.IsDuring,
-            this.IsExpired)
-        ]).subscribe(res => {
-          this.rowData = res[0];
-          this.IsDown = true;
-        });
+
+        this.DealsHall.GetContractAuction(
+          this.RegionGroupParams.selectedObject,
+          this.RegionCodes,
+          this.SubCostCenterCodes,
+          this.CostCenterCodes,
+          this.IsDuring,
+          this.IsExpired,
+          PageNumber,
+          PageSize,
+          SortModelList,
+          FilterModelList).subscribe((res: any) => {
+            this.rowData = res.List;
+            if (PageNumber == 1) {
+              if (PageNumber == 1) {
+                this.TotalRecordCount = res.TotalItemCount;
+              }
+            }
+            this.IsDown = true;
+            if (resolve != null) {
+              resolve();
+            }
+          });
         break;
       case 'tender':
-        forkJoin([
-          this.DealsHall.GetContractTender(
-            this.RegionGroupParams.selectedObject,
-            this.RegionCodes,
-            this.SubCostCenterCodes,
-            this.CostCenterCodes,
-            this.IsDuring,
-            this.IsExpired)
-        ]).subscribe(res => {
-          this.rowData = res[0];
-          this.IsDown = true;
-        });
+        this.DealsHall.GetContractTender(
+          this.RegionGroupParams.selectedObject,
+          this.RegionCodes,
+          this.SubCostCenterCodes,
+          this.CostCenterCodes,
+          this.IsDuring,
+          this.IsExpired,
+          PageNumber,
+          PageSize,
+          SortModelList,
+          FilterModelList).subscribe((res: any) => {
+            this.rowData = res.List;
+            if (PageNumber == 1) {
+              this.TotalRecordCount = res.TotalItemCount;
+            }
+            this.IsDown = true;
+            if (resolve != null) {
+              resolve();
+            }
+          });
         break;
       case 'search':
-        forkJoin([
-          this.DealsHall.GetContractInquiry(
-            this.RegionGroupParams.selectedObject,
-            this.RegionCodes,
-            this.SubCostCenterCodes,
-            this.CostCenterCodes,
-            this.IsDuring,
-            this.IsExpired)
-        ]).subscribe(res => {
-          this.rowData = res[0];
-          this.IsDown = true;
-        });
+        this.DealsHall.GetContractInquiry(
+          this.RegionGroupParams.selectedObject,
+          this.RegionCodes,
+          this.SubCostCenterCodes,
+          this.CostCenterCodes,
+          this.IsDuring,
+          this.IsExpired,
+          PageNumber,
+          PageSize,
+          SortModelList,
+          FilterModelList).subscribe((res: any) => {
+            this.rowData = res.List;
+            if (PageNumber == 1) {
+              this.TotalRecordCount = res.TotalItemCount;
+            }
+            this.IsDown = true;
+            if (resolve != null) {
+              resolve();
+            }
+          });
         break;
       case 'advertising':
-        forkJoin([
-          this.DealsHall.GetContractPublicSale(
-            this.RegionGroupParams.selectedObject,
-            this.RegionCodes,
-            this.SubCostCenterCodes,
-            this.CostCenterCodes,
-            this.IsDuring,
-            this.IsExpired)
-        ]).subscribe(res => {
-          this.rowData = res[0];
-          this.IsDown = true;
-        });
+        this.DealsHall.GetContractPublicSale(
+          this.RegionGroupParams.selectedObject,
+          this.RegionCodes,
+          this.SubCostCenterCodes,
+          this.CostCenterCodes,
+          this.IsDuring,
+          this.IsExpired,
+          PageNumber,
+          PageSize,
+          SortModelList,
+          FilterModelList).subscribe((res: any) => {
+            this.rowData = res.List;
+            if (PageNumber == 1) {
+              this.TotalRecordCount = res.TotalItemCount;
+            }
+            this.IsDown = true;
+            if (resolve != null) {
+              resolve();
+            }
+          });
         break;
       case 'limited-tender':
-          if (this.AuthServices.CheckAuth()) {
+        this.AuthServices.CheckAuth().subscribe(LoginRes => {
+          if (LoginRes) {
             this.DealsHall.GetContractLimitedTender(
               this.RegionGroupParams.selectedObject,
               this.RegionCodes,
               this.SubCostCenterCodes,
               this.CostCenterCodes,
               this.IsDuring,
-              this.IsExpired).subscribe(res => {
-                this.rowData = res;
+              this.IsExpired,
+              PageNumber,
+              PageSize,
+              SortModelList,
+              FilterModelList).subscribe((res: any) => {
+                this.rowData = res.List;
+                if (PageNumber == 1) {
+                  this.TotalRecordCount = res.TotalItemCount;
+                }
                 this.IsDown = true;
+                if (resolve != null) {
+                  resolve();
+                }
               });
           } else {
             this.DealsDetailParam = new Object();
@@ -460,10 +511,11 @@ export class TenderPageComponent implements OnInit {
             this.OverStartTopPosition = 130;
             this.OverPixelWidth = 500;
             this.OverPixelHeight = null;
-            this.PopupType = 'login-page';
+            this.PopupType = 'advertising-login';
             this.BtnClickName = 'limited-tender-click';
             this.btnclicked = true;
           }
+        });
         break;
       default:
         break;
@@ -517,7 +569,8 @@ export class TenderPageComponent implements OnInit {
       this.PopupType = 'advertising-accept-rules';
       this.btnclicked = true;
     } else {
-        if (this.AuthServices.CheckAuth()) {
+      this.AuthServices.CheckAuth().subscribe(Loginres => {
+        if (Loginres) {
           if (row.DealMethodCode === 2) {
             this.ProductRequestService.IsValidProposalByInquiryID(row.InquiryID).subscribe(res => {
               if (res && res !== undefined && res === true) {
@@ -550,6 +603,7 @@ export class TenderPageComponent implements OnInit {
         } else {
           this.ShowMessageBoxWithOkBtn('جهت دانلود فایل ابتدا وارد سایت شوید');
         }
+      });
     }
   }
   OnUploadArchive(row) {
@@ -557,14 +611,15 @@ export class TenderPageComponent implements OnInit {
       if (!CheckRes) {
         this.ShowMessageBoxWithOkBtn('زمان بارگذاری و ارسال اسناد با توجه به مهلت ارائه اسناد پایان یافته است ');
       } else {
-          if (!this.AuthServices.CheckAuth()) {
+        this.AuthServices.CheckAuth().subscribe(Loginres => {
+          if (!Loginres) {
             this.DealsDetailParam = row;
             this.DealsDetailParam.HeaderName = 'فرم ورود به سامانه';
             this.overStartLeftPosition = 420;
             this.OverStartTopPosition = 130;
             this.OverPixelWidth = 500;
             this.OverPixelHeight = null;
-            this.PopupType = 'login-page';
+            this.PopupType = 'advertising-login';
             this.BtnClickName = 'upload-archive-click';
             this.btnclicked = true;
           } else {
@@ -577,6 +632,7 @@ export class TenderPageComponent implements OnInit {
             this.PopupType = 'deal-upload-docs';
             this.btnclicked = true;
           }
+        });
       }
     });
   }
@@ -594,5 +650,35 @@ export class TenderPageComponent implements OnInit {
     this.alertMessageParams.HaveOkBtn = true;
     this.alertMessageParams.HaveYesBtn = false;
     this.alertMessageParams.HaveNoBtn = false;
+  }
+  OnChangePage(ChangeParam) {
+    this.rowData = [];
+    this.ReloadData(ChangeParam.PageNumber, ChangeParam.PageSize, ChangeParam.SortModels, ChangeParam.FilterModelList);
+  }
+  OnSortChange(param) {
+    this.rowData = [];
+    this.ReloadData(param.PageNumber, param.PageSize, param.SortModels);
+  }
+  OnFilterChange(param) {
+    const promise = new Promise((resolve, reject) => {
+      this.ReloadData(1, 30, null, param, resolve);
+    }).then(() => {
+
+      setTimeout(() => {
+        param.forEach(element => {
+          const countryFilterComponent = this.gridApi.getFilterInstance(element.FieldName);
+          const model = {
+            filter: element.FilterText,
+            filterType: 'text',
+            type: element.FilterType
+          };
+          countryFilterComponent.setModel(model);
+        });
+      }, 10);
+    });
+
+  }
+  onGridReady(params: { api: any; }) {
+    this.gridApi = params.api;
   }
 }

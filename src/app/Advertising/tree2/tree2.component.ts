@@ -1,8 +1,8 @@
 import { Component, OnInit, ViewChild, Output, EventEmitter, SimpleChanges, Input } from '@angular/core';
+import { TreeNode, TreeComponent } from '@circlon/angular-tree-component';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
 import { isUndefined } from 'util';
 import { DealsHallService } from 'src/app/Services/ContractService/DealsHall/DealsHallService';
-import { TreeComponent, TreeNode } from '@circlon/angular-tree-component';
 declare var jquery: any;
 declare var $: any;
 @Component({
