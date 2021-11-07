@@ -349,6 +349,7 @@ import { ImageViewerModule } from '@udhsin/ngx-image-viewer';
 import { LoginPageComponent } from './Shared/login-page/login-page.component';
 import { StimulViewerComponent } from './Shared/stimul-viewer/stimul-viewer.component';
 import { StimulsoftViewerModule } from 'stimulsoft-viewer-angular';
+import { CustomizedTreeComponent } from './Shared/customized-tree/customized-tree.component';
 // import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 @NgModule({
   declarations: [
@@ -642,7 +643,8 @@ import { StimulsoftViewerModule } from 'stimulsoft-viewer-angular';
     FileViwerPageComponent,
     ContractStatusSummaryRepPageComponent,
     ContractStatusSummarySearchPageComponent,
-    StimulViewerComponent
+    StimulViewerComponent,
+    CustomizedTreeComponent
   ],
   imports: [
     FormsModule,
