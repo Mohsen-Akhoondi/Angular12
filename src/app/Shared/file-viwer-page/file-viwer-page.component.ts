@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { TreeComponent } from 'angular-tree-component';
+import { TreeComponent } from '@circlon/angular-tree-component';
 import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
 declare var jquery: any;
 declare var $: any;
