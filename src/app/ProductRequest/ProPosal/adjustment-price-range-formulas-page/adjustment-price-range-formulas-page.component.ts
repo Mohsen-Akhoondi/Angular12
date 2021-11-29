@@ -2,7 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
-import { isDefined } from '@angular/compiler/src/util';
+import { isUndefined } from 'util';
 
 @Component({
   selector: 'app-adjustment-price-range-formulas-page', // فرمول های تعیین دامنه قیمت عادله
@@ -53,8 +53,8 @@ export class AdjustmentPriceRangeFormulasPageComponent implements OnInit {
 
   ngOnInit() {
     this.ProductRequestObject = this.PopupParam.ProductRequestObject;
-    this.CommitionDate = this.PopupParam.CommitionDate && isDefined(this.PopupParam.CommitionDate) ? this.PopupParam.CommitionDate : null;
-    this.DeadLineDate = this.PopupParam.DeadLineDate && isDefined(this.PopupParam.DeadLineDate) ? this.PopupParam.DeadLineDate : null;
+    this.CommitionDate = this.PopupParam.CommitionDate && !isUndefined(this.PopupParam.CommitionDate) ? this.PopupParam.CommitionDate : null;
+    this.DeadLineDate = this.PopupParam.DeadLineDate && !isUndefined(this.PopupParam.DeadLineDate) ? this.PopupParam.DeadLineDate : null;
     // tslint:disable-next-line: max-line-length
     this.ProductRequest.GetAdjustmentPriceRangeFormulaValues(this.ProductRequestObject.CostFactorID, this.PopupParam.OrderCommitionID,
       this.DeadLineDate, this.CommitionDate).subscribe(ress => {

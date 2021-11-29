@@ -27,7 +27,6 @@ import { resolve } from 'q';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
 import { RadioBoxModel } from 'src/app/Shared/Radio-Box/Radio-Box-Model/RadioBoxModel';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { CommonService } from 'src/app/Services/CommonService/CommonService';
 import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';

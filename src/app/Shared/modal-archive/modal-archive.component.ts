@@ -6,7 +6,7 @@ import { of } from 'rxjs';
 import { CheckboxFieldEditableComponent } from '../checkbox-field-editable/checkbox-field-editable.component';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
 import { isUndefined } from 'util';
-import { isDefined } from '@angular/compiler/src/util';
+
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
 declare var jquery: any;
@@ -94,7 +94,7 @@ export class ModalArchiveComponent implements OnInit {
       case 2939:
       case 2951:
         // tslint:disable-next-line: max-line-length
-        this.ShowAdvertising = this.ArchiveParam.ModuleCode === 2730 && this.ArchiveParam.ModuleViewTypeCode && this.ArchiveParam.ModuleViewTypeCode !== null && isDefined(this.ArchiveParam.ModuleViewTypeCode) && this.ArchiveParam.ModuleViewTypeCode === 131 ? false : !this.ArchiveParam.IsReadOnly;
+        this.ShowAdvertising = this.ArchiveParam.ModuleCode === 2730 && this.ArchiveParam.ModuleViewTypeCode && this.ArchiveParam.ModuleViewTypeCode !== null && !isUndefined(this.ArchiveParam.ModuleViewTypeCode) && this.ArchiveParam.ModuleViewTypeCode === 131 ? false : !this.ArchiveParam.IsReadOnly;
         this.HasArchiveAccess = !this.ArchiveParam.IsReadOnly;
         break;
       case 2785:
