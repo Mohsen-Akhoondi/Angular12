@@ -62,15 +62,14 @@ export class DealDetailsComponent implements OnInit {
     }
   }
   OnUploadArchive(event) {
-    this.AuthServices.CheckAuth().subscribe(res => {
-      if (!res) {
+      if (!this.AuthServices.CheckAuth()) {
         this.DealsDetailParam = this.InputParams;
         this.DealsDetailParam.HeaderName = 'فرم ورود به سامانه';
         this.overStartLeftPosition = 420;
         this.OverStartTopPosition = 130;
         this.OverPixelWidth = 500;
         this.OverPixelHeight = null;
-        this.PopupType = 'advertising-login';
+        this.PopupType = 'login-page';
         this.btnclicked = true;
       } else {
         this.DealsDetailParam = this.InputParams;
@@ -82,10 +81,9 @@ export class DealDetailsComponent implements OnInit {
         this.PopupType = 'deal-upload-docs';
         this.btnclicked = true;
       }
-    });
   }
   popupclosed(param) {
-    if (this.PopupType === 'advertising-login' && param === 'IsLogin') {
+    if (this.PopupType === 'login-page' && param === 'IsLogin') {
       this.OverPixelWidth = 800;
       this.OverPixelHeight = 530;
       this.overStartLeftPosition = 260;
@@ -113,8 +111,7 @@ export class DealDetailsComponent implements OnInit {
       this.PopupType = 'advertising-accept-rules';
       this.btnclicked = true;
     } else {
-      this.AuthServices.CheckAuth().subscribe(res => {
-        if (res) {
+        if (this.AuthServices.CheckAuth()) {
           if (this.InputParams.DealMethodCode === 2) {
             this.ProductRequestService.IsValidProposalByInquiryID(this.InputParams.InquiryID).subscribe(res => {
               if (res && res !== undefined && res === true) {
@@ -145,7 +142,6 @@ export class DealDetailsComponent implements OnInit {
         } else {
           this.ShowMessageBoxWithOkBtn('جهت دانلود فایل ابتدا وارد سایت شوید');
         }
-      });
     }
   }
   ShowMessageBoxWithOkBtn(message) {
