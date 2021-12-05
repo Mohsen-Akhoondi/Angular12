@@ -82,8 +82,8 @@ export class ContractListService {
     return this.http.get(window.location.origin + '/Home/GetContractOrderItemProductListByType', { AContractID, AContractTypeCode, AOrderNo });
   }
 
-  GetRolesList(IsLoading = true) {
-    return this.http.get(window.location.origin + '/Home/GetRolesList', null, IsLoading);
+  GetRolesList(IsLoading = true , ModuleCode = null) {
+    return this.http.get(window.location.origin + '/Home/GetRolesList', {ModuleCode}, IsLoading);
   }
 
   SaveContractPerson(ContractID: number,
@@ -866,8 +866,8 @@ export class ContractListService {
     return this.http.get(window.location.origin + '/Contract/GetConcludedContractPaging',
       { PageNumber, PageSize, SearchTerm, SearchOption, RegionCode, ProductRequestTypeCode });
   }
-  ChangeContractStatus(ContractID: number) {
-    return this.http.get(window.location.origin + '/Contract/ChangeContractStatus', { ContractID });
+  ChangeContractStatus(ContractID: number, ModuleCode: number) {
+    return this.http.get(window.location.origin + '/Contract/ChangeContractStatus', { ContractID, ModuleCode });
   }
   GetFullSaveCostContractWithOrderExceptions(
     AContract: any,
@@ -1087,4 +1087,22 @@ export class ContractListService {
     },
         false);
 }
+
+  GetCostumerOrderQty(
+    ProductID: number, RegionCode: number, CustomerOrderDate = null) {
+    return this.http.get(window.location.origin + '/Contract/GetCostumerOrderQty',
+      {
+        ProductID,
+        RegionCode,
+        CustomerOrderDate
+      });
+  }
+  GetDeadlineContractList(
+    RegionCode: number, Date: any) {
+    return this.http.get(window.location.origin + '/Contract/GetDeadlineContractList',
+      {
+        RegionCode,
+        Date
+      });
+  }
 }

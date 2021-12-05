@@ -351,6 +351,7 @@ import { StimulViewerComponent } from './Shared/stimul-viewer/stimul-viewer.comp
 import { StimulsoftViewerModule } from 'stimulsoft-viewer-angular';
 import { CustomizedTreeComponent } from './Shared/customized-tree/customized-tree.component';
 // import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { DeadlineContractListComponent } from './Contract/deadline-contract-list/deadline-contract-list.component';
 @NgModule({
   declarations: [
     LoginPageComponent,
@@ -644,7 +645,8 @@ import { CustomizedTreeComponent } from './Shared/customized-tree/customized-tre
     ContractStatusSummaryRepPageComponent,
     ContractStatusSummarySearchPageComponent,
     StimulViewerComponent,
-    CustomizedTreeComponent
+    CustomizedTreeComponent,
+    DeadlineContractListComponent
   ],
   imports: [
     FormsModule,

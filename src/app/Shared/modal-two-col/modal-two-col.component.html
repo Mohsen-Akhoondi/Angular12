@@ -104,7 +104,7 @@
     <app-month-work-hour *ngIf="ModuleCode == 2707"></app-month-work-hour>
     <app-user-work-log-Contract-Order *ngIf="ModuleCode == 2727"></app-user-work-log-Contract-Order>
     <app-user-work-log-Product-Request
-      *ngIf="ModuleCode == 2756 || ModuleCode == 2793  || ModuleCode == 2824 || ModuleCode == 2838 || ModuleCode == 2896 || ModuleCode == 2980 || ModuleCode == 2996">
+      *ngIf="ModuleCode == 2756 || ModuleCode == 2793  || ModuleCode == 2824 || ModuleCode == 2838 || ModuleCode == 2896 || ModuleCode == 2980 || ModuleCode == 2996 || ModuleCode == 3033">
     </app-user-work-log-Product-Request>
     <app-user-work-log-Contract-Pay *ngIf="ModuleCode == 2755 || ModuleCode == 2875"></app-user-work-log-Contract-Pay>
     <app-document-type-master-mandatory (DocumentTypeComponentClosed)="closeModal()" *ngIf="ModuleCode == 2764">
@@ -177,7 +177,8 @@
     <app-responsibility-type-page *ngIf="ModuleCode == 2899"></app-responsibility-type-page>
     <!-- <app-researcher-product-request-list *ngIf="ModuleCode == 2895"></app-researcher-product-request-list> -->
     <app-product-entity-page *ngIf="ModuleCode == 2898"></app-product-entity-page>
-    <app-end-of-contract *ngIf="ModuleCode == 3003 || ModuleCode == 3004 || ModuleCode == 3025" (Output)="MessageBoxAction($event)"></app-end-of-contract>
+    <app-end-of-contract *ngIf="ModuleCode == 3003 || ModuleCode == 3004 || ModuleCode == 3025"
+      (Output)="MessageBoxAction($event)"></app-end-of-contract>
     <app-civil-project-page *ngIf="ModuleCode == 2907"></app-civil-project-page>
     <app-control-project-bgt-info-page *ngIf="ModuleCode == 2908"></app-control-project-bgt-info-page>
     <app-estate-property-type-page *ngIf="ModuleCode == 2904"></app-estate-property-type-page>
@@ -219,10 +220,14 @@
     <app-external-user-detail *ngIf="ModuleCode == 3009" (onClose)="closeModal()"></app-external-user-detail>
     <app-customer-order-list *ngIf="ModuleCode == 1646"></app-customer-order-list>
     <app-product-pattern *ngIf="ModuleCode == 3016"></app-product-pattern>
-    <app-applicant-out-cost-center-rep *ngIf="ModuleCode == 3005" (Closed)="closeModal()"></app-applicant-out-cost-center-rep>
+    <app-applicant-out-cost-center-rep *ngIf="ModuleCode == 3005" (Closed)="closeModal()">
+    </app-applicant-out-cost-center-rep>
     <app-product-search *ngIf="ModuleCode == 1273"></app-product-search>
-    <app-customer-order-search *ngIf="ModuleCode == 3017"></app-customer-order-search>
+    <app-customer-order-search *ngIf="ModuleCode == 3017 || ModuleCode == 3029"></app-customer-order-search>
     <app-asset-page-search *ngIf="ModuleCode == 1618"></app-asset-page-search>
+    <app-letter-type *ngIf="ModuleCode == 3018"></app-letter-type>
+    <app-change-cartable-user *ngIf="ModuleCode == 3028" (Closed)="closeModal()"></app-change-cartable-user>
+    <app-deadline-contract-list *ngIf="ModuleCode == 3031"></app-deadline-contract-list>
   </div>
-    
+
 </div>

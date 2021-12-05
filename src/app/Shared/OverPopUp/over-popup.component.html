@@ -712,13 +712,34 @@
                 (Closed)="closeModal()" (OutPutParam)="getOutPutParam($event)">
             </app-product-pattern-entry>
 
-            <app-product-receive-doc 
-            *ngIf="PopupType == 'product-receive-doc'" 
-            [InputParam]="PopupParam" (Closed)="closeModal()"
-            (OutPutParam)="getOutPutParam($event)">
+            <app-product-receive-doc *ngIf="PopupType == 'product-receive-doc'" [InputParam]="PopupParam"
+                (Closed)="closeModal()" (OutPutParam)="getOutPutParam($event)">
             </app-product-receive-doc>
 
-            <app-customer-order-product-request *ngIf="PopupType == 'customer-order-product-request'" (Closed)="closeModal()" [InputParam]="PopupParam"></app-customer-order-product-request>
+            <app-customer-order-product-request *ngIf="PopupType == 'customer-order-product-request'"
+                (Closed)="closeModal()" [InputParam]="PopupParam"></app-customer-order-product-request>
+
+            <app-customer-order-list (Closed)="closeModal()" *ngIf="PopupType == 'customer-order-list'"
+                [InputParam]="PopupParam" (OutPutParam)="getOutPutParam($event)">
+            </app-customer-order-list>
+
+            <app-text-request-page *ngIf="PopupType == 'text-request-page'" (Closed)="closeModal()"
+                (TextSelected)="getOutPutParam($event)" [InputParam]="PopupParam">
+            </app-text-request-page>
+            <app-asset-page *ngIf="PopupType == 'app-asset'" [InputParam]="PopupParam" (Closed)="closeModal()">
+            </app-asset-page>
+
+            <app-rich-text-box-input-page *ngIf="PopupType == 'rich-text-box-input'" (Closed)="closeModal()"
+                [InputParam]="PopupParam">
+            </app-rich-text-box-input-page>
+
+            <app-application-link-page *ngIf="PopupType == 'application-link'" (Closed)="closeModal()">
+            </app-application-link-page>
+
+            <app-deadline-contract-list *ngIf="PopupType == 'deadline-contract'" (Closed)="closeModal()"
+                [InputParam]="PopupParam">
+            </app-deadline-contract-list>
+
         </div>
     </div>
 </div>

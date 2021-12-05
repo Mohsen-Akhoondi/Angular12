@@ -214,7 +214,7 @@ MessageBoxAction(event) {
 }
 //////////////////////////////////////////
 ChangeContractStatus() {
-  this.ContractService.ChangeContractStatus(this.ContractParams.selectedObject).subscribe((res: any) => {
+  this.ContractService.ChangeContractStatus(this.ContractParams.selectedObject, this.ModuleCode).subscribe((res: any) => {
     if (res) {
       this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
       this.ContractParams.selectedObject = null;
