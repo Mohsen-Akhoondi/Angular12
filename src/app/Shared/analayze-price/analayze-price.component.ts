@@ -4,7 +4,7 @@ import { AnalayzePriceTypeService } from 'src/app/Services/BaseService/AnalayzeP
 import { FinYearService } from 'src/app/Services/BaseService/FinYearService';
 import { AnalayzePriceListService } from 'src/app/Services/BaseService/AnalayzePriceListService';
 import { of } from 'rxjs';
-import { NgSelectConfig } from '../ng-select';
+import { NgSelectConfig } from '../ng-select/public-api';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
 declare var jquery: any;
 declare var $: any;

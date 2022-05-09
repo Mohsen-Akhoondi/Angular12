@@ -6,7 +6,7 @@ import { RegionListService } from 'src/app/Services/BaseService/RegionListServic
 import { forkJoin } from 'rxjs';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { ContractPersonRepService } from 'src/app/Services/ContractService/ContractReport/ContractPersonRepService';
-import { NgSelectConfig } from 'src/app/Shared/ng-select';
+import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { isUndefined } from 'util';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';

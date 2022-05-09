@@ -3,7 +3,7 @@ import { GridOptions } from 'ag-grid-community';
 import { of, Observable } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Input, Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { NgSelectConfig } from 'src/app/Shared/ng-select';
+import { NgSelectConfig } from '../../Shared/ng-select/public-api'
 import { CommonService } from 'src/app/Services/CommonService/CommonService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 

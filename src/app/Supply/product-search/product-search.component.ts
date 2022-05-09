@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter,ViewChild, TemplateRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
-import { NgSelectConfig } from 'src/app/Shared/ng-select';
+import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
 import { ActivatedRoute } from '@angular/router';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { ProductService } from 'src/app/Services/BaseService/ProductService';

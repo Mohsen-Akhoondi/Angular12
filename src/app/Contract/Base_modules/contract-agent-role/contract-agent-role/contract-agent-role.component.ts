@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 import { ContractAgentService } from 'src/app/Services/ContractService/BasemodulesService/ContractAgent/ContractAgentService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
-import { NgSelectConfig } from 'src/app/Shared/ng-select';
+import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 declare var jquery: any;

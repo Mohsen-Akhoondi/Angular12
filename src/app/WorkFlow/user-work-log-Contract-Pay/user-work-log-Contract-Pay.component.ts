@@ -1,4 +1,4 @@
-import { NgSelectConfig } from 'src/app/Shared/ng-select';
+import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ModuleService } from 'src/app/Services/BaseService/ModuleService';

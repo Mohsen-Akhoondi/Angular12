@@ -2,7 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { GridOptions } from 'ag-grid-community';
 import { of } from 'rxjs';
-import { NgSelectConfig } from 'src/app/Shared/ng-select';
+import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';

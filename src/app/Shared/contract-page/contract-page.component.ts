@@ -3,7 +3,7 @@ import { ContractListService } from 'src/app/Services/BaseService/ContractListSe
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
 import { of, forkJoin } from 'rxjs';
-import { NgSelectConfig } from '../ng-select';
+import { NgSelectConfig } from '../ng-select/public-api';
 import { promise } from 'protractor';
 import { NgSelectCellEditorComponent } from '../NgSelectCellEditor/ng-select-cell-editor.component';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';

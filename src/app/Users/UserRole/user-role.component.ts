@@ -6,7 +6,7 @@ import { RouterModule, Routes, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { GridOptions } from 'ag-grid-community';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
-import { NgSelectConfig } from 'src/app/Shared/ng-select';
+import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 

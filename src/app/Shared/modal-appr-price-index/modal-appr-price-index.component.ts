@@ -1,7 +1,7 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { PriceListTopicService } from 'src/app/Services/BaseService/PriceListTopicService';
-import { NgSelectConfig } from '../ng-select';
+import { NgSelectConfig } from '../ng-select/public-api';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';

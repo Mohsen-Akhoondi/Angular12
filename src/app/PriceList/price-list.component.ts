@@ -2,7 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { PriceListService } from '../Services/BaseService/PriceListService';
 import { of } from 'rxjs';
 import { GridOptions } from 'ag-grid-community';
-import { NgSelectConfig } from '../Shared/ng-select';
+import { NgSelectConfig } from '../Shared/ng-select/public-api';
 import { ArchiveDetailService } from '../Services/BaseService/ArchiveDetailService';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';

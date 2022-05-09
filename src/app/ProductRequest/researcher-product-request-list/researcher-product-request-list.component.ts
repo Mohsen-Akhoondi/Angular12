@@ -5,7 +5,7 @@ import { RegionListService } from 'src/app/Services/BaseService/RegionListServic
 import { single } from 'rxjs/operators';
 import { GridOptions } from 'ag-grid-community';
 import { of } from 'rxjs';
-import { NgSelectConfig } from 'src/app/Shared/ng-select';
+import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 declare var jquery: any;
 declare var $: any;

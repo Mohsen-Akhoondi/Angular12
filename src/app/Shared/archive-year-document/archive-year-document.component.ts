@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { Router ,ActivatedRoute} from '@angular/router';
 import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
-import { NgSelectConfig } from '../ng-select';
+import { NgSelectConfig } from '../ng-select/public-api';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
 import { TemplateRendererComponent } from '../grid-component/template-renderer/template-renderer.component';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';

@@ -24,7 +24,6 @@ import { NgSelectVirtualScrollComponent } from './Shared/ng-select-virtual-scrol
 import { TestComponent } from './test/test.component';
 import { RouterModule } from '@angular/router';
 import { CustomCheckboxModule } from './Shared/custom-checkbox/src/public_api';
-import { NgSelectModule } from './Shared/ng-select';
 import { MessageService } from './Shared/message-box/MessageService';
 import { TreeModule } from '@circlon/angular-tree-component';
 import { ExpandMode, NgxTreeSelectModule } from './Shared/ngx-tree-select/src';
@@ -352,6 +351,7 @@ import { StimulsoftViewerModule } from 'stimulsoft-viewer-angular';
 import { CustomizedTreeComponent } from './Shared/customized-tree/customized-tree.component';
 // import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { DeadlineContractListComponent } from './Contract/deadline-contract-list/deadline-contract-list.component';
+import { NgSelectModule } from './Shared/ng-select/public-api';
 @NgModule({
   declarations: [
     LoginPageComponent,

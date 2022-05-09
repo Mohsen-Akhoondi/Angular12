@@ -1,7 +1,8 @@
 import {
     Component,
-    OnDestroy,
     OnChanges,
+    OnDestroy,
+    OnInit,
     AfterViewInit,
     forwardRef,
     ChangeDetectorRef,
@@ -37,26 +38,25 @@ import {
     NgTypeToSearchTemplateDirective,
     NgLoadingTextTemplateDirective,
     NgMultiLabelTemplateDirective,
-    NgTagTemplateDirective
+    NgTagTemplateDirective,
+    NgLoadingSpinnerTemplateDirective
 } from './ng-templates.directive';
 
 import { ConsoleService } from './console.service';
 import { isDefined, isFunction, isPromise, isObject } from './value-utils';
 import { ItemsList } from './items-list';
-import { NgOption, KeyCode } from './ng-select.types';
+import { NgOption, KeyCode, DropdownPosition } from './ng-select.types';
 import { newId } from './id';
 import { NgDropdownPanelComponent } from './ng-dropdown-panel.component';
 import { NgOptionComponent } from './ng-option.component';
 import { SelectionModelFactory } from './selection-model';
 import { NgSelectConfig } from './config.service';
+import { NgDropdownPanelService } from './ng-dropdown-panel.service';
 
 export const SELECTION_MODEL_FACTORY = new InjectionToken<SelectionModelFactory>('ng-select-selection-model');
-export type DropdownPosition = 'bottom' | 'top' | 'auto';
-export type AutoCorrect = 'off' | 'on';
-export type AutoCapitalize = 'off' | 'on';
 export type AddTagFn = ((term: string) => any | Promise<any>);
 export type CompareWithFn = (a: any, b: any) => boolean;
-export type GroupValueFn = (key: string | object, children: any[]) => string | object;
+export type GroupValueFn = (key: string | any, children: any[]) => string | any;
 
 @Component({
     selector: 'ng-select',
@@ -66,20 +66,14 @@ export type GroupValueFn = (key: string | object, children: any[]) => string | o
         provide: NG_VALUE_ACCESSOR,
         useExisting: forwardRef(() => NgSelectComponent),
         multi: true
-    }],
+    }, NgDropdownPanelService],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    host: {
-        'role': 'listbox',
-        'class': 'ng-select',
-        '[class.ng-select-single]': '!multiple',
-    }
 })
-export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, ControlValueAccessor {
+export class NgSelectComponent implements OnDestroy, OnChanges, OnInit, AfterViewInit, ControlValueAccessor {
 
     @Input() bindLabel: string;
     @Input() bindValue: string;
-    @Input() clearable = true;
     @Input() markFirst = true;
     @Input() placeholder: string;
     @Input() notFoundText: string;
@@ -87,52 +81,71 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
     @Input() addTagText: string;
     @Input() loadingText: string;
     @Input() clearAllText: string;
+    @Input() appearance: string;
     @Input() dropdownPosition: DropdownPosition = 'auto';
     @Input() appendTo: string;
-    @Input() IsCustome: boolean;
     @Input() loading = false;
     @Input() closeOnSelect = true;
     @Input() hideSelected = false;
     @Input() selectOnTab = false;
     @Input() openOnEnter: boolean;
     @Input() maxSelectedItems: number;
-    @Input() groupBy: string | Function;
+    @Input() groupBy: string | ((value: any) => any);
     @Input() groupValue: GroupValueFn;
     @Input() bufferAmount = 4;
     @Input() virtualScroll: boolean;
     @Input() selectableGroup = false;
     @Input() selectableGroupAsModel = true;
     @Input() searchFn = null;
-    @Input() excludeGroupsFromDefaultSelection = false;
+    @Input() trackByFn = null;
     @Input() clearOnBackspace = true;
-
     @Input() labelForId = null;
-    @Input() autoCorrect: AutoCorrect = 'off';
-    @Input() autoCapitalize: AutoCapitalize = 'off';
+    @Input() inputAttrs: { [key: string]: string } = {};
+    @Input() tabIndex: number;
+    @Input() readonly = false;
+    @Input() searchWhileComposing = true;
+    @Input() minTermLength = 0;
+    @Input() editableSearchTerm = false;
+    @Input() keyDownFn = (_: KeyboardEvent) => true;
+
     @Input() @HostBinding('class.ng-select-typeahead') typeahead: Subject<string>;
     @Input() @HostBinding('class.ng-select-multiple') multiple = false;
     @Input() @HostBinding('class.ng-select-taggable') addTag: boolean | AddTagFn = false;
     @Input() @HostBinding('class.ng-select-searchable') searchable = true;
+    @Input() @HostBinding('class.ng-select-clearable') clearable = true;
     @Input() @HostBinding('class.ng-select-opened') isOpen = false;
 
     @Input()
     get items() { return this._items };
-    set items(value: any[]) {
+
+    set items(value: any[] | null) {
+        if (value === null) {
+            value = [];
+        }
         this._itemsAreUsed = true;
         this._items = value;
     };
 
     @Input()
     get compareWith() { return this._compareWith; }
+
     set compareWith(fn: CompareWithFn) {
-        if (!isFunction(fn)) {
+        if (fn !== undefined && fn !== null && !isFunction(fn)) {
             throw Error('`compareWith` must be a function.');
         }
         this._compareWith = fn;
     }
 
     @Input()
-    get clearSearchOnAdd() { return isDefined(this._clearSearchOnAdd) ? this._clearSearchOnAdd : this.closeOnSelect; };
+    get clearSearchOnAdd() {
+        if (isDefined(this._clearSearchOnAdd)) {
+            return this._clearSearchOnAdd;
+        } else if (isDefined(this.config.clearSearchOnAdd)) {
+            return this.config.clearSearchOnAdd;
+        }
+        return this.closeOnSelect;
+    };
+
     set clearSearchOnAdd(value) {
         this._clearSearchOnAdd = value;
     };
@@ -143,7 +156,7 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
     @Output('change') changeEvent = new EventEmitter();
     @Output('open') openEvent = new EventEmitter();
     @Output('close') closeEvent = new EventEmitter();
-    @Output('search') searchEvent = new EventEmitter();
+    @Output('search') searchEvent = new EventEmitter<{ term: string, items: any[] }>();
     @Output('clear') clearEvent = new EventEmitter();
     @Output('add') addEvent = new EventEmitter();
     @Output('remove') removeEvent = new EventEmitter();
@@ -161,29 +174,42 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
     @ContentChild(NgTypeToSearchTemplateDirective, { read: TemplateRef }) typeToSearchTemplate: TemplateRef<any>;
     @ContentChild(NgLoadingTextTemplateDirective, { read: TemplateRef }) loadingTextTemplate: TemplateRef<any>;
     @ContentChild(NgTagTemplateDirective, { read: TemplateRef }) tagTemplate: TemplateRef<any>;
+    @ContentChild(NgLoadingSpinnerTemplateDirective, { read: TemplateRef }) loadingSpinnerTemplate: TemplateRef<any>;
 
     @ViewChild(forwardRef(() => NgDropdownPanelComponent)) dropdownPanel: NgDropdownPanelComponent;
+    @ViewChild('searchInput', { static: true }) searchInput: ElementRef<HTMLInputElement>;
     @ContentChildren(NgOptionComponent, { descendants: true }) ngOptions: QueryList<NgOptionComponent>;
-    @ViewChild('filterInput') filterInput: ElementRef;
 
-    @HostBinding('class.ng-select-disabled') disabled = false;
-    @HostBinding('class.ng-select-filtered') get filtered() { return !!this.filterValue && this.searchable };
+    @HostBinding('class.ng-select') useDefaultClass = true;
+
+    @HostBinding('class.ng-select-disabled') get disabled() { return this.readonly || this._disabled };
+
+    @HostBinding('class.ng-select-filtered') get filtered() { return (!!this.searchTerm && this.searchable || this._isComposing) };
+
+    @HostBinding('class.ng-select-single') get single() { return !this.multiple };
 
     itemsList: ItemsList;
     viewPortItems: NgOption[] = [];
-    filterValue: string = null;
+    searchTerm: string = null;
     dropdownId = newId();
     element: HTMLElement;
     focused: boolean;
+    escapeHTML = true;
 
     private _items = [];
     private _itemsAreUsed: boolean;
     private _defaultLabel = 'label';
-    private _primitive = true;
+    private _primitive;
     private _manualOpen: boolean;
+    private _disabled: boolean;
     private _pressedKeys: string[] = [];
     private _compareWith: CompareWithFn;
     private _clearSearchOnAdd: boolean;
+    private _isComposing = false;
+
+    private get _editableSearchTerm(): boolean {
+        return this.editableSearchTerm && !this.multiple;
+    }
 
     private readonly _destroy$ = new Subject<void>();
     private readonly _keyPress$ = new Subject<string>();
@@ -197,11 +223,10 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
 
     constructor(
         @Attribute('class') public classes: string,
-        @Attribute('tabindex') public tabIndex: string,
         @Attribute('autofocus') private autoFocus: any,
-        config: NgSelectConfig,
+        public config: NgSelectConfig,
         @Inject(SELECTION_MODEL_FACTORY) newSelectionModel: SelectionModelFactory,
-        _elementRef: ElementRef,
+        _elementRef: ElementRef<HTMLElement>,
         private _cd: ChangeDetectorRef,
         private _console: ConsoleService
     ) {
@@ -222,8 +247,16 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
         return this.selectedItems.length > 0;
     }
 
+    get currentPanelPosition(): DropdownPosition {
+        if (this.dropdownPanel) {
+            return this.dropdownPanel.currentPosition;
+        }
+        return undefined;
+    }
+
     ngOnInit() {
         this._handleKeyPresses();
+        this._setInputAttributes();
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -240,6 +273,7 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
 
     ngAfterViewInit() {
         if (!this._itemsAreUsed) {
+            this.escapeHTML = false;
             this._setItemsFromNgOptions();
         }
 
@@ -255,34 +289,41 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
 
     @HostListener('keydown', ['$event'])
     handleKeyDown($event: KeyboardEvent) {
-        if (KeyCode[$event.which]) {
-            switch ($event.which) {
-                case KeyCode.ArrowDown:
-                    this._handleArrowDown($event);
-                    break;
-                case KeyCode.ArrowUp:
-                    this._handleArrowUp($event);
-                    break;
-                case KeyCode.Space:
-                    this._handleSpace($event);
-                    break;
-                case KeyCode.Enter:
-                    this._handleEnter($event);
-                    break;
-                case KeyCode.Tab:
-                    this._handleTab($event);
-                    break;
-                case KeyCode.Esc:
-                    this.close();
-                    $event.preventDefault();
-                    $event.stopPropagation();
-                    break;
-                case KeyCode.Backspace:
-                    this._handleBackspace();
-                    break;
+        const keyCode = KeyCode[$event.which];
+        if (keyCode) {
+            if (this.keyDownFn($event) === false) {
+                return;
             }
+            this.handleKeyCode($event)
         } else if ($event.key && $event.key.length === 1) {
             this._keyPress$.next($event.key.toLocaleLowerCase());
+        }
+    }
+
+    handleKeyCode($event: KeyboardEvent) {
+        switch ($event.which) {
+        case KeyCode.ArrowDown:
+            this._handleArrowDown($event);
+            break;
+        case KeyCode.ArrowUp:
+            this._handleArrowUp($event);
+            break;
+        case KeyCode.Space:
+            this._handleSpace($event);
+            break;
+        case KeyCode.Enter:
+            this._handleEnter($event);
+            break;
+        case KeyCode.Tab:
+            this._handleTab($event);
+            break;
+        case KeyCode.Esc:
+            this.close();
+            $event.preventDefault();
+            break;
+        case KeyCode.Backspace:
+            this._handleBackspace();
+            break
         }
     }
 
@@ -291,7 +332,6 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
         if (target.tagName !== 'INPUT') {
             $event.preventDefault();
         }
-        $event.stopPropagation();
 
         if (target.classList.contains('ng-clear-wrapper')) {
             this.handleClearClick();
@@ -328,14 +368,14 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
 
     handleClearClick() {
         if (this.hasValue) {
-            this.clearModel();
+            this.itemsList.clearSelected(true);
+            this._updateNgModel();
         }
         this._clearSearch();
         this.focus();
-        if (this._isTypeahead) {
-            this.typeahead.next(null);
-        }
         this.clearEvent.emit();
+
+        this._onSelectionChanged();
     }
 
     clearModel() {
@@ -360,8 +400,8 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
         this._onTouched = fn;
     }
 
-    setDisabledState(isDisabled: boolean): void {
-        this.disabled = isDisabled;
+    setDisabledState(state: boolean): void {
+        this._disabled = state;
         this._cd.markForCheck();
     }
 
@@ -384,7 +424,7 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
         this.isOpen = true;
         this.itemsList.markSelectedOrDefault(this.markFirst);
         this.openEvent.emit();
-        if (!this.filterValue) {
+        if (!this.searchTerm) {
             this.focus();
         }
         this.detectChanges();
@@ -395,7 +435,13 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
             return;
         }
         this.isOpen = false;
-        this._clearSearch();
+        this._isComposing = false;
+        if (!this._editableSearchTerm) {
+            this._clearSearch();
+        } else {
+            this.itemsList.resetFilteredItems();
+        }
+        this.itemsList.unmarkItem();
         this._onTouched();
         this.closeEvent.emit();
         this._cd.markForCheck();
@@ -411,19 +457,25 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
         } else {
             this.select(item);
         }
+
+        if (this._editableSearchTerm) {
+            this._setSearchTermFromItems();
+        }
+
+        this._onSelectionChanged();
     }
 
     select(item: NgOption) {
         if (!item.selected) {
             this.itemsList.select(item);
-            if (this.clearSearchOnAdd) {
+            if (this.clearSearchOnAdd && !this._editableSearchTerm) {
                 this._clearSearch();
             }
 
+            this._updateNgModel();
             if (this.multiple) {
                 this.addEvent.emit(item.value);
             }
-            this._updateNgModel();
         }
 
         if (this.closeOnSelect || this.itemsList.noItemsToSelect) {
@@ -432,7 +484,11 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
     }
 
     focus() {
-        this.filterInput.nativeElement.focus();
+        this.searchInput.nativeElement.focus();
+    }
+
+    blur() {
+        this.searchInput.nativeElement.blur();
     }
 
     unselect(item: NgOption) {
@@ -449,9 +505,9 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
     selectTag() {
         let tag;
         if (isFunction(this.addTag)) {
-            tag = (<AddTagFn>this.addTag)(this.filterValue);
+            tag = (<AddTagFn>this.addTag)(this.searchTerm);
         } else {
-            tag = this._primitive ? this.filterValue : { [this.bindLabel]: this.filterValue };
+            tag = this._primitive ? this.searchTerm : { [this.bindLabel]: this.searchTerm };
         }
 
         const handleTag = (item) => this._isTypeahead || !this.isOpen ? this.itemsList.mapItem(item, null) : this.itemsList.addItem(item);
@@ -463,15 +519,23 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
     }
 
     showClear() {
-        return this.clearable && (this.hasValue || this.filterValue) && !this.disabled;
+        return this.clearable && (this.hasValue || this.searchTerm) && !this.disabled;
     }
 
+    trackByOption = (_: number, item: NgOption) => {
+        if (this.trackByFn) {
+            return this.trackByFn(item.value);
+        }
+
+        return item;
+    };
+
     get showAddTag() {
-        if (!this.filterValue) {
+        if (!this._validTerm) {
             return false;
         }
 
-        const term = this.filterValue.toLowerCase();
+        const term = this.searchTerm.toLowerCase().trim();
         return this.addTag &&
             (!this.itemsList.filteredItems.some(x => x.label.toLowerCase() === term) &&
                 (!this.hideSelected && this.isOpen || !this.selectedItems.some(x => x.label.toLowerCase() === term))) &&
@@ -481,35 +545,56 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
     showNoItemsFound() {
         const empty = this.itemsList.filteredItems.length === 0;
         return ((empty && !this._isTypeahead && !this.loading) ||
-            (empty && this._isTypeahead && this.filterValue && !this.loading)) &&
+            (empty && this._isTypeahead && this._validTerm && !this.loading)) &&
             !this.showAddTag;
     }
 
     showTypeToSearch() {
         const empty = this.itemsList.filteredItems.length === 0;
-        return empty && this._isTypeahead && !this.filterValue && !this.loading;
+        return empty && this._isTypeahead && !this._validTerm && !this.loading;
+    }
+
+    onCompositionStart() {
+        this._isComposing = true;
+    }
+
+    onCompositionEnd(term: string) {
+        this._isComposing = false;
+        if (this.searchWhileComposing) {
+            return;
+        }
+
+        this.filter(term);
     }
 
     filter(term: string) {
-      term = term.replace('ی', 'ي');
-        this.filterValue = term;
-        this.open();
+        if (this._isComposing && !this.searchWhileComposing) {
+            return;
+        }
 
-        if (this._isTypeahead) {
-            this.typeahead.next(this.filterValue);
-        } else {
-            this.itemsList.filter(this.filterValue);
+        this.searchTerm = term;
+        if (this._isTypeahead && (this._validTerm || this.minTermLength === 0)) {
+            this.typeahead.next(term);
+        }
+
+        if (!this._isTypeahead) {
+            this.itemsList.filter(this.searchTerm);
             if (this.isOpen) {
                 this.itemsList.markSelectedOrDefault(this.markFirst);
             }
         }
 
-        this.searchEvent.emit(term);
+        this.searchEvent.emit({ term, items: this.itemsList.filteredItems.map(x => x.value) });
+        this.open();
     }
 
     onInputFocus($event) {
         if (this.focused) {
             return;
+        }
+
+        if (this._editableSearchTerm) {
+            this._setSearchTermFromItems();
         }
 
         this.element.classList.add('ng-select-focused');
@@ -522,6 +607,9 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
         this.blurEvent.emit($event);
         if (!this.isOpen && !this.disabled) {
             this._onTouched();
+        }
+        if (this._editableSearchTerm) {
+            this._setSearchTermFromItems();
         }
         this.focused = false;
     }
@@ -539,22 +627,21 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
         }
     }
 
-    updateDropdownPosition() {
-        if (this.dropdownPanel) {
-            this.dropdownPanel.updateDropdownPosition();
-        }
+    private _setSearchTermFromItems() {
+        const selected = this.selectedItems && this.selectedItems[0];
+        this.searchTerm = (selected && selected.label) || null;
     }
 
     private _setItems(items: any[]) {
         const firstItem = items[0];
         this.bindLabel = this.bindLabel || this._defaultLabel;
-        this._primitive = isDefined(firstItem) ? !isObject(firstItem) : this._primitive;
+        this._primitive = isDefined(firstItem) ? !isObject(firstItem) : this._primitive || this.bindLabel === this._defaultLabel;
         this.itemsList.setItems(items);
         if (items.length > 0 && this.hasValue) {
             this.itemsList.mapSelectedItems();
         }
-        if (this.isOpen && isDefined(this.filterValue) && !this._isTypeahead) {
-            this.itemsList.filter(this.filterValue);
+        if (this.isOpen && isDefined(this.searchTerm) && !this._isTypeahead) {
+            this.itemsList.filter(this.searchTerm);
         }
         if (this._isTypeahead || this.isOpen) {
             this.itemsList.markSelectedOrDefault(this.markFirst);
@@ -562,7 +649,7 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
     }
 
     private _setItemsFromNgOptions() {
-        const handleNgOptions = (options: QueryList<NgOptionComponent>) => {
+        const mapNgOptions = (options: QueryList<NgOptionComponent>) => {
             this.items = options.map(option => ({
                 $ngOptionValue: option.value,
                 $ngOptionLabel: option.elementRef.nativeElement.innerHTML,
@@ -582,7 +669,8 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
                 .subscribe(option => {
                     const item = this.itemsList.findItem(option.value);
                     item.disabled = option.disabled;
-                    this._cd.markForCheck();
+                    item.label = option.label || item.label;
+                    this._cd.detectChanges();
                 });
         };
 
@@ -590,7 +678,7 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
             .pipe(startWith(this.ngOptions), takeUntil(this._destroy$))
             .subscribe(options => {
                 this.bindLabel = this._defaultLabel;
-                handleNgOptions(options);
+                mapNgOptions(options);
                 handleOptionChange();
             });
     }
@@ -602,7 +690,9 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
 
         const validateBinding = (item: any): boolean => {
             if (!isDefined(this.compareWith) && isObject(item) && this.bindValue) {
-                this._console.warn(`Binding object(${JSON.stringify(item)}) with bindValue is not allowed.`);
+                this._console.warn(
+                    `Setting object(${JSON.stringify(item)}) as your model with bindValue is not allowed unless [compareWith] is used.`
+                );
                 return false;
             }
             return true;
@@ -666,6 +756,7 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
                 if (item) {
                     if (this.isOpen) {
                         this.itemsList.markItem(item);
+                        this._scrollToMarked();
                         this._cd.markForCheck();
                     } else {
                         this.select(item);
@@ -675,13 +766,29 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
             });
     }
 
+    private _setInputAttributes() {
+        const input = this.searchInput.nativeElement;
+        const attributes = {
+            type: 'text',
+            autocorrect: 'off',
+            autocapitalize: 'off',
+            autocomplete: this.labelForId ? 'off' : this.dropdownId,
+            ...this.inputAttrs
+        };
+
+        for (const key of Object.keys(attributes)) {
+            input.setAttribute(key, attributes[key]);
+        }
+    }
+
     private _updateNgModel() {
         const model = [];
         for (const item of this.selectedItems) {
             if (this.bindValue) {
                 let value = null;
                 if (item.children) {
-                    value = item.value[<string>this.groupBy];
+                    const groupKey = this.groupValue ? this.bindValue : <string>this.groupBy;
+                    value = item.value[groupKey || <string>this.groupBy];
                 } else {
                     value = this.itemsList.resolveNested(item.value, this.bindValue);
                 }
@@ -704,32 +811,48 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
     }
 
     private _clearSearch() {
-        if (!this.filterValue) {
+        if (!this.searchTerm) {
             return;
         }
 
-        this.filterValue = null;
+        this._changeSearch(null);
         this.itemsList.resetFilteredItems();
+    }
+
+    private _changeSearch(searchTerm: string) {
+        this.searchTerm = searchTerm;
+        if (this._isTypeahead) {
+            this.typeahead.next(searchTerm);
+        }
     }
 
     private _scrollToMarked() {
         if (!this.isOpen || !this.dropdownPanel) {
             return;
         }
-        this.dropdownPanel.scrollInto(this.itemsList.markedItem);
+        this.dropdownPanel.scrollTo(this.itemsList.markedItem);
     }
 
     private _scrollToTag() {
         if (!this.isOpen || !this.dropdownPanel) {
             return;
         }
-        this.dropdownPanel.scrollIntoTag();
+        this.dropdownPanel.scrollToTag();
+    }
+
+    private _onSelectionChanged() {
+        if (this.isOpen && this.multiple && this.appendTo) {
+            // Make sure items are rendered.
+            this._cd.detectChanges();
+            this.dropdownPanel.adjustPosition();
+        }
     }
 
     private _handleTab($event: KeyboardEvent) {
-        if (!this.isOpen) {
+        if (this.isOpen === false && !this.addTag) {
             return;
         }
+
         if (this.selectOnTab) {
             if (this.itemsList.markedItem) {
                 this.toggleItem(this.itemsList.markedItem);
@@ -759,7 +882,6 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
         }
 
         $event.preventDefault();
-        $event.stopPropagation();
     }
 
     private _handleSpace($event: KeyboardEvent) {
@@ -799,13 +921,13 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
 
     private _nextItemIsTag(nextStep: number): boolean {
         const nextIndex = this.itemsList.markedIndex + nextStep;
-        return this.addTag && this.filterValue
+        return this.addTag && this.searchTerm
             && this.itemsList.markedItem
             && (nextIndex < 0 || nextIndex === this.itemsList.filteredItems.length)
     }
 
     private _handleBackspace() {
-        if (this.filterValue || !this.clearable || !this.clearOnBackspace || !this.hasValue) {
+        if (this.searchTerm || !this.clearable || !this.clearOnBackspace || !this.hasValue) {
             return;
         }
 
@@ -820,6 +942,11 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
         return this.typeahead && this.typeahead.observers.length > 0;
     }
 
+    private get _validTerm() {
+        const term = this.searchTerm && this.searchTerm.trim();
+        return term && term.length >= this.minTermLength;
+    }
+
     private _mergeGlobalConfig(config: NgSelectConfig) {
         this.placeholder = this.placeholder || config.placeholder;
         this.notFoundText = this.notFoundText || config.notFoundText;
@@ -831,5 +958,9 @@ export class NgSelectComponent implements OnDestroy, OnChanges, AfterViewInit, C
             ? this.virtualScroll
             : isDefined(config.disableVirtualScroll) ? !config.disableVirtualScroll : false;
         this.openOnEnter = isDefined(this.openOnEnter) ? this.openOnEnter : config.openOnEnter;
+        this.appendTo = this.appendTo || config.appendTo;
+        this.bindValue = this.bindValue || config.bindValue;
+        this.bindLabel = this.bindLabel || config.bindLabel;
+        this.appearance = this.appearance || config.appearance;
     }
 }

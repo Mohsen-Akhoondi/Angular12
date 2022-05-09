@@ -7,7 +7,7 @@ import { single } from 'rxjs/operators';
 import { GridOptions } from 'ag-grid-community';
 import { of } from 'rxjs';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { NgSelectConfig } from 'src/app/Shared/ng-select';
+import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { ContractPayService } from 'src/app/Services/ContractService/ContractPayServices/ContractPayService';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';

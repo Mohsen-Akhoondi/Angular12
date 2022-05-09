@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { of } from 'rxjs';
-import { NgSelectConfig } from 'src/app/Shared/ng-select';
+import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { CustomerOrderService } from 'src/app/Services/CRM/CustomerOrderService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';

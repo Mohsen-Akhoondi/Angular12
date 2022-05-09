@@ -6,7 +6,7 @@ import { ContractListService } from 'src/app/Services/BaseService/ContractListSe
 import { single } from 'rxjs/operators';
 import { GridOptions } from 'ag-grid-community';
 import { forkJoin, of } from 'rxjs';
-import { NgSelectConfig } from '../ng-select';
+import { NgSelectConfig } from '../ng-select/public-api';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { environment } from 'src/environments/environment';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';

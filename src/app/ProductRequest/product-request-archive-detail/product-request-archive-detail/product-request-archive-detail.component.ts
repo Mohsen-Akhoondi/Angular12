@@ -6,7 +6,7 @@ import { of, forkJoin } from 'rxjs';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
-import { isDefined } from 'src/app/Shared/ng-select/ng-select/value-utils';
+import { isDefined } from 'src/app/Shared/ng-select/lib/value-utils';
 declare var jquery: any;
 declare var $: any;
 
