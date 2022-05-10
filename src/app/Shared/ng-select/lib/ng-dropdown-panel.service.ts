@@ -28,12 +28,9 @@ export class NgDropdownPanelService {
     calculateItems(scrollPos: number, itemsLength: number, buffer: number): ItemsRangeResult {
         const d = this._dimensions;
         const scrollHeight = d.itemHeight * itemsLength;
-        console.log('scrollHeight' + scrollHeight);
 
         const scrollTop = Math.max(0, scrollPos);
-        console.log('scrollTop' + scrollTop);
         const indexByScrollTop = scrollTop / scrollHeight * itemsLength;
-        console.log('indexByScrollTop : ' + indexByScrollTop);
         let end = Math.min(itemsLength, Math.ceil(indexByScrollTop) + (d.itemsPerViewport + 1));
 
         const maxStartEnd = end;
