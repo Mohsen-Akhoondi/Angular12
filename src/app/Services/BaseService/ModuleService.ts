@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { BaseHttpClient } from './BaseHttpClient';
-import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ModuleService {
@@ -37,8 +36,30 @@ export class ModuleService {
   GetListByModuleCode(ModuleCode: number, loading: boolean) {
     return this.http.get(window.location.origin + '/Common/GetListByModuleCode', { ModuleCode }, loading);
   }
-GetAutomationOrganizationList() {
+  GetAutomationOrganizationList() {
     return this.http.get(window.location.origin + '/Common/GetAutomationOrganizationList', null);
-    
+
+  }
+  GetModule(IsWeb: boolean) {
+    return this.http.get(window.location.origin + '/Common/GetModule', { IsWeb: IsWeb, });
+
+  }
+  SaveApplicationNote(ApplicationNote) {
+    return this.http.post(window.location.origin + '/Common/SaveApplicationNote', { ApplicationNote });
+  }
+  GetApplicationNoteListData(ModuleCode) {
+    return this.http.get(window.location.origin + '/Common/GetApplicationNoteListData', { ModuleCode });
+
+  }
+
+  GetApplicationNote(ApplicationNoteID) {
+    return this.http.get(window.location.origin + '/Common/GetApplicationNote', { ApplicationNoteID });
+
+  }
+  DeleteApplicationNote(ApplicationNoteID: any) {
+    return this.http.post(window.location.origin + '/Common/DeleteApplicationNote', { ApplicationNoteID });
+  }
+  UpdateApplicationNote(ApplicationNote, ApplicationNoteID) {
+    return this.http.post(window.location.origin + '/Common/UpdateApplicationNote', { ApplicationNote, ApplicationNoteID });
   }
 }
