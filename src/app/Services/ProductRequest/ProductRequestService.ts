@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
 import { BaseHttpClient } from '../BaseService/BaseHttpClient';
-
 @Injectable({ providedIn: 'root' })
 export class ProductRequestService {
     constructor(private http: BaseHttpClient) {
@@ -22,9 +20,21 @@ export class ProductRequestService {
     GetValidWarehouseByRegion(ARegionCode: number) {
         return this.http.get(window.location.origin + '/ProductRequest/GetValidWarehouseByRegion', { ARegionCode });
     }
-    GetContractByRegionCode(ARegionCode: number) {
-        return this.http.get(window.location.origin + '/ProductRequest/GetContractByRegionCode', { ARegionCode });
+    GetContractByRegionCode(ARegionCode: number, FinYearCode: number = null) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetContractByRegionCode', {
+            ARegionCode,
+            FinYearCode
+        });
     }
+    GetContractByRegion(ARegionCode: number, IsCost: boolean, FinYearCode: number = null) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetContractByRegion', {
+            ARegionCode,
+            IsCost,
+            FinYearCode
+
+        });
+    }
+
     GetOnfilterRegion() {
         return this.http.get(window.location.origin + '/ProductRequest/GetOnfilterRegion', null);
     }
@@ -128,7 +138,9 @@ export class ProductRequestService {
         WarrantyList?: any,
         ModuleViewTypeCode?: number,
         RelatedProductList = null,
-        IsReturn: boolean = null
+        IsReturn: boolean = null,
+        ProductRequestPerson = null,
+        ContractId = null
     ) {
         return this.http.post(window.location.origin + '/ProductRequest/SaveProductRequest', {
             ModuleCode,
@@ -142,7 +154,9 @@ export class ProductRequestService {
             WarrantyList,
             ModuleViewTypeCode, // RFC 52370
             RelatedProductList,
-            IsReturn
+            IsReturn,
+            ProductRequestPerson,
+            ContractId
         });
     }
     SavePurProductRequest(
@@ -227,7 +241,7 @@ export class ProductRequestService {
         ProductRequestRelationList: any,
         BeneficiaryList: any,
         Checkexception: any,
-        IsTransferedContract: any,
+        // IsTransferedContract: any,
         CostFactorLetter?: any,
         Document?: any,
         SaveListSetting?: any,
@@ -246,7 +260,7 @@ export class ProductRequestService {
             SaveListSetting,
             ModuleCode,
             OrginalModuleCode,
-            IsTransferedContract,
+            // IsTransferedContract,
             PriceListTypeCode
         });
     }
@@ -327,6 +341,7 @@ export class ProductRequestService {
         CostFactorLetter?: any,
         Document?: any,
         OrginalModuleCode?: any,
+        AContractPeronList?: any
     ) {
         return this.http.post(window.location.origin + '/ProductRequest/UpdateProductRequestContract', {
             ProductRequest,
@@ -342,7 +357,8 @@ export class ProductRequestService {
             ModuleCode,
             CostFactorLetter,
             Document,
-            OrginalModuleCode
+            OrginalModuleCode,
+            AContractPeronList
         });
     }
     UpdateInComeProductRequestContract(ProductRequest: any,
@@ -358,6 +374,7 @@ export class ProductRequestService {
         ModuleCode: any,
         CostFactorLetter?: any,
         Document?: any,
+        OrginalModuleCode?: any,
         ModuleViewTypeCode: any = null
 
     ) {
@@ -375,6 +392,7 @@ export class ProductRequestService {
             ModuleCode,
             CostFactorLetter,
             Document,
+            OrginalModuleCode,
             ModuleViewTypeCode
         });
     }
@@ -382,15 +400,20 @@ export class ProductRequestService {
     GetProductRequestList(ARegionCode: number, ModuleCode: number) {
         return this.http.get(window.location.origin + '/ProductRequest/GetProductRequestList', { ARegionCode, ModuleCode });
     }
-
     GetContractWithoutFlowListData(ARegionCode: number, AModuleCode: number) {
         return this.http.get(window.location.origin + '/ProductRequest/GetContractWithoutFlowListData', { ARegionCode, AModuleCode });
+    }
+    GetContractWithoutFlowList(ARegionCode: number, AModuleCode: number) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetContractWithoutFlowList', { ARegionCode, AModuleCode }, true);
     }
     GetProductRequestOnlyForAdvertising(CostFactorID: number) {
         return this.http.get(window.location.origin + '/ProductRequest/GetProductRequestOnlyForAdvertising', { CostFactorID });
     }
     GetProductRequest(CostFactorID: number) {
         return this.http.get(window.location.origin + '/ProductRequest/GetProductRequest', { CostFactorID });
+    }
+    GetProductRequestForPRPage(CostFactorID: number) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetProductRequestForPRPage', { CostFactorID });
     }
     GetProductRequestForItems(CostFactorID: number) {
         return this.http.get(window.location.origin + '/ProductRequest/GetProductRequestForItems', { CostFactorID });
@@ -420,14 +443,16 @@ export class ProductRequestService {
         CostFactorID: number = null,
         IsChabokContractModuleViewType11: boolean = false,
         IsCompletionContractInfo: boolean = false,
-        ModuleViewTypeCode: number = null) {
+        ModuleViewTypeCode: number = null,
+        ModuleCode: number = null) {
         return this.http.get(window.location.origin + '/ProductRequest/GetOrdersWithProductRequest', {
             ProductRequestItemID,
             HasnotOrder,
             CostFactorID,
             IsChabokContractModuleViewType11,
             IsCompletionContractInfo,
-            ModuleViewTypeCode
+            ModuleViewTypeCode,
+            ModuleCode
         });
     }
 
@@ -604,7 +629,11 @@ export class ProductRequestService {
             IsWarrantyProvided
         });
     }
-    GetPRCostWarrantyList(CostFactorID, OrderCommitionID = null, ModuleVIewTypeCode: number = null) {
+    GetPRCostWarrantyList(
+        CostFactorID,
+        OrderCommitionID = null,
+        ModuleVIewTypeCode: number = null
+    ) {
         return this.http.get(window.location.origin + '/ProductRequest/GetPRCostWarrantyList', {
             CostFactorID,
             OrderCommitionID,
@@ -676,8 +705,18 @@ export class ProductRequestService {
             { AdvertisingID, RegionCode, DealMethodCode, IsCost });
     }
     GetCommitionMemberList(CommitionCode: any, RegionCode: number, Codes: any = null) {
-        return this.http.get(window.location.origin + '/ProductRequest/GetCommitionMemberList', { CommitionCode, RegionCode, Codes });
+        return this.http.get(window.location.origin + '/ProductRequest/GetCommitionMemberList', {
+            CommitionCode, RegionCode, Codes
+        });
     }
+    GetByActorIDs(CommitionCode: number, RegionCode: number, ActorIDs: any) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetByActorIDs', {
+            CommitionCode,
+            RegionCode,
+            ActorIDs
+        });
+    }
+
 
     SaveCommitionMember(OrderCommition: any, ActorIDList: any, InquiryID: any, ProposalList: any,
         // tslint:disable-next-line: max-line-length
@@ -821,8 +860,8 @@ export class ProductRequestService {
             OrginalModuleCode
         });
     }
-    GetInvestType(IsLoading: boolean) {
-        return this.http.get(window.location.origin + '/ProductRequest/GetInvestType', IsLoading);
+    GetInvestType(IsLoading: boolean, ModuleCode = null) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetInvestType', { IsLoading, ModuleCode });
     }
     SaveInvestTypeList(List: any[], ModuleToLog: number) {
         return this.http.post(window.location.origin + '/ProductRequest/SaveInvestTypeList', {
@@ -839,8 +878,9 @@ export class ProductRequestService {
     GetProductRequestInvest(CostFactorID: any) {
         return this.http.get(window.location.origin + '/ProductRequest/GetProductRequestInvest', { CostFactorID });
     }
-    SaveProductRequestInvest(AProductRequestInvest) {
-        return this.http.post(window.location.origin + '/ProductRequest/SaveProductRequestInvest', { AProductRequestInvest });
+    SaveProductRequestInvest(AProductRequestInvest, ARequestInvestUsageTypeList) {
+        // tslint:disable-next-line: max-line-length
+        return this.http.post(window.location.origin + '/ProductRequest/SaveProductRequestInvest', { AProductRequestInvest, ARequestInvestUsageTypeList });
     }
     GetActLocationByRegionCode(RegionCode: number) {
         return this.http.get(window.location.origin + '/ProductRequest/GetActLocationByRegionCode', { RegionCode });
@@ -933,6 +973,13 @@ export class ProductRequestService {
         return this.http.post(window.location.origin + '/ProductRequest/SetProductRequestRenewal', {
             CostFactorID,
             IsRenewal
+        });
+    }
+    SetProductRequestRenewal187(CostFactorID, IsRenewal) {
+        return this.http.post(window.location.origin + '/ProductRequest/SetProductRequestRenewal187', {
+            CostFactorID,
+            IsRenewal
+
         });
     }
     GetAllDealTypeMethodList() {
@@ -1068,11 +1115,16 @@ export class ProductRequestService {
         HasTripleReport,
         SaveMode: any = false,
         ModuleViewTypeCode = null,
-        ModuleCode: number = null) {
+        ModuleCode: number = null,
+        ShowNoteInReport: boolean = null,
+        UrbanRepType: number = null) {
         return this.http.get(window.location.origin + '/ProductRequest/GetMinutesReportPDFContent',
             {
-                OrderCommitionIDs, CostFactorID, RegionCode, SaveMode,
-                HasTripleReport, ReportVer, ModuleViewTypeCode, ModuleCode
+                OrderCommitionIDs, CostFactorID,
+                RegionCode, SaveMode,
+                HasTripleReport, ReportVer,
+                ModuleViewTypeCode, ModuleCode,
+                ShowNoteInReport, UrbanRepType
             });
     }
     GetPDFDigestMinutesReport(OrderCommitionID, Certificate, DocTypeCode) {
@@ -1321,7 +1373,7 @@ export class ProductRequestService {
         return this.http.post(window.location.origin + '/ProductRequest/DeleteWorkFlowInstance', { WorkFlowInstanceId, ModuleCode });
     }
     GetContractPeriodTotaly(
-        RegionGroupCode: number,
+        RegionCode: number,
         FromProductRequestDate,
         ToProductRequestDate,
         FromContractDate,
@@ -1329,7 +1381,7 @@ export class ProductRequestService {
         Times: number) {
         return this.http.get(window.location.origin + '/ProductRequest/GetContractPeriodTotaly',
             {
-                RegionGroupCode,
+                RegionCode,
                 FromProductRequestDate,
                 ToProductRequestDate,
                 FromContractDate,
@@ -1338,7 +1390,8 @@ export class ProductRequestService {
             });
     }
 
-    GetContractPeriodDetail(RegionGroupCode: number,
+    GetContractPeriodDetail(
+        RegionCode: number,
         FromProductRequestDate,
         ToProductRequestDate,
         FromContractDate,
@@ -1346,7 +1399,7 @@ export class ProductRequestService {
         Times: number) {
         return this.http.get(window.location.origin + '/ProductRequest/GetContractPeriodDetail',
             {
-                RegionGroupCode,
+                RegionCode,
                 FromProductRequestDate,
                 ToProductRequestDate,
                 FromContractDate,
@@ -1429,12 +1482,23 @@ export class ProductRequestService {
         return this.http.get(window.location.origin + '/ProductRequest/GetProductRequestEntityByRegionList',
             { RegionCode });
     }
-
+    GetEntityByProductIDAndRegionCode(
+        RegionCode: number,
+        ProductID: number,
+        ProductTypeCode: number,
+        ProductName: string) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetEntityByProductIDAndRegionCode',
+            {
+                RegionCode,
+                ProductID,
+                ProductTypeCode,
+                ProductName
+            });
+    }
     SavePREntityList(ProductRequestEntityList: any, RegionCode: number, PEntityItemList: any) {
         return this.http.post(window.location.origin + '/ProductRequest/SavePREntityList',
             { ProductRequestEntityList, RegionCode, PEntityItemList });
     }
-
     GetAllEntityTypeItem(EntityTypeID, ProductID) {
         return this.http.get(window.location.origin + '/ProductRequest/GetAllEntityTypeItem', {
             EntityTypeID, ProductID
@@ -1698,7 +1762,8 @@ export class ProductRequestService {
     UpdateIsStarOver30(CostFactorID: number, IsStarOver30: boolean, ModuleCode: number) {
         return this.http.get(window.location.origin + '/ProductRequest/UpdateIsStarOver30', { CostFactorID, IsStarOver30, ModuleCode });
     }
-    GetContractWorkFlowAverageWaiting(RegionGroupCode: number,
+    GetContractWorkFlowAverageWaiting(
+        RegionCode: number,
         FromContractDate,
         ToContractDate,
         FromProductRequestDate,
@@ -1706,7 +1771,7 @@ export class ProductRequestService {
         NoTimesCode) {
         return this.http.get(window.location.origin + '/Contract/GetContractWorkFlowAverageWaiting',
             {
-                RegionGroupCode,
+                RegionCode,
                 FromContractDate,
                 ToContractDate,
                 FromProductRequestDate,
@@ -1843,6 +1908,20 @@ export class ProductRequestService {
             false);
     }
 
+    GetBaseAssetsGroup(SearchOption: number,
+        Searchterm: string,
+        PageNumber: number,
+        PageSize: number,
+        BaseAssetGroupID) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetBaseAssetGroup', {
+            SearchOption,
+            Searchterm,
+            PageNumber,
+            PageSize,
+            BaseAssetGroupID
+        },
+            false);
+    }
     GetDealTypeList() {
         return this.http.get(window.location.origin + '/ProductRequest/GetDealTypeList', null);
     }
@@ -1883,8 +1962,8 @@ export class ProductRequestService {
             });
     }
 
-    GetProduct(ProductCode, ProductTypeCode) {
-        return this.http.get(window.location.origin + '/ProductRequest/GetProduct', { ProductCode, ProductTypeCode });
+    GetProduct(ProductCode, ProductTypeCode, ProductPatternID) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetProduct', { ProductCode, ProductTypeCode, ProductPatternID });
     }
 
     getProductRequestByContractId(ContractId: any) {
@@ -1895,11 +1974,11 @@ export class ProductRequestService {
 
     GetApplicantOutCost(ARegionCode, RoleID, FromCostCenterCode,
         ToCostCenterCode, FromSubCostCenterCode,
-        ToSubCostCenterCode) {
+        ToSubCostCenterCode, IsChecked) {
         return this.http.get(window.location.origin + '/ProductRequest/GetApplicantOutCost', {
             ARegionCode, RoleID, FromCostCenterCode,
             ToCostCenterCode, FromSubCostCenterCode,
-            ToSubCostCenterCode
+            ToSubCostCenterCode, IsChecked
         });
     }
     SaveProductReceiveDoc(PRReceiveDocList: any, IsCost, CostFactorID: number) {
@@ -1934,13 +2013,276 @@ export class ProductRequestService {
     GetMaxReferenceNo(CostFactorID: any, IsCost: boolean) {
         return this.http.get(window.location.origin + '/ProductRequest/GetMaxReferenceNo', { CostFactorID, IsCost });
     }
+    GetRelatedAsset(AssetID) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetRelatedAsset', { AssetID });
+    }
+    GetExeUnitPersonByAsset(AssetID) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetExeUnitPersonByAsset', { AssetID });
+    }
     GetContractWarrantyList(CostFactorID, IsCost) {
         return this.http.get(window.location.origin + '/Contract/GetContractWarrantyList', {
             CostFactorID,
             IsCost
         });
     }
+    CheckPDFSignersInfo(OrderCommitionID = null, ModuleVIewTypeCode: number = null) {
+        return this.http.get(window.location.origin + '/ProductRequest/CheckPDFSignersInfo', {
+            OrderCommitionID,
+            ModuleVIewTypeCode
+        });
+    }
     GetAssetList(AssetTag: string = null, AssetCode: number = null) {
         return this.http.get(window.location.origin + '/ProductRequest/GetAssetList', { AssetTag, AssetCode });
+    }
+    GetProductPattern() {
+        return this.http.get(window.location.origin + '/ProductRequest/GetProductPattern', null, false);
+    }
+    GetProductPatternName(ProductPatternProductsID) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetProductPatternName', {
+            ProductPatternProductsID
+        });
+    }
+    GetMaxCustomerOrderCode(RegionCode: any) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetMaxCustomerOrderCode', { RegionCode });
+    }
+    GetRequestInvestUsageType(CostFactorID) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetRequestInvestUsageType', { CostFactorID });
+    }
+    GetArticlePattern(ProductID) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetArticlePattern', { ProductID });
+    }
+    GetAssetHistoryDataGrid(AssetID) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetAssetHistoryDataGrid', { AssetID });
+    }
+    GetInvVoucherCode(ARegionCode, AssetID) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetInvVoucherCode', { ARegionCode, AssetID });
+    }
+
+    GetDepreciationRate(AssetID) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetDepreciationRate', { AssetID });
+    }
+
+    GetSupportNo(AssetID) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetSupportNo', { AssetID });
+    }
+    GetActLocation() {
+        return this.http.get(window.location.origin + '/ProductRequest/GetActLocation', null);
+    }
+    GetArticlePatternByProduct(ProductID) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetArticlePatternByProduct', { ProductID });
+    }
+
+    GetDisApprArt18Note(OrderCommitionID: number) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetDisApprArt18Note', { OrderCommitionID });
+    }
+
+    InsertDisApprNote(OrderCommitionID: number, DisApprovalArticle18Note: string) {
+        return this.http.post(window.location.origin + '/ProductRequest/InsertDisApprNote', { OrderCommitionID, DisApprovalArticle18Note });
+    }
+
+    SaveCrmProductRequest(
+        ModuleCode,
+        ProductRequest,
+        ProductRequestList,
+        OrginalModuleCode
+    ) {
+
+        return this.http.post(window.location.origin + '/ProductRequest/SaveCrmProductRequest', {
+            ModuleCode,
+            ProductRequest,
+            ProductRequestList,
+            OrginalModuleCode
+        });
+    }
+
+
+    ResearcherDisconnect(CostFactorID: number, ResearcherID: number, ModuleCode: number) {
+        return this.http.post(window.location.origin + '/ProductRequest/ResearcherDisconnect', { CostFactorID, ResearcherID, ModuleCode });
+    }
+    UpdateProductRequestInfo(ProductRequest: any, OrginalModuleCode: any, ModuleCode?: any) {
+        return this.http.post(window.location.origin + '/ProductRequest/UpdateProductRequestInfo', {
+            ProductRequest,
+            OrginalModuleCode,
+            ModuleCode
+        });
+    }
+
+    SaveRelatedProductRequests(RelatedProductRequests, ModuleCode: number) {
+        return this.http.post(window.location.origin + '/ProductRequest/SaveRelatedProductRequests',
+            {
+                RelatedProductRequests,
+                ModuleCode
+            });
+    }
+
+    DeleteFromRelatedGroup(RelatedProductRequests, ModuleCode: number) {
+        return this.http.post(window.location.origin + '/ProductRequest/DeleteFromRelatedGroup', {
+            RelatedProductRequests,
+            ModuleCode
+        });
+    }
+
+    GetConfirmCustomerOrder(CostFactorList) {
+        return this.http.post(window.location.origin + '/ProductRequest/GetConfirmCustomerOrder', { CostFactorList });
+    }
+
+    GetProductPatternByID(ProductPatternID) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetProductPatternByID', {
+            ProductPatternID
+        });
+    }
+    ReturnFromCancelProductRequest(CostFactorID,
+        ModuleCode,
+        ContractID: number = null,
+        ContractSatusCode: number = null,
+        WorkFlowInstanceId: number = null) {
+        return this.http.get(window.location.origin + '/ProductRequest/ReturnFromCancelProductRequest', {
+            CostFactorID,
+            ModuleCode,
+            ContractID,
+            ContractSatusCode,
+            WorkFlowInstanceId
+        });
+    }
+    GetSaleType() {
+        return this.http.get(window.location.origin + '/ProductRequest/GetSaleType', false);
+    }
+
+    GetCRMProductRequest(CostFactorID: number) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetCRMProductRequest', { CostFactorID });
+    }
+
+    SaveToCurrentGroupRequests(RelatedProductRequests, GroupNumber, ModuleCode: number) {
+        return this.http.post(window.location.origin + '/ProductRequest/SaveToCurrentGroupRequests',
+            {
+                RelatedProductRequests,
+                GroupNumber,
+                ModuleCode
+            });
+    }
+
+    GetCRMProductRequestPaging(pageNumber: any, pageSize: any, SearchTerm: any, SearchOption: any, RegionCode: any) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetCRMProductRequestPaging', {
+            pageNumber,
+            pageSize,
+            SearchTerm,
+            SearchOption,
+            RegionCode
+        });
+
+    }
+    GetRequestDurationRep(
+        RegionCode: number,
+        ProductRequestNo: String = null) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetRequestDurationRep',
+            {
+                RegionCode,
+                ProductRequestNo
+            });
+    }
+
+    UpdateTenderDoc(CostFactorID, IsUpdateTenderDoc) {
+        return this.http.post(window.location.origin + '/ProductRequest/UpdateTenderDoc', {
+            CostFactorID,
+            IsUpdateTenderDoc
+        });
+    }
+
+    RequestCommitionMemberReport(
+        Resioncode,
+        FromCostFactorID,
+        ToCostFactorID,
+        CostCenterId,
+        SubCostCenterId,
+        FromCommitionDate,
+        ToCommitionDate,
+        CommitionMemberIDs) {
+        return this.http.get(window.location.origin + '/ProductRequest/RequestCommitionMemberReport',
+            {
+                Resioncode,
+                FromCostFactorID,
+                ToCostFactorID,
+                CostCenterId,
+                SubCostCenterId,
+                FromCommitionDate,
+                ToCommitionDate,
+                CommitionMemberIDs
+            });
+    }
+
+    UpdateIsSaleType(CostFactorID, IsSaleType) {
+        return this.http.post(window.location.origin + '/ProductRequest/UpdateIsSaleType', {
+            CostFactorID,
+            IsSaleType
+        });
+    }
+
+    GetAssetID(AssetID: number) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetAssetID', { AssetID });
+    }
+
+    SaveIncomeContract(AProductReq: any, AContract: any, ModuleCode: any) {
+        return this.http.post(window.location.origin + '/ProductRequest/SaveIncomeContract', {
+            AProductReq,
+            AContract,
+            ModuleCode
+        });
+    }
+
+    UpdateBgtRequest(CostFactorID: number, BgtRequest: boolean, ModuleCode: number) {
+        return this.http.post(window.location.origin + '/ProductRequest/UpdateBgtRequest', { CostFactorID, BgtRequest, ModuleCode });
+    }
+
+    SaveInvestProductRequest(AProductReq: any, ProductRequestList, ModuleCode: any) {
+        return this.http.post(window.location.origin + '/ProductRequest/SaveInvestProductRequest', {
+            AProductReq, ProductRequestList, ModuleCode
+        });
+    }
+
+    InsertSupplierIntoPropsalExtension(CostFactorID: number) {
+        return this.http.get(window.location.origin + '/ProductRequest/InsertSupplierIntoPropsalExtension',
+            { CostFactorID }, true);
+    }
+    DeleteIncomeContract(CostFactorID: any, ModuleCode: number) {
+        return this.http.post(window.location.origin + '/ProductRequest/DeleteIncomeContract', { CostFactorID, ModuleCode });
+    }
+
+    GetProductRequestInvestPaging(pageNumber: any, pageSize: any, SearchTerm: any, SearchOption: any, RegionCode: any) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetProductRequestInvestPaging', {
+            pageNumber,
+            pageSize,
+            SearchTerm,
+            SearchOption,
+            RegionCode
+        });
+
+    }
+
+    GetProductRequestInvestList(
+        ARegionCode: number, FromRequest: number = null, ToRequest: number = null) {
+        return this.http.get(window.location.origin + '/ProductRequest/GetProductRequestInvestList',
+            {
+                ARegionCode,
+                FromRequest,
+                ToRequest,
+            });
+    }
+
+    CallAllMethod(
+        CostFactorID: number, IsOrderCommition: boolean,
+        Ckeckexceptions: boolean, OrginalModuleCode: string,
+        IsCompleteContractInfoForSendClarification, SetWinner,
+        ModuleCode: number) {
+        return this.http.get(window.location.origin + '/ProductRequest/CallAllMethod',
+            {
+                CostFactorID,
+                IsOrderCommition,
+                Ckeckexceptions,
+                OrginalModuleCode,
+                IsCompleteContractInfoForSendClarification,
+                SetWinner,
+                ModuleCode,
+
+            });
     }
 }

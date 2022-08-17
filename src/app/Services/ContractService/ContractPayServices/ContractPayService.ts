@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
 import { BaseHttpClient } from '../../BaseService/BaseHttpClient';
 @Injectable({ providedIn: 'root' })
 export class ContractPayService {
@@ -71,9 +70,9 @@ export class ContractPayService {
         return this.http.get(window.location.origin + '/ContractPay/HaveWorkFlowInstanceForProductRequest', { ObjectID, WorkFlowObjectCode });
     }
 
-    HasPermissionToDeleteContract(ObjectID: number, WorkFlowObjectCode: number, ReadOnlyRegion: boolean, ContractID?: number) {
+    HasPermissionToDeleteContract(ObjectID: number, WorkFlowObjectCode: number, ReadOnlyRegion: boolean, ModuleCode: number, ContractID?: number) {
         return this.http.get(window.location.origin + '/ContractPay/HasPermissionToDeleteContract'
-            , { ObjectID, WorkFlowObjectCode, ReadOnlyRegion, ContractID });
+            , { ObjectID, WorkFlowObjectCode, ReadOnlyRegion, ModuleCode, ContractID });
     }
     ComprehensiveStatusReport(
         RegionCode: number,
@@ -89,5 +88,17 @@ export class ContractPayService {
             , {
                 RegionCode, ContractCode, CostCenterCode, SubCostCenterCode, TypeContractor, PersonReqCode, FromDate, ToDate
             });
+    }
+    GetSpecificContractOperation() {
+        return this.http.get(window.location.origin + '/ContractPay/GetSpecificContractOperation', null);
+    }
+
+    HaveOneWorkFlowInstanceRow(ObjectID: number,
+        WorkFlowObjectCode: number) {
+        return this.http.get(window.location.origin + '/ContractPay/HaveOneWorkFlowInstanceRow', { ObjectID, WorkFlowObjectCode });
+    }
+
+    GetIsOnContract(ContractOperationID: number) {
+        return this.http.get(window.location.origin + '/ContractPay/GetIsOnContract', { ContractOperationID });
     }
 }

@@ -21,7 +21,8 @@ export class ReportService {
     }
     );
   }
-  ShowReport(selectedWorkflowID: number,
+  ShowReport(
+    selectedWorkflowID: number,
     WorkflowInstanceID: number,
     objectID: number,
     ContractCode: number,
@@ -33,8 +34,9 @@ export class ReportService {
     WorkflowTypeName: string,
     ModuleCode: number,
     RegionCode: number,
-    HaveSave: boolean = null, // RFC 51581
+    HaveSave: boolean = null // RFC 51581
   ) {
+ 
     const Str = 'WFID=' + selectedWorkflowID +
       '&WorkflowInstanceID=' + WorkflowInstanceID +
       '&objectID=' + objectID +
@@ -186,25 +188,23 @@ export class ReportService {
   }
 
   ContractPeriodReport(
-    RegionGroupCode: number,
+    RegionCode: number,
     FromProductRequestDate: string,
     ToProductRequestDate: string,
     FromContractDate: string,
     ToContractDate: string,
     Times: number,
     ModuleCode: number,
-    RegionCode: number,
     HeaderName: any
   ) {
     const Str =
-      'RegionGroupCode=' + RegionGroupCode + '&' +
+      'RegionCode=' + RegionCode + '&' +
       'FromProductRequestDate=' + FromProductRequestDate + '&' +
       'ToProductRequestDate=' + ToProductRequestDate + '&' +
       'FromContractDate=' + FromContractDate + '&' +
       'ToContractDate=' + ToContractDate + '&' +
       'Times=' + Times + '&' +
       'ModuleCode=' + ModuleCode + '&' +
-      'RegionCode=' + RegionCode + '&' +
       'HeaderName=' + HeaderName;
     this.http.get(window.location.origin + '/Report/Encrypt', { Str: Str }).
       subscribe(
@@ -535,11 +535,12 @@ export class ReportService {
         }
       );
   }
-  ShowapprpriceindexReport(finYearCode: number, attachmentNo: number, levelCode: number) {
+  ShowapprpriceindexReport(finYearCode: number, attachmentNo: number, levelCode: number, PriceListTypeCode) {
     const Str =
       'fin-year=' + finYearCode + '&' +
       'attachment=' + attachmentNo + '&' +
       'level=' + levelCode + '&' +
+      'PriceListTypeCode=' + PriceListTypeCode + '&' +
       'ModuleCode=2649';
     this.http.get(window.location.origin + '/Report/Encrypt', { Str: Str }).
       subscribe(
@@ -708,5 +709,98 @@ export class ReportService {
         }
       );
   };
+  ProductRequestProvisionReport(
+    CostFactorID: number,
+    ModuleViewTypeCode: any,
+    ModuleCode: number,
+    Flag,
+    RegionCode,
+    HeaderName
+  ) {
+    const Str =
+      'CostFactorID=' + CostFactorID +
+      '&ModuleViewTypeCode=' + ModuleViewTypeCode +
+      '&Flag=' + Flag +
+      '&RegionCode=' + RegionCode +
+      '&ModuleCode=' + ModuleCode +
+      '&HeaderName=' + HeaderName;
 
+    this.http.get(window.location.origin + '/Report/Encrypt', { Str: Str }).
+      subscribe(
+        (res) => {
+          window.open(window.location.origin + '/Report/Print?' + res, '_blank');
+        }
+      );
+  };
+  OpenContractRep(RegionCode: number, FinYearCode: number, RusteeCode: number, PriceListTopicID: number) {
+    const Str =
+      'RegionCodes=' + RegionCode + '&' +
+      'FinYearCode=' + FinYearCode + '&' +
+      'RusteeCode=' + RusteeCode + '&' +
+      'ModuleCode=' + 3040 + '&' +      
+      'PriceListTopicID=' + PriceListTopicID;
+    this.http.get(window.location.origin + '/Report/Encrypt', { Str: Str }).subscribe((res) => {
+      window.open(window.location.origin + '/Report/Print?' + res, '_blank');
+    });
+  }
+  ShowReportCustomerOrder(
+    objectID: number,
+    ModuleCode: number,
+    RegionCode: number,
+    HaveSave: boolean = null // RFC 51581
+  ) {
+    const Str = 
+      'objectID=' + objectID +
+      '&WfModuleCode=' + ModuleCode +
+      '&RegionCode=' + RegionCode +
+      '&HaveSave=' + HaveSave +
+      '&HeaderName=' + 'گردش کار';
+
+    this.http.get(window.location.origin + '/Report/Encrypt', { Str: Str }).
+      subscribe(
+        (res) => {
+          window.open(window.location.origin + '/Report/Print?' + res, '_blank');
+        }
+      );
+  }
+  ShowReportCustomerProduct(
+    objectID: number,
+    ModuleCode: number,
+    RegionCode: number = null ,
+    HaveSave: boolean = null // RFC 51581
+  ) {
+    const Str = 
+      'objectID=' + objectID +
+      '&WfModuleCode=' + ModuleCode +
+      '&RegionCode=' + RegionCode +
+      '&HaveSave=' + HaveSave +
+      '&HeaderName=' + 'گردش کار';
+
+    this.http.get(window.location.origin + '/Report/Encrypt', { Str: Str }).
+      subscribe(
+        (res) => {
+          window.open(window.location.origin + '/Report/Print?' + res, '_blank');
+        }
+      );
+  }
+  ShowReportAssetPage(
+    objectID: number,
+    ModuleCode: number,
+    RegionCode: number,
+    HaveSave: boolean = null // RFC 51581
+  ) {
+    const Str = 
+      'objectID=' + objectID +
+      '&WfModuleCode=' + ModuleCode +
+      '&RegionCode=' + RegionCode +
+      '&HaveSave=' + HaveSave +
+      '&HeaderName=' + 'گردش کار';
+
+    this.http.get(window.location.origin + '/Report/Encrypt', { Str: Str }).
+      subscribe(
+        (res) => {
+          window.open(window.location.origin + '/Report/Print?' + res, '_blank');
+        }
+      );
+  }
 }

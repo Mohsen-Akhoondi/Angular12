@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
 import { BaseHttpClient } from '../BaseService/BaseHttpClient';
 import { InvoiceDataModel } from 'src/app/Invoice/single-sale-invoice/InvoiceDataModel';
 @Injectable({ providedIn: 'root' })
@@ -11,8 +10,8 @@ export class InvoiceService {
         return this.http.get(window.location.origin + '/Invoice/GetInvoiceList', { RegionCode });
     }
 
-    DeleteInvoice(InvoiceID: number) {
-        return this.http.post(window.location.origin + '/Invoice/DeleteInvoice', { InvoiceID });
+    DeleteInvoice(InvoiceID: number,ModuleCode: number) {
+        return this.http.post(window.location.origin + '/Invoice/DeleteInvoice', { InvoiceID ,ModuleCode});
     }
 
     SaveInvoice(InvoiceObject : InvoiceDataModel, BankList: any, HaveBank: boolean = null) {
@@ -36,7 +35,9 @@ export class InvoiceService {
         SubCostCostCenterID: number = null,
         AdministrationActorID: number = null,
         EndWFCode = null,
-        RequestedPersonID: number = null) {
+        RequestedPersonID: number = null,
+      SumFinalPrice: number=null
+        ) {
         return this.http.get(window.location.origin + '/Invoice/InvoiceSearch',
             {
                 RegionCode,
@@ -50,6 +51,7 @@ export class InvoiceService {
                 AdministrationActorID,
                 EndWFCode,
                 RequestedPersonID,
+               SumFinalPrice
             });
     }
 

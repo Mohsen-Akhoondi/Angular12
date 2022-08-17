@@ -139,9 +139,10 @@ export class DealsHallService {
             CostFactorID
         });
     }
-    DownloadHelpArchiveFile(DocumnetTypeCode) {
+    DownloadHelpArchiveFile(DocumnetTypeCode , Extension = null) {
         return this.http.get(window.location.origin + '/DealsHall/DownloadHelpArchiveFile', {
-            DocumnetTypeCode
+            DocumnetTypeCode ,
+            Extension
         });
     }
     CheckAdvertisingExpireDate(InquiryID) {
@@ -149,9 +150,10 @@ export class DealsHallService {
             InquiryID
         });
     }
-    CancelReceiveElectronicDocs(ProposalID) {
+    CancelReceiveElectronicDocs(ProposalID, CheckAdmin = true) {
         return this.http.get(window.location.origin + '/DealsHall/CancelReceiveElectronicDocs', {
-            ProposalID
+            ProposalID,
+            CheckAdmin
         });
     }
 }

@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
 import { BaseHttpClient } from '../../BaseService/BaseHttpClient';
 @Injectable({ providedIn: 'root' })
 export class ContractSupervisionService {
@@ -9,51 +8,64 @@ export class ContractSupervisionService {
     GetContractSupervisionList(ContractID: number,
                                ContractSupervisionCode: number = null,
                                IsLoad: boolean = true) {
-        return this.http.get(window.location.origin + '/ContractSupervision/GetContractSupervisionList', { ContractID,
-                                                                                                           ContractSupervisionCode
-                                                                                                         }, IsLoad);
+        return this.http.get(window.location.origin + '/ContractSupervision/GetContractSupervisionList', {
+            ContractID,
+            ContractSupervisionCode
+        }, IsLoad);
     }
 
     GetMaxContractSupervisionCode(ContractID: any) {
-        return this.http.get(window.location.origin + '/ContractSupervision/GetMaxContractSupervisionCode', {ContractID});
+        return this.http.get(window.location.origin + '/ContractSupervision/GetMaxContractSupervisionCode', { ContractID });
     }
 
     GetSupervisionContractOrder(ContractID: number,
                                 ContractSupervisionCode: number,
                                 Date: any,
                                 ProductIDs: any,
-                                IsLoad: boolean ) {
+                                IsLoad: boolean) {
 
-    return this.http.get(window.location.origin + '/ContractSupervision/GetSupervisionContractOrder', {ContractID,
-                                                                                                       ContractSupervisionCode,
-                                                                                                       Date,
-                                                                                                       ProductIDs
-                                                                                                       },
-                                                                                                       IsLoad);
-   }
+        return this.http.get(window.location.origin + '/ContractSupervision/GetSupervisionContractOrder', {
+            ContractID,
+            ContractSupervisionCode,
+            Date,
+            ProductIDs
+        },
+            IsLoad);
+    }
 
-   SaveContractSupervision(ContractSupervision: any ,
-                           ContractSupervisionItemList: any) {
+    SaveContractSupervision(ContractSupervision: any,
+        ContractSupervisionItemList: any,
+        IsGreenSpace: boolean = null) {
 
-return this.http.post(window.location.origin + '/ContractSupervision/SaveContractSupervision', {ContractSupervision,
-                                                                                                ContractSupervisionItemList}
-             );
-   }
+        return this.http.post(window.location.origin + '/ContractSupervision/SaveContractSupervision', {
+            ContractSupervision,
+            ContractSupervisionItemList,
+            IsGreenSpace
+        }
+        );
+    }
 
-   DeleteContractSupervision(ContractSupervisionID: any) {
-    return this.http.post(window.location.origin + '/ContractSupervision/DeleteContractSupervision', {ContractSupervisionID});
-}
+    DeleteContractSupervision(ContractSupervisionID: any) {
+        return this.http.post(window.location.origin + '/ContractSupervision/DeleteContractSupervision', { ContractSupervisionID });
+    }
 
-GetContractSupervision(ContractSupervisionID: any) {
-    return this.http.get(window.location.origin + '/ContractSupervision/GetContractSupervision', {ContractSupervisionID});
-}
+    GetContractSupervision(ContractSupervisionID: any) {
+        return this.http.get(window.location.origin + '/ContractSupervision/GetContractSupervision', { ContractSupervisionID });
+    }
 
-UpdateContractSupervision(ContractSupervision: any ,
-                          ContractSupervisionItemList: any ) {
+    UpdateContractSupervision(ContractSupervision: any,
+        ContractSupervisionItemList: any,
+        IsGreenSpace: boolean = null) {
 
-return this.http.post(window.location.origin + '/ContractSupervision/UpdateContractSupervision', {ContractSupervision,
-                                                                                                  ContractSupervisionItemList}
-                     );
-}
+        return this.http.post(window.location.origin + '/ContractSupervision/UpdateContractSupervision', {
+            ContractSupervision,
+            ContractSupervisionItemList,
+            IsGreenSpace
+        }
+        );
+    }
+    GetPREntityList(ProductID: number) {
+        return this.http.get(window.location.origin + '/ContractSupervision/GetPREntityList', { ProductID });
+    }
 
 }
