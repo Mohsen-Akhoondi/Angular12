@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { BaseHttpClient } from './BaseHttpClient';
-import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class RegionListService {
@@ -30,6 +29,12 @@ export class RegionListService {
 
     GetUserRegionList(IsLoading = true) {
         return this.http.get(window.location.origin + '/Home/GetUserRegionList', null , IsLoading );
+    }
+    GetAllRegion() {
+        return this.http.get(window.location.origin + '/Home/GetAllRegion', null );
+    }
+    GetRegionByRegionGroup(ARegionGroupCode) {
+        return this.http.get(window.location.origin + '/Home/GetRegionByRegionGroup', { ARegionGroupCode });
     }
 }
 

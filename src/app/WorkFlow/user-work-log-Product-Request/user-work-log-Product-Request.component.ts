@@ -1,9 +1,6 @@
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ModuleService } from 'src/app/Services/BaseService/ModuleService';
-import { GridOptions } from 'ag-grid-community';
-import { of, Observable, forkJoin } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Input, Component, OnInit, ViewChild, TemplateRef, Output, EventEmitter } from '@angular/core';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
@@ -13,11 +10,10 @@ import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_a
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
-import { catchError, finalize } from 'rxjs/operators';
 import { RadioBoxModel } from 'src/app/Shared/Radio-Box/Radio-Box-Model/RadioBoxModel';
-import { isUndefined } from 'util';
 import { AutomationService } from 'src/app/Services/BaseService/AutomationService';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
+import { forkJoin } from 'rxjs';
 @Component({
   // tslint:disable-next-line: component-selector
   selector: 'app-user-work-log-Product-Request',
@@ -1446,15 +1442,6 @@ export class UserWorkLogProductRequestComponent implements OnInit {
         this.FromRequestParams.loading = true;
         this.ProductRequest.GetProductRequestPaging(1, 30, '',
           '', this.NgSelectRegionParams.selectedObject).subscribe((res: any) => {
-            res.List.forEach(element => {
-              if (element.ProductRequestNo) {
-                element.ProductRequestCodeSub = element.ProductRequestNo + ' - ' + element.Subject;
-              } else if (element.Subject) {
-                element.ProductRequestCodeSub = element.Subject;
-              } else if (element.ProductRequestCode) {
-                element.ProductRequestCodeSub = element.ProductRequestCode;
-              }
-            });
             this.FromRequestItems = res.List;
             this.FromRequestTotalItemCount = res.TotalItemCount;
             this.FromRequestPageCount = Math.ceil(res.TotalItemCount / 30);
@@ -1466,15 +1453,6 @@ export class UserWorkLogProductRequestComponent implements OnInit {
         this.ToRequestParams.loading = true;
         this.ProductRequest.GetProductRequestPaging(1, 30, '',
           '', this.NgSelectRegionParams.selectedObject).subscribe((res: any) => {
-            res.List.forEach(element => {
-              if (element.ProductRequestNo) {
-                element.ProductRequestCodeSub = element.ProductRequestNo + ' - ' + element.Subject;
-              } else if (element.Subject) {
-                element.ProductRequestCodeSub = element.Subject;
-              } else if (element.ProductRequestCode) {
-                element.ProductRequestCodeSub = element.ProductRequestCode;
-              }
-            });
             this.ToRequestItems = res.List;
             this.ToRequestTotalItemCount = res.TotalItemCount;
             this.ToRequestPageCount = Math.ceil(res.TotalItemCount / 30);
@@ -2823,18 +2801,11 @@ export class UserWorkLogProductRequestComponent implements OnInit {
         event.CurrentItems.forEach(el => {
           ResultList.push(el);
         });
-        res.List.forEach(element => {
-          if (element.ProductRequestNo) {
-            element.ProductRequestCodeSub = element.ProductRequestNo;
-          }
-          if (element.search) {
-            element.ProductRequestCodeSub = element.ProductRequestCodeSub + ' - ' + element.Subject;
-          }
-          if (element.ProductRequestCode) {
-            element.ProductRequestCodeSub = element.ProductRequestCodeSub + ' - ' + element.ProductRequestCode;
-          }
-          ResultList.push(element);
-        });
+        if (res) {
+          res.List.forEach(element => {
+            ResultList.push(element);
+          });
+        }
         if (type === 'From') {
           this.FromRequestItems = ResultList;
           this.FromRequestParams.loading = false;
@@ -2846,7 +2817,7 @@ export class UserWorkLogProductRequestComponent implements OnInit {
   }
 
   doRequestSearch(event, type) {
-    this.currentRequestSearchTerm = event.term;
+    this.currentRequestSearchTerm = event.term.term;
     if (type === 'From') {
       this.FromRequestParams.loading = true;
     } else if (type === 'TO') {
@@ -2855,20 +2826,9 @@ export class UserWorkLogProductRequestComponent implements OnInit {
     if (event.SearchOption === 'null' || event.SearchOption == null) {
       event.SearchOption = 'ProductRequestNo';
     }
-    this.ProductRequest.GetProductRequestPaging(event.PageNumber, event.PageSize, event.term,
+    this.ProductRequest.GetProductRequestPaging(event.PageNumber, event.PageSize, event.term.term,
       event.SearchOption, this.NgSelectRegionParams.selectedObject).subscribe((res: any) => {
-        if (this.currentRequestSearchTerm === event.term) {
-          res.List.forEach(element => {
-            if (element.ProductRequestNo) {
-              element.ProductRequestCodeSub = element.ProductRequestNo;
-            }
-            if (element.search) {
-              element.ProductRequestCodeSub = element.ProductRequestCodeSub + ' - ' + element.Subject;
-            }
-            if (element.ProductRequestCode) {
-              element.ProductRequestCodeSub = element.ProductRequestCodeSub + ' - ' + element.ProductRequestCode;
-            }
-          });
+        if (this.currentRequestSearchTerm === event.term.term) {
           if (type === 'From') {
             this.FromRequestItems = res.List;
             this.FromRequestTotalItemCount = res.TotalItemCount;

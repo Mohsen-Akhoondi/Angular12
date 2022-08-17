@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
 import { BaseHttpClient } from './BaseHttpClient';
-import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ActorService {
   constructor(private http: BaseHttpClient) { }
 
-  GetPersonList(RoleID: number, RegionCode: number = null, HaveLoading: boolean) {
-    return this.http.get(window.location.origin + '/Home/GetPersonList', { RoleID, RegionCode }, HaveLoading);
+  GetPersonList(RoleID: number, SubCostCenterID: number = null, RegionCode: number = null, HaveLoading: boolean) {
+    return this.http.get(window.location.origin + '/Home/GetPersonList', { RoleID, SubCostCenterID, RegionCode }, HaveLoading);
   }
   GetPhoneNumberVerifyCode(PhoneNumber) {
     return this.http.get(window.location.origin + '/Account/PhoneNumberVerifyCode', { PhoneNumber });
@@ -103,7 +102,8 @@ export class ActorService {
     IsRelatedCorporate = false,
     CostFactorID = null,
     HasAllowState = false,
-    NotShowMuncipalityPersonel: boolean = null) {
+    NotShowMuncipalityPersonel: boolean = null,
+    ModuleCode = null) {
     return this.http.get(window.location.origin + '/Home/GetActorPaging', {
       PageNumber,
       PageSize,
@@ -117,9 +117,11 @@ export class ActorService {
       IsRelatedCorporate,
       CostFactorID,
       HasAllowState,
-      NotShowMuncipalityPersonel
+      NotShowMuncipalityPersonel,
+      ModuleCode
     }, IsLoading);
   }
+
   GetAllActorsPaging(PageNumber,
     PageSize,
     SearchTerm,
@@ -155,12 +157,12 @@ export class ActorService {
     return this.http.post(window.location.origin + '/Contract/SaveCorporate', { CorporateObject, ModuleCode });
   }
 
-  UpdateActorPerson(PersonObject: any) {
-    return this.http.post(window.location.origin + '/Actor/UpdateActorPerson', { PersonObject });
+  UpdateActorPerson(PersonObject: any, ModuleCode) {
+    return this.http.post(window.location.origin + '/Actor/UpdateActorPerson', { PersonObject, ModuleCode });
   }
 
-  SaveActorPerson(PersonObject: any) {
-    return this.http.post(window.location.origin + '/Actor/SaveActorPerson', { PersonObject });
+  SaveActorPerson(PersonObject: any, ModuleCode) {
+    return this.http.post(window.location.origin + '/Actor/SaveActorPerson', { PersonObject, ModuleCode });
   }
 
   GetPersonByIdentityNo(IdentityNo: any, PersonID, RegionCode) {
@@ -176,12 +178,12 @@ export class ActorService {
   GetCorporateByInquiry(IdentityNo: any, PostCode) {
     return this.http.get(window.location.origin + '/Actor/GetCorporateByInquiry', { IdentityNo, PostCode });
   }
-  UpdateActorCorporate(CorporateObject: any, CorporatePositionList): any {
-    return this.http.post(window.location.origin + '/Actor/UpdateActorCorporate', { CorporateObject, CorporatePositionList });
+  UpdateActorCorporate(CorporateObject: any, CorporatePositionList, ModuleCode): any {
+    return this.http.post(window.location.origin + '/Actor/UpdateActorCorporate', { CorporateObject, CorporatePositionList, ModuleCode });
   }
 
-  SaveActorCorporate(CorporateObject: any, CorporatePositionList: any) {
-    return this.http.post(window.location.origin + '/Actor/SaveActorCorporate', { CorporateObject, CorporatePositionList });
+  SaveActorCorporate(CorporateObject: any, CorporatePositionList: any, ModuleCode) {
+    return this.http.post(window.location.origin + '/Actor/SaveActorCorporate', { CorporateObject, CorporatePositionList, ModuleCode });
   }
 
   GetUserRegionList(UserID) {
@@ -209,7 +211,7 @@ export class ActorService {
   }
   GetUserWithRegionChecking(ActorID, LoginName, IsExternal, IsCorporate: any = null) {
     return this.http.get(window.location.origin + '/Actor/GetUserWithRegionChecking',
-      { ActorID: ActorID, LoginName: LoginName, IsExternal: IsExternal, IsCorporate });
+      { ActorID: ActorID, LoginName: LoginName, IsExternal: IsExternal, IsCorporate }, true);
   }
   SetSelectedUserSessionForCartable(UserID: number) {
     return this.http.post(window.location.origin + '/Home/SetSelectedUserSessionForCartable', { UserID: UserID });
@@ -428,7 +430,11 @@ export class ActorService {
     BusinessPatternCode: number = null,
     UnitPatternID: number = null,
     RoleID: number = null,
-    LoginName: string = null
+    LoginName: string = null,
+    FromRank: number = null,
+    ToRank: number = null,
+    PriceListTopicID: number = null,
+    RegisterNo: string = null
   ) {
     return this.http.get(window.location.origin + '/Actor/ProvidersSearch', {
       IsCorporate,
@@ -439,7 +445,11 @@ export class ActorService {
       BusinessPatternCode,
       UnitPatternID,
       RoleID,
-      LoginName
+      LoginName,
+      FromRank,
+      ToRank,
+      PriceListTopicID,
+      RegisterNo
     });
   }
   onSaveRank(RankList: any, ActorID: number, IsCorporate: boolean, ModuleViewTypeCode: number = null, ModuleCode: number = null) {
@@ -488,7 +498,7 @@ export class ActorService {
     return this.http.get(window.location.origin + '/Actor/CalculateRank', { ActorID, PriceListTopicID });
   }
   GetCorporateTypeItems(ModuleCode) {
-    return this.http.get(window.location.origin + '/Actor/GetCorporateTypeItems', {ModuleCode});
+    return this.http.get(window.location.origin + '/Actor/GetCorporateTypeItems', { ModuleCode });
   }
   UpdateSignImageActorCorporate(CorporatePositionID: number, SignImageStr: string) {
     return this.http.get(window.location.origin + '/Actor/UpdateSignImageActorCorporate', {
@@ -536,12 +546,12 @@ export class ActorService {
     return this.http.get(window.location.origin + '/Actor/GetPersonByIdentityNoExternalOrgan', { IdentityNo, PersonID, RegionCode });
   }
 
-  GetCustomerByIdentityNo(IdentityNo: any , IsExternal) {
-    return this.http.get(window.location.origin + '/Actor/GetCustomerByIdentityNo', { IdentityNo , IsExternal});
+  GetCustomerByIdentityNo(IdentityNo: any, IsExternal) {
+    return this.http.get(window.location.origin + '/Actor/GetCustomerByIdentityNo', { IdentityNo, IsExternal });
   }
 
   SaveCustomer(CorporateObject: any, CorporatePositionList, ModuleCode): any {
-    return this.http.post(window.location.origin + '/Actor/SaveCustomer', { CorporateObject, CorporatePositionList , ModuleCode});
+    return this.http.post(window.location.origin + '/Actor/SaveCustomer', { CorporateObject, CorporatePositionList, ModuleCode });
   }
 
   // SaveExternalOrgActorPerson(PersonObject: any) {
@@ -551,7 +561,7 @@ export class ActorService {
   // UpdateExternalOrgActorPerson(PersonObject: any) {
   //   return this.http.post(window.location.origin + '/Actor/UpdateExternalOrgActorPerson', { PersonObject });
   // }
-  
+
   FindExternalUserDeails(UserName: string = null, NationalCode: string = null) {
     return this.http.get(window.location.origin + '/Actor/FindExternalUserDeails', {
       UserName,
@@ -563,8 +573,8 @@ export class ActorService {
     return this.http.get(window.location.origin + '/Contract/GetActor', { IdentityNo, BirthDate, IsPerson, PostCode });
   }
 
-  SaveExternalOrgPerson(PersonObject: any , ModuleCode) {
-    return this.http.post(window.location.origin + '/Actor/SaveExternalOrgPerson', { PersonObject , ModuleCode });
+  SaveExternalOrgPerson(PersonObject: any, ModuleCode) {
+    return this.http.post(window.location.origin + '/Actor/SaveExternalOrgPerson', { PersonObject, ModuleCode });
   }
   GetTotalCapacityContractorCardSearch(
     ContractorType,
@@ -579,7 +589,92 @@ export class ActorService {
         RegisterNo
       });
   }
-  GetAgentActorID(ActorID: number,CustomerOrderDate) {
-    return this.http.get(window.location.origin + '/Actor/GetAgentActorID', { ActorID ,CustomerOrderDate});
+  GetAgentActorID(ActorID: number, CustomerOrderDate) {
+    return this.http.get(window.location.origin + '/Actor/GetAgentActorID', { ActorID, CustomerOrderDate });
+  }
+  GetCustomerActorPaging(PageNumber,
+    PageSize,
+    SearchTerm,
+    SearchOption,
+    ActorType,
+    IsUseProviders,
+    IsLoading,
+    ActorID = null,
+    IdentityNo = null,
+    RegionCode?,
+    IsRelatedCorporate = false,
+    CostFactorID = null,
+    HasAllowState = false,
+    NotShowMuncipalityPersonel: boolean = null,
+    ISInternal: boolean = true) {
+    return this.http.get(window.location.origin + '/Home/GetCustomerActorPaging', {
+      PageNumber,
+      PageSize,
+      SearchTerm,
+      SearchOption,
+      ActorType,
+      IsUseProviders,
+      ActorID,
+      IdentityNo,
+      RegionCode,
+      IsRelatedCorporate,
+      CostFactorID,
+      HasAllowState,
+      NotShowMuncipalityPersonel,
+      ISInternal
+    }, IsLoading);
+  }
+  CheckAdminRole1578() {
+    return this.http.get(window.location.origin + '/Home/CheckAdminRole1578', null);
+  }
+
+  GetCRMCustomerActorPaging(PageNumber,
+    PageSize,
+    SearchTerm,
+    SearchOption,
+    AgentActorID,
+    ActorID = null) {
+    return this.http.get(window.location.origin + '/Home/GetCRMCustomerActorPaging', {
+      PageNumber,
+      PageSize,
+      SearchTerm,
+      SearchOption,
+      AgentActorID,
+      ActorID
+    });
+  }
+  SetSelectedUserSessionForMenu(UserID: number) {
+    return this.http.post(window.location.origin + '/Home/SetSelectedUserSessionForMenu', { UserID: UserID });
+  }
+  RemoveSelectedUserSessionForMenu() {
+    return this.http.get(window.location.origin + '/Home/RemoveSelectedUserSessionForMenu', null);
+  }
+  CheckExceptionActorBusiness(ActorBusinessList: any, ActorId: number) {
+    return this.http.post(window.location.origin + '/Actor/CheckExceptionActorBusiness', {
+      ActorBusinessList,
+      ActorId
+    });
+  }
+
+  GetpersonPagingWithLoginName(PageNumber,
+    PageSize,
+    SearchTerm,
+    SearchOption,
+    ActorType,
+    IsUseProviders,
+    IsLoading,
+    ActorID = null) {
+    return this.http.get(window.location.origin + '/Home/GetpersonPagingWithLoginName', {
+      PageNumber,
+      PageSize,
+      SearchTerm,
+      SearchOption,
+      ActorType,
+      IsUseProviders,
+      ActorID
+    }, IsLoading);
+
+
+
   }
 }
