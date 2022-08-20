@@ -1,12 +1,9 @@
 import { Component, OnInit, OnDestroy, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
-import { AutoWidthCalculator } from 'ag-grid-community';
-import { forkJoin, of } from 'rxjs';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
-declare var jquery: any;
 declare var $: any;
 
 @Component({
@@ -77,6 +74,10 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
           this.widthPX = 510;
           this.heightPC = 85;
           break;
+        case 1960:
+          this.widthPX = 1100;
+          this.heightPC = 95;
+          break;
         case 2696:
         case 2695:
           this.widthPX = 800;
@@ -113,6 +114,7 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
         case 2883: // Mojoodiat-e-Baravord-e-Darkhast
         case 2912: // Noe Mojudiat
         case 2885: // Jostojoo-TaminKonande
+        case 3092:
         case 2893: // E'mal-e-Zarfiat-e-Mazad
         case 2895: // Pajooheshi
         case 2934: // Pajooheshi-chabook
@@ -122,6 +124,14 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
         case 2980: // جستجوی درخواست معامله ملکی
         case 2996: // جستجوی چاپ مجدد
         case 1618:
+        case 3029:
+        case 3033:
+        case 3037:
+        case 3051:
+        case 3056:
+        case 2705:
+        case 3094: // درخواست مشارکتی
+        case 3090: // Emzaye electronic Commition
           this.MainwidthPC = 95;
           this.heightPC = 98;
           this.widthPX = 1290;
@@ -151,6 +161,7 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
           this.heightPC = 85;
           break;
         case 2699:
+        case 3088:
           this.widthPX = 1300;
           this.heightPC = 95;
           break;
@@ -181,7 +192,10 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
         case 1206:
         case 2785:
         case 3010:
+        case 3045:
         case 3011:
+        case 2375:
+        case 3090: // Emzaye electronic Commition
           this.MainwidthPC = 95;
           this.heightPC = 98;
           this.widthPX = 1390;
@@ -197,6 +211,11 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
         case 3012:
           // this.MainwidthPC = 95;
           this.maxheightPX = 445;
+          this.widthPX = 900;
+          this.minwidthPX = 900;
+          break;
+        case 2114:
+          this.maxheightPX = 330;
           this.widthPX = 900;
           this.minwidthPX = 900;
           break;
@@ -254,13 +273,21 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
           this.minwidthPX = 980;
           break;
         case 2864:
+        case 3031:
+        case 3042:
+        case 3043:
+        case 3044:
+        case 2944:
+        case 3052:
+        case 3086:
+        case 3087:
           this.MainwidthPC = 60;
           break;
         case 3025:
         case 3003:
         case 3004:
           this.widthPX = 620;
-          this.heightPC = 20;
+          this.heightPC = 35;
           break;
         case 2907:
           this.MainwidthPC = 52;
@@ -272,6 +299,7 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
           this.heightPC = 40;
           break;
         case 2501:
+        case 3096:
         case 2645:
         case 2646:
         case 2647:
@@ -284,7 +312,10 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
         case 2921:
         case 2687:
         case 3008:
+        case 3065:
+        case 3067:
         case 3005:
+        case 3071: // ابزار راهبری نظارت
           this.widthPX = 1140;
           this.heightPC = 90;
           let RegionList = [];
@@ -333,13 +364,13 @@ export class ModalTwoColComponent implements OnInit, OnDestroy {
           this.minheightPX = 185;
           this.TopPX = 200;
           break;
-          case 3009:
-            this.heightPC = 40;
-            this.widthPX = 850;
-            this.minwidthPX = 840;
-            this.minheightPX = 330;
-            this.TopPX = 100;
-             break;
+        case 3009:
+          this.heightPC = 40;
+          this.widthPX = 850;
+          this.minwidthPX = 840;
+          this.minheightPX = 330;
+          this.TopPX = 100;
+          break;
         default:
           this.widthPX = 1140;
           this.heightPC = 90;
