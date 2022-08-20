@@ -1,8 +1,8 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { utils, write, WorkBook, read } from 'xlsx';
+import { utils, read } from 'xlsx';
 import { ExcelService } from 'src/app/Services/BaseService/ExcelService';
 import { LoadingService } from 'src/app/Load/loading/LoadingService';
-declare var jquery: any;
+
 declare var $: any;
 
 @Component({

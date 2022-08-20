@@ -1,9 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
-import { RouterModule, Routes, Router } from '@angular/router';
+import { Router } from '@angular/router';
 
-declare var jquery: any;
-declare var $: any;
+
 @Component({
   selector: 'app-customized-menu',
   templateUrl: './customized-menu.component.html',
