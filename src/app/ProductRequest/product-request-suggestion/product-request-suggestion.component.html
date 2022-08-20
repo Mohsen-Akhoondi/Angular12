@@ -18,7 +18,7 @@
                 </td>
                 <td style="width: 33%">
                   <span class="table-cell-Lable">نوع قرارداد</span>
-                  <app-ng-select-virtual-scroll [Disabled]="IsDisable || IsShowType95"
+                  <app-ng-select-virtual-scroll [Disabled]="IsDisable || IsShowType95 || Disable"
                     style="display: inline-block;width: 60%;" class="select-general-for-lable"
                     [NgSelectParams]="ContractTypeParams" [Items]="ContractTypeItems"
                     (selectedChange)="onChangeContractType($event)"
@@ -36,9 +36,9 @@
                   <span class="table-cell-Lable">مدت انجام کار</span>
                   <div style="display: inline-block;width: 60%;">
                     <div style="display: inline-block;width: 34%;">
-                      <app-number-input-component [ReadOnly]="IsShowType95"
-                        [id]="'indicator-label-Duration'" [Value]="DurationYear" [IsFloat]="false" [MaxLength]="1"
-                        [FloatMaxLength]="0" [PerCentWidth]="60" [PixelHeight]="25" [CheckValidate]="PopupParam.ModuleViewTypeCode === 89 &&
+                      <app-number-input-component [ReadOnly]="IsShowType95" [id]="'indicator-label-Duration'"
+                        [Value]="DurationYear" [IsFloat]="false" [MaxLength]="1" [FloatMaxLength]="0"
+                        [PerCentWidth]="60" [PixelHeight]="25" [CheckValidate]="PopupParam.ModuleViewTypeCode === 89 &&
                          (!DurationYear && !DurationMonth && !DurationDay) ? CheckValidate : false"
                         (ValueChange)="getDurationYear($event)" class="col-form-label" [HaveThousand]="false">
                       </app-number-input-component>
@@ -46,9 +46,9 @@
                       <span style="margin-right: 5px;margin-left: 5px;" class="table-cell-Lable">سال</span>
                     </div>
                     <div style="display: inline-block;width: 33%;">
-                      <app-number-input-component [ReadOnly]="IsShowType95"
-                        [id]="'indicator-label-Duration'" [Value]="DurationMonth" [IsFloat]="false" [MaxLength]="2"
-                        [FloatMaxLength]="0" [PerCentWidth]="60" [PixelHeight]="25" [CheckValidate]="PopupParam.ModuleViewTypeCode === 89 &&
+                      <app-number-input-component [ReadOnly]="IsShowType95" [id]="'indicator-label-Duration'"
+                        [Value]="DurationMonth" [IsFloat]="false" [MaxLength]="2" [FloatMaxLength]="0"
+                        [PerCentWidth]="60" [PixelHeight]="25" [CheckValidate]="PopupParam.ModuleViewTypeCode === 89 &&
                         (!DurationYear && !DurationMonth && !DurationDay) ? CheckValidate : false"
                         (ValueChange)="getDurationMonth($event)" class="col-form-label" [HaveThousand]="false">
                       </app-number-input-component>
@@ -56,10 +56,9 @@
                       <span style="margin-right: 5px;margin-left: 5px;" class="table-cell-Lable">ماه</span>
                     </div>
                     <div style="display: inline-block;width: 33%;">
-                      <app-number-input-component [ReadOnly]="IsShowType95"
-                        [id]="'indicator-label-Duration'" [Value]="DurationDay" [IsFloat]="false"
-                        [MaxLength]="" [FloatMaxLength]="0" [PerCentWidth]="65" [PixelHeight]="25"
-                        [CheckValidate]="PopupParam.ModuleViewTypeCode === 89 &&
+                      <app-number-input-component [ReadOnly]="IsShowType95" [id]="'indicator-label-Duration'"
+                        [Value]="DurationDay" [IsFloat]="false" [MaxLength]="" [FloatMaxLength]="0" [PerCentWidth]="65"
+                        [PixelHeight]="25" [CheckValidate]="PopupParam.ModuleViewTypeCode === 89 &&
                         (!DurationYear && !DurationMonth && !DurationDay) ? CheckValidate : false"
                         (ValueChange)="getDurationDay($event)" class="col-form-label" [HaveThousand]="false">
                       </app-number-input-component>
@@ -153,9 +152,9 @@
             </table>
             <table style="width: 100%;">
               <tr>
-                <td width="34%">
+                <td width="39%">
                   <span class="table-cell-Lable">نوع شروع</span>
-                  <div class="redio-div" style="width: 58%;padding-right: 5px;">
+                  <div class="redio-div" style="width: 64%;padding-right: 5px;">
                     <div class="custom-control custom-radio custom-control-inline">
                       <input [disabled]="SpecialIsEditable || IsRadioEditable" [checked]="StartType === 1" type="radio"
                         class="custom-control-input" id="ISContractRadio" name="rdoStartType"
@@ -171,11 +170,18 @@
                       <label style="margin: auto;" class="custom-control-label redio-label" for="ISDateRadio">از تاريخ
                         دلخواه</label>
                     </div>
+                    <div *ngIf="ISSign" class="custom-control custom-radio custom-control-inline">
+                      <input [disabled]="(SpecialIsEditable || IsRadioEditable)" [checked]="StartType === 3"
+                        type="radio" class="custom-control-input" id="ISSignRadio" name="rdoStartType"
+                        (click)="rdoStartTypeClick(3)">
+                      <label style="margin: auto;" class="custom-control-label redio-label" for="ISSignRadio">از تاريخ
+                        ابلاغ</label>
+                    </div>
                   </div>
                 </td>
-                <td width="33%">
+                <td width="28%">
                   <span class="table-cell-Lable">نوع مبلغ</span>
-                  <div class="redio-div" style="width: 60%;padding-right: 5px;">
+                  <div class="redio-div" style="width: 70%;padding-right: 5px;">
                     <div class="custom-control custom-radio custom-control-inline">
                       <input [disabled]="SpecialIsEditable" [checked]="AmountType" type="radio"
                         class="custom-control-input" id="rdoFinalAmount" name="ChoosenrdoAmount"
@@ -205,7 +211,7 @@
 
           <ul style="margin-top: 5px" class="nav nav-tabs" role="tablist">
             <li class="nav-item">
-              <a class="nav-link active" href="#supplier" role="tab" data-toggle="tab">طرف قرارداد</a>
+              <a class="nav-link active" href="#supplier" role="tab" data-toggle="tab">{{SupplierTabName}}</a>
             </li>
             <li class="nav-item" *ngIf="!IsRelatedContract">
               <a class="nav-link" href="#relation" role="tab" data-toggle="tab">قراردادهای مرتبط</a>
@@ -840,7 +846,11 @@
           <img width="15px" height="15px" src="assets/Icons/save.png" />
           ثبت
         </button>
-
+        <!-- <button [disabled]="false" id="BtnProxyContract" (click)="onProxyContractClick()"
+          class="btn btn-primary btnGreen">
+          <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
+          قرارداد نیابتی
+        </button> -->
         <button
           *ngIf="(this.DealMethodParams.selectedObject === 2 && this.PopupParam.ModuleViewTypeCode !== 89) || (ShowLetterBtn)"
           id="btnClose" class="btn btn-primary btnGreen" (click)="onAutomationClick()">
@@ -861,9 +871,14 @@
           <img width="15px" height="15px" src="assets/Icons/print.png" />
           چاپ برآورد
         </button>
-        <button *ngIf="HasTripleReport" id="btnTenderRep" class="btn btn-primary btnGreen" (click)="onShowInputFormulaPage()">
+        <button *ngIf="HasTripleReport" id="btnTenderRep" class="btn btn-primary btnGreen"
+          (click)="onShowInputFormulaPage()">
           <img width="15px" height="15px" src="assets/Icons/show.png" />
           مشاهده پیش نویس جزییات
+        </button>
+        <button *ngIf="ModuleCode == 2793" (click)="btnSignReturnClick()" class="btn btn-primary btnGreen">
+          <img width="15px" height="15px" src="assets/Icons/exit.png" />
+          بازگشت امضای صورتجلسه
         </button>
         <button (click)="onClose()" class="btn btn-primary btnGreen">
           <img width="15px" height="15px" src="assets/Icons/exit.png" />

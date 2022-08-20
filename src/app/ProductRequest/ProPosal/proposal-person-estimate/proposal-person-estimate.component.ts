@@ -1,19 +1,13 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
-import { of, forkJoin } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
-import { LoadingService } from 'src/app/Load/loading/LoadingService';
-import { isUndefined } from 'util';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
-import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { OverPopUpCellEditorComponent } from 'src/app/Shared/OverPopUpcellEditor/over-pop-up-cell-editor.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
-declare var jquery: any;
 declare var $: any;
 import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 
@@ -117,7 +111,7 @@ export class ProposalPersonEstimateComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.ReadOnly =  this.PopupParam.ReadOnly;
+    this.ReadOnly = this.PopupParam.ReadOnly;
     this.ActorName = this.PopupParam.Proposal.ActorName;
     this.ProposalDate = this.PopupParam.Proposal.PersianProposalDate;
     this.LetterNo = this.PopupParam.Proposal.LetterNo;
@@ -521,9 +515,9 @@ export class ProposalPersonEstimateComponent implements OnInit {
         ProgressPercent: item.data.ProgressPercent,
         ProposalPersonEstimateDataList: ProposalPersonEstimateList,
         StartDate: item.data.PersianStartDate && item.data.PersianStartDate.MDate ? item.data.PersianStartDate.MDate
-        : (item.data.ShortStartDate ? item.data.ShortStartDate : null),
-       EndDate: item.data.PersianEndDate && item.data.PersianEndDate.MDate ? item.data.PersianEndDate.MDate
-        : (item.data.ShortEndDate ? item.data.ShortEndDate : null),
+          : (item.data.ShortStartDate ? item.data.ShortStartDate : null),
+        EndDate: item.data.PersianEndDate && item.data.PersianEndDate.MDate ? item.data.PersianEndDate.MDate
+          : (item.data.ShortEndDate ? item.data.ShortEndDate : null),
       };
       ProposalItemList.push(ProposalItem);
     });

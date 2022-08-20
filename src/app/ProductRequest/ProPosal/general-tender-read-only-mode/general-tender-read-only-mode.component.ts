@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, EventEmitter, Output, TemplateRef, ViewChild } from '@angular/core';
-import { of, forkJoin } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
@@ -9,7 +9,6 @@ import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
-import { isUndefined } from 'util';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { AutomationService } from 'src/app/Services/BaseService/AutomationService';
 @Component({
@@ -446,15 +445,15 @@ export class GeneralTenderReadOnlyModeComponent implements OnInit {
       const promise = new Promise((resolve, reject) => {
         event.Owner.Actor.GetActorPaging(event.PageNumber, event.PageSize, event.term,
           event.SearchOption, event.Owner.SelectedPersonTypeCode === 1 ?
-            true : event.Owner.SelectedPersonTypeCode === 2 ? false : null, false, true).subscribe(res => {
-              event.CurrentItems.forEach(el => {
-                ResultList.push(el);
-              });
-              res.List.forEach(element => {
-                ResultList.push(element);
-              });
-              resolve(res.TotalItemCount);
+          true : event.Owner.SelectedPersonTypeCode === 2 ? false : null, false, true).subscribe(res => {
+            event.CurrentItems.forEach(el => {
+              ResultList.push(el);
             });
+            res.List.forEach(element => {
+              ResultList.push(element);
+            });
+            resolve(res.TotalItemCount);
+          });
       }).then((TotalItemCount: number) => {
         event.Owner.RefreshPersonItems.RefreshItemsVirtualNgSelect({
           List: ResultList,

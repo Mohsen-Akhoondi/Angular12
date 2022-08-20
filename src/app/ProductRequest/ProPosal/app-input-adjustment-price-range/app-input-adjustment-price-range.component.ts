@@ -83,7 +83,7 @@ export class AppInputAdjustmentPriceRangeComponent implements OnInit {
         HeaderName: 'جزییات متغیرهای صورتجلسه بر مبنای تاریخ وارد شده',
         DeadLineDate: this.DeadLineDate,
         CommitionDate: this.CommitionDate,
-        OrderCommitionID: null,
+        OrderCommitionID: this.PopupParam.OrderCommitionID ? this.PopupParam.OrderCommitionID : null,
         ProductRequestObject: this.ProductRequestObject
       };
     }

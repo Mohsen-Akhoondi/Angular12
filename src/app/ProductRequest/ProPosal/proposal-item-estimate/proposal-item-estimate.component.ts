@@ -1,20 +1,15 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
-import { of, forkJoin } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
-import { LoadingService } from 'src/app/Load/loading/LoadingService';
-import { isUndefined } from 'util';
-import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
-import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { OverPopUpCellEditorComponent } from 'src/app/Shared/OverPopUpcellEditor/over-pop-up-cell-editor.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import * as moment from 'jalali-moment';
-declare var jquery: any;
+
 declare var $: any;
 
 
@@ -130,6 +125,9 @@ export class ProposalItemEstimateComponent implements OnInit {
   IsDisplay = true;
   IsActiveDealMethodCode = true;
   BtnType = true;
+  DifferenceDay = 0;
+  DifferenceMonth = 0;
+  DifferenceRatioDay = 0;
 
   constructor(
     private ContractList: ContractListService,
@@ -181,9 +179,9 @@ export class ProposalItemEstimateComponent implements OnInit {
       this.gridheight = 70;
     }
 
-    if(this.ReadOnly){
-     this.HasWarrantyItem = true;
-     this.IsShow = false;
+    if (this.ReadOnly) {
+      this.HasWarrantyItem = true;
+      this.IsShow = false;
     }
 
     this.ColumnDefinition();
@@ -200,10 +198,31 @@ export class ProposalItemEstimateComponent implements OnInit {
       } else {
         this.PopupParam.ProductRequestObject.ProductRequestItemList.forEach(item => {
           item.Price = '';
-          item.Qty = 1;
           item.EstiamteList = [];
         });
-        this.rowData1 = this.PopupParam.ProductRequestObject.ProductRequestItemList;
+        if (this.PopupParam &&
+          this.PopupParam.ProductRequestObject.ProductRequestTypeCode === 2 &&
+          this.PopupParam.ProductRequestObject.PriceListTopicID === 402374) {
+          this.PopupParam.ProductRequestObject.ProductRequestItemList.forEach(element => {
+            element.Price = element.AmountCOEFPactWithDuration;
+          });
+        }
+
+        if (this.PopupParam &&
+          this.PopupParam.ProductRequestObject.ProductRequestTypeCode === 2 &&
+          this.PopupParam.ProductRequestObject.PriceListTopicID === 402374) {
+          var rowDataList = [];
+          const PRItemObj = {
+            ProductID: 344914,
+            ProductName: 'کارکرد',
+            ScaleName: 'واحد',
+          };
+
+          rowDataList.push(PRItemObj);
+          this.rowData1 = rowDataList;
+        } else {
+          this.rowData1 = this.PopupParam.ProductRequestObject.ProductRequestItemList;
+        }
       }
 
       if (res[0]) {
@@ -264,20 +283,25 @@ export class ProposalItemEstimateComponent implements OnInit {
           resizable: true
         },
         {
-          headerName: 'مبلغ پیشنهادی',
-          field: 'Price',
+          headerName: 'مبلغ پیشنهادی ماهانه',
+          field: 'MonthlyPrice',
           HaveThousand: true,
-          width: 120,
+          width: 200,
           resizable: true,
-          editable: () => {
-            // tslint:disable-next-line: max-line-length
-            if (this.PopupParam.ModuleViewTypeCode === 149 && this.PopupParam.ProductRequestObject.RegionCode === 222 && this.PopupParam.BtnType) {
-              return false;
-            } else {
-              return this.editableItems;
+          hide: this.PopupParam.ModuleViewTypeCode !== 68,
+          editable: true,
+          valueSetter: (params) => {
+            if (params.newValue) {
+              params.data.MonthlyPrice = params.newValue;
+              if (params.data.PersianStartDate !== null || params.data.PersianEndDate !== null) {
+                this.CalculateTime(params.data.PersianStartDate, params.data.PersianEndDate);
+                if (this.DifferenceMonth !== 0) {
+                  params.data.Price = (Math.floor(this.DifferenceMonth * params.data.MonthlyPrice));
+                }
+              }
             }
-          }
-        },
+          },
+        }, // 64176
         {
           headerName: 'تاریخ شروع',
           field: 'PersianStartDate',
@@ -343,6 +367,21 @@ export class ProposalItemEstimateComponent implements OnInit {
               params.data.ShortEndDate = null;
               params.data.PersianEndDate = '';
               return false;
+            }
+          }
+        },
+        {
+          headerName: 'مبلغ پیشنهادی',
+          field: 'Price',
+          HaveThousand: true,
+          width: 200,
+          resizable: true,
+          editable: () => {
+            // tslint:disable-next-line: max-line-length
+            if (this.PopupParam.ModuleViewTypeCode === 149 && this.PopupParam.ProductRequestObject.RegionCode === 222 && this.PopupParam.BtnType) {
+              return false;
+            } else {
+              return this.editableItems;
             }
           }
         },
@@ -446,20 +485,25 @@ export class ProposalItemEstimateComponent implements OnInit {
           resizable: true
         },
         {
-          headerName: 'مبلغ پیشنهادی',
-          field: 'Price',
+          headerName: 'مبلغ پیشنهادی ماهانه',
+          field: 'MonthlyPrice',
           HaveThousand: true,
-          width: 120,
+          width: 200,
           resizable: true,
-          editable: () => {
-            // tslint:disable-next-line: max-line-length
-            if (this.PopupParam.ModuleViewTypeCode === 149 && this.PopupParam.ProductRequestObject.RegionCode === 222 && this.PopupParam.BtnType) {
-              return false;
-            } else {
-              return this.editableItems;
+          hide: this.PopupParam.ModuleViewTypeCode !== 68,
+          editable: true,
+          valueSetter: (params) => {
+            if (params.newValue) {
+              params.data.MonthlyPrice = params.newValue;
+              if (params.data.PersianStartDate !== null || params.data.PersianEndDate !== null) {
+                this.CalculateTime(params.data.PersianStartDate, params.data.PersianEndDate);
+                if (this.DifferenceMonth !== 0) {
+                  params.data.Price = (Math.floor(this.DifferenceMonth * params.data.MonthlyPrice));
+                }
+              }
             }
-          }
-        },
+          },
+        }, // 64176
         {
           headerName: 'تاریخ شروع',
           field: 'PersianStartDate',
@@ -525,6 +569,21 @@ export class ProposalItemEstimateComponent implements OnInit {
               params.data.ShortEndDate = null;
               params.data.PersianEndDate = '';
               return false;
+            }
+          }
+        },
+        {
+          headerName: 'مبلغ پیشنهادی',
+          field: 'Price',
+          HaveThousand: true,
+          width: 200,
+          resizable: true,
+          editable: () => {
+            // tslint:disable-next-line: max-line-length
+            if (this.PopupParam.ModuleViewTypeCode === 149 && this.PopupParam.ProductRequestObject.RegionCode === 222 && this.PopupParam.BtnType) {
+              return false;
+            } else {
+              return this.editableItems;
             }
           }
         },
@@ -695,8 +754,13 @@ export class ProposalItemEstimateComponent implements OnInit {
 
     if (InvalidRowData.length > 0 &&
       (this.IsTechnicalStatus || this.IsAccept || this.IsAcceptGrade || this.IsAcceptJobCategory)) { // RFC 51647
-      // tslint:disable-next-line: max-line-length
-      this.ShowMessageBoxWithYesNoBtn('تاریخ شروع و پایان وارد نشده است . تاریخ قرارداد به عنوان تاریخ انعقاد قرارداد در نظر گرفته خواهد شد.آیا مایل به ادامه هستید؟');
+      if (this.PopupParam.ProductRequestObject.StartTypeCode == 3) {
+        // tslint:disable-next-line: max-line-length
+        this.ShowMessageBoxWithYesNoBtn('تاریخ شروع و پایان وارد نشده است . تاریخ قرارداد به عنوان تاریخ ابلاغ قرارداد در نظر گرفته خواهد شد.آیا مایل به ادامه هستید؟');
+      } else {
+        // tslint:disable-next-line: max-line-length
+        this.ShowMessageBoxWithYesNoBtn('تاریخ شروع و پایان وارد نشده است . تاریخ قرارداد به عنوان تاریخ انعقاد قرارداد در نظر گرفته خواهد شد.آیا مایل به ادامه هستید؟');
+      }
     } else {
       this.SaveProposalItem();
     }
@@ -724,7 +788,7 @@ export class ProposalItemEstimateComponent implements OnInit {
         ItemNo: ++AItemNo,
         ProposalID: this.ProposalID,
         ProductID: item.data.ProductID,
-        Qty: 1,
+        Qty: item.data.Qty ? item.data.Qty : 0,
         Price: item.data.Price,
         DisCount: 0,
         StartDate: item.data.ShortStartDate ? item.data.ShortStartDate : null,
@@ -1101,7 +1165,7 @@ export class ProposalItemEstimateComponent implements OnInit {
           ItemNo: ++AItemNo,
           ProposalID: this.ProposalID,
           ProductID: item.data.ProductID,
-          Qty: 1,
+          Qty: item.data.Qty ? item.data.Qty : 0,
           Price: item.data.Price,
           DisCount: 0,
           StartDate: item.data.ShortStartDate ? item.data.ShortStartDate : null,
@@ -1313,6 +1377,35 @@ export class ProposalItemEstimateComponent implements OnInit {
         });
     } else {
       this.ShowMessageBoxWithOkBtn('مقادیر به درستی وارد نشده است، لطفا با راهبر سیستم تماس بگیرید');
+    }
+  }
+  CalculateTime(FromDate, ToDate) {
+    // tslint:disable-next-line:radix
+    const CurrentYearFrom = parseInt(FromDate.split('/')[0]);
+    // tslint:disable-next-line:radix
+    const CurrentYearTo = parseInt(ToDate.split('/')[0]);
+    // tslint:disable-next-line:radix
+    const CurrentMonthFrom = parseInt(FromDate.split('/')[1]);
+    // tslint:disable-next-line:radix
+    const CurrentMonthTo = parseInt(ToDate.split('/')[1]);
+    // tslint:disable-next-line:radix
+    let CurrentDayFrom = parseInt(FromDate.split('/')[2]);
+    // tslint:disable-next-line:radix
+    let CurrentDayTo = parseInt(ToDate.split('/')[2]);
+    if (CurrentDayFrom === 31 || CurrentDayFrom === 29) {
+      CurrentDayFrom = 30;
+    }
+    if (CurrentDayTo === 31 || CurrentDayTo === 29) {
+      CurrentDayTo = 30;
+    }
+    // tslint:disable-next-line: prefer-const
+    this.DifferenceDay = CurrentDayTo - CurrentDayFrom + 1;
+    this.DifferenceRatioDay = this.DifferenceDay / 30;
+    let DifferenceYear = CurrentYearTo - CurrentYearFrom;
+    if (DifferenceYear === 0) {
+      this.DifferenceMonth = CurrentMonthTo - CurrentMonthFrom;
+    } else {
+      this.DifferenceMonth = CurrentMonthTo - CurrentMonthFrom + (12 * DifferenceYear);
     }
   }
 }

@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, EventEmitter, Output, TemplateRef, ViewChild } from '@angular/core';
-import { of, forkJoin } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
@@ -10,10 +10,11 @@ import { ContractListService } from 'src/app/Services/BaseService/ContractListSe
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
-import { isUndefined } from 'util';
+import { isNullOrUndefined, isUndefined } from 'util';
 import { AutomationService } from 'src/app/Services/BaseService/AutomationService';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { DealsHallService } from 'src/app/Services/ContractService/DealsHall/DealsHallService';
+
 
 @Component({
   selector: 'app-general-tender',
@@ -382,7 +383,7 @@ export class GeneralTenderComponent implements OnInit {
         },
       ];
     } else if (this.ModuleViewTypeCode === 90 || this.ModuleViewTypeCode === 129 || this.ModuleViewTypeCode === 130
-      || this.ModuleViewTypeCode === 141) {
+      || this.ModuleViewTypeCode === 141 || this.ModuleViewTypeCode === 185) {
       this.ProductRequestCostColDef = [
         {
           headerName: 'ردیف',
@@ -471,7 +472,7 @@ export class GeneralTenderComponent implements OnInit {
           field: 'IsWin',
           width: 100,
           resizable: true,
-          hide: this.PopupParam.ModuleViewTypeCode !== 129,  // RFC 54418
+          hide: this.PopupParam.ModuleViewTypeCode !== 129,  // RFC 54418 //RFC 65086
           cellStyle: function (params) {
             return { 'text-align': 'center' };
           },
@@ -524,7 +525,7 @@ export class GeneralTenderComponent implements OnInit {
           editable: this.PopupParam && this.PopupParam.OrginalModuleCode === 2824 && this.PopupParam.OriginModuleViewTypeCode === 500000 ? false : true,
         },
         {
-          headerName: 'تاریخ دریافت اسناد',
+          headerName: this.ProductRequestObject.DealMethodCode == 3 ? 'تاریخ ارائه استعلام' : 'تاریخ دریافت اسناد',
           field: 'PersianProposalDate',
           width: 120,
           resizable: true,
@@ -776,7 +777,7 @@ export class GeneralTenderComponent implements OnInit {
           editable: false,
         },
         {
-          headerName: 'تاریخ دریافت اسناد',
+          headerName: this.ProductRequestObject.DealMethodCode == 3 ? 'تاریخ ارائه استعلام' : 'تاریخ دریافت اسناد',
           field: 'PersianProposalDate',
           width: 120,
           resizable: true,
@@ -891,6 +892,22 @@ export class GeneralTenderComponent implements OnInit {
             }
           },
         },
+        {
+          headerName: 'مدت اعتبار پیشنهاد',
+          field: 'ProposalValidateTime',
+          width: 120,
+          resizable: true,
+          editable: true,
+          hide: this.PopupParam.ModuleViewTypeCode !== 24,
+        },
+        {
+          headerName: 'دوره تضمین',
+          field: 'WarrantyTime',
+          width: 120,
+          resizable: true,
+          editable: true,
+          hide: this.PopupParam.ModuleViewTypeCode !== 24,
+        }, // 65592
       ];
     } else {
       this.ProductRequestCostColDef = [
@@ -933,11 +950,12 @@ export class GeneralTenderComponent implements OnInit {
                 || this.ModuleViewTypeCode === 94
                 || this.ModuleViewTypeCode === 24
                 || this.ModuleViewTypeCode === 43
-                || this.ModuleViewTypeCode === 83  // RFC = 54535
+                || this.ModuleViewTypeCode === 83  // RFC: 54535
                 || this.ModuleViewTypeCode === 104
-                || this.ModuleViewTypeCode === 128 // RFC 54244
+                || this.ModuleViewTypeCode === 128 // RFC: 54244
                 || this.ModuleViewTypeCode === 105
                 || this.ModuleViewTypeCode === 143
+                || this.ModuleViewTypeCode === 188 // RFC: 65242
                 || this.ModuleViewTypeCode === 142) // RFC 51969 && 53793 && 52657 && 53949
                 || ((this.PopupParam.OrginalModuleCode === 2776
                   || this.PopupParam.ModuleCode === 2776) && this.ModuleViewTypeCode === 200000)); // RFC 55630 - درخواست ملکی
@@ -950,7 +968,7 @@ export class GeneralTenderComponent implements OnInit {
           width: 165,
           sortable: false,
           resizable: false,
-          hide: this.PopupParam.OriginModuleViewTypeCode !== 100000 ,
+          hide: this.PopupParam.OriginModuleViewTypeCode !== 100000,
           cellStyle: function (params) {
             return { 'text-align': 'center' };
           },
@@ -1043,7 +1061,7 @@ export class GeneralTenderComponent implements OnInit {
           editable: false,
         },
         {
-          headerName: 'تاریخ دریافت اسناد',
+          headerName: this.ProductRequestObject.DealMethodCode == 3 ? 'تاریخ ارائه استعلام' : 'تاریخ دریافت اسناد',
           field: 'PersianProposalDate',
           width: 120,
           resizable: true,
@@ -1348,7 +1366,7 @@ export class GeneralTenderComponent implements OnInit {
           this.ISStarInquiryDateLableName = true;
           this.ISStarDocumentDeadlineDate = true;
           this.CheckValidate = true;
-          this.HaveProposalReadingDate =  this.ProductRequestObject.DealMethodCode === 6 ? true : false;
+          this.HaveProposalReadingDate = this.ProductRequestObject.DealMethodCode === 6 ? true : false;
           break;
         case 29:
           this.InquiryNoLableName = 'شماره';
@@ -1442,7 +1460,7 @@ export class GeneralTenderComponent implements OnInit {
           this.HaveAdvertisingDates = true;
           this.HaveAdvertisingDate = false; // به درخواست خانم قربانزاده
           this.DepositAmountWidth = 50;
-          this.HaveProposalReadingDate =  this.ProductRequestObject.DealMethodCode === 1 ? true : false;
+          this.HaveProposalReadingDate = this.ProductRequestObject.DealMethodCode === 1 ? true : false;
           break;
         case 139:
           this.InquiryNoLableName = 'شماره';
@@ -1520,6 +1538,7 @@ export class GeneralTenderComponent implements OnInit {
         case 70:
         case 143:
         case 164:
+        case 188:
           this.InquiryNoLableName = 'شماره';
           this.InquiryDateLableName = 'تاریخ';
           this.DepositAmountLableName = 'مبلغ سپرده';
@@ -1762,7 +1781,7 @@ export class GeneralTenderComponent implements OnInit {
           this.HaveAdvertisingDates = true; // RFC 50325
           this.HaveAdvertisingDate = false; // RFC 50325
           this.HaveAdvertisingShow = true; // RFC 50325
-          this.HaveProposalReadingDate =  this.ProductRequestObject.DealMethodCode === 5 ? true : false;
+          this.HaveProposalReadingDate = this.ProductRequestObject.DealMethodCode === 5 ? true : false;
           break;
         case 133:
           this.InquiryNoLableName = 'شماره';
@@ -1927,6 +1946,7 @@ export class GeneralTenderComponent implements OnInit {
           }
           break;
         case 129:
+        case 185:
           this.HasWarrantyReceiveDocType = true;
           this.PrepaymentAmountLableName = 'مبلغ پیش پرداخت';
           this.HasDepositAmount = true;
@@ -2220,6 +2240,7 @@ export class GeneralTenderComponent implements OnInit {
     this.ProductRequestCostClosed.emit(this.ProductRequestObject);
   }
   onSave(IsCheckException = false) {
+
     // tslint:disable-next-line:max-line-length
     let CheckExceptions = (this.PopupParam.OrginalModuleCode === 2793 || this.PopupParam.OrginalModuleCode === 2824) && this.PopupParam.IsAdmin && !IsCheckException;
     let StrExceptions = '';
@@ -2245,6 +2266,16 @@ export class GeneralTenderComponent implements OnInit {
     if (this.PopupParam.ModuleViewTypeCode === 29 && (this.NewsPaperParams.selectedObject === null ||
       SelectedAdvertisingID === null)) {
       this.ShowMessageBoxWithOkBtn('اطلاعات آگهی را وارد کنید');
+      return;
+    }
+
+    if ((this.HasRecDocAndPock ||
+      (this.PopupParam.ModuleViewTypeCode === 90
+        || this.PopupParam.ModuleViewTypeCode === 94 || this.PopupParam.ModuleViewTypeCode === 129
+        || this.PopupParam.ModuleViewTypeCode === 130 || this.PopupParam.ModuleViewTypeCode === 141
+        || this.PopupParam.ModuleViewTypeCode === 185))
+      && isNullOrUndefined(this.DocumentDeadlineDate)) {
+      this.ShowMessageBoxWithOkBtn('مهلت دریافت اسناد را وارد نمایید.');
       return;
     }
 
@@ -2280,6 +2311,7 @@ export class GeneralTenderComponent implements OnInit {
       const ProposalList = [];
       const ProposalPersonContactInfoList = [];
       if (this.HaveSupplers) {
+        this.PRCostGridApi.stopEditing();
         this.PRCostGridApi.forEachNode(node => {
           // tslint:disable-next-line: max-line-length
           const ActorID = node.data.ActorName && node.data.ActorId ? node.data.ActorId : (node.data.ActorID ? node.data.ActorID : -1);
@@ -2308,7 +2340,9 @@ export class GeneralTenderComponent implements OnInit {
               CorporateIdentityNo: node.data.CorporateIdentityNo,
               BirthDate: node.data.BirthDate,
               CorporateTypeCode: node.data.CorporateTypeCode,
-              TechnicalStatus: node.data.TechnicalStatus
+              TechnicalStatus: node.data.TechnicalStatus,
+              WarrantyTime: node.data.WarrantyTime,
+              ProposalValidateTime: node.data.ProposalValidateTime,
             };
             ProposalList.push(Proposal);
           }
@@ -2332,7 +2366,7 @@ export class GeneralTenderComponent implements OnInit {
       // tslint:disable-next-line:max-line-length
       if (
         this.ProductRequestObject.RegionCode !== 200 &&
-        (this.ProductRequestObject.RegionCode <= 22 || this.ProductRequestObject.DealMethodCode !== 3) && //RFC 58395
+        (this.ProductRequestObject.RegionCode <= 22 || this.ProductRequestObject.DealMethodCode !== 3 || this.ProductRequestObject.DealMethodCode !== 1) && //RFC 58395
         this.PopupParam.ModuleViewTypeCode !== 35 &&
         this.PopupParam.ModuleViewTypeCode !== 42 &&
         this.PopupParam.ModuleViewTypeCode !== 57 &&
@@ -2462,6 +2496,7 @@ export class GeneralTenderComponent implements OnInit {
                   ResultList.push(el);
                 });
                 res.List.forEach(element => {
+                  element.IdentityNo = element.IdentityNo ? element.IdentityNo : element.ParentIdentityNo;
                   ResultList.push(element);
                 });
                 resolve(res.TotalItemCount);
@@ -2501,6 +2536,7 @@ export class GeneralTenderComponent implements OnInit {
                   ResultList.push(el);
                 });
                 res.List.forEach(element => {
+                  element.IdentityNo = element.IdentityNo ? element.IdentityNo : element.ParentIdentityNo;
                   ResultList.push(element);
                 });
                 resolve(res.TotalItemCount);
@@ -2533,6 +2569,7 @@ export class GeneralTenderComponent implements OnInit {
                 ResultList.push(el);
               });
               res.List.forEach(element => {
+                element.IdentityNo = element.IdentityNo ? element.IdentityNo : element.ParentIdentityNo;
                 ResultList.push(element);
               });
               resolve(res.TotalItemCount);
@@ -2580,6 +2617,9 @@ export class GeneralTenderComponent implements OnInit {
               event.Owner.ProductRequestObject.CostFactorID,
               false,
               true).subscribe(res => {
+                res.List.forEach(el => {
+                  el.IdentityNo = el.IdentityNo ? el.IdentityNo : el.ParentIdentityNo;
+                });
                 event.Owner.RefreshPersonItems.RefreshItemsVirtualNgSelect({
                   List: res.List,
                   term: event.term,
@@ -2610,6 +2650,9 @@ export class GeneralTenderComponent implements OnInit {
             event.Owner.ProductRequestObject.CostFactorID,
             true,
             true).subscribe(res => {
+              res.List.forEach(el => {
+                el.IdentityNo = el.IdentityNo ? el.IdentityNo : el.ParentIdentityNo;
+              });
               event.Owner.RefreshPersonItems.RefreshItemsVirtualNgSelect({
                 List: res.List,
                 term: event.term,
@@ -2631,6 +2674,9 @@ export class GeneralTenderComponent implements OnInit {
             true : event.Owner.SelectedPersonTypeCode === 2 ? false : null,
           false,
           true).subscribe(res => {
+            res.List.forEach(el => {
+              el.IdentityNo = el.IdentityNo ? el.IdentityNo : el.ParentIdentityNo;
+            });
             event.Owner.RefreshPersonItems.RefreshItemsVirtualNgSelect({
               List: res.List,
               term: event.term,
@@ -2677,6 +2723,9 @@ export class GeneralTenderComponent implements OnInit {
               this.ProductRequestObject.CostFactorID,
               false,
               true).subscribe(res => {
+                res.List.forEach(el => {
+                  el.IdentityNo = el.IdentityNo ? el.IdentityNo : el.ParentIdentityNo;
+                });
                 this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
                   List: res.List,
                   TotalItemCount: res.TotalItemCount,
@@ -2705,6 +2754,9 @@ export class GeneralTenderComponent implements OnInit {
             this.ProductRequestObject.CostFactorID,
             false,
             true).subscribe(res => {
+              res.List.forEach(el => {
+                el.IdentityNo = el.IdentityNo ? el.IdentityNo : el.ParentIdentityNo;
+              });
               this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
                 List: res.List,
                 TotalItemCount: res.TotalItemCount,
@@ -2731,6 +2783,9 @@ export class GeneralTenderComponent implements OnInit {
           false,
           true,
           event.data.ActorID).subscribe(res => {
+            res.List.forEach(el => {
+              el.IdentityNo = el.IdentityNo ? el.IdentityNo : el.ParentIdentityNo;
+            });
             this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
               List: res.List,
               TotalItemCount: res.TotalItemCount,
@@ -3141,6 +3196,9 @@ export class GeneralTenderComponent implements OnInit {
   }
 
   onWFSave() {
+    if (this.HaveSupplers) {
+      this.PRCostGridApi.stopEditing();
+    }
     switch (this.ModuleViewTypeCode) {
       case 38:
       case 131:
@@ -3308,7 +3366,7 @@ export class GeneralTenderComponent implements OnInit {
       this.DealsHall.CancelReceiveElectronicDocs(row.ProposalID).subscribe(res => {
         if (res) {
           this.ShowMessageBoxWithOkBtn('حذف تایید نهایی ارسال الکترونیک اسناد با موفقیت انجام شد');
-        } 
+        }
       });
     }
   }

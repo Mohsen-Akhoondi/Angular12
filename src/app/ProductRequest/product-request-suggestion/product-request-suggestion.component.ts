@@ -1,5 +1,5 @@
-import { Component, OnInit, Output, EventEmitter, Input, ɵConsole } from '@angular/core';
-import { of, forkJoin } from 'rxjs';
+import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
+import { forkJoin } from 'rxjs';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
@@ -16,10 +16,12 @@ import { ActivatedRoute } from '@angular/router';
 // tslint:disable-next-line:max-line-length
 import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 import { isUndefined } from 'util';
-import { environment } from 'src/environments/environment';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
-declare var jquery: any;
+import { FinYearService } from 'src/app/Services/BaseService/FinYearService';
+import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
+
+
 declare var $: any;
 
 @Component({
@@ -31,7 +33,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
   @Output() ProductRequestSuggestionClosed: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() PopupOutPut: EventEmitter<any> = new EventEmitter<any>();
   @Input() PopupParam;
-  IsTransferedContract = false;
+  // IsTransferedContract = false;
   IsRelatedContract = false;
   IsContractContent = false;
   ContractContentNote;
@@ -547,6 +549,22 @@ export class ProductRequestSuggestionComponent implements OnInit {
   HasPRIEntity = false;
   IsForcePriceList = false;
   HasTripleReport = false;
+  ISSign = false;
+  RelFinYearParams = {
+    bindLabelProp: 'FinYearCode',
+    bindValueProp: 'FinYearCode',
+    placeholder: '',
+    MinWidth: '155px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    Required: false,
+    type: 'rel-fin-year',
+  };
+  SupplierTabName = 'طرف قرارداد';
+  Disable = false;
+
   constructor(private ProductRequest: ProductRequestService,
     private ContractList: ContractListService,
     private Actor: ActorService,
@@ -557,7 +575,9 @@ export class ProductRequestSuggestionComponent implements OnInit {
     private RefreshCartable: RefreshServices,
     private contractpaydetail: ContractPayDetailsService,
     private User: UserSettingsService,
-    private CommonService: CommonServices) {
+    private CommonService: CommonServices,
+    private FinYear: FinYearService,
+    private ArchiveList: ArchiveDetailService,) {
     this.PersonTypeList = [{ PersonTypeName: 'حقيقي', PersonTypeCode: 1 },
     { PersonTypeName: 'حقوقي', PersonTypeCode: 2 }];
     this.CalculationMethodItems =
@@ -616,45 +636,55 @@ export class ProductRequestSuggestionComponent implements OnInit {
         resizable: true
       },
       {
-        headerName: 'نوع قرارداد',
-        field: 'ContractTypeName',
-        cellEditorFramework: NgSelectCellEditorComponent,
+        headerName: 'سال مالی',
+        field: 'FinYearCode',
+        cellEditorFramework: NgSelectVirtualScrollComponent,
         cellEditorParams: {
-          HardCodeItems: this.ContractTypeList,
-          bindLabelProp: 'ContractTypeName',
-          bindValueProp: 'ContractTypeCode'
+          Params: this.RelFinYearParams,
+          Items: this.FinYearItems
         },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
           if (params.value) {
-            return params.value.ContractTypeName;
-
+            return params.value.FinYearCode;
           } else {
             return '';
           }
         },
         valueSetter: (params) => {
-          if (params.newValue) {
-            if (params.newValue.ContractTypeName !== params.oldValue) {
-              params.data.ContractTypeName = params.newValue.ContractTypeName;
-              params.data.ContractTypeCode = params.newValue.ContractTypeCode;
-              return true;
-            }
+          if (params.newValue && params.newValue.FinYearCode) {
+            params.data.FinYearCode = params.newValue.FinYearCode;
+            params.data.ContractId = null;
+            params.data.Subject = '';
+            params.data.Contract = '';
+            params.data.ContractAmountStr = '';
+            params.data.ContractorFullName = '';
+            params.data.LetterNo = '';
+            params.data.ContractCode = '';
+            params.data.PersianFromContractDateString = '';
+            params.data.Note = '';
+            return true;
           } else {
-            params.data.ContractTypeName = null;
-            params.data.ContractTypeCode = null;
+            params.data.FinYearCode = null;
+            params.data.ContractId = null;
+            params.data.Subject = '';
+            params.data.Contract = '';
+            params.data.ContractAmountStr = '';
+            params.data.ContractorFullName = '';
+            params.data.LetterNo = '';
+            params.data.ContractCode = '';
+            params.data.PersianFromContractDateString = '';
+            params.data.Note = '';
             return false;
           }
         },
-        editable: () => {
-          return this.IsEditable;
-        },
+        editable: this.PopupParam && this.PopupParam.ModuleViewTypeCode === 500000 ? false : true,
         width: 120,
-        resizable: true,
+        resizable: true
       },
       {
-        headerName: 'قرارداد ',
-        field: 'Contract',
+        headerName: 'موضوع قرارداد ',
+        field: 'Subject',
         cellEditorFramework: NgSelectVirtualScrollComponent,
         cellEditorParams: {
           Params: this.NgSelectVCParams,
@@ -671,8 +701,69 @@ export class ProductRequestSuggestionComponent implements OnInit {
             return '';
           }
         },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.Subject) {
+            params.data.FinYearCode = params.data.FinYearCode === null || isUndefined(params.data.FinYearCode) ?
+              params.newValue.FinYearCode : params.newValue.FinYearCode;
+            params.data.RelatedContractID = params.newValue.ContractId;
+            params.data.Subject = params.newValue.Subject;
+            params.data.ContractAmountStr = params.newValue.ContractAmountStr;
+            params.data.ContractorFullName = params.newValue.ContractorFullName;
+            params.data.LetterNo = params.newValue.LetterNo;
+            params.data.ContractCode = params.newValue.ContractCode;
+            params.data.PersianFromContractDateString = params.newValue.PersianFromContractDateString;
+            params.data.Note = '';
+            params.data.ContractTypeCode = params.newValue.ContractTypeCode;
+            params.data.IsMuncipalityRegionContractor = params.newValue.IsMuncipalityRegionContractor;
+            params.data.ProxyContractorRegionCode = params.newValue.ProxyContractorRegionCode;
+            params.data.ContractIsCost = params.newValue.ContractIsCost;
+            return true;
+          } else {
+            params.data.RelatedContractID = null;
+            params.data.Subject = '';
+            params.data.FinYearCode = null;
+            params.data.ContractAmountStr = '';
+            params.data.ContractorFullName = '';
+            params.data.LetterNo = '';
+            params.data.ContractCode = '';
+            params.data.PersianFromContractDateString = '';
+            params.data.Note = '';
+            params.data.ContractTypeCode = null;
+            return false;
+          }
+        },
         editable: true,
         width: 300,
+        resizable: true
+      },
+      {
+        headerName: 'شماره قراداد',
+        field: 'LetterNo',
+        width: 100,
+        resizable: true
+      },
+      {
+        headerName: 'کد قراداد',
+        field: 'ContractCode',
+        width: 100,
+        resizable: true
+      },
+      {
+        headerName: 'پیمانکار',
+        field: 'ContractorFullName',
+        width: 200,
+        resizable: true
+      },
+      {
+        headerName: 'مبلغ قرارداد',
+        field: 'ContractAmountStr',
+        width: 150,
+        resizable: true
+      },
+      {
+        headerName: 'تاریخ شروع قرارداد',
+        field: 'PersianFromContractDateString',
+        width: 150,
         resizable: true
       },
       {
@@ -1130,6 +1221,8 @@ export class ProductRequestSuggestionComponent implements OnInit {
     if (!this.ModuleCode) {
       this.ModuleCode = this.PopupParam.ModuleCode;
     }
+    this.SupplierTabName = this.PopupParam.IsAgreement ? 'طرف توافق نامه' : 'طرف قرارداد';
+    this.Disable = this.PopupParam.IsAgreement ? true : false; // 65775
     if (this.PopupParam.ModuleViewTypeCode) {
       this.ModuleViewTypeCode = this.PopupParam.ModuleViewTypeCode;
     }
@@ -1142,9 +1235,9 @@ export class ProductRequestSuggestionComponent implements OnInit {
     this.CheckRegionWritable = this.PopupParam.CheckRegionWritable;
     this.ProductRequestObject = this.PopupParam.ProductRequestObject;
     this.CostFactorID = this.ProductRequestObject.CostFactorID;
-    if (this.PopupParam && this.PopupParam.IsTransferedContract) {
-      this.IsTransferedContract = this.PopupParam.IsTransferedContract;
-    }
+    // if (this.PopupParam && this.PopupParam.IsTransferedContract) {
+    //   this.IsTransferedContract = this.PopupParam.IsTransferedContract;
+    // }
     //  this.ProdReqItemrowData = this.ProductRequestObject.ProductRequestItemList;
     this.RequestSupplierList = this.ProductRequestObject.RequestSupplierList;
     this.BeneficiaryList = this.ProductRequestObject.BeneficiaryList;
@@ -1256,7 +1349,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
       ).subscribe(res => {
         this.ContractTypeItems = res[0];
         this.DealMethodItems = [];
-        if (this.ModuleViewTypeCode === 100000 || this.ModuleViewTypeCode === 200000 || this.ModuleViewTypeCode === 300000) { //RFC 56539
+        if (this.ModuleViewTypeCode === 200000 || this.ModuleViewTypeCode === 300000) { //RFC 56539
           if (!this.ProductRequestObject.IsCost) {
             if (res[1].find(x => x.DealMethodCode === 6)) {
               this.DealMethodItems.push(res[1].find(x => x.DealMethodCode === 6));
@@ -1278,7 +1371,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
         this.PriceListTopicItems.forEach(item => {
           item.PriceListTopicName = item.PriceListTopicCode + ' - ' + item.PriceListTopicName;
         });
-        this.ContractTypeParams.selectedObject = this.ProductRequestObject.ContractTypeCode;
+        this.ContractTypeParams.selectedObject = this.PopupParam.IsAgreement ? 8 : this.ProductRequestObject.ContractTypeCode;
         // tslint:disable-next-line: max-line-length
         if ((this.ProductRequestObject.RegionCode >= 1 && this.ProductRequestObject.RegionCode <= 22) && this.ProductRequestObject.SubCostCenterObject.ProductRequestTypeCode === 1 && !this.ProductRequestObject.RelatedContractID) { // Rfc50393
           this.PRTypeParams.selectedObject = 1;
@@ -1361,7 +1454,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
           }
         );
         if ( // this.PopupParam.ModuleViewTypeCode === 1 && RFC: 55046
-          this.PRTypeParams.selectedObject === 1 || this.PRTypeParams.selectedObject === 4) { // RFC 54283
+          this.PRTypeParams.selectedObject === 1 || this.PRTypeParams.selectedObject === 4) { // RFC 54283         
           this.IsDisplay = true;
           this.DisableJobCategory = true;
           this.GeneralTermHeight = 57;
@@ -1394,6 +1487,10 @@ export class ProductRequestSuggestionComponent implements OnInit {
       case 89: // RFC 50757
         this.HasBeneficiary = true;
         this.DisplayReviewMethod = true;
+        this.ISSign = true; //RFC 63549
+        break;
+      case 17:
+        this.ISSign = true; //RFC 63859
         break;
       case 69:
         this.IsDisable = true;
@@ -1439,6 +1536,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
       case 106:
         this.SpecialIsEditable = this.IsDisable = true;
         this.IsSupplierFinalEditable = this.IsSupplierEditable = this.IsEditable = false;
+        this.ISSign = this.PopupParam.ModuleViewTypeCode === 120 ? true : false; //RFC 64665
         break;
       case 300000:
         this.ContractContent = false;
@@ -1450,7 +1548,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
         this.ReNewQuestion = 'درخواست تجدید شود؟';
         if (this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.IsReturn != null) {
           this.IsLawful = !this.ProductRequestObject.LastInquiryObject.IsReturn;
-          this.IsReturn = this.ProductRequestObject.LastInquiryObject.IsReturn;  // RFC 56880 
+          this.IsReturn = this.ProductRequestObject.LastInquiryObject.IsReturn;  // RFC 56880
         } else {
           this.IsLawful = true;
           this.IsReturn = false;  // RFC 56880
@@ -1490,6 +1588,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
         }
         break;
       case 100000:
+        this.ISSign = true; //RFC 63549
         this.ContractContent = false;
         this.TabRahbari = true;
         this.QuestionLabel = 'آیا شرکت کننده ای وجود دارد ؟';
@@ -1524,6 +1623,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
         if (this.ModuleCode === 2730 && this.ProductRequestObject.RegionCode === 200 /*|| this.ProductRequestObject.RegionCode === 0*/) {
           this.IsAllowed = true;
         }
+        this.ISSign = true;
         break;
       default:
         break;
@@ -1680,8 +1780,9 @@ export class ProductRequestSuggestionComponent implements OnInit {
 
       if (!this.ProductRequestObject.RelatedContractID && !this.ProductRequestObject.ProvisionContractID) {
         if (CurrentIsLeavingFormality !== this.IsLeavingFormality) {
-          this.ProductRequestObject.ProvisionContractID
-          
+          // tslint:disable-next-line: no-unused-expression
+          this.ProductRequestObject.ProvisionContractID;
+
           this.RequestSupplierList = [];
           this.ShowMessageBoxWithOkBtn('به دلیل تغییر روش انجام معامله از/به ترک تشریفات، طرف قرارداد را مجددا وارد فرمایید');
         }
@@ -1719,7 +1820,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
       this.GeneralTermHeight = 62;
       this.SupplierGridHeight = 95;
       this.ProdReqItemColHeight = 65;
-      this.ProdReqItemHeight = 85;
+      this.ProdReqItemHeight = 79;
       this.EstimateTabHeight = 97;
     }
     this.DealMethodParams.selectedObject = DealMethodCode;
@@ -1932,7 +2033,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
       itemsToUpdate = [];
       this.ProdReqEstApi.forEachNode(node => {
         if (node.rowIndex === event.rowIndex && node.data.Amount && node.data.Amount > 0) {
-          node.data.Qty = (node.data.WorkUnitCode === 106) ? ((value * 100) / node.data.Amount).toFixed(2) : (value / node.data.Amount).toFixed(2);  // 60248 
+          node.data.Qty = (node.data.WorkUnitCode === 106) ? ((value * 100) / node.data.Amount).toFixed(2) : (value / node.data.Amount).toFixed(2);  // 60248
           itemsToUpdate.push(node.data);
         }
       });
@@ -1942,7 +2043,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
       itemsToUpdate = [];
       this.ProdReqEstApi.forEachNode(node => {
         if (node.rowIndex === event.rowIndex && node.data.Qty) {
-          node.data.FinalAmount = (node.data.WorkUnitCode === 106) ? (value * node.data.Qty) / 100 : value * node.data.Qty;    // 60248    
+          node.data.FinalAmount = (node.data.WorkUnitCode === 106) ? (value * node.data.Qty) / 100 : value * node.data.Qty;    // 60248
           itemsToUpdate.push(node.data);
         }
       });
@@ -2158,6 +2259,12 @@ export class ProductRequestSuggestionComponent implements OnInit {
               && this.PriceListTopicRasteParams.selectedObject
               && this.RankParams.selectedObject;
           }
+
+          if(this.IsForcePriceList && (!this.PriceListTopicRasteParams.selectedObject || !this.RankParams.selectedObject) ) {
+            ValidateForm = false;
+            this.CheckValidate = true;
+          }
+          
           if (ValidateForm) {
             this.ProdReqEstApi.forEachNode(node => {
               DataList.push(node.data);
@@ -2178,8 +2285,10 @@ export class ProductRequestSuggestionComponent implements OnInit {
               !this.HaveEstimate &&
               this.ProductRequestObject.RelatedContractID === null &&
               this.IsCost &&
-              (this.ContractTypeParams.selectedObject !== 4 && this.ContractTypeParams.selectedObject !== 2 && this.ContractTypeParams.selectedObject !== 26 //62828 
-              && this.ContractTypeParams.selectedObject !== 27 && this.ContractTypeParams.selectedObject !== 28 && this.ContractTypeParams.selectedObject !== 29) &&
+              // tslint:disable-next-line: max-line-length
+              (this.ContractTypeParams.selectedObject !== 4 && this.ContractTypeParams.selectedObject !== 2 && this.ContractTypeParams.selectedObject !== 26 // 62828
+                // tslint:disable-next-line: max-line-length
+                && this.ContractTypeParams.selectedObject !== 27 && this.ContractTypeParams.selectedObject !== 28 && this.ContractTypeParams.selectedObject !== 29) &&
               this.ProductRequestObject.RegionCode >= 1 &&
               this.ProductRequestObject.RegionCode < 22 &&
               this.OrginalModuleCode !== 2793 // 62348
@@ -2194,7 +2303,6 @@ export class ProductRequestSuggestionComponent implements OnInit {
             this.ProductRequestObject.SeasonCode = this.SeasonListParams.selectedObject ? this.SeasonListParams.selectedObject : null;
             // tslint:disable-next-line:max-line-length
             this.ProductRequestObject.ContractTypeCode = this.ContractTypeParams.selectedObject ? this.ContractTypeParams.selectedObject : null;
-            this.ProductRequestObject.DealMethodCode = this.DealMethodParams.selectedObject ? this.DealMethodParams.selectedObject : null;
             this.ProductRequestObject.DurationDay = this.DurationDay;
             this.ProductRequestObject.DurationMonth = this.DurationMonth;
             this.ProductRequestObject.DurationYear = this.DurationYear;
@@ -2243,76 +2351,81 @@ export class ProductRequestSuggestionComponent implements OnInit {
               const ProdReqRelationObj = {
                 ProductRequestRelationID: node.data.ProductRequestRelationID ? node.data.ProductRequestRelationID : -1,
                 // tslint:disable-next-line:max-line-length
-                RelatedContractID: node.data.Contract.ContractId ? node.data.Contract.ContractId : (node.data.RelatedContractID ? node.data.RelatedContractID : null),
+                RelatedContractID: (node.data.Subject.ContractId) ? node.data.Subject.ContractId : (node.data.RelatedContractID ? node.data.RelatedContractID : null),
                 // tslint:disable-next-line:max-line-length
-                ContractRelationTypeCode: node.data.ContractRelationTypeName.ContractRelationTypeCode ? node.data.ContractRelationTypeName.ContractRelationTypeCode : (node.data.ContractRelationTypeCode ? node.data.ContractRelationTypeCode : null),
+                ContractRelationTypeCode: (node.data.ContractRelationTypeName && node.data.ContractRelationTypeName.ContractRelationTypeCode) ? node.data.ContractRelationTypeName.ContractRelationTypeCode : (node.data.ContractRelationTypeCode ? node.data.ContractRelationTypeCode : null),
                 CostFactorID: this.ProductRequestObject.CostFactorID,
                 Note: node.data.Note,
                 IsIncreament: 0,
-                ItemNo: node.ItemNo
+                ItemNo: node.data.ItemNo,
+                ContractTypeCode: node.data.ContractTypeCode,
+                IsMuncipalityRegionContractor: node.data.IsMuncipalityRegionContractor,
+                ContractIsCost: node.data.ContractIsCost,
+                ProxyContractorRegionCode: node.data.ProxyContractorRegionCode
               };
               ProductRequestRelationList.push(ProdReqRelationObj);
             });
 
             const ProdReqItemList = [];
-            if (this.PopupParam.IsTransferedContract === true) {
-              this.PopupParam.ProductRequestObject.ProductRequestItemList.forEach(node => {
-                ProdReqItemList.push(node);
-              });
+            // if (this.PopupParam.IsTransferedContract === true) {
+            //   this.PopupParam.ProductRequestObject.ProductRequestItemList.forEach(node => {
+            //     ProdReqItemList.push(node);
+            //   });
 
-              const ProdReqRelationObj = {
-                ProductRequestRelationID: -1,
-                // tslint:disable-next-line:max-line-length
-                RelatedContractID: this.ProductRequestObject.ContractObject.ContractId,
-                // tslint:disable-next-line:max-line-length
-                ContractRelationTypeCode:  2,
-                CostFactorID: this.ProductRequestObject.CostFactorID,
-                Note: '',
-                IsIncreament: 0
-              };
-              ProductRequestRelationList.push(ProdReqRelationObj);
-            } else {
-              this.ProdReqItemApi.forEachNode(node => {
-                let ItemNo = 0;
-                node.data.ProductRequestEstimateDataList = [];
-                node.data.ProductRequestEstimateList.forEach(item => {
-                  var keys = Object.keys(item);
-                  const EntityTypeItemIDList = [];
-                  if (node.data.PRIEntityList) {
-                    node.data.PRIEntityList.forEach(Entity => {
-                      let str = 'Subject' + Entity.EntityTypeID.toString();
-                      let ID = 'EntityTypeItemID' + Entity.EntityTypeID.toString();
-                      var key = keys.find(x => x === str);
+            //   const ProdReqRelationObj = {
+            //     ProductRequestRelationID: -1,
+            //     // tslint:disable-next-line:max-line-length
+            //     RelatedContractID: this.ProductRequestObject.ContractObject.ContractId,
+            //     // tslint:disable-next-line:max-line-length
+            //     ContractRelationTypeCode: 2,
+            //     CostFactorID: this.ProductRequestObject.CostFactorID,
+            //     Note: '',
+            //     IsIncreament: 0
+            //   };
+            //   ProductRequestRelationList.push(ProdReqRelationObj);
+            // } else {
+            this.ProdReqItemApi.forEachNode(node => {
+              let ItemNo = 0;
+              node.data.ProductRequestEstimateDataList = [];
+              node.data.ProductRequestEstimateList.forEach(item => {
+                var keys = Object.keys(item);
+                const EntityTypeItemIDList = [];
+                if (node.data.PRIEntityList) {
+                  node.data.PRIEntityList.forEach(Entity => {
+                    let str = 'Subject' + Entity.EntityTypeID.toString();
+                    let ID = 'EntityTypeItemID' + Entity.EntityTypeID.toString();
+                    var key = keys.find(x => x === str);
 
-                      if (key && item[key]) {
-                        if (item[key].EntityTypeItemID) {
-                          EntityTypeItemIDList.push(item[key].EntityTypeItemID);
-                        } else {
-                          key = keys.find(x => x === ID);
-                          if (key && item[key]) {
-                            EntityTypeItemIDList.push(item[key]);
-                          }
+                    if (key && item[key]) {
+                      if (item[key].EntityTypeItemID) {
+                        EntityTypeItemIDList.push(item[key].EntityTypeItemID);
+                      } else {
+                        key = keys.find(x => x === ID);
+                        if (key && item[key]) {
+                          EntityTypeItemIDList.push(item[key]);
                         }
                       }
-                    });
-                  }
+                    }
+                  });
+                }
 
-                  const EstimateObj = {
-                    ProductRequestEstimateID: item.ProductRequestEstimateID ? item.ProductRequestEstimateID : -1,
-                    ProductRequestItemID: node.data.ProductRequestItemID,
-                    ItemNo: ++ItemNo,
-                    PriceListPatternID: item.PriceListPatternID,
-                    Qty: item.Qty,
-                    Amount: item.Amount,
-                    RelatedPriceListPatternID: item.RelatedPriceListPatternID ? item.RelatedPriceListPatternID : null,
-                    EntityTypeItemIDList: EntityTypeItemIDList,
-                    IndexPriceListPatternID: item.IndexPriceListPatternID ? item.IndexPriceListPatternID : null,
-                  };
-                  node.data.ProductRequestEstimateDataList.push(EstimateObj);
-                });
-                ProdReqItemList.push(node.data);
+                const EstimateObj = {
+                  ProductRequestEstimateID: item.ProductRequestEstimateID ? item.ProductRequestEstimateID : -1,
+                  ProductRequestItemID: node.data.ProductRequestItemID,
+                  ItemNo: ++ItemNo,
+                  PriceListPatternID: item.PriceListPatternID,
+                  Qty: item.Qty,
+                  Coef: item.Coef,
+                  Amount: item.Amount,
+                  RelatedPriceListPatternID: item.RelatedPriceListPatternID ? item.RelatedPriceListPatternID : null,
+                  EntityTypeItemIDList: EntityTypeItemIDList,
+                  IndexPriceListPatternID: item.IndexPriceListPatternID ? item.IndexPriceListPatternID : null,
+                };
+                node.data.ProductRequestEstimateDataList.push(EstimateObj);
               });
-            }
+              ProdReqItemList.push(node.data);
+            });
+            // }
             const SaveListSetting = {
               CostFactorID: this.ProductRequestObject.CostFactorID,
               HalWayThrough: this.HalWayThrough,
@@ -2439,6 +2552,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
               this.ShowMessageBoxWithOkBtn('بايد بهره بردار وارد شود.');
               return;
             }
+            this.ProductRequestObject.DealMethodCode = this.DealMethodParams.selectedObject ? this.DealMethodParams.selectedObject : null; // 63811
             // tslint:disable-next-line: max-line-length
             this.ProductRequestObject.ProductRequestDate = this.CommonService.ConvertToASPDateTime(this.ProductRequestObject.ProductRequestDate);
             if (CheckExceptions) {
@@ -2461,7 +2575,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
                     ProductRequestRelationList,
                     BeneficiaryList,
                     false,
-                    this.IsTransferedContract,
+                    // this.IsTransferedContract,
                     this.CostFactorLetter ? this.CostFactorLetter : null,
                     this.SelectedDocument ? this.SelectedDocument : null,
                     SaveListSetting,
@@ -2504,7 +2618,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
                 ProductRequestRelationList,
                 BeneficiaryList,
                 !IsCheckException,
-                this.IsTransferedContract,
+                // this.IsTransferedContract,
                 this.CostFactorLetter ? this.CostFactorLetter : null,
                 this.SelectedDocument ? this.SelectedDocument : null,
                 SaveListSetting,
@@ -2887,6 +3001,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
                 ResultList.push(el);
               });
               res.List.forEach(element => {
+                element.IdentityNo = element.IdentityNo ? element.IdentityNo : element.ParentIdentityNo;
                 ResultList.push(element);
               });
               resolve(res.TotalItemCount);
@@ -2915,6 +3030,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
                 ResultList.push(el);
               });
               res.List.forEach(element => {
+                element.IdentityNo = element.IdentityNo ? element.IdentityNo : element.ParentIdentityNo;
                 ResultList.push(element);
               });
               resolve(res.TotalItemCount);
@@ -2962,6 +3078,9 @@ export class ProductRequestSuggestionComponent implements OnInit {
             event.Owner.ProductRequestObject.CostFactorID,
             true,
             true).subscribe(res => {
+              res.List.forEach(el => {
+                el.IdentityNo = el.IdentityNo ? el.IdentityNo : el.ParentIdentityNo;
+              });
               event.Owner.RefreshPersonItems.RefreshItemsVirtualNgSelect({
                 List: res.List,
                 term: event.term,
@@ -2992,6 +3111,9 @@ export class ProductRequestSuggestionComponent implements OnInit {
           event.Owner.ProductRequestObject.CostFactorID,
           true,
           true).subscribe(res => {
+            res.List.forEach(el => {
+              el.IdentityNo = el.IdentityNo ? el.IdentityNo : el.ParentIdentityNo;
+            });
             event.Owner.RefreshPersonItems.RefreshItemsVirtualNgSelect({
               List: res.List,
               term: event.term,
@@ -3027,6 +3149,9 @@ export class ProductRequestSuggestionComponent implements OnInit {
           this.Actor.GetActorPaging(1, 30, '', '', event.data.PersonTypeCode === 1, this.IsLeavingFormality, true,
             event.data.ActorID, null, RegionCode, this.IsRelatedCorporate,
             this.ProductRequestObject.CostFactorID, true, true).subscribe(res => {
+              res.List.forEach(el => {
+                el.IdentityNo = el.IdentityNo ? el.IdentityNo : el.ParentIdentityNo;
+              });
               this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
                 List: res.List,
                 TotalItemCount: res.TotalItemCount,
@@ -3044,6 +3169,9 @@ export class ProductRequestSuggestionComponent implements OnInit {
         this.Actor.GetActorPaging(1, 30, '', '', event.data.PersonTypeCode === 1, this.IsLeavingFormality, true,
           event.data.ActorID, null, RegionCode, this.IsRelatedCorporate,
           this.ProductRequestObject.CostFactorID, true, true).subscribe(res => {
+            res.List.forEach(el => {
+              el.IdentityNo = el.IdentityNo ? el.IdentityNo : el.ParentIdentityNo;
+            });
             this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
               List: res.List,
               TotalItemCount: res.TotalItemCount,
@@ -3235,7 +3363,8 @@ export class ProductRequestSuggestionComponent implements OnInit {
       this.ConsultantSelectedWayParams.selectedObject = null;
     }
     if (TypeCode === 2 || TypeCode === 26 || TypeCode === 27 || TypeCode === 28 || TypeCode === 29) { // 62341
-      if ((this.ModuleCode === 2730 && this.PopupParam && this.PopupParam.ModuleViewTypeCode === 1)
+      if ((this.ModuleCode === 2730 && this.PopupParam
+        && (this.PopupParam.ModuleViewTypeCode === 1 || this.PopupParam.ModuleViewTypeCode === 89)) // RFC 65724
         || (this.ModuleCode === 2793 && this.PopupParam && this.PopupParam.ModuleViewTypeCode === 100000)) {
         this.IsConsultant = true;
       } else {
@@ -3384,7 +3513,6 @@ export class ProductRequestSuggestionComponent implements OnInit {
           });
       }
     }
-
   }
 
   CoulumnsDefinition(ContractTypeCode) {
@@ -3824,7 +3952,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
     const ResultList = [];
     const promise = new Promise((resolve, reject) => {
       event.Owner.ContractList.GetRelatedContractpaging(event.PageNumber, event.PageSize, event.term, event.SearchOption,
-        event.Owner.ProductRequestObject.RegionCode, event.Owner.ContractType, null).subscribe((res: any) => {
+        event.Owner.ProductRequestObject.RegionCode, event.Owner.FinYearCode, null).subscribe((res: any) => {
           event.CurrentItems.forEach(el => {
             ResultList.push(el);
           });
@@ -3850,8 +3978,8 @@ export class ProductRequestSuggestionComponent implements OnInit {
     }
     event.Owner.ProdReqRelColDef[3].cellEditorParams.Params.loading = true;
     event.Owner.ContractList.GetRelatedContractpaging(event.PageNumber, 30, event.term,
-      event.SearchOption, event.Owner.ProductRequestObject.RegionCode, event.Owner.ContractType,
-      null).subscribe((res: any) => {
+      event.SearchOption, event.Owner.ProductRequestObject.RegionCode, event.Owner.FinyearCode, null).
+      subscribe((res: any) => {
         event.Owner.RefreshPersonItems.RefreshItemsVirtualNgSelect({
           List: res.List,
           term: event.term,
@@ -3860,18 +3988,29 @@ export class ProductRequestSuggestionComponent implements OnInit {
           type: 'related-contract'
         });
       });
-    event.Owner.ProdReqRelColDef[2].cellEditorParams.Params.loading = false;
+    event.Owner.ProdReqRelColDef[3].cellEditorParams.Params.loading = false;
   }
   onContractcellEditingStarted(event) {
-    this.ContractType = event.data.ContractTypeCode === 1;
-    if (event.colDef && event.colDef.field === 'Contract') {
-      this.ContractList.GetRelatedContractpaging(1, 30, '', null, this.ProductRequestObject.RegionCode,
-        this.ContractType, null).subscribe((res: any) => {
+    if (event.colDef && event.colDef.field === 'Subject') {
+      this.ContractList.
+        GetRelatedContractpaging(1, 30, '', null,
+          this.ProductRequestObject.RegionCode,
+          event.data.FinYearCode,
+          event.data.RelatedContractID)
+        .subscribe((res: any) => {
           this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
             List: res.List,
             TotalItemCount: res.TotalItemCount,
             PageCount: Math.ceil(res.TotalItemCount / 30),
             type: 'related-contract'
+          });
+        });
+    } else if (event.colDef && event.colDef.field === 'FinYearCode') {
+      this.FinYear.GetFinYearList()
+        .subscribe((res: any) => {
+          this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
+            List: res,
+            type: 'rel-fin-year'
           });
         });
     }
@@ -4394,7 +4533,7 @@ export class ProductRequestSuggestionComponent implements OnInit {
 
     if ((TypeCode === 1 || TypeCode === 4) &&
       (this.PopupParam.ModuleViewTypeCode === 1 ||  // شهرداری
-        this.PopupParam.ModuleViewTypeCode === 114 || this.PopupParam.ModuleViewTypeCode === 165) // سازمان حمل و نقل ترافیک
+        this.PopupParam.ModuleViewTypeCode === 114 || this.PopupParam.ModuleViewTypeCode === 165 || this.PopupParam.ModuleViewTypeCode == 100000)  // سازمان حمل و نقل ترافیک
     ) {
       this.IsDisplay = true;
       this.DisableJobCategory = true;
@@ -4465,45 +4604,45 @@ export class ProductRequestSuggestionComponent implements OnInit {
   }
 
   EntityColumnDefinition(selectedPRItemRow) {
-    if (selectedPRItemRow && selectedPRItemRow.PRIEntityList && selectedPRItemRow.PRIEntityList.length > 0) {
-      var columnDef22 = [];
-      this.ProdReqEstColDef.forEach(element => {
-        columnDef22.push(element);
-      });
-      this.ProdReqEstColDef = [];
+    // if (selectedPRItemRow && selectedPRItemRow.PRIEntityList && selectedPRItemRow.PRIEntityList.length > 0) {
+    //   var columnDef22 = [];
+    //   this.ProdReqEstColDef.forEach(element => {
+    //     columnDef22.push(element);
+    //   });
+    //   this.ProdReqEstColDef = [];
 
-      selectedPRItemRow.PRIEntityList.forEach(i => {
-        const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
+    //   selectedPRItemRow.PRIEntityList.forEach(i => {
+    //     const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
 
-        if (!obItem) {
-          const obj = {
-            index: i.EntityTypeID,
-            headerName: i.Subject,
-            field: 'Subject' + i.EntityTypeID.toString(),
-            width: 200,
-            editable: true,
-            resizable: true,
-            cellEditorFramework: NgSelectVirtualScrollComponent,
-            cellEditorParams: {
-              Params: this.NgSelectContractEntityItemParams,
-              Items: [],
-              Owner: this
-            },
-            cellRenderer: 'SeRender',
-            valueFormatter: function currencyFormatter(params) {
-              if (params.value) {
-                return params.value.Subject;
-              } else {
-                return '';
-              }
-            },
-          };
-          columnDef22.push(obj);
-        }
-      });
+    //     if (!obItem) {
+    //       const obj = {
+    //         index: i.EntityTypeID,
+    //         headerName: i.Subject,
+    //         field: 'Subject' + i.EntityTypeID.toString(),
+    //         width: 200,
+    //         editable: true,
+    //         resizable: true,
+    //         cellEditorFramework: NgSelectVirtualScrollComponent,
+    //         cellEditorParams: {
+    //           Params: this.NgSelectContractEntityItemParams,
+    //           Items: [],
+    //           Owner: this
+    //         },
+    //         cellRenderer: 'SeRender',
+    //         valueFormatter: function currencyFormatter(params) {
+    //           if (params.value) {
+    //             return params.value.Subject;
+    //           } else {
+    //             return '';
+    //           }
+    //         },
+    //       };
+    //       columnDef22.push(obj);
+    //     }
+    //   });
 
-      this.ProdReqEstColDef = columnDef22;
-    }
+    //   this.ProdReqEstColDef = columnDef22;
+    // }
   }
   IsLawfulRedioClick(IsLawful) {
     this.IsLawful = IsLawful;
@@ -4710,7 +4849,37 @@ export class ProductRequestSuggestionComponent implements OnInit {
     this.MinHeightPixel = 200;
     this.PopupParam = {
       HeaderName: 'ورود اطلاعات پایه پیش نویس کمیسیون',
-      ProductRequestObject: this.ProductRequestObject
+      ProductRequestObject: this.ProductRequestObject,
+      OrderCommitionID: this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.OrderCommitionObject
+        && this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID > 0
+        ? this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID : null,
+    };
+  }
+
+  btnSignReturnClick() {
+    if (this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.OrderCommitionObject
+      && this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID > 0
+      //&& this.ProductRequestObject.LastInquiryObject.IsReturn == false
+    ) {
+      this.ArchiveList.ReturnArchiveDetailToLast(this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID).subscribe(res => {
+        this.ShowMessageBoxWithOkBtn('بازگشت امضای صورتجلسه با موفقیت انجام شد');
+      });
+    }
+  }
+
+  onProxyContractClick() {
+    this.PopUpType = 'proxy-contract-list';
+    this.HaveHeader = true;
+    this.isClicked = true;
+    this.startLeftPosition = 20;
+    this.startTopPosition = 20;
+    this.HaveMaxBtn = false;
+    this.MainMaxwidthPixel = 600;
+    this.MinHeightPixel = 600;
+    this.PopupParam = {
+      ProxyContract: true,
+      RegionCode: this.ProductRequestObject.RegionCode,
+      OrginalModuleCode: this.OrginalModuleCode ? this.OrginalModuleCode : this.ModuleCode
     };
   }
 }
