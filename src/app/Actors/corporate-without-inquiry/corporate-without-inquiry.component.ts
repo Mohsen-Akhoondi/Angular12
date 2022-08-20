@@ -1,6 +1,5 @@
-import { Component, OnInit, Output, EventEmitter, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
-import { of } from 'rxjs';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
@@ -12,15 +11,13 @@ import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsSe
 import { CommonService } from 'src/app/Services/CommonService/CommonService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 
-declare var jquery: any;
-declare var $: any;
 
 @Component({
-  selector: 'app-corporate',
-  templateUrl: './corporate.component.html',
-  styleUrls: ['./corporate.component.css']
+  selector: 'app-corporate-without-inquiry',
+  templateUrl: './corporate-without-inquiry.component.html',
+  styleUrls: ['./corporate-without-inquiry.component.css']
 })
-export class CorporateComponent implements OnInit {
+export class CorporateWithoutInquiryComponent implements OnInit {
   @ViewChild('IsSignRightValid') IsSignRightValid: TemplateRef<any>;
   @ViewChild('UploadImage') UploadImage: TemplateRef<any>;
   @ViewChild('SignImageValid') SignImageValid: TemplateRef<any>;
@@ -51,6 +48,7 @@ export class CorporateComponent implements OnInit {
   RegisterNo: any;
   ActorName: any;
   ModuleCode;
+  CorporateName;
   CorporateTypeItem;
   NgSelectResponsibilityTypeParams = {
     bindLabelProp: 'ResponsibilityTypeName',
@@ -140,6 +138,9 @@ export class CorporateComponent implements OnInit {
   ProgramOrgIdentityCode: any;
   CheckValidate = false;
   IsEditFields = true;
+  CorporateTypeCode: any;
+  CorporateTypeName: any;
+  ActorID: any;
 
   constructor(private Actor: ActorService,
     private ProductRequest: ProductRequestService,
@@ -153,6 +154,7 @@ export class CorporateComponent implements OnInit {
     });
   }
 
+
   ngOnInit() {
     this.CustomCheckBoxConfig.color = 'state p-primary';
     this.CustomCheckBoxConfig.icon = 'fa fa-check';
@@ -160,20 +162,9 @@ export class CorporateComponent implements OnInit {
     this.CustomCheckBoxConfig.AriaWidth = 50;
     this.Actor.GetCorporateTypeItems(this.ModuleCode).subscribe(res => {
       this.CorporateTypeItem = res;
-      if (this.ModuleCode === 3010 || this.ModuleCode === 3011) {
-        this.IsEditable = true;
-        this.NgSelectCorporateTypeParams.selectedObject = 1;
-      }
-      else {
-        this.NgSelectCorporateTypeParams.selectedObject = 4;
-      }
     })
-
-    if (this.ModuleCode === 3011 || this.ModuleCode === 3010) {
-      this.Actor.GetCustomerByIdentityNo(null, this.ModuleCode === 3011).subscribe(res2 => {
-      });
-    }
   }
+
   ngAfterViewInit(): void {
     this.colDef = [
       {
@@ -448,64 +439,7 @@ export class CorporateComponent implements OnInit {
       },
     ];
   }
-  onSearch() {
-    if (this.ModuleCode === 3011 || this.ModuleCode === 3010) {
-      this.Actor.GetCustomerByIdentityNo(this.IdentityNoSearch, this.ModuleCode === 3011).subscribe(res => {
-        this.Search(res);
-      });
-    }
-    else {
-      this.Actor.GetCorporateByIdentityNo(this.IdentityNoSearch).subscribe(res => {
-        this.Search(res);
-      });
-    }
 
-  }
-
-  onSearchInquiry() {
-    if (!this.IdentityNoSearch) {
-      this.ShowMessageBoxWithOkBtn('شناسه ملی نمی تواند خالی باشد');
-      return;
-    }
-    if (!this.PostCodeSearch) {
-      this.ShowMessageBoxWithOkBtn('کد پستی نمی تواند خالی باشد');
-      return;
-    }
-    if (this.ModuleCode === 3010 || this.ModuleCode === 3011) {
-      this.Actor.GetActor(this.IdentityNoSearch, "null", false, this.PostCodeSearch).subscribe(res => {
-        if (res) {
-          this.FillVorporateObj(res);
-        }
-      });
-    }
-    else {
-      this.Actor.GetCorporateByInquiry(this.IdentityNoSearch, this.PostCodeSearch).subscribe(res => {
-        if (res) {
-          this.FillVorporateObj(res);
-        } else {
-          this.ShowMessageBoxWithOkBtn('اطلاعات شخص در سیستم یافت نشد');
-          this.IdentityNo = '';
-          this.ActorId = '';
-          this.Address = '';
-          this.Tel = '';
-          this.Cell = '';
-          this.Email = '';
-          this.Web = '';
-          this.PostCode = '';
-          this.RegionName = '';
-          this.ActorName = '';
-          this.NgSelectCorporateTypeParams.selectedObject = '';
-          this.EconomicCode = '';
-          this.ProgramOrgIdentityCode = '';
-          this.Fax = '';
-          this.RegisterReferenceName = '';
-          this.RegisterPersianDate = '';
-          this.RegisterNo = '';
-        }
-      });
-    }
-
-  }
   OnCheckBoxChange(event) {
     this.IsValid = event;
   }
@@ -549,48 +483,44 @@ export class CorporateComponent implements OnInit {
       };
       corporatepositionList.push(tempobj);
     });
-    if (this.CorporateObject) {
-      this.CorporateObject.Web = this.Web;
-      this.CorporateObject.PostCode = this.PostCode;
-      this.CorporateObject.RegionName = this.RegionName;
-      this.CorporateObject.Tel = this.Tel;
-      this.CorporateObject.Cell = this.Cell;
-      this.CorporateObject.Email = this.Email;
-      this.CorporateObject.Address = this.Address;
-      this.CorporateObject.RegisterNo = this.RegisterNo;
-      this.CorporateObject.EconomicCode = this.EconomicCode;
-      this.CorporateObject.ProgramOrgIdentityCode = this.ProgramOrgIdentityCode;
-      this.CorporateObject.Fax = this.Fax;
-      this.CorporateObject.RegisterDate = this.CorporateObject.ShortRegisterDate;
-      this.CorporateObject.IsValid = this.IsValid;
-      this.CorporateObject.CorporateTypeCode = this.NgSelectCorporateTypeParams.selectedObject;
+      const CorporateObject = {
+        ActorId : this.ActorId,
+        RegisterReferenceName : this.RegisterReferenceName,
+        RegisterNo : this.RegisterNo,
+        RegisterPersianDate : this.RegisterPersianDate,
+        Tel :this.Tel,
+        Fax : this.Fax,
+        Email : this.Email,
+        Web : this.Web,
+        RegionName : this.RegionName,
+        EconomicCode : this.EconomicCode,
+        Address : this.Address,
+        PostCode : this.PostCode,
+        ProgramOrgIdentityCode : this.ProgramOrgIdentityCode,
+        CorporateName : this.ActorName ,
+        CorporateTypeCode :this.NgSelectCorporateTypeParams.selectedObject ,
+        IsValid : this.IsValid,
+        IdentityNo : this.IdentityNoSearch,
+        
 
-      if (this.ModuleCode === 3010 || this.ModuleCode === 3011) {
-        this.Actor.SaveCustomer(this.CorporateObject, corporatepositionList, this.ModuleCode).subscribe(res => {
-          this.CorporateObject = res;
-          this.Validate = this.CorporateObject.Validate;
-          this.ShowMessageBoxWithOkBtn('ثبت اطلاعات با موفقیت انجام شد');
-        });
-      }
-      else {
+      };   
         if (this.ActorId > 0) {
-          this.Actor.UpdateActorCorporate(this.CorporateObject, corporatepositionList , this.ModuleCode).subscribe(res => {
+          this.Actor.UpdateActorCorporate(CorporateObject, corporatepositionList , this.ModuleCode).subscribe(res => {
             this.CorporateObject = res;
             this.Validate = this.CorporateObject.Validate;
             this.ShowMessageBoxWithOkBtn('ویرایش اطلاعات با موفقیت انجام شد');
           });
         } else {
-          this.Actor.SaveActorCorporate(this.CorporateObject, corporatepositionList ,this.ModuleCode).subscribe(res => {
+          this.Actor.SaveActorCorporate(CorporateObject, corporatepositionList , this.ModuleCode).subscribe(res => {
             this.CorporateObject = res;
+            this.ActorId = this.CorporateObject.ActorId;
             this.Validate = this.CorporateObject.Validate;
             this.ShowMessageBoxWithOkBtn('ثبت اطلاعات با موفقیت انجام شد');
           });
         }
-      }
-      return;
-    }
+      
+      
   }
-
 
   ShowMessageBoxWithOkBtn(message) {
     this.isClicked = true;
@@ -604,10 +534,10 @@ export class CorporateComponent implements OnInit {
     this.alertMessageParams.HaveYesBtn = false;
     this.alertMessageParams.HaveNoBtn = false;
   }
-
   onGridReady(params: { api: any; }) {
     this.gridApi = params.api;
   }
+
   onCellEditingStartedMCP(event) {
     if (event.colDef && event.colDef.field === 'ActorName') {
       this.colDef[1].cellEditorParams.Params.loading = true;
@@ -637,6 +567,7 @@ export class CorporateComponent implements OnInit {
       });
     }
   }
+
   FetchActorByTermMCP(event) {
     event.Owner.colDef[1].cellEditorParams.Params.loading = true;
     event.Owner.Actor.GetActorPaging(event.PageNumber, event.PageSize, event.term, event.SearchOption,
@@ -650,6 +581,7 @@ export class CorporateComponent implements OnInit {
         });
       });
   }
+
   FetchMoreActorMCP(event) {
     event.Owner.colDef[1].cellEditorParams.Params.loading = true;
     const ResultList = [];
@@ -677,6 +609,7 @@ export class CorporateComponent implements OnInit {
   uploadimgCSMClicked() {
     $('#imguploadcsm').click();
   }
+
   onCSMFileChanged(event) {
     this.ImgLoadMsgSizeCSM = [];
     this.ImgLoadMsgTypeCSM = [];
@@ -728,66 +661,6 @@ export class CorporateComponent implements OnInit {
     this.SelectedMCPRow = event.rowIndex;
   }
 
-  Search(res) {
-    if (res) {
-      this.FillVorporateObj(res);
-    }
-    else {
-      this.ShowMessageBoxWithOkBtn('اطلاعات شخص در سیستم یافت نشد لطفا استعلام بگیرید');
-      this.IdentityNo = '';
-      this.ActorId = '';
-      this.Address = '';
-      this.Tel = '';
-      this.Cell = '';
-      this.Email = '';
-      this.Web = '';
-      this.PostCode = '';
-      this.RegionName = '';
-      this.ActorName = '';
-      this.NgSelectCorporateTypeParams.selectedObject = null;
-      this.EconomicCode = '';
-      this.ProgramOrgIdentityCode = '';
-      this.Fax = '';
-      this.RegisterReferenceName = '';
-      this.RegisterPersianDate = '';
-      this.RegisterNo = '';
-    }
-  }
-
-  FillVorporateObj(res) {
-    this.CorporateObject = res; // کل آبجکت شخص حقوقی و اکتور
-    this.Validate = res.Validate;
-    this.ActorId = res.ActorId;
-    this.ActorName = res.ActorName;
-    this.NgSelectCorporateTypeParams.selectedObject = res.CorporateTypeCode;
-    this.IdentityNo = res.IdentityNo;
-    this.Address = res.Address;
-    this.Tel = res.Tel;
-    this.Cell = res.Cell;
-    this.Email = res.Email;
-    this.Web = res.Web;
-    this.PostCode = res.PostCode;
-    this.RegionName = res.RegionName;
-    this.EconomicCode = res.EconomicCode;
-    this.ProgramOrgIdentityCode = res.ProgramOrgIdentityCode;
-    this.Fax = res.Fax;
-    this.RegisterReferenceName = res.RegisterReferenceName;
-    this.RegisterPersianDate = res.RegisterPersianDate;
-    this.RegisterNo = res.RegisterNo;
-    this.IsValid = res.IsValid;
-    this.rowData = res.CorporatePositionMembersList;
-    if (this.ModuleCode === 3011 || this.ModuleCode === 3010) 
-    {
-      this.IsEditable = false;
-      this.IsEditFields = this.ActorId > 0 ? true : false;
-    }
-    else
-    {
-    this.IsEditable = true;
-    this.IsEditFields = this.ActorId > 0 ? false : true; // RFC 60302
-    }
-
-  }
 
   BtnArchiveClick() {
     this.ProductRequest.GetDocTypeMadatory(

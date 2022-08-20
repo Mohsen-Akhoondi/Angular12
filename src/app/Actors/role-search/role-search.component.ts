@@ -3,8 +3,6 @@ import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { of } from 'rxjs';
-import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 
 @Component({
   selector: 'app-role-search',

@@ -117,7 +117,7 @@
               [rowsData]="UnitPatternUserRegion_rowData" (GridReady)="UnitPatternUserRegion_onGridReady($event)"
               (CellValueChanged)="UnitPatternUserRegion_onCellValueChanged($event)"
               (cellEditingStarted)="UnitPatternUserRegion_onCellEditingStarted($event)" [gridHeight]="76"
-              [IsEditable]="true" (Delete)="UnitPatternUser_onDeletedRow($event)"></app-grid>
+              [IsEditable]="true" (Delete)="UnitPatternUserRegion_onDeletedRow($event)"></app-grid>
           </div>
           <div class="div-left-bottom">
             <app-grid style="width: 45%;" [columns]="UserCostCenter_colDef" [rowsData]="UserCostCenter_rowData"
@@ -133,7 +133,7 @@
 
     </div> <!--  main-form-body -->
     <div class="buttons-place" style="margin: 5px;">
-      <button (click)="onSave()" [disabled]="false" id="btnSave" class="btn btn-primary btnGreen">
+      <button *ngIf="HaveSave"  (click)="onSave()" [disabled]="false" id="btnSave" class="btn btn-primary btnGreen">
         <img width="15px" height="15px" src="assets/Icons/save.png" />
         ثبت
       </button>

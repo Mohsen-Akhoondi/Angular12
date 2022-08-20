@@ -160,33 +160,33 @@ export class Person2Component implements OnInit {
     type: 'region'
   };
   BusinessPatternParams = {
-      bindLabelProp: 'BusinessPatternNoName', // 62056
-      bindValueProp: 'BusinessPatternID',
-      placeholder: '',
-      MinWidth: '300px',
-      PageSize: 30,
-      PageCount: 0,
-      TotalItemCount: 0,
-      selectedObject: null,
-      loading: false,
-      IsVirtualScroll: true,
-      IsDisabled: false,
-      DropDownMinWidth: '300px',
-      type: 'business-pattern',
-      AdvanceSearch: {
-        SearchLabel: 'جستجو براساس :',
-        SearchItemDetails:
-          // tslint:disable-next-line: max-line-length
-          [{ HeaderCaption: 'نام تخصص', HeaderName: 'BusinessPatternName', width: 55, MinTermLenght: 1, SearchOption: 'BusinessPatternName' },
-          // tslint:disable-next-line: max-line-length
-          { HeaderCaption: 'کد تجهیز', HeaderName: 'BusinessPatternNo', width: 53, MinTermLenght: 3, SearchOption: 'BusinessPatternNo' }],
-        SearchItemHeader:
-          [{ HeaderCaption: 'نام تخصص', width: 55, },
-          { HeaderCaption: 'کد تجهیز', width: 53, }],
-        HaveItemNo: true,
-        ItemNoWidth: 16
-      }
-    };
+    bindLabelProp: 'BusinessPatternNoName', // 62056
+    bindValueProp: 'BusinessPatternID',
+    placeholder: '',
+    MinWidth: '300px',
+    PageSize: 30,
+    PageCount: 0,
+    TotalItemCount: 0,
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: true,
+    IsDisabled: false,
+    DropDownMinWidth: '300px',
+    type: 'business-pattern',
+    AdvanceSearch: {
+      SearchLabel: 'جستجو براساس :',
+      SearchItemDetails:
+        // tslint:disable-next-line: max-line-length
+        [{ HeaderCaption: 'نام تخصص', HeaderName: 'BusinessPatternName', width: 55, MinTermLenght: 1, SearchOption: 'BusinessPatternName' },
+        // tslint:disable-next-line: max-line-length
+        { HeaderCaption: 'کد تجهیز', HeaderName: 'BusinessPatternNo', width: 53, MinTermLenght: 3, SearchOption: 'BusinessPatternNo' }],
+      SearchItemHeader:
+        [{ HeaderCaption: 'نام تخصص', width: 55, },
+        { HeaderCaption: 'کد تجهیز', width: 53, }],
+      HaveItemNo: true,
+      ItemNoWidth: 16
+    }
+  };
   GradeParams =
     {
       bindLabelProp: 'PriceListTopicName',
@@ -662,14 +662,17 @@ export class Person2Component implements OnInit {
   IsManagerInfo = false; // RFC 55889
   CorporateID: number;
   VeteranPercent: any;
-
   GridOptionsRowStyle: GridOptions = {
     getRowStyle: function (params) {
+      if (params.data.IsChanged === true && params.data.needShowColor === true) {
+        return { 'background-color': '#ffe600' };
+      }
       if (params.data.AllowStateCode === 7) {
         return { 'background-color': '#d1f0d1', };
       }
     }
   };
+
   NgSelectManagementTypeParams = {
     bindLabelProp: 'ManagementTypeName',
     bindValueProp: 'ManagementTypeCode',
@@ -707,6 +710,39 @@ export class Person2Component implements OnInit {
     type: 'ExperienceCoef',
   }
 
+  BackGroundColor: any = '#ffe600';
+  IdentityNoSearchChangeFlag = false;
+  LastNameChangeFlag = false;
+  BirthCertificateSerialChangeFlag = false;
+  EconomicCodeChangeFlag = false;
+  VeteranPercentChangeFlag = false;
+  BirthDateSearchChangeFlag = false;
+  FatherNameChangeFlag = false;
+  BirthPlaceChangeFlag = false;
+  ActorNoteChangeFlag = false;
+  FirstNameChangeFlag = false;
+  BirthCertificateNoChangeFlag = false;
+  IssuancePlaceChangeFlag = false;
+  AllowStateNameChangeFlag = false;
+
+  AddressChangeFlag = false;
+  PostCodeChangeFlag = false;
+  FaxChangeFlag = false;
+  WebChangeFlag = false;
+  EmailChangeFlag = false;
+  CellNoChangeFlag = false;
+
+  IsContractorChangeFlag = false;
+  IsConsultChangeFlag = false;
+  IsProducerChangeFlag = false;
+  IsSupplierChangeFlag = false;
+  IsInternalBuildersChangeFlag = false;
+  IsExternalBuildersChangeFlag = false;
+  IsRelatedItems = [
+    { IsRelated: 1, RelatedName: 'مرتبط' },
+    { IsRelated: 2, RelatedName: 'غیر مرتبط' }]
+    ;
+
   constructor(private Actor: ActorService,
     private Common: CommonService,
     private router: Router,
@@ -727,11 +763,13 @@ export class Person2Component implements OnInit {
       this.OrginalModuleCode = +params['ModuleCode'];
     });
     this.EvaluatorList = [{ EvaluatorID: '734', EvaluatorName: 'شهرداري تهران' },
-    { EvaluatorID: '6978079', EvaluatorName: 'سازمان مديريت' }, { EvaluatorID: '7060739', EvaluatorName: 'شوراي عالي انفورماتيک' }];
+    { EvaluatorID: '6978079', EvaluatorName: 'سازمان مديريت' }, { EvaluatorID: '7060739', EvaluatorName: 'شوراي عالي انفورماتيک' },
+    { EvaluatorID: '7056530', EvaluatorName: 'وزارت تعاون، کار و رفاه اجتماعی' }];
     this.CertificationEvaluatorList = [
       { CertificationEvaluatorID: 734, CertificationEvaluatorName: 'شهرداری تهران' },
       { CertificationEvaluatorID: 6978079, CertificationEvaluatorName: 'سازمان مدیریت' },
       { CertificationEvaluatorID: 7060739, CertificationEvaluatorName: 'شورای عالی انفورماتیک' },
+      { CertificationEvaluatorID: 7056530, CertificationEvaluatorName: 'وزارت تعاون، کار و رفاه اجتماعی' },
       { CertificationEvaluatorID: 6476300, CertificationEvaluatorName: 'سایر' }];
   }
   ngOnInit() {
@@ -1305,6 +1343,40 @@ export class Person2Component implements OnInit {
         }
       },
       {
+        headerName: 'مرتبط/غیر مرتبط',
+        field: 'RelatedName',
+        cellEditorFramework: NgSelectCellEditorComponent,
+        hide: false,
+        cellEditorParams: {
+          HardCodeItems: this.IsRelatedItems,
+          bindLabelProp: 'RelatedName',
+          bindValueProp: 'IsRelated'
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.RelatedName;
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.RelatedName) {
+            params.data.RelatedName = params.newValue.RelatedName;
+            params.data.IsRelated = params.newValue.IsRelated;
+            return true;
+          } else {
+            params.data.RelatedName = '';
+            params.data.IsRelated = null;
+            return false;
+          }
+        },
+        editable: true,
+        width: 150,
+        resizable: true,
+        sortable: true
+      },
+      {
         headerName: 'مستندات',
         field: '',
         width: 100,
@@ -1498,6 +1570,40 @@ export class Person2Component implements OnInit {
         resizable: true
       },
       {
+        headerName: 'مرتبط/غیر مرتبط',
+        field: 'RelatedName',
+        cellEditorFramework: NgSelectCellEditorComponent,
+        hide: false,
+        cellEditorParams: {
+          HardCodeItems: this.IsRelatedItems,
+          bindLabelProp: 'RelatedName',
+          bindValueProp: 'IsRelated'
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.RelatedName;
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.RelatedName) {
+            params.data.RelatedName = params.newValue.RelatedName;
+            params.data.IsRelated = params.newValue.IsRelated;
+            return true;
+          } else {
+            params.data.RelatedName = '';
+            params.data.IsRelated = null;
+            return false;
+          }
+        },
+        editable: true,
+        width: 150,
+        resizable: true,
+        sortable: true
+      },
+      {
         headerName: 'نشاني',
         field: 'Address',
         editable: () => {
@@ -1581,269 +1687,6 @@ export class Person2Component implements OnInit {
         }
       },
     ];
-    // ستون هاي اموال منقول
-    // this.MovableColumnDef = [
-    //   {
-    //     headerName: 'رديف ',
-    //     field: 'ItemNo',
-    //     width: 80,
-    //     resizable: true
-    //   },
-    //   {
-    //     headerName: 'واحد اجرایی',
-    //     field: 'RegionName',
-    //     cellEditorFramework: NgSelectVirtualScrollComponent,
-    //     cellEditorParams: {
-    //       Params: this.NgSelectRegionParams,
-    //       Items: [],
-    //     },
-    //     cellRenderer: 'SeRender',
-    //     valueFormatter: function currencyFormatter(params) {
-    //       if (params.value) {
-    //         return params.value.RegionName;
-    //       } else {
-    //         return '';
-    //       }
-    //     },
-    //     valueSetter: (params) => {
-    //       if (params.newValue && params.newValue.RegionName) {
-    //         params.data.RegionName = params.newValue.RegionName;
-    //         params.data.RegionCode = params.newValue.RegionCode;
-    //         params.data.BusinessPatternID = null;
-    //         params.data.BusinessPatternName = '';
-    //         params.data.Rank = '';
-    //         return true;
-    //       } else {
-    //         params.data.RegionName = '';
-    //         params.data.RegionCode = null;
-    //         return false;
-    //       }
-    //     },
-    //     editable: true,
-    //     width: 200,
-    //     resizable: true,
-    //     sortable: true
-    //   },
-    //   {
-    //     headerName: 'حوزه کاری',
-    //     field: 'BusinessPatternName',
-    //     editable: true,
-    //     width: 200,
-    //     resizable: true,
-    //     cellEditorFramework: NgSelectVirtualScrollComponent,
-    //     cellEditorParams: {
-    //       Params: this.MovableBusinessPatternParams,
-    //       Items: [],
-    //     },
-    //     cellRenderer: 'SeRender',
-    //     valueFormatter: function currencyFormatter(params) {
-    //       if (params.value) {
-    //         return params.value.BusinessPatternName;
-    //       } else {
-    //         return '';
-    //       }
-    //     },
-    //     valueSetter: (params) => {
-    //       if (params.newValue && params.newValue.BusinessPatternName) {
-    //         params.data.BusinessPatternName = params.newValue.BusinessPatternName;
-    //         params.data.BusinessPatternID = params.newValue.BusinessPatternID;
-    //         return true;
-    //       } else {
-    //         params.data.BusinessPatternName = '';
-    //         params.data.BusinessPatternID = null;
-    //         return false;
-    //       }
-    //     },
-    //   },
-    //   {
-    //     headerName: 'نوع تجهيزات',
-    //     field: 'EquipmentTypeName',
-    //     cellEditorFramework: NgSelectVirtualScrollComponent,
-    //     cellEditorParams: {
-    //       Params: this.NgSelectEqTypeParams,
-    //       Items: [],
-    //       Owner: this
-    //     },
-    //     cellRenderer: 'SeRender',
-    //     valueFormatter: function currencyFormatter(params) {
-    //       if (params.value) {
-    //         return params.value.EquipmentTypeName;
-    //       } else {
-    //         return '';
-    //       }
-    //     },
-    //     valueSetter: (params) => {
-    //       if (params.newValue && params.newValue.EquipmentTypeName) {
-    //         params.data.EquipmentTypeName = params.newValue.EquipmentTypeName;
-    //         params.data.EquipmentTypeCode = params.newValue.EquipmentTypeCode;
-    //         return true;
-    //       } else {
-    //         params.data.EquipmentTypeName = '';
-    //         params.data.EquipmentTypeCode = null;
-    //         return false;
-    //       }
-    //     },
-    //     editable: true,
-    //     width: 150,
-    //     resizable: true,
-    //     sortable: true
-    //   },
-    //   {
-    //     headerName: ' مدل  ',
-    //     field: 'Model',
-    //     width: 120,
-    //     resizable: true,
-    //     sortable: true,
-    //     editable: true
-    //   },
-    //   {
-    //     headerName: 'شماره موتور',
-    //     field: 'EngineNo',
-    //     width: 120,
-    //     resizable: true,
-    //     sortable: true,
-    //     editable: true
-    //   },
-    //   {
-    //     headerName: 'شماره شاسی',
-    //     field: 'ChassisNo',
-    //     width: 120,
-    //     resizable: true,
-    //     sortable: true,
-    //     editable: true
-    //   },
-    //   {
-    //     headerName: 'شماره vin',
-    //     field: 'VinNo',
-    //     width: 120,
-    //     resizable: true,
-    //     sortable: true,
-    //     editable: true
-    //   },
-    //   {
-    //     headerName: 'پلاک',
-    //     field: 'CarTag',
-    //     HaveThousand: false,
-    //     width: 200,
-    //     resizable: true,
-    //     editable: true,
-    //     cellEditorFramework: CarTagComponent,
-    //     cellEditorParams: { MaxLength: 4 },
-    //     cellRenderer: 'SeRender',
-    //     valueFormatter: function currencyFormatter(params) {
-    //       if (params.data) {
-    //         return params.data.CarTag;
-    //       } else {
-    //         return '';
-    //       }
-    //     },
-    //     valueSetter: (params) => {
-    //       if (params.newValue) {
-    //         params.data.CarTag = params.newValue.CarTag;
-    //         params.data.IranPlaqueCode = params.newValue.IranPlaqueCode;
-    //         params.data.FirstPlaqueCode = params.newValue.FirstPlaqueCode;
-    //         params.data.SecondPlaqueCode = params.newValue.SecondPlaqueCode;
-    //         params.data.LetterPlaqueNo = params.newValue.LetterPlaqueNo;
-    //       }
-    //     },
-    //   },
-    //   {
-    //     headerName: 'پلاک در سیستم قدیم',
-    //     field: 'OldPlaqueNo',
-    //     width: 120,
-    //     resizable: true,
-    //     sortable: true,
-    //     editable: false
-    //   },
-    //   {
-    //     headerName: 'سال ساخت ',
-    //     field: 'ProductYear',
-    //     HaveThousand: false,
-    //     width: 90,
-    //     resizable: true,
-    //     editable: true,
-    //     cellEditorFramework: NumberFieldEditableComponent,
-    //     cellEditorParams: { MaxLength: 4 },
-    //     cellRenderer: 'SeRender',
-    //     valueFormatter: function currencyFormatter(params) {
-    //       if (params.value) {
-    //         return params.value;
-    //       } else {
-    //         return '';
-    //       }
-    //     },
-    //     valueSetter: (params) => {
-    //       if (params.newValue) {
-    //         params.data.ProductYear = params.newValue;
-    //       }
-    //     },
-    //   },
-    //   {
-    //     headerName: 'تعداد ',
-    //     field: 'Qty',
-    //     HaveThousand: false,
-    //     width: 110,
-    //     resizable: true,
-    //     editable: true,
-    //     cellEditorFramework: NumberFieldEditableComponent,
-    //     cellRenderer: 'SeRender',
-    //     valueFormatter: function currencyFormatter(params) {
-    //       if (params.value) {
-    //         return params.value;
-    //       } else {
-    //         return '';
-    //       }
-    //     },
-    //     valueSetter: (params) => {
-    //       if (params.newValue) {
-    //         params.data.Qty = params.newValue;
-    //       }
-    //     },
-    //   },
-    //   {
-    //     headerName: 'مبلغ ',
-    //     field: 'Amount',
-    //     HaveThousand: true,
-    //     width: 150,
-    //     resizable: true,
-    //     editable: true,
-    //     cellEditorFramework: NumberFieldEditableComponent,
-    //     cellRenderer: 'SeRender',
-    //     valueFormatter: function currencyFormatter(params) {
-    //       if (params.value) {
-    //         return params.value;
-    //       } else {
-    //         return '';
-    //       }
-    //     },
-    //     valueSetter: (params) => {
-    //       if (params.newValue) {
-    //         params.data.Amount = params.newValue;
-    //       }
-    //     },
-    //   },
-    //   {
-    //     headerName: 'توضيحات',
-    //     field: 'Note',
-    //     width: 350,
-    //     resizable: true,
-    //     editable: true
-    //   },
-    //   {
-    //     headerName: 'مستندات',
-    //     field: '',
-    //     width: 100,
-    //     sortable: false,
-    //     resizable: false,
-    //     cellStyle: function (params) {
-    //       return { 'text-align': 'center' };
-    //     },
-    //     cellRendererFramework: TemplateRendererComponent,
-    //     cellRendererParams: {
-    //       ngTemplate: this.UploadArchive,
-    //     }
-    //   },
-    // ];
     // ستون هاي اموال غير منقول
     this.ImmovablePropertyColDef = [
       {
@@ -1958,7 +1801,7 @@ export class Person2Component implements OnInit {
         },
       },
 
-      
+
       {
         headerName: 'کدپستي ده رقمي',
         field: 'PostCode',
@@ -3086,8 +2929,8 @@ export class Person2Component implements OnInit {
       this.WorkPostCode = res.WorkPostCode;
       this.Cell2 = res.Cell2;
       this.VeteranPercent = res.VeteranPercent;
-      this.ActorNote= res.ActorNote;
-     
+      this.ActorNote = res.ActorNote;
+
       if (!this.WorkFlowID && res.ActorBusinessList.length > 0) { // RFC 53083 و هماهنگی با آقای آخوندی
         if (this.IsAdmin && this.ModuleCode !== 2893 && this.ModuleCode !== 2885
           && (!this.InputParam || this.InputParam.ModuleViewTypeCode !== 300000)) {
@@ -3112,6 +2955,7 @@ export class Person2Component implements OnInit {
           }
         }
       }
+      this.SetChangeFlag();
     }
   }
   OnBirthDateChange(ADate) {
@@ -3157,7 +3001,7 @@ export class Person2Component implements OnInit {
     this.WorkPostCode = '';
     this.Cell2 = '';
     this.VeteranPercent = '';
-    this.ActorNote='';
+    this.ActorNote = '';
 
     this.Actor.GetPersonByIdentityNo(this.IdentityNoSearch, PersonID, RegionCode).subscribe(res2 => {
       if (res2) {
@@ -3267,7 +3111,7 @@ export class Person2Component implements OnInit {
             }
           }
         }
-
+        this.SetChangeFlag();
       } else {
         this.ShowMessageBoxWithOkBtn('اطلاعات شخص در سيستم يافت نشد لطفا استعلام بگيريد');
       }
@@ -3314,7 +3158,7 @@ export class Person2Component implements OnInit {
     this.VeteranPercent = '';
     this.UserImage = null;
     this.rowData = [];
-    this.ActorNote=[];
+    this.ActorNote = [];
 
     this.Actor.GetActorByIdentityNo(this.IdentityNoSearch, this.BirthDateSearch, true, this.PostCodeSearch).subscribe(res => {
       if (res) {
@@ -3457,10 +3301,11 @@ export class Person2Component implements OnInit {
             ? item.data.PersianEndDate.MDate : (item.data.ShortEndDate ? item.data.ShortEndDate : null),
           // tslint:disable-next-line: max-line-length
           ResponsibilityTypeCode: (item.data.ResponsibilityTypeName && item.data.ResponsibilityTypeName.ResponsibilityTypeCode) ? item.data.ResponsibilityTypeName.ResponsibilityTypeCode
-          : (item.data.ResponsibilityTypeCode ? item.data.ResponsibilityTypeCode : null),
+            : (item.data.ResponsibilityTypeCode ? item.data.ResponsibilityTypeCode : null),
           // tslint:disable-next-line: max-line-length
           ExperienceCoefCode: (item.data.ExperienceCoefName && item.data.ExperienceCoefName.ExperienceCoefCode) ? item.data.ResponsibilityTypeName.ExperienceCoefCode
-          : (item.data.ExperienceCoefCode ? item.data.ExperienceCoefCode : null),
+            : (item.data.ExperienceCoefCode ? item.data.ExperienceCoefCode : null),
+            IsRelated: (item.data.IsRelated !== null && item.data.IsRelated !== undefined) ? ((item.data.IsRelated === 1 || item.data.IsRelated === true) ? 1 : 0) : null,
         };
         WorkExperienceList.push(tempobj);
       });
@@ -3513,6 +3358,7 @@ export class Person2Component implements OnInit {
           FromYear: node.data.FromYear ? node.data.FromYear : null,
           ToYear: node.data.ToYear ? node.data.ToYear : null,
           EducationDate: node.data.ShortEducationDate ? node.data.ShortEducationDate : null,
+          IsRelated: (node.data.IsRelated !== null && node.data.IsRelated !== undefined) ? ((node.data.IsRelated === 1 || node.data.IsRelated === true) ? 1 : 0) : null,
         };
         EducationHistoryList.push(EduHisobj);
       });
@@ -3726,22 +3572,22 @@ export class Person2Component implements OnInit {
         });
       });
     } else if (event.colDef && event.colDef.field === 'BusinessPatternNoName') {
-        this.RankColumnDef[8].cellEditorParams.Params.loading = true;
-        this.Common.GetBusinessPatternPaging('',
-          '',
-          1,
-          30,
-          event.data.UnitPatternID,
-          event.data.BusinessPatternID).
-          subscribe(res => {
-            this.RankColumnDef[8].cellEditorParams.Params.loading = false;
-            this.RefreshServiceObj.RefreshItemsVirtualNgSelect({
-              List: res.List,
-              TotalItemCount: res.TotalItemCount,
-              PageCount: Math.ceil(res.TotalItemCount / 30),
-              type: 'business-pattern'
-            });
+      this.RankColumnDef[8].cellEditorParams.Params.loading = true;
+      this.Common.GetBusinessPatternPaging('',
+        '',
+        1,
+        30,
+        event.data.UnitPatternID,
+        event.data.BusinessPatternID).
+        subscribe(res => {
+          this.RankColumnDef[8].cellEditorParams.Params.loading = false;
+          this.RefreshServiceObj.RefreshItemsVirtualNgSelect({
+            List: res.List,
+            TotalItemCount: res.TotalItemCount,
+            PageCount: Math.ceil(res.TotalItemCount / 30),
+            type: 'business-pattern'
           });
+        });
     } else if (event.colDef && event.colDef.field === 'PriceListTopicName') {
       // tslint:disable-next-line: max-line-length
       this.Actor.GetPriceListTopicByBusinesPatternID(event.data.BusinessPatternID, false).subscribe(res => {
@@ -5202,6 +5048,134 @@ export class Person2Component implements OnInit {
     this.PopupParam = {
       ActorID: this.ActorId,
     };
+  }
+  OnshowhistorydetailClick() {
+    if (this.PersonObject && this.PersonObject.ActorId) {
+      this.PopUpType = 'show-history-detail';
+      this.HaveHeader = true;
+      this.isClicked = true;
+      this.HaveMaxBtn = true;
+      this.startLeftPosition = 80;
+      this.startTopPosition = 20;
+
+      this.OverMainMinwidthPixel = 1200;
+      this.MainMaxwidthPixel = 1200;
+
+      this.PixelHeight = 600;
+      this.MinHeightPixel = 600;
+      let ObjectIDList = [];
+
+      this.PopupParam = {
+        ActorId: this.PersonObject.ActorId,
+        HeaderName: 'مشاهده ریز اصلاحات',
+        ModuleCode: 2784
+      };
+    }
+  }
+  SetChangeFlag() {
+    this.IdentityNoSearchChangeFlag = false;
+    this.LastNameChangeFlag = false;
+    this.BirthCertificateSerialChangeFlag = false;
+    this.EconomicCodeChangeFlag = false;
+    this.VeteranPercentChangeFlag = false;
+    this.BirthDateSearchChangeFlag = false;
+    this.FatherNameChangeFlag = false;
+    this.BirthPlaceChangeFlag = false;
+    this.ActorNoteChangeFlag = false;
+    this.FirstNameChangeFlag = false;
+    this.BirthCertificateNoChangeFlag = false;
+    this.IssuancePlaceChangeFlag = false;
+    this.AllowStateNameChangeFlag = false;
+    this.AddressChangeFlag = false;
+    this.PostCodeChangeFlag = false;
+    this.FaxChangeFlag = false;
+    this.WebChangeFlag = false;
+    this.EmailChangeFlag = false;
+    this.CellNoChangeFlag = false;
+    this.IsContractorChangeFlag = false;
+    this.IsConsultChangeFlag = false;
+    this.IsProducerChangeFlag = false;
+    this.IsSupplierChangeFlag = false;
+    this.IsInternalBuildersChangeFlag = false;
+    this.IsExternalBuildersChangeFlag = false;
+    forkJoin([
+      this.Common.GetLastAuditByObjectID(this.ActorId),
+      this.Common.CheckAllowState(this.ActorId),
+    ]).subscribe(res => {
+      if (res[1] === true) {
+        // let ChangeActoBusinessObj = res[0].filter(x => x.TableName === 'ACTOR_BUSINESS');
+        // let ActoBusinessObjList = [];
+        // this.RankgridApi.stopEditing();
+        // ChangeActoBusinessObj.forEach(element => {
+        //   this.RankrowsData.forEach(element2 => {
+        //     if (element.ObjectID === element2.ActorBusinessID) {
+        //       element2.IsChanged = true;
+        //     }
+        //     ActoBusinessObjList.push(element2);
+        //   });
+        //   this.RankrowsData = ActoBusinessObjList;
+        // });
+
+        let ChangePersonObj = res[0].filter(x => x.TableName === 'PERSON');
+        ChangePersonObj.forEach(element => {
+          if (element.ColumnName === 'IDENTITY_NO') {
+            this.IdentityNoSearchChangeFlag = true;
+          } else if (element.ColumnName === 'LAST_NAME') {
+            this.LastNameChangeFlag = true;
+          } else if (element.ColumnName === 'BIRTH_CERTIFICATE_SERIAL') {
+            this.BirthCertificateSerialChangeFlag = true;
+          } else if (element.ColumnName === 'VETERAN_PERCENT') {
+            this.VeteranPercentChangeFlag = true;
+          } else if (element.ColumnName === 'BIRTH_DATE') {
+            this.BirthDateSearchChangeFlag = true;
+          } else if (element.ColumnName === 'FATHER_NAME') {
+            this.FatherNameChangeFlag = true;
+          } else if (element.ColumnName === 'BIRTH_PLACE') {
+            this.BirthPlaceChangeFlag = true;
+          } else if (element.ColumnName === 'FIRST_NAME') {
+            this.FirstNameChangeFlag = true;
+          } else if (element.ColumnName === 'BIRTH_CERTIFICATE_NO') {
+            this.BirthCertificateNoChangeFlag = true;
+          } else if (element.ColumnName === 'ISSUANCE_PLACE') {
+            this.IssuancePlaceChangeFlag = true;
+          }
+        });
+        let ChangeActorObj = res[0].filter(x => x.TableName === 'ACTOR');
+        ChangeActorObj.forEach(element => {
+          if (element.ColumnName === 'ECONOMIC_CODE') {
+            this.EconomicCodeChangeFlag = true;
+          } else if (element.ColumnName === 'ADDRESS') {
+            this.AddressChangeFlag = true;
+          } else if (element.ColumnName === 'POST_CODE') {
+            this.PostCodeChangeFlag = true;
+          } else if (element.ColumnName === 'WEB') {
+            this.WebChangeFlag = true;
+          } else if (element.ColumnName === 'EMAIL') {
+            this.EmailChangeFlag = true;
+          } else if (element.ColumnName === 'CELL') {
+            this.CellNoChangeFlag = true;
+          } else if (element.ColumnName === 'ALLOW_STATE_CODE') {
+            this.AllowStateNameChangeFlag = true;
+          }
+        });
+        let ChangeActorRoleObj = res[0].filter(x => x.TableName === 'ACTOR_ROLE');
+        ChangeActorRoleObj.forEach(element => {
+          if (element.ColumnName === 'IS_CONTRACTOR') {
+            this.IsContractorChangeFlag = true;
+          } else if (element.ColumnName === 'IS_CONSULT') {
+            this.IsConsultChangeFlag = true;
+          } else if (element.ColumnName === 'IS_PRODUCER') {
+            this.IsProducerChangeFlag = true;
+          } else if (element.ColumnName === 'IS_SUPPLIER') {
+            this.IsSupplierChangeFlag = true;
+          } else if (element.ColumnName === 'IS_INTERNAL_BUILDERS') {
+            this.IsInternalBuildersChangeFlag = true;
+          } else if (element.ColumnName === 'IS_EXTERNAL_BUILDERS') {
+            this.IsExternalBuildersChangeFlag = true;
+          }
+        });
+      }
+    });
   }
 }
 
