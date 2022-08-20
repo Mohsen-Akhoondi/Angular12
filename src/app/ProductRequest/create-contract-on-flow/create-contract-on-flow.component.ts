@@ -1,13 +1,10 @@
-import { Component, OnInit, Output, EventEmitter, Input, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { ActivatedRoute } from '@angular/router';
-
-declare var jquery: any;
-declare var $: any;
 
 @Component({
   selector: 'app-create-contract-on-flow',
@@ -98,6 +95,7 @@ export class CreateContractOnFlowComponent implements OnInit {
   disabledLetterDate = false;
   IsException = false;
   DisableDate = false;
+  DisableEndDate = true;
   SumProposalItemPrice: any;
   IsNew: any;
   SumFinalAmountStr: any;
@@ -120,6 +118,10 @@ export class CreateContractOnFlowComponent implements OnInit {
     this.ModuleViewTypeCode = this.PopupParam.ModuleViewTypeCode;
     this.SumFinalAmount = this.PopupParam.SumFinalAmount;
     this.IsNew = this.PopupParam.IsNew;
+
+    if (this.PopupParam.ModuleViewTypeCode === 800) {
+      this.ProductRequestObject.ContractTypeCode = 15;
+    }
 
     if (this.IsNew) {
       this.SumProposalName = 'مبلغ پیشنهادی برنده';
@@ -157,6 +159,10 @@ export class CreateContractOnFlowComponent implements OnInit {
           }
         });
       }
+      if (this.PRContractObject.ContractSatusCode === 1 && this.PopupParam.OrginalModuleCode == 2824) {
+        this.DisableEndDate = false;
+      }
+
     }
     this.onSignersOpen(1);
     if (this.ModuleViewTypeCode === 21) {
@@ -203,6 +209,10 @@ export class CreateContractOnFlowComponent implements OnInit {
     }
     if (this.ProductRequestObject.WinnerProposalObject) { // RFC 61950
       this.SumProposalItemPrice = this.ProductRequestObject.WinnerProposalObject.SumProposalItemPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    if (this.ModuleViewTypeCode === 800) {
+      this.DisableEndDate = false;
     }
   }
 
@@ -287,12 +297,12 @@ export class CreateContractOnFlowComponent implements OnInit {
     this.ContractLetterDate = ADate.MDate;
   }
   OnContractStartDateChange(ADate) {
-    this.StartDate = ADate.MDate;
-    if (this.StartDate && this.ProductRequestObject && this.ProductRequestObject.RelatedContractID === null) {
-      // tslint:disable-next-line: max-line-length   
-      this.ContractList.GetEndDateByDuration(this.StartDate, this.ProductRequestObject.DurationDay, this.ProductRequestObject.DurationMonth, this.ProductRequestObject.DurationYear).subscribe(res => {
-        this.EndDate = res;
-      });
+      this.StartDate = ADate.MDate;
+      if (this.StartDate && this.ProductRequestObject && this.ProductRequestObject.RelatedContractID === null && this.ModuleViewTypeCode != 800) {
+        // tslint:disable-next-line: max-line-length   
+        this.ContractList.GetEndDateByDuration(this.StartDate, this.ProductRequestObject.DurationDay, this.ProductRequestObject.DurationMonth, this.ProductRequestObject.DurationYear).subscribe(res => {
+          this.EndDate = res;
+        });     
     }
   }
   OnContractEndDateChange(ADate) {
@@ -346,7 +356,7 @@ export class CreateContractOnFlowComponent implements OnInit {
     if (this.ProductRequestObject.RegionCode === 222) { // RFC 59122
       this.ContractSignParams.bindValueProp = 'ActorID'; // RFC 59935
       this.ProductRequest.GetContractSignerList(this.ProductRequestObject.RegionCode,
-        this.ProductRequestObject.ShortProductRequestDate, this.ProductRequestObject.CostFactorID,
+        this.ContractLetterDate ? this.ContractLetterDate : this.ProductRequestObject.ShortProductRequestDate, this.ProductRequestObject.CostFactorID,
         this.ProductRequestObject.ContractID).subscribe(res => {
           this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
             List: res,
@@ -547,7 +557,8 @@ export class CreateContractOnFlowComponent implements OnInit {
                 if ((this.ModuleViewTypeCode !== 66
                   && this.ModuleViewTypeCode !== 21
                   && this.ModuleViewTypeCode !== 52
-                  && this.ModuleViewTypeCode !== 174)
+                  && this.ModuleViewTypeCode !== 174
+                  && this.ModuleViewTypeCode !== 75) // RFC 64711
                   && this.ModuleCode !== 2793) { // RFC 52153
                   this.Disabled = true;
                 }
@@ -570,7 +581,8 @@ export class CreateContractOnFlowComponent implements OnInit {
           if ((this.ModuleViewTypeCode !== 66
             && this.ModuleViewTypeCode !== 21
             && this.ModuleViewTypeCode !== 52
-            && this.ModuleViewTypeCode !== 174)
+            && this.ModuleViewTypeCode !== 174
+            && this.ModuleViewTypeCode !== 75) // RFC 64711
             && this.ModuleCode !== 2793) { // RFC 52153
             this.Disabled = true;
           }

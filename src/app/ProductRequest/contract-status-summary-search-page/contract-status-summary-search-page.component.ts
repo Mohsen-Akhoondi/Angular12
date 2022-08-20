@@ -6,7 +6,7 @@ import { ContractListService } from 'src/app/Services/BaseService/ContractListSe
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
-import { isNull, isNullOrUndefined, isUndefined } from 'util';
+import { isNullOrUndefined } from 'util';
 
 @Component({
   selector: 'app-contract-status-summary-search-page',
@@ -346,10 +346,10 @@ export class ContractStatusSummarySearchPageComponent implements OnInit {
         ];
         this.ContractService.SearchContractStatusSummaryList(this.NgSelectRegionParams.selectedObject, this.VWExeUnitParams.selectedObject,
           this.BusinessPatternParams.selectedObject, this.PriceListTopicParams.selectedObject, this.Grade, InDetail).subscribe(res => {
-          if (res) {
-            this.rowData = res;
-          }
-        });
+            if (res) {
+              this.rowData = res;
+            }
+          });
         break;
       case 'InGeneral':
         this.MaincolumnDef = [
@@ -404,10 +404,10 @@ export class ContractStatusSummarySearchPageComponent implements OnInit {
         ];
         this.ContractService.SearchContractStatusSummaryList(this.NgSelectRegionParams.selectedObject, this.VWExeUnitParams.selectedObject,
           this.BusinessPatternParams.selectedObject, this.PriceListTopicParams.selectedObject, this.Grade, InDetail).subscribe(res => {
-          if (res) {
-            this.rowData = res;
-          }
-        });
+            if (res) {
+              this.rowData = res;
+            }
+          });
         break;
       default:
         break;

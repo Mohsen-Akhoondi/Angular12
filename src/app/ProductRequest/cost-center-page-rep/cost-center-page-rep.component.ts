@@ -1,14 +1,9 @@
-import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
-import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
+import { Component, OnInit, Input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { BaseHttpClient } from 'src/app/Services/BaseService/BaseHttpClient';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
-import { event } from 'jquery';
-import { find } from 'rxjs/operators';
-
-
 
 @Component({
   selector: 'app-cost-center-page-rep',
@@ -70,7 +65,7 @@ export class CostCenterPageRepComponent implements OnInit {
   FromSubCostCenterItems;
   FromSubCostCenterParams = {
     bindLabelProp: 'SubCostCenterTitle',
-    bindValueProp: 'SubCostCenterId',
+    bindValueProp: 'SubCostCenterCode',
     placeholder: '',
     MinWidth: '155px',
     selectedObject: null,
@@ -83,7 +78,7 @@ export class CostCenterPageRepComponent implements OnInit {
   ToSubCostCenterItems;
   ToSubCostCenterParams = {
     bindLabelProp: 'SubCostCenterTitle',
-    bindValueProp: 'SubCostCenterId',
+    bindValueProp: 'SubCostCenterCode',
     placeholder: '',
     MinWidth: '155px',
     selectedObject: null,
