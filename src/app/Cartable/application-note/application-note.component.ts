@@ -1,6 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServices';
-import { runInThisContext } from 'vm';
 
 @Component({
   selector: 'app-application-note',
@@ -52,7 +51,7 @@ export class ApplicationNoteComponent implements OnInit {
   }
 
   closeModal() {
-      this.Closed.emit(true);
+    this.Closed.emit(true);
   }
 
   RowClick(event) {
