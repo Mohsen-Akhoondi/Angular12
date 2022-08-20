@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 import { DealsHallService } from 'src/app/Services/ContractService/DealsHall/DealsHallService';
 import { forkJoin } from 'rxjs';
 import { AuthService } from 'src/app/Services/BaseService/Auth.Service';
@@ -46,16 +46,19 @@ export class MainPageComponent implements OnInit {
     });
   }
   LoadLimitedTender() {
-      if (!this.AuthServices.CheckAuth()) {
+    this.AuthServices.CheckAuth().subscribe(res => {
+      if (!res) {
         this.ContractLimitedTenderCount = '-';
       } else {
         this.DealsHall.GetCountContractLimitedTender().subscribe(CountRes => {
           this.ContractLimitedTenderCount = CountRes;
         });
       }
+    });
   }
   LimitedTenderClick() {
-      if (this.AuthServices.CheckAuth()) {
+    this.AuthServices.CheckAuth().subscribe(LoginRes => {
+      if (LoginRes) {
         this.router.navigate(['/tender-page', { type: 'limited-tender' }]);
         // window.location.href = window.location.origin + '/Finance/tender-page?type=limited-tender';
       } else {
@@ -65,13 +68,14 @@ export class MainPageComponent implements OnInit {
         this.OverStartTopPosition = 130;
         this.OverPixelWidth = 500;
         this.OverPixelHeight = null;
-        this.PopupType = 'login-page';
+        this.PopupType = 'advertising-login';
         this.BtnClickName = 'limited-tender-click';
         this.btnclicked = true;
       }
+    });
   }
   popupclosed(param) {
-    if (this.PopupType === 'login-page' && param === 'IsLogin') {
+    if (this.PopupType === 'advertising-login' && param === 'IsLogin') {
       this.router.navigate(['/tender-page', { type: 'limited-tender' }]);
     }
     this.btnclicked = false;
