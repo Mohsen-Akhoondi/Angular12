@@ -1,7 +1,6 @@
-import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
-declare var jquery: any;
 declare var $: any;
 
 @Component({
@@ -45,6 +44,10 @@ export class OverPopupComponent implements OnInit {
     });
 
     console.log(this.PopupType);
+
+    if (!this.MainMaxwidthPixel) {
+      this.MainMaxwidthPixel = 1140;
+    }
 
     switch (this.PopupType) {
       case 'choose-report':
@@ -119,6 +122,10 @@ export class OverPopupComponent implements OnInit {
         this.MainMaxwidthPixel = 1000;
         this.minHeightPixel = 500;
         break;
+      case 'app-contract-pay-deduction':
+        this.MainMaxwidthPixel = 1000;
+        this.minHeightPixel = 500;
+        break;
       case 'app-goods':
         this.PixelWidth = 500;
         break;
@@ -128,6 +135,26 @@ export class OverPopupComponent implements OnInit {
       case 'contract-case':
         this.MainMaxwidthPixel = 1290;
         break;
+      case 'proxy-contract-list':
+        this.MainMaxwidthPixel = 1290;
+        this.minHeightPixel = 600;
+        this.PixelHeight = 600;
+        break;
+      case 'show-contract-relation':
+        this.MainMaxwidthPixel = 1000;
+        this.minHeightPixel = 500;
+        this.PixelHeight = 500;
+        break;
+      case 'rich-text-box-input':
+        this.PixelHeight = 290;
+        break;
+      case 'entiry-page':
+        this.minWidthPixel = 1140;
+        this.HeightPercentWithMaxBtn = 90;
+        break;
+        case 'product-request-invest-archive':
+          this.MainMaxwidthPixel = null;
+          break;
       default:
         break;
     }
@@ -159,6 +186,7 @@ export class OverPopupComponent implements OnInit {
     $('#modal-' + CurrType).draggable({
       handle: '#header'
     });
+    this.detectScreenSize();
   }
   closeModal(param) {
     if (param) {
@@ -183,5 +211,20 @@ export class OverPopupComponent implements OnInit {
     if (changes.PixelWidth && changes.PixelWidth.currentValue) {
       this.PixelWidth = changes.PixelWidth.currentValue;
     }
+  }
+
+  @HostListener("window:resize", [])
+  private onResize() {
+    this.detectScreenSize();
+  }
+
+  private detectScreenSize() {
+    // console.log('ddddddddddddddddddddddddddddddddddddddddddddd' , this.startLeftPosition);
+
+    //window.innerWidth;
+    // if(window.innerWidth <= 500) {
+    //   this.startLeftPosition =  900;
+    // }
+
   }
 }
