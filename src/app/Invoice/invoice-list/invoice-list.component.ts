@@ -2,18 +2,11 @@ import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
-import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
-import { single } from 'rxjs/operators';
-import { GridOptions } from 'ag-grid-community';
 import { of } from 'rxjs';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
-import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-import { ContractPayService } from 'src/app/Services/ContractService/ContractPayServices/ContractPayService';
-import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
+import { NgSelectConfig } from 'src/app/Shared/ng-select';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
-import { reject } from 'q';
 import { InvoiceService } from 'src/app/Services/Invoice/InvoiceService';
 import { isUndefined } from 'util';
 declare var jquery: any;
@@ -297,7 +290,7 @@ export class InvoiceListComponent implements OnInit {
     this.ShowMessageBoxWithYesNoBtn('آیا از حذف فاکتور مطمئن هستید؟');
   }
   DoDelete() {
-    this.Invoice.DeleteInvoice(this.selectedRow.data.InvoiceID).subscribe(
+    this.Invoice.DeleteInvoice(this.selectedRow.data.InvoiceID,this.ModuleCode).subscribe(
       res => {
         if (res === true) {
           this.rowData = this.Invoice.GetInvoiceList(this.RegionParams.selectedObject);
