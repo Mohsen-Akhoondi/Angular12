@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
@@ -6,10 +6,9 @@ import { RegionListService } from 'src/app/Services/BaseService/RegionListServic
 import { OrderService } from 'src/app/Services/ProductRequest/OrderService';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { Router, ActivatedRoute  } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
-import { of, forkJoin, Observable } from 'rxjs';
-import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
+import { forkJoin } from 'rxjs';
 import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 @Component({
   selector: 'app-commition-member',
@@ -115,9 +114,9 @@ export class CommitionMemberComponent implements OnInit {
     private router: Router,
     private User: UserSettingsService,
     private route: ActivatedRoute) {
-      this.route.params.subscribe(params => {
-        this.ModuleCode = +params['ModuleCode'];
-      });
+    this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
     this.columnDef = [
       {
         headerName: 'ردیف',
@@ -297,8 +296,8 @@ export class CommitionMemberComponent implements OnInit {
 
   ngOnInit() {
     forkJoin([
-    this.RegionList.GetSpecialRegionList(this.ModuleCode, true),
-    this.Order.GetCommitionList()
+      this.RegionList.GetSpecialRegionList(this.ModuleCode, true),
+      this.Order.GetCommitionList()
     ]).subscribe(res => {
       if (res[0]) {
         this.RegionListSet = res[0];
@@ -310,93 +309,93 @@ export class CommitionMemberComponent implements OnInit {
       }
       this.onLoadGrid();
     });
-      this.User.GetModulOPByUser(this.ModuleCode).subscribe(res => {
-        res.forEach(node => {
-          switch (node.OperationCode) {
-            case 7:
-              this.HaveSave = true;
-              break;
-            default:
-              break;
-          }
+    this.User.GetModulOPByUser(this.ModuleCode).subscribe(res => {
+      res.forEach(node => {
+        switch (node.OperationCode) {
+          case 7:
+            this.HaveSave = true;
+            break;
+          default:
+            break;
+        }
 
-        });
       });
+    });
 
   }
   FetchMoreSupplerPerson(event) {
-      event.Owner.columnDef[1].cellEditorParams.Params.loading = true;
-      const ResultList = [];
-      const promise = new Promise((resolve, reject) => {
-        event.Owner.Actor.GetActorPaging(event.PageNumber, event.PageSize, event.term,
-          event.SearchOption, true, false, true).subscribe(res => {
-            event.CurrentItems.forEach(el => {
-              ResultList.push(el);
-            });
-            res.List.forEach(element => {
-              ResultList.push(element);
-            });
-            resolve(res.TotalItemCount);
-          });
-      }).then((TotalItemCount: number) => {
-        event.Owner.RefreshPersonItems.RefreshItemsVirtualNgSelect({
-          List: ResultList,
-          term: event.term,
-          TotalItemCount: TotalItemCount,
-          PageCount: Math.ceil(TotalItemCount / 30),
-          type: 'supplier'
-        });
-        // event.Owner.columnDef_Person[1].cellEditorParams.Items  = ResultList;
-      });
-  }
-
-  FetchSupplerPersonByTerm(event) {
-      event.Owner.columnDef[1].cellEditorParams.Params.loading = true;
-      event.Owner.Actor.GetActorPaging(event.PageNumber, event.PageSize, event.term, event.SearchOption,
-        true, false, true).subscribe(res => {
-          event.Owner.RefreshPersonItems.RefreshItemsVirtualNgSelect({
-            List: res.List,
-            term: event.term,
-            TotalItemCount: res.TotalItemCount,
-            PageCount: Math.ceil(res.TotalItemCount / 30),
-            type: 'supplier'
-          });
-        });
-  }
-  FetchMoreUnitTopic(event) {
-      event.Owner.columnDef[9].cellEditorParams.Params.loading = true;
-      const ResultList = [];
-      const promise = new Promise((resolve, reject) => {
-        event.Owner.Order.GetUnitTopicPaging(event.PageNumber, event.PageSize, event.term, event.SearchOption).subscribe(res => {
+    event.Owner.columnDef[1].cellEditorParams.Params.loading = true;
+    const ResultList = [];
+    const promise = new Promise((resolve, reject) => {
+      event.Owner.Actor.GetActorPaging(event.PageNumber, event.PageSize, event.term,
+        event.SearchOption, true, false, true).subscribe(res => {
           event.CurrentItems.forEach(el => {
             ResultList.push(el);
           });
-            res.List.forEach(element => {
-              ResultList.push(element);
-            });
-            resolve(res.TotalItemCount);
+          res.List.forEach(element => {
+            ResultList.push(element);
           });
-      }).then((TotalItemCount: number) => {
-        event.Owner.RefreshUnitTopicItems.RefreshItemsVirtualNgSelect({
-          List: ResultList,
+          resolve(res.TotalItemCount);
+        });
+    }).then((TotalItemCount: number) => {
+      event.Owner.RefreshPersonItems.RefreshItemsVirtualNgSelect({
+        List: ResultList,
+        term: event.term,
+        TotalItemCount: TotalItemCount,
+        PageCount: Math.ceil(TotalItemCount / 30),
+        type: 'supplier'
+      });
+      // event.Owner.columnDef_Person[1].cellEditorParams.Items  = ResultList;
+    });
+  }
+
+  FetchSupplerPersonByTerm(event) {
+    event.Owner.columnDef[1].cellEditorParams.Params.loading = true;
+    event.Owner.Actor.GetActorPaging(event.PageNumber, event.PageSize, event.term, event.SearchOption,
+      true, false, true).subscribe(res => {
+        event.Owner.RefreshPersonItems.RefreshItemsVirtualNgSelect({
+          List: res.List,
           term: event.term,
-          TotalItemCount: TotalItemCount,
-          PageCount: Math.ceil(TotalItemCount / 30),
-          type: 'commission-member-unit-topic'
+          TotalItemCount: res.TotalItemCount,
+          PageCount: Math.ceil(res.TotalItemCount / 30),
+          type: 'supplier'
         });
       });
   }
-  FetchUnitTopicByTerm(event) {
-      event.Owner.columnDef[9].cellEditorParams.Params.loading = true;
+  FetchMoreUnitTopic(event) {
+    event.Owner.columnDef[9].cellEditorParams.Params.loading = true;
+    const ResultList = [];
+    const promise = new Promise((resolve, reject) => {
       event.Owner.Order.GetUnitTopicPaging(event.PageNumber, event.PageSize, event.term, event.SearchOption).subscribe(res => {
-          event.Owner.RefreshUnitTopicItems.RefreshItemsVirtualNgSelect({
-            List: res.List,
-            term: event.term,
-            TotalItemCount: res.TotalItemCount,
-            PageCount: Math.ceil(res.TotalItemCount / 30),
-            type: 'commission-member-unit-topic'
-          });
+        event.CurrentItems.forEach(el => {
+          ResultList.push(el);
         });
+        res.List.forEach(element => {
+          ResultList.push(element);
+        });
+        resolve(res.TotalItemCount);
+      });
+    }).then((TotalItemCount: number) => {
+      event.Owner.RefreshUnitTopicItems.RefreshItemsVirtualNgSelect({
+        List: ResultList,
+        term: event.term,
+        TotalItemCount: TotalItemCount,
+        PageCount: Math.ceil(TotalItemCount / 30),
+        type: 'commission-member-unit-topic'
+      });
+    });
+  }
+  FetchUnitTopicByTerm(event) {
+    event.Owner.columnDef[9].cellEditorParams.Params.loading = true;
+    event.Owner.Order.GetUnitTopicPaging(event.PageNumber, event.PageSize, event.term, event.SearchOption).subscribe(res => {
+      event.Owner.RefreshUnitTopicItems.RefreshItemsVirtualNgSelect({
+        List: res.List,
+        term: event.term,
+        TotalItemCount: res.TotalItemCount,
+        PageCount: Math.ceil(res.TotalItemCount / 30),
+        type: 'commission-member-unit-topic'
+      });
+    });
   }
   oncellEditingStarted(event) {
     if (event.colDef && event.colDef.field === 'ActorName') {
@@ -421,100 +420,100 @@ export class CommitionMemberComponent implements OnInit {
         });
       });
     }
-}
-onChangeRegionObj(region: number) {
+  }
+  onChangeRegionObj(region: number) {
     this.onLoadGrid();
-}
-onChangeCommitionObj(commitioncode: number) {
+  }
+  onChangeCommitionObj(commitioncode: number) {
     this.onLoadGrid();
-}
-onLoadGrid() {
+  }
+  onLoadGrid() {
     this.rowData = this.ProductRequest.GetCommitionMemberList(this.CommitionParams.selectedObject, this.RegionParams.selectedObject);
-}
-onGridReady(params: { api: any; }) {
-  this.gridApi = params.api;
-}
-ShowMessageBoxWithOkBtn(message) {
-  this.btnclicked = true;
-  this.PopUpType = 'message-box';
-  this.HaveHeader = true;
-  this.HaveMaxBtn = false;
-  this.startLeftPosition = 530;
-  this.startTopPosition = 200;
-  this.alertMessageParams.message = message;
-  this.alertMessageParams.HaveOkBtn = true;
-  this.alertMessageParams.HaveYesBtn = false;
-  this.alertMessageParams.HaveNoBtn = false;
-}
-popupclosed() {
-  this.HaveMaxBtn = false;
-  this.btnclicked = false;
-}
-close(): void {
-  this.btnclicked = false;
-  this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
-}
-onSave() {
-  const CommitionMemberList = [];
-  this.gridApi.stopEditing();
-  this.gridApi.forEachNode(node => {
-    const CommitionMemberObj = {
-      CommitionMemberID: node.data.CommitionMemberID ? node.data.CommitionMemberID : -1,
-      RegionCode: this.RegionParams.selectedObject,
-      CommitionCode: this.CommitionParams.selectedObject,
-      ActorID: node.data.ActorID ? node.data.ActorID : null,
-      ActorName: node.data.ActorName && node.data.ActorName.ActorName ? node.data.ActorName.ActorName : null,
-      StartDate: node.data.PersianStartDate && node.data.PersianStartDate.MDate ?
-       node.data.PersianStartDate.MDate : (node.data.ShortStartDate ? node.data.ShortStartDate : null),
-      EndDate: node.data.PersianEndDate && node.data.PersianEndDate.MDate ?
-        node.data.PersianEndDate.MDate : (node.data.ShortEndDate ? node.data.ShortEndDate : null),
-      AttachLetterCode: node.data.AttachLetterCode,
-      AttachLetterDate: node.data.PersianAttachLetterDate && node.data.PersianAttachLetterDate.MDate ?
-      node.data.PersianAttachLetterDate.MDate : (node.data.ShortAttachLetterDate ? node.data.ShortAttachLetterDate : null),
-      DetachLetterCode: node.data.DetachLetterCode,
-      DetachLetterDate: node.data.PersianDetachLetterDate && node.data.PersianDetachLetterDate.MDate ?
-      node.data.PersianDetachLetterDate.MDate : (node.data.ShortDetachLetterDate ? node.data.ShortDetachLetterDate : null),
-      SortLevel: node.data.SortLevel,
-      UnitTopicID: node.data.UnitTopicID ? node.data.UnitTopicID : null,
-      ItemNo: node.data.ItemNo
-    };
-    CommitionMemberList.push(CommitionMemberObj);
-  });
-  this.Order.SaveCommissionMemberFilterd(CommitionMemberList, this.RegionParams.selectedObject, this.CommitionParams.selectedObject,
-     this.ModuleCode).subscribe((res: any) => {
-    this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
-  },
-    err => {
-      if (!err.error.Message.includes('|')) {
-        this.ShowMessageBoxWithOkBtn('ثبت با شکست مواجه شد');
-      }
+  }
+  onGridReady(params: { api: any; }) {
+    this.gridApi = params.api;
+  }
+  ShowMessageBoxWithOkBtn(message) {
+    this.btnclicked = true;
+    this.PopUpType = 'message-box';
+    this.HaveHeader = true;
+    this.HaveMaxBtn = false;
+    this.startLeftPosition = 530;
+    this.startTopPosition = 200;
+    this.alertMessageParams.message = message;
+    this.alertMessageParams.HaveOkBtn = true;
+    this.alertMessageParams.HaveYesBtn = false;
+    this.alertMessageParams.HaveNoBtn = false;
+  }
+  popupclosed() {
+    this.HaveMaxBtn = false;
+    this.btnclicked = false;
+  }
+  close(): void {
+    this.btnclicked = false;
+    this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
+  }
+  onSave() {
+    const CommitionMemberList = [];
+    this.gridApi.stopEditing();
+    this.gridApi.forEachNode(node => {
+      const CommitionMemberObj = {
+        CommitionMemberID: node.data.CommitionMemberID ? node.data.CommitionMemberID : -1,
+        RegionCode: this.RegionParams.selectedObject,
+        CommitionCode: this.CommitionParams.selectedObject,
+        ActorID: node.data.ActorID ? node.data.ActorID : null,
+        ActorName: node.data.ActorName && node.data.ActorName.ActorName ? node.data.ActorName.ActorName : null,
+        StartDate: node.data.PersianStartDate && node.data.PersianStartDate.MDate ?
+          node.data.PersianStartDate.MDate : (node.data.ShortStartDate ? node.data.ShortStartDate : null),
+        EndDate: node.data.PersianEndDate && node.data.PersianEndDate.MDate ?
+          node.data.PersianEndDate.MDate : (node.data.ShortEndDate ? node.data.ShortEndDate : null),
+        AttachLetterCode: node.data.AttachLetterCode,
+        AttachLetterDate: node.data.PersianAttachLetterDate && node.data.PersianAttachLetterDate.MDate ?
+          node.data.PersianAttachLetterDate.MDate : (node.data.ShortAttachLetterDate ? node.data.ShortAttachLetterDate : null),
+        DetachLetterCode: node.data.DetachLetterCode,
+        DetachLetterDate: node.data.PersianDetachLetterDate && node.data.PersianDetachLetterDate.MDate ?
+          node.data.PersianDetachLetterDate.MDate : (node.data.ShortDetachLetterDate ? node.data.ShortDetachLetterDate : null),
+        SortLevel: node.data.SortLevel,
+        UnitTopicID: node.data.UnitTopicID ? node.data.UnitTopicID : null,
+        ItemNo: node.data.ItemNo
+      };
+      CommitionMemberList.push(CommitionMemberObj);
     });
-}
-oncellvaluechanged(event) {
-  if (event.colDef && event.colDef.field === 'ActorName') {
-    if (event.newValue && event.newValue.ActorId) {
-      const itemsToUpdate = [];
-      this.gridApi.forEachNode(node => {
-        if (node.rowIndex === event.rowIndex) {
-          node.data.ActorID = event.newValue.ActorId;
-          itemsToUpdate.push(node.data);
-        }
-      });
-      this.gridApi.updateRowData({ update: itemsToUpdate });
+    this.Order.SaveCommissionMemberFilterd(CommitionMemberList, this.RegionParams.selectedObject, this.CommitionParams.selectedObject,
+      this.ModuleCode).subscribe((res: any) => {
+        this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
+      },
+        err => {
+          if (!err.error.Message.includes('|')) {
+            this.ShowMessageBoxWithOkBtn('ثبت با شکست مواجه شد');
+          }
+        });
+  }
+  oncellvaluechanged(event) {
+    if (event.colDef && event.colDef.field === 'ActorName') {
+      if (event.newValue && event.newValue.ActorId) {
+        const itemsToUpdate = [];
+        this.gridApi.forEachNode(node => {
+          if (node.rowIndex === event.rowIndex) {
+            node.data.ActorID = event.newValue.ActorId;
+            itemsToUpdate.push(node.data);
+          }
+        });
+        this.gridApi.updateRowData({ update: itemsToUpdate });
+      }
+    }
+    if (event.colDef && event.colDef.field === 'UnitTopicName') {
+      if (event.newValue && event.newValue.UnitTopicID) {
+        const itemsToUpdate2 = [];
+        this.gridApi.forEachNode(node => {
+          if (node.rowIndex === event.rowIndex) {
+            node.data.UnitTopicID = event.newValue.UnitTopicID;
+            itemsToUpdate2.push(node.data);
+          }
+        });
+        this.gridApi.updateRowData({ update: itemsToUpdate2 });
+      }
     }
   }
-  if (event.colDef && event.colDef.field === 'UnitTopicName') {
-    if (event.newValue && event.newValue.UnitTopicID) {
-      const itemsToUpdate2 = [];
-      this.gridApi.forEachNode(node => {
-        if (node.rowIndex === event.rowIndex) {
-          node.data.UnitTopicID = event.newValue.UnitTopicID;
-          itemsToUpdate2.push(node.data);
-        }
-      });
-      this.gridApi.updateRowData({ update: itemsToUpdate2 });
-    }
-  }
-}
 
 }
