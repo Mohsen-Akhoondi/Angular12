@@ -1,14 +1,9 @@
-import { Component, OnInit, Output, EventEmitter, Input, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input} from '@angular/core';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { ActivatedRoute } from '@angular/router';
-
-declare var jquery: any;
-declare var $: any;
-
 
 @Component({
   selector: 'app-contract-order-on-without-flow',
@@ -222,13 +217,15 @@ export class ContractOrderOnWithoutFlowComponent implements OnInit {
       this.ProductRequestObject.DealMethodCode === 8 ||
       this.ProductRequestObject.DealMethodCode === 9;
 
-    if (IsLeavingFormality &&
-      (!this.ProductRequestObject.RequestSupplierList ||
-        this.ProductRequestObject.RequestSupplierList.length <= 0 ||
-        !this.ProductRequestObject.RequestSupplierList[0].ActorID)) {
-      this.ShowMessageBoxWithOkBtn('طرف قرارداد براي درخواست ثبت نشده است . امکان انعقاد قرارداد وجود ندارد.');
-      return;
-    }
+    // if (IsLeavingFormality &&
+    //   (!this.ProductRequestObject.RequestSupplierList ||
+    //     this.ProductRequestObject.RequestSupplierList.length <= 0 ||
+    //     !this.ProductRequestObject.RequestSupplierList[0].ActorID)) {
+    //   this.ShowMessageBoxWithOkBtn('طرف قرارداد براي درخواست ثبت نشده است . امکان انعقاد قرارداد وجود ندارد.');
+    //   return;
+    // }
+// rfc 65663 : .با هماهنگی لازم کنترل کامنت شد
+
     if (this.ProductRequestObject.RelatedContractID) {
       this.PRContractObject.FromContractDate = this.PRContractObject.FromContractDateString;
       this.PRContractObject.ToContractDate = this.PRContractObject.ToContractDateString;
