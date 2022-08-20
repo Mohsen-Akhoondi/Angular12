@@ -3,16 +3,17 @@
 
     <div id="div3" class="grid-box right-dev" style="margin: 5px;padding: 5px;">
       <app-grid [columns]="LetterTypecolumnDef" [rowsData]="LetterTypeRowData" (RowClick)="LetterTypeRowClick($event)"
-        [gridHeight]="87" [gridHeader] = "'نوع نامه'">
+        [gridHeight]="87" [gridHeader]="'نوع نامه'">
       </app-grid>
     </div>
     <div id="div4" class="grid-box left-dev-g" style="margin: 5px;padding: 5px;">
-      <app-grid style="width: 100%;" [columns]="LetterscolumnDef" [rowsData]="LettersRowData"
-        [gridHeight]="88" [gridHeader] = "'لیست نامه'">
+      <app-grid style="width: 100%;" [columns]="LetterscolumnDef" [rowsData]="LettersRowData" [gridHeight]="88"
+        [gridHeader]="'لیست نامه'">
       </app-grid>
     </div>
 
-    <div *ngIf="!ReadOnlyMode" id="mainformbody" class="main-form-body" [style.height.%]="88" style="margin: 5px; padding:2px 10px">
+    <div *ngIf="!ReadOnlyMode" id="mainformbody" class="main-form-body" [style.height.%]="88"
+      style="margin: 5px; padding:2px 10px">
       <table style="width: 100%;">
         <tr>
           <td style="width: 25%">
@@ -49,7 +50,8 @@
       </table>
     </div>
     <div *ngIf="!ReadOnlyMode" class="tab-content box-dev" style="margin: 5px;padding: 5px;">
-      <app-grid [columns]="columnDef" [rowsData]="RowData" (RowClick)="RowClick($event)" [gridHeight]="90" [gridHeader] = "'لیست نامه های یافت شده'"></app-grid>
+      <app-grid [columns]="columnDef" [rowsData]="RowData" (RowClick)="RowClick($event)" [gridHeight]="90"
+        [gridHeader]="'لیست نامه های یافت شده'"></app-grid>
     </div>
   </div>
 
@@ -72,11 +74,13 @@
 </div>
 
 <ng-template #ShowLetter let-row>
-  <img [ngClass]="'img-def'" style="cursor: pointer;" width="16px" height="16px"  src="assets/Icons/Approve.png" (click)="onShowLetterClick(row)" />
+  <img [ngClass]="'img-def'" style="cursor: pointer;" width="16px" height="16px" src="assets/Icons/Approve.png"
+    (click)="onShowLetterClick(row)" />
 </ng-template>
 
 <ng-template #DeleteLetter let-row>
-  <img [ngClass]="'img-def'" style="cursor: pointer;" width="16px" height="16px"  src="assets/Icons/DisApprove.png" (click)="onDeleteLetterClick(row)" />
+  <img [ngClass]="'img-def'" style="cursor: pointer;" width="16px" height="16px" src="assets/Icons/DisApprove.png"
+    (click)="onDeleteLetterClick(row)" />
 </ng-template>
 
 <ng-template #IsArchive let-row>
