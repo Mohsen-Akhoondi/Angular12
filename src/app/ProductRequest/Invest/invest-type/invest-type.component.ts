@@ -1,9 +1,7 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { CommonService } from 'src/app/Services/CommonService/CommonService';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-import { resolve } from 'q';
 
 @Component({
   selector: 'app-invest-type',
@@ -64,7 +62,7 @@ export class InvestTypeComponent implements OnInit {
         },
     ];
     });
-      this.InvestTypeService.GetInvestType(true).subscribe((res: any) => {
+      this.InvestTypeService.GetInvestType(true,null).subscribe((res: any) => {
           this.rowData = res;
       });
   }
@@ -95,7 +93,7 @@ export class InvestTypeComponent implements OnInit {
   }
   popupclosed() {
     this.btnclicked = false;
-    this.InvestTypeService.GetInvestType(true).subscribe((res2: any) => {
+    this.InvestTypeService.GetInvestType(true,null).subscribe((res2: any) => {
       this.rowData = res2;
   });
   }
