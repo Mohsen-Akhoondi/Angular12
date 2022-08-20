@@ -7,6 +7,7 @@ import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
 import { forkJoin } from 'rxjs';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
+import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 
 @Component({
   selector: 'app-other-contract-documents',
@@ -91,6 +92,36 @@ export class OtherContractDocumentsComponent implements OnInit {
   MinHeightPixel;
   IsViewable = false;
   AutoEntityTypeCode: number;
+  IsDefined = true;
+  DisabledContractMinutesDate = false;
+
+
+  PunishmentTypeItems;
+  PunishmentTypeParams = {
+    bindLabelProp: 'PunishmentTypeName',
+    bindValueProp: 'PunishmentTypeCode',
+    placeholder: '',
+    MinWidth: '128px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    Required: true
+  };
+
+  RepetitionItems;
+  RepetitionParams = {
+    bindLabelProp: 'RepetitionName',
+    bindValueProp: 'RepetitionCode',
+    placeholder: '',
+    MinWidth: '155px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    Required: true
+  };
+  ContractMinutesSubject: any;
 
   constructor(private contractMinutes: ContractMinutesService,
     private contractpaydetail: ContractPayDetailsService,
@@ -98,9 +129,12 @@ export class OtherContractDocumentsComponent implements OnInit {
     private FlowService: WorkflowService,
     private RefreshCartable: RefreshServices,
     private CommonService: CommonServices,
-    private Report: ReportService) { }
+    private ContractService: ContractListService,
+    private Report: ReportService) {
+     }
 
   ngOnInit() {
+    this.IsDefined = true;
     if (this.InputParam) {
       this.onDisplay();
       console.log(this.InputParam);
@@ -214,7 +248,7 @@ export class OtherContractDocumentsComponent implements OnInit {
               this.ContractMinutesDate = ress[0].ContractMinutesDate;
               this.Note = ress[0].Note;
             }
-          }
+          }     
         );
         this.IsDown = true;
     });
@@ -239,6 +273,16 @@ export class OtherContractDocumentsComponent implements OnInit {
       this.TextMinutes = this.ContractDetails.TextMinutes;
       this.AutoEntityTypeCode = this.ContractDetails.AutoEntityTypeCode;
       this.IsDown = true;
+      this.ContractMinutesSubject = this.ContractDetails.Subject
+      this.OnOpenPunishmentType();
+      this.PunishmentTypeParams.selectedObject = this.ContractDetails.PunishmentTypeCode;
+      this.OnOpenRepetition();
+      this.RepetitionParams.selectedObject = this.ContractDetails.RepetitionCode;   
+      if( !this.ContractMinutesDate){
+        this.IsDefined = false;
+        this.DisabledContractMinutesDate = false;
+      }
+  
     });
   }
 
@@ -263,10 +307,10 @@ export class OtherContractDocumentsComponent implements OnInit {
   }
 
   onSave() {
-    if (!this.ContractMinutesDate || this.ContractMinutesDate == null) {
-      this.ShowMessageBoxWithOkBtn('تاريخ صورت وضعيت نمي تواند خالي باشد');
-      return;
-    }
+    // if (!this.ContractMinutesDate || this.ContractMinutesDate == null) {
+    //   this.ShowMessageBoxWithOkBtn('تاريخ صورت وضعيت نمي تواند خالي باشد');
+    //   return;
+    // }
 
     if (this.InputParam.Mode === 'InsertMode') {
       this.SaveContractMinutes();
@@ -325,6 +369,10 @@ export class OtherContractDocumentsComponent implements OnInit {
       Note: this.Note,
       TextMinutes: this.TextMinutes,
       AutoEntityTypeCode: this.InputParam.AutoEntityTypeCode,
+      RepetitionCode : this.RepetitionParams.selectedObject ,
+      Subject : this.ContractMinutesSubject,
+      PunishmentTypeCode : this.PunishmentTypeParams.selectedObject
+
     };
     this.contractMinutes.SaveContractMinutes(ContractMinutesObj, null).subscribe(res => {
       this.ShowMessageBoxWithOkBtn('ثبت با موفقيت انجام شد');
@@ -332,7 +380,8 @@ export class OtherContractDocumentsComponent implements OnInit {
       this.ChangeDetection = false;
       this.IsDisable = false;
       this.CheckTextMinutes();
-     // this.ngOnInit();
+      this.InputParam.Mode = 'EditMode';
+      this.EditModeNgInit();
     },
       err => {
         this.ShowMessageBoxWithOkBtn('ثبت با شکست مواجه شد');
@@ -350,6 +399,9 @@ export class OtherContractDocumentsComponent implements OnInit {
       Note: this.Note,
       TextMinutes: this.TextMinutes,
       AutoEntityTypeCode: this.AutoEntityTypeCode,
+      RepetitionCode : this.RepetitionParams.selectedObject ,
+      Subject : this.ContractMinutesSubject,
+      PunishmentTypeCode : this.PunishmentTypeParams.selectedObject
     };
     this.contractMinutes.UpdateContractMinutes(ContractMinutesObj,
       null
@@ -669,4 +721,32 @@ export class OtherContractDocumentsComponent implements OnInit {
           }
         );
   }
+
+  OnOpenPunishmentType(){
+    this.ContractService.GetPunishmentTypeList().subscribe(res => {
+     this.PunishmentTypeItems = res; 
+
+    });
+  }
+
+  OnOpenRepetition(){ 
+    this.ContractService.GetRepetitionList().subscribe(res => {
+      this.RepetitionItems = res; 
+ 
+     });
+  }
+
+  RedioClick(event){
+    this.IsDefined = event; 
+    if(event){
+      this.DisabledContractMinutesDate = false;
+
+    }
+    else{
+      this.DisabledContractMinutesDate = true;
+      this.ContractMinutesDate = null;
+    }
+
+  }
+
 }

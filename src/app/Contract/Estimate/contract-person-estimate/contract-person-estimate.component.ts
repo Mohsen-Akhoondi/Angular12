@@ -1,7 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { isUndefined } from 'util';
-import { of } from 'rxjs';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServices';
 import { ContractOrderService } from 'src/app/Services/ContractService/ContractOrderServices/ContractOrderService';

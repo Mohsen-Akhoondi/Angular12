@@ -302,7 +302,7 @@ export class ContractStatusSummaryRepPageComponent implements OnInit {
     }
     this.Report.PrintContStatusSummRep(this.NgSelectRegionParams.selectedObject, this.AdvertisingNo,
       FromRequestNo, ToRequestNo,
-       this.FromAdvrtisingtDate, this.ToAdvrtisingtDate, this.ModuleCode);
+      this.FromAdvrtisingtDate, this.ToAdvrtisingtDate, this.ModuleCode);
   }
 
   closeModal() {
@@ -329,5 +329,5 @@ export class ContractStatusSummaryRepPageComponent implements OnInit {
   }
   onClearAdvertisingClick() {
     this.AdvertisingNo = '';
-   }
+  }
 }

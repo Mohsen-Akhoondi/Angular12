@@ -1,7 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
-import { of } from 'rxjs';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { isUndefined } from 'util';
 

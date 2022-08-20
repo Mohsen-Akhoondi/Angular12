@@ -247,7 +247,7 @@ export class OtherContractDocsListComponent implements OnInit {
   onInsert() {
     this.ConMinutesService.GetAutoEntityTypeList(11, this.PopupParam.RegionCode).subscribe(res => {
       if (res && res.length > 0) {
-        this.startLeftPosition = 272;
+        this.startLeftPosition = 460;
         this.startTopPosition = 81;
         this.PopUpType = 'other-contract-docs-type';
         this.ContractMinutesPopupParam.RegionCode = this.PopupParam.RegionCode;

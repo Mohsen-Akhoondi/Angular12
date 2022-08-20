@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
@@ -60,15 +59,15 @@ export class Article31PageComponent implements OnInit {
   };
 
   constructor(private router: Router,
-              private User: UserSettingsService,
-              private route: ActivatedRoute,
-              private RegionList: RegionListService,
-              private ProductRequest: ProductRequestService,
-              private RefreshPersonItems: RefreshServices) {
-                this.route.params.subscribe(params => {
-                  this.ModuleCode = +params['ModuleCode'];
-                });
-              }
+    private User: UserSettingsService,
+    private route: ActivatedRoute,
+    private RegionList: RegionListService,
+    private ProductRequest: ProductRequestService,
+    private RefreshPersonItems: RefreshServices) {
+    this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
+  }
 
   ngOnInit() {
     this.rowData = [];
@@ -259,16 +258,16 @@ export class Article31PageComponent implements OnInit {
       Article31List.push(Article31Obj);
     });
 
-      this.ProductRequest.SaveArticle31(Article31List, this.ModuleCode, this.NgSelectRegionGroupParams.selectedObject).subscribe(res => {
-        this.btnclicked = true;
-        this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد.');
-      },
-        err => {
-          if (!err.error.Message.includes('|')) {
-            this.btnclicked = true;
-            this.ShowMessageBoxWithOkBtn('ثبت با شکست مواجه شد');
-          }
-        });
+    this.ProductRequest.SaveArticle31(Article31List, this.ModuleCode, this.NgSelectRegionGroupParams.selectedObject).subscribe(res => {
+      this.btnclicked = true;
+      this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد.');
+    },
+      err => {
+        if (!err.error.Message.includes('|')) {
+          this.btnclicked = true;
+          this.ShowMessageBoxWithOkBtn('ثبت با شکست مواجه شد');
+        }
+      });
   }
 
   close() {

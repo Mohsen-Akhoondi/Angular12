@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter} from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { OrderService } from 'src/app/Services/ProductRequest/OrderService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
@@ -23,8 +23,8 @@ export class CommitionTypeComponent implements OnInit {
   HaveSave;
   alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false };
   constructor(private router: Router,
-  private Order: OrderService,
-  private User: UserSettingsService,
+    private Order: OrderService,
+    private User: UserSettingsService,
     private route: ActivatedRoute) {
     this.columnDef = [
       {
@@ -63,19 +63,19 @@ export class CommitionTypeComponent implements OnInit {
     this.route.params.subscribe(params => {
       this.ModuleCode = +params['ModuleCode'];
     });
-      this.User.GetModulOPByUser(this.ModuleCode).subscribe(res => {
-        res.forEach(node => {
-          switch (node.OperationCode) {
-            case 7:
-              this.HaveSave = true;
-              break;
-            default:
-              break;
-          }
+    this.User.GetModulOPByUser(this.ModuleCode).subscribe(res => {
+      res.forEach(node => {
+        switch (node.OperationCode) {
+          case 7:
+            this.HaveSave = true;
+            break;
+          default:
+            break;
+        }
 
-        });
       });
-   this.rowData = this.Order.GetCommitionList();
+    });
+    this.rowData = this.Order.GetCommitionList();
   }
   onSave() {
     const CommitionList = [];
@@ -83,7 +83,7 @@ export class CommitionTypeComponent implements OnInit {
     this.gridApi.forEachNode(node => {
       const CommitionObj = {
         CommitionCode: node.data.CommitionCode,
-        CommitionName: node.data.CommitionName ,
+        CommitionName: node.data.CommitionName,
         MinMember: node.data.MinMember,
       };
       CommitionList.push(CommitionObj);
@@ -99,8 +99,8 @@ export class CommitionTypeComponent implements OnInit {
       });
   }
   close(): void {
-      this.btnclicked = false;
-      this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
+    this.btnclicked = false;
+    this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
   }
   onGridReady(params: { api: any; }) {
     this.gridApi = params.api;
