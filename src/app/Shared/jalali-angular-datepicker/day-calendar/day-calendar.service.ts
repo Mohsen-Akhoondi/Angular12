@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import * as momentNs from 'jalali-moment';
-import {Moment, unitOfTime} from 'jalali-moment';
+import {Moment} from 'jalali-moment';
 import {WeekDays} from '../common/types/week-days.type';
 import {UtilsService} from '../common/services/utils/utils.service';
 import {IDay} from './day.model';

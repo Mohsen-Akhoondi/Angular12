@@ -4,9 +4,9 @@
       <div class="main-form-body" style="margin: 5px;">
         <div class="header-message">
           <div *ngFor="let item of InputParam?.RadioItems; index as i" class="custom-control custom-radio">
-            <input *ngIf="i === 0" checked="checked" type="radio" (click)="onRedioClick(item.type)"
-              class="custom-control-input" id="LevelRadio{{i}}" name="LevelRadios" [disabled]="item.IsDisable">
-            <input *ngIf="i > 0" type="radio" (click)="onRedioClick(item)" class="custom-control-input"
+            <!-- <input *ngIf="i === 0" checked="checked" type="radio" (click)="onRedioClick(item.type)"
+              class="custom-control-input" id="LevelRadio{{i}}" name="LevelRadios" [disabled]="item.IsDisable"> -->
+            <input [checked] = "item.checked"  type="radio" (click)="onRedioClick(item)" class="custom-control-input"
               id="LevelRadio{{i}}" name="LevelRadios" [disabled]="item.IsDisable">
             <label class="custom-control-label redio-label" for="LevelRadio{{i}}">{{item.title}}</label>
           </div>

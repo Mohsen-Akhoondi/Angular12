@@ -2,7 +2,7 @@ import {ECalendarValue} from '../../types/calendar-value-enum';
 import {SingleCalendarValue} from '../../types/single-calendar-value';
 import {Injectable} from '@angular/core';
 import * as momentNs from 'jalali-moment';
-import {Moment, MomentInput, unitOfTime} from 'jalali-moment';
+import {Moment, unitOfTime} from 'jalali-moment';
 import {CalendarValue} from '../../types/calendar-value';
 import {IDate} from '../../models/date.model';
 import {CalendarMode} from '../../types/calendar-mode';
@@ -55,9 +55,13 @@ export class UtilsService {
       return true;
     }
     const day = date.split('/');
-    date = day[0] + '/' + day[1] + '/' + (Number(day[2]) > 30 ? 30 : day[2]);
-    // return moment(date, format, true, locale).isValid();
-    return moment(date, format, true).isValid();
+     if((Number(day[2])) > 9 ) {
+       // بخاطر ولید شدن تاریخ های 29 و 30 و 31 از این متد استفاده شد .
+      return moment(moment(date).format(format),format, true).isValid();
+     } else {
+      return moment(date , format, true).isValid();
+     }
+  
   }
 
   // todo:: add unit test

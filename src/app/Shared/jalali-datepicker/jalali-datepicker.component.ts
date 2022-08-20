@@ -135,6 +135,9 @@ export class JalaliDatepickerComponent implements ICellEditorAngularComp, OnInit
       this.DateFormat = changes.DateFormat.currentValue;
       this.config.format = changes.DateFormat.currentValue;
     }
+    if (changes.CurrMiladiDateValue && !changes.CurrMiladiDateValue.currentValue) {
+      this.selectedDate = null;
+    }
   }
 
   // -------------------------------------
