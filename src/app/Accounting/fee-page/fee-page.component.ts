@@ -6,7 +6,7 @@ import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServic
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
 import { BaseHttpClient } from 'src/app/Services/BaseService/BaseHttpClient';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 
@@ -518,29 +518,29 @@ export class FeePageComponent implements OnInit {
     this.MyAccountingService.GetElChequeInfo(
       this.FeeID,
       row.ChequeNo
-      ).subscribe(PDFRes => {
-        this.IsDown = true;
-        this.type = 'pdf-viewer';
-        this.HaveHeader = true;
-        this.isClicked = true;
-        this.startLeftPosition = 40;
-        this.startTopPosition = 0;
-        this.HaveMaxBtn = false;
-        this.OverMainMinwidthPixel = 1295;
-        this.MainMaxwidthPixel = 1300;
-        this.ParamObj = {
-          HeaderName: 'چک',
-          PDFSrc: PDFRes.FileBase64,
-          FileName: PDFRes.FileName,
-          ChequeNo: row.ChequeNo,
-          // HaveEstimate: this.HasEstimate,
-          HaveSign: true,
-          RegionCode: this.RegionCode,
-          PDFSignersInfo: PDFRes.PDFSignersInfo,
-          IsFinal: true, // نهایی
-          HasDelBtn: false,
-          IsArticle18: false
-        };
-      });
+    ).subscribe(PDFRes => {
+      this.IsDown = true;
+      this.type = 'pdf-viewer';
+      this.HaveHeader = true;
+      this.isClicked = true;
+      this.startLeftPosition = 40;
+      this.startTopPosition = 0;
+      this.HaveMaxBtn = false;
+      this.OverMainMinwidthPixel = 1295;
+      this.MainMaxwidthPixel = 1300;
+      this.ParamObj = {
+        HeaderName: 'چک',
+        PDFSrc: PDFRes.FileBase64,
+        FileName: PDFRes.FileName,
+        ChequeNo: row.ChequeNo,
+        // HaveEstimate: this.HasEstimate,
+        HaveSign: true,
+        RegionCode: this.RegionCode,
+        PDFSignersInfo: PDFRes.PDFSignersInfo,
+        IsFinal: true, // نهایی
+        HasDelBtn: false,
+        IsArticle18: false
+      };
+    });
   }
 }

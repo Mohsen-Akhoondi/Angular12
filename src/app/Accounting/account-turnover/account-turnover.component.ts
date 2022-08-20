@@ -1,7 +1,7 @@
-import { Component, OnInit, Input, Output, EventEmitter, } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, } from '@angular/core';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
-import { of, Observable, forkJoin } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { AccountingService } from 'src/app/Services/AccountingService/AccountingService';
 import { ActivatedRoute } from '@angular/router';
 @Component({
@@ -75,7 +75,7 @@ export class AccountTurnoverComponent implements OnInit {
   };
   LedgerAccSet = [];
   SubLedgerAccSet = [];
-  DetailAccSet ;
+  DetailAccSet;
   DetailAccGroupListSet = [];
   columnDef;
   FinYearItems = [];
@@ -94,22 +94,22 @@ export class AccountTurnoverComponent implements OnInit {
   currentSubLedgerAccSearchTerm;
   currentLedgerAccSearchTerm;
   MonthsItems = [
-  {MonthName: 'فروردین' , MonthCode: 1},
-  {MonthName: 'اردیبهشت' , MonthCode: 2},
-  {MonthName: 'خرداد' , MonthCode: 3},
-  {MonthName: 'تیر' , MonthCode: 4},
-  {MonthName: 'مرداد' , MonthCode: 5},
-  {MonthName: 'شهریور' , MonthCode: 6},
-  {MonthName: 'مهر' , MonthCode: 7},
-  {MonthName: 'آبان' , MonthCode: 8},
-  {MonthName: 'آذر' , MonthCode: 9},
-  {MonthName: 'دی' , MonthCode: 10},
-  {MonthName: 'بهمن' , MonthCode: 11},
-  {MonthName: 'اسفند' , MonthCode: 12},
-  {MonthName: 'دوره_مالی' , MonthCode: 13}
+    { MonthName: 'فروردین', MonthCode: 1 },
+    { MonthName: 'اردیبهشت', MonthCode: 2 },
+    { MonthName: 'خرداد', MonthCode: 3 },
+    { MonthName: 'تیر', MonthCode: 4 },
+    { MonthName: 'مرداد', MonthCode: 5 },
+    { MonthName: 'شهریور', MonthCode: 6 },
+    { MonthName: 'مهر', MonthCode: 7 },
+    { MonthName: 'آبان', MonthCode: 8 },
+    { MonthName: 'آذر', MonthCode: 9 },
+    { MonthName: 'دی', MonthCode: 10 },
+    { MonthName: 'بهمن', MonthCode: 11 },
+    { MonthName: 'اسفند', MonthCode: 12 },
+    { MonthName: 'دوره_مالی', MonthCode: 13 }
   ];
   gridApi;
-  rowsData: any =[];
+  rowsData: any = [];
   isClicked: boolean;
   PopUpType: string;
   HaveHeader: boolean;
@@ -129,9 +129,9 @@ export class AccountTurnoverComponent implements OnInit {
     private Region: RegionListService,
     private AccountingServ: AccountingService,
     private route: ActivatedRoute) {
-      this.route.params.subscribe(params => {
-        this.ModuleCode = +params['ModuleCode'];
-      });
+    this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
     this.columnDef = [
       {
         headerName: 'ردیف ',
@@ -188,7 +188,7 @@ export class AccountTurnoverComponent implements OnInit {
   onClose() {
     this.Closed.emit(true);
   }
-  onGridReady (params) {
+  onGridReady(params) {
     this.gridApi = params.api;
   }
   onChangeRegionObj(param) {
@@ -208,11 +208,11 @@ export class AccountTurnoverComponent implements OnInit {
     if (this.RegionParams.selectedObject === null || this.FinYearParams.selectedObject === null) {
       this.ShowMessageBoxWithOkBtn('ابتدا سال مالی را پر نمایید');
     } else {
-  this.AccountingServ.GetLedgerAcc(this.RegionParams.selectedObject, this.FinYearParams.selectedObject)
-    .subscribe(res => {
-      this.LedgerAccSet = res;
-    });
-  }
+      this.AccountingServ.GetLedgerAcc(this.RegionParams.selectedObject, this.FinYearParams.selectedObject)
+        .subscribe(res => {
+          this.LedgerAccSet = res;
+        });
+    }
   }
 
   onChangeLedgerAcc(event) {
@@ -228,20 +228,20 @@ export class AccountTurnoverComponent implements OnInit {
     if (!this.LedgerAccParams.selectedObject) {
       this.ShowMessageBoxWithOkBtn('ابتدا حساب کل را پر نمایید');
     } else {
-    this.AccountingServ.GetSubLedgerByLedger(this.LedgerAccParams.selectedObject, null)
-    .subscribe(res => {
-      this.SubLedgerAccSet = res;
-    });
-  }
+      this.AccountingServ.GetSubLedgerByLedger(this.LedgerAccParams.selectedObject, null)
+        .subscribe(res => {
+          this.SubLedgerAccSet = res;
+        });
+    }
   }
   OnOpenNgSelectDetailAccGroup() {
-    if (!this.SubLedgerAccParams.selectedObject ) {
+    if (!this.SubLedgerAccParams.selectedObject) {
       this.ShowMessageBoxWithOkBtn('ابتدا حساب معین را پر نمایید');
     } else {
       this.AccountingServ.GetDetailAccGroupBySubLedger(this.SubLedgerAccParams.selectedObject, null).subscribe(res => {
-       this.DetailAccGroupListSet = res;
-       });
-  }
+        this.DetailAccGroupListSet = res;
+      });
+    }
   }
   onChangeDetailAccGroupObj(event) {
     this.DetailAccParams.selectedObject = null;
@@ -253,9 +253,9 @@ export class AccountTurnoverComponent implements OnInit {
       // tslint:disable-next-line:max-line-length
       this.AccountingServ.GetDetailAccByGroupSearch(this.DetailAccGroupParams.selectedObject, this.RegionParams.selectedObject).subscribe(
         res => {
-        this.DetailAccSet = res;
-      });
-  }
+          this.DetailAccSet = res;
+        });
+    }
   }
   ShowMessageBoxWithOkBtn(message) {
     this.isClicked = true;

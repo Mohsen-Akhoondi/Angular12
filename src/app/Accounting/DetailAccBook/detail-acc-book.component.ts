@@ -205,9 +205,9 @@ export class DetailAccBookComponent implements OnInit {
     Required: true
   };
   NgPrintListSet = [
-    {PrintTypeName : '_', PrintTypeCode: 0},
-    {PrintTypeName : 'به ریز', PrintTypeCode: 1},
-    {PrintTypeName : 'به سرجمع', PrintTypeCode: 2}
+    { PrintTypeName: '_', PrintTypeCode: 0 },
+    { PrintTypeName: 'به ریز', PrintTypeCode: 1 },
+    { PrintTypeName: 'به سرجمع', PrintTypeCode: 2 }
   ];
   SelectedPrintType;
   VoucherStatusParams = {
@@ -238,26 +238,26 @@ export class DetailAccBookComponent implements OnInit {
   RegisterVoucherDisabled = true;
 
   VoucherStatusListSet =
-  [
-    {
-      VoucherStatusName : 'ثبت نشده',
-      VoucherStatusCode: 0,
-    },
-    {
-      VoucherStatusName : 'ثبت شده',
-      VoucherStatusCode: 1,
-    },
-    {
-      VoucherStatusName : 'کلیه اسناد',
-      VoucherStatusCode: 2,
-    },
-  ];
+    [
+      {
+        VoucherStatusName: 'ثبت نشده',
+        VoucherStatusCode: 0,
+      },
+      {
+        VoucherStatusName: 'ثبت شده',
+        VoucherStatusCode: 1,
+      },
+      {
+        VoucherStatusName: 'کلیه اسناد',
+        VoucherStatusCode: 2,
+      },
+    ];
   NgSortListSet = [
     {
-      SortCode: 1 , SortName : 'شماره سند'
+      SortCode: 1, SortName: 'شماره سند'
     },
     {
-      SortCode: 2 , SortName : 'تاریخ سند'
+      SortCode: 2, SortName: 'تاریخ سند'
     }
   ];
   FromVoucherCode;
@@ -279,10 +279,10 @@ export class DetailAccBookComponent implements OnInit {
   constructor(private RegionService: RegionListService, private Finyearserv: FinYearService,
     private AccountingServ: AccountingService,
     private route: ActivatedRoute) {
-      this.route.params.subscribe(params => {
-        this.ModuleCode = +params['ModuleCode'];
-      });
-    }
+    this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
+  }
 
   OnChangePrintType(event) {
     this.SelectedPrintType = event;
@@ -307,7 +307,7 @@ export class DetailAccBookComponent implements OnInit {
   }
   onChangeVoucherStatus(param) {
     this.VoucherStatusCode = param;
-    if (this.VoucherStatusCode === 2 ) {
+    if (this.VoucherStatusCode === 2) {
       this.RegisterVoucherDisabled = false;
     } else {
       this.RegisterVoucherDisabled = true;
@@ -324,11 +324,11 @@ export class DetailAccBookComponent implements OnInit {
       case 'From':
         this.FromVoucherCode = param ? param : null;
         break;
-        case 'To':
-          this.ToVoucherCode = param ? param : null;
-          break;
-        default:
-          break;
+      case 'To':
+        this.ToVoucherCode = param ? param : null;
+        break;
+      default:
+        break;
     }
   }
 
@@ -337,11 +337,11 @@ export class DetailAccBookComponent implements OnInit {
       case 'From':
         this.FromDebitAmount = param ? param : null;
         break;
-        case 'To':
-          this.ToDebitAmount = param ? param : null;
-          break;
-        default:
-          break;
+      case 'To':
+        this.ToDebitAmount = param ? param : null;
+        break;
+      default:
+        break;
     }
   }
   GetCreditAmount(param, el) {
@@ -349,11 +349,11 @@ export class DetailAccBookComponent implements OnInit {
       case 'From':
         this.FromCreditAmount = param ? param : null;
         break;
-        case 'To':
-          this.ToCreditAmount = param ? param : null;
-          break;
-        default:
-          break;
+      case 'To':
+        this.ToCreditAmount = param ? param : null;
+        break;
+      default:
+        break;
     }
   }
   onShowReport() {
@@ -548,11 +548,11 @@ export class DetailAccBookComponent implements OnInit {
       case 'From':
         this.FromDate = param ? param.MDate : null;
         break;
-        case 'To':
-          this.ToDate = param ? param.MDate : null;
-          break;
-        default:
-          break;
+      case 'To':
+        this.ToDate = param ? param.MDate : null;
+        break;
+      default:
+        break;
     }
   }
   OnChangeCheckBox1Value(param) {
@@ -584,24 +584,24 @@ export class DetailAccBookComponent implements OnInit {
     switch (el) {
       case 'From':
         this.FromSubLedgerId = event;
-      break;
+        break;
       case 'To':
         this.ToSubLedgerId = event;
-      break;
+        break;
       default:
-      break;
+        break;
     }
   }
   onChangeDetailAccGroup(event, el) {
     switch (el) {
       case 'From':
         this.FromDetailAccGroupCode = event;
-      break;
+        break;
       case 'To':
         this.ToDetailAccGroupCode = event;
-      break;
+        break;
       default:
-      break;
+        break;
     }
   }
   OnOpenNgSelectSubLedger() {
@@ -609,20 +609,20 @@ export class DetailAccBookComponent implements OnInit {
       return;
     }
     this.AccountingServ.GetSubLedgerByLedger(this.FromLedgerId,
-    this.ToLedgerId).subscribe(res => {
-      this.SubLedgerAccFromSet = res;
-      this.SubLedgerAccToSet = res;
-    });
+      this.ToLedgerId).subscribe(res => {
+        this.SubLedgerAccFromSet = res;
+        this.SubLedgerAccToSet = res;
+      });
   }
   OnOpenNgSelectDetailAccGroup() {
     if (!this.SelectedFinYear || !this.SelectedRegion || !this.FromSubLedgerId || !this.ToSubLedgerId) {
       return;
     }
     this.AccountingServ.GetDetailAccGroupBySubLedger(this.FromSubLedgerId,
-    this.ToSubLedgerId).subscribe(res => {
-      this.DetailAccGroupFromSet = res;
-      this.DetailAccGroupToSet = res;
-    });
+      this.ToSubLedgerId).subscribe(res => {
+        this.DetailAccGroupFromSet = res;
+        this.DetailAccGroupToSet = res;
+      });
   }
   onChangeRegionObj(param) {
     this.SelectedRegion = param;
@@ -639,24 +639,24 @@ export class DetailAccBookComponent implements OnInit {
         this.FromLedgerId = event;
         this.FromSubLedgerId = null;
         this.ToSubLedgerId = null;
-      break;
+        break;
       case 'To':
         this.ToLedgerId = event;
-      break;
+        break;
       default:
-      break;
+        break;
     }
   }
   onChangeDetailAcc(event, el) {
     switch (el) {
       case 'From':
         this.FromDetailAccID = event;
-      break;
+        break;
       case 'To':
         this.ToDetailAccID = event;
-      break;
+        break;
       default:
-      break;
+        break;
     }
   }
   FetchMoreDetailAcc(event, el) {
@@ -669,20 +669,20 @@ export class DetailAccBookComponent implements OnInit {
         this.DetailAccFromParam.loading = true;
         this.AccountingServ.GetDetailAccByGroup(event.PageNumber, event.PageSize,
           event.term, event.SearchOption, this.FromDetailAccGroupCode, this.ToDetailAccGroupCode, this.SelectedRegion).subscribe(res => {
-          event.CurrentItems.forEach(el2 => {
-            ResultList.push(el2);
+            event.CurrentItems.forEach(el2 => {
+              ResultList.push(el2);
+            });
+            res.List.forEach(element => {
+              ResultList.push(element);
+            });
+            this.DetailAccFromSet = ResultList;
           });
-          res.List.forEach(element => {
-            ResultList.push(element);
-          });
-          this.DetailAccFromSet = ResultList;
-        });
         this.DetailAccFromParam.loading = false;
         break;
-        case 'To':
-          this.DetailAccToParam.loading = true;
-          this.AccountingServ.GetDetailAccByGroup(event.PageNumber, event.PageSize,
-            event.term, event.SearchOption, this.FromDetailAccGroupCode, this.ToDetailAccGroupCode,this.SelectedRegion).subscribe(res => {
+      case 'To':
+        this.DetailAccToParam.loading = true;
+        this.AccountingServ.GetDetailAccByGroup(event.PageNumber, event.PageSize,
+          event.term, event.SearchOption, this.FromDetailAccGroupCode, this.ToDetailAccGroupCode, this.SelectedRegion).subscribe(res => {
             event.CurrentItems.forEach(el2 => {
               ResultList.push(el2);
             });
@@ -691,10 +691,10 @@ export class DetailAccBookComponent implements OnInit {
             });
             this.DetailAccToSet = ResultList;
           });
-          this.DetailAccToParam.loading = false;
-          break;
-        default:
-          break;
+        this.DetailAccToParam.loading = false;
+        break;
+      default:
+        break;
     }
   }
   SearchDetailAcc(event, el) {
@@ -709,7 +709,7 @@ export class DetailAccBookComponent implements OnInit {
           event.SearchOption = 'DetailAccCode';
         }
         this.AccountingServ.GetDetailAccByGroup(event.PageNumber, event.PageSize, event.term,
-          event.SearchOption, this.FromDetailAccGroupCode, this.ToDetailAccGroupCode,this.SelectedRegion).subscribe((res: any) => {
+          event.SearchOption, this.FromDetailAccGroupCode, this.ToDetailAccGroupCode, this.SelectedRegion).subscribe((res: any) => {
             if (this.currentFromDetailAccSearchTerm === event.term) {
               this.DetailAccFromSet = res.List;
               this.DetailAccFromTotalItems = res.TotalItemCount;
@@ -718,7 +718,7 @@ export class DetailAccBookComponent implements OnInit {
             }
           });
         break;
-        case 'To':
+      case 'To':
         this.currentToDetailAccSearchTerm = event.term;
         this.DetailAccToParam.loading = true;
         if (event.SearchOption === 'null' || event.SearchOption == null) {
@@ -733,9 +733,9 @@ export class DetailAccBookComponent implements OnInit {
               this.DetailAccToParam.loading = false;
             }
           });
-          break;
-        default:
-          break;
+        break;
+      default:
+        break;
     }
   }
 
@@ -747,25 +747,25 @@ export class DetailAccBookComponent implements OnInit {
       case 'From':
         this.DetailAccFromParam.loading = true;
         this.AccountingServ.GetDetailAccByGroup(1, 30, '', '', this.FromDetailAccGroupCode, this.ToDetailAccGroupCode, this.SelectedRegion).
-        subscribe(res => {
-          this.DetailAccFromSet = res.List;
-          this.DetailAccFromTotalItems = res.TotalItemCount;
-          this.DetailAccFromPageCount = Math.ceil(res.TotalItemCount / 30);
-        });
+          subscribe(res => {
+            this.DetailAccFromSet = res.List;
+            this.DetailAccFromTotalItems = res.TotalItemCount;
+            this.DetailAccFromPageCount = Math.ceil(res.TotalItemCount / 30);
+          });
         this.DetailAccFromParam.loading = false;
-      break;
+        break;
       case 'To':
         this.DetailAccToParam.loading = true;
         this.AccountingServ.GetDetailAccByGroup(1, 30, '', '', this.FromDetailAccGroupCode, this.ToDetailAccGroupCode, this.SelectedRegion).
-        subscribe(res => {
-          this.DetailAccToSet = res.List;
-          this.DetailAccToTotalItems = res.TotalItemCount;
-          this.DetailAccToPageCount = Math.ceil(res.TotalItemCount / 30);
-        });
+          subscribe(res => {
+            this.DetailAccToSet = res.List;
+            this.DetailAccToTotalItems = res.TotalItemCount;
+            this.DetailAccToPageCount = Math.ceil(res.TotalItemCount / 30);
+          });
         this.DetailAccToParam.loading = false;
-      break;
+        break;
       default:
-      break;
+        break;
     }
   }
 
