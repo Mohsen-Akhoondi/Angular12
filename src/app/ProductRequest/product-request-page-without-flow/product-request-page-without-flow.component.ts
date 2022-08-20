@@ -4,11 +4,9 @@ import { isUndefined } from 'util';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-import { INVVoucherGroupService } from 'src/app/Services/InventoryService/BasemodulesService/INVVoucherGroupService';
-import { VWIncrementTypeService } from 'src/app/Services/InventoryService/BasemodulesService/VWIncrementTypeService';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { Validators, FormControl, FormGroup, FormBuilder } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
@@ -21,8 +19,6 @@ import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jala
 import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServices';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import * as moment from 'jalali-moment';
-import { resolve } from 'url';
-import { promise } from 'protractor';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
 import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
@@ -288,6 +284,15 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
   BriefingReport = '';
   Address = '';
   CostCenterItems;
+  ShowActLocation = true;
+  ShowRequestType = true;
+  ShowContract = true;
+  ShowISCost = true;
+  widthcode = 68;
+  WidthProduct = 60;
+  WidthDeadLine = 66;
+
+
   ContractSubject = '';
   CostCenterParams = {
     bindLabelProp: 'CostCenterName',
@@ -570,7 +575,9 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
     Required: true
   };
   HaveAlertToFinance = false;
+  ShowInvest = false;
   DocTypeMadatory;
+  ContractRelationList;
   constructor(
     private ContractList: ContractListService,
     private Actor: ActorService,
@@ -864,15 +871,15 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
         width: 120,
         resizable: true
       },
+      // {
+      //   headerName: 'مبلغ با احتساب ضرایب ردیف',
+      //   field: 'AmountCOEF',
+      //   HaveThousand: true,
+      //   width: 200,
+      //   resizable: true
+      // },
       {
-        headerName: 'مبلغ با احتساب ضرایب ردیف',
-        field: 'AmountCOEF',
-        HaveThousand: true,
-        width: 200,
-        resizable: true
-      },
-      {
-        headerName: 'مبلغ کل',
+        headerName: 'مبلغ کل بااحتساب ضرایب',
         field: 'AmountCOEFPact',
         HaveThousand: true,
         width: 150,
@@ -1128,7 +1135,7 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
       this.DisabledControls = false;
       this.IsEditable = false;
     }
-    
+
     this.CheckRegionWritable = this.InputParam && this.InputParam.IsRegionReadOnly;
     this.ProductRequest.GetCurrentDate().subscribe(resss => {
       this.ProductRequestDate = resss;
@@ -1149,7 +1156,8 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
       this.MinimumPosting = this.InputParam.MinimumPosting;
       // tslint:disable-next-line: max-line-length
       this.ModuleCode = this.ISProvisionRemain ? 2739 : this.InputParam.ModuleCode ? this.InputParam.ModuleCode :
-        this.InputParam.ISEstateRequest ? 2776 : this.InputParam.ISTahator ? 2901 : this.ModuleCode ? this.ModuleCode : 2840;
+        this.InputParam.ISEstateRequest ? 2776 : this.InputParam.ISTahator ? 2901 : this.ModuleCode ? this.ModuleCode :
+          this.InputParam.CurrWorkFlow && this.InputParam.CurrWorkFlow.WorkflowObjectCode === 29 ? 3037 : 2840;
       this.ChangeViewType();
       // tslint:disable-next-line: max-line-length
       this.UserRegionCode = this.InputParam.UserRegionCode ? this.InputParam.UserRegionCode : this.ProductRequestObject ? this.ProductRequestObject.RegionCode : null;
@@ -1186,7 +1194,15 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
     if (this.InputParam.CostFactorID) {
       this.CostFactorID = this.InputParam.CostFactorID;
     }
-
+    if (this.ModuleCode === 3037) {
+      this.ShowRequestType = false;
+      this.ShowContract = false;
+      this.ShowActLocation = false;
+      this.ShowISCost = false;
+      this.widthcode = 60; // rfc 64947
+      this.WidthProduct = 68;
+      this.WidthDeadLine = 60;
+    }
 
     if (!this.IsEndFlow && (!this.ReadyToConfirm || this.ReadyToConfirm === null || this.ReadyToConfirm === 0)) {
       this.btnConfirmName = 'تایید';
@@ -1266,6 +1282,9 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
           this.AssetRowData = this.ProductRequestObject.AssetList;
           if (this.ProductRequestObject && this.ProductRequestObject.ContractObject) {
             this.IsInsert = true;
+            this.ContractList.GetContractRelationList(this.ProductRequestObject.ContractObject.ContractId, this.CostFactorID).subscribe(res => {
+              this.ContractRelationList = res;
+            });
           }
           if (this.ProductRequestObject.RelatedContractID) {
             this.IsNew = false;
@@ -1430,6 +1449,10 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
             this.IsEditable = false;
             break;
         }
+      } else if (this.ModuleCode === 3037) {
+        this.ShowInvest = true;
+        this.IsEditable = true;
+        this.IsCost = false;
       } else if (this.ModuleCode === 2776) {
         switch (Number(this.ModuleViewTypeCode)) {
           case 1:
@@ -1486,7 +1509,7 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
             this.IsEditable = false;
             break;
         }
-      } else if (this.ModuleCode === 2840) {
+      } else if ((this.ModuleCode === 2840)) {
         switch (Number(this.ModuleViewTypeCode)) {
           case 1:
             this.IsEditable = true;
@@ -1531,7 +1554,20 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
             this.IsEditable = false;
             break;
         }
-      } else if (this.ModuleCode === 2844) {
+      } else if (this.ModuleCode === 3034) {
+        switch (this.ModuleViewTypeCode) {
+          case 50000: // نمایش و عدم نمایش دکمه
+            this.IsEditable = false;
+            this.HasAssetEstaeBtn = false;
+            this.HasRequestEvalateBtn = false;
+            this.HasPrintBtn = false;
+            this.HasArchive = true;
+            this.HasShow = false;
+            this.DisabledControls = false
+            break;
+        }
+      }
+      else if (this.ModuleCode === 2844) {
         switch (Number(this.ModuleViewTypeCode)) {
           case 800000: // جستجو خدمات شهری
             this.IsShow = true;
@@ -1630,6 +1666,13 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
   }
 
   popupclosed(event) {
+
+    if (event && this.PopUpType === 'request-contract-without-flow') {
+      this.ProductRequest.GetProductRequestItemListVW(this.CostFactorID, true).subscribe(res => {
+        this.rowsData = res;
+      });
+    }
+
     this.HaveMaxBtn = false;
     this.isClicked = false;
     this.PercentWidth = null;
@@ -1962,6 +2005,17 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
     }
     this.CheckValidate = true;
     let ValidateForm = true;
+    if (this.ModuleCode === 3037) {
+      this.RequiredComponents = [
+        this.RegionParams,
+        this.VWExeUnitParams,
+        this.SubRusteeParams,
+        this.RequestedPersonParams,
+        this.RusteeParams,
+        this.CostCenterParams,
+        this.SubCostCenterParams
+      ];
+    }
     // tslint:disable-next-line: no-shadowed-variable
     const promise = new Promise<void>((resolve, reject) => {
       this.RequiredComponents.forEach((element, index, array) => {
@@ -1975,7 +2029,7 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
     }).then(() => {
       ValidateForm =
         ValidateForm &&
-        this.Subject && (this.ModuleCode === 2840 ? this.Address : true) &&
+        this.Subject && ((this.ModuleCode === 2840 || this.ModuleCode === 3034) ? this.Address : true) &&
         this.ProductRequestDate;
       if (ValidateForm) {
         let ItemNo = 0;
@@ -2001,7 +2055,7 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
           Subject: this.Subject,
           Address: this.Address,
           ProductRequestStatusCode: 1,
-          InvVoucherGroupCode: 1,
+          InvVoucherGroupCode: this.RegionParams.selectedObject === 200 && !this.IsCost ? 10 : 1,  // 65085
           HasLicence: 0,
           ResearcherID: this.ResearcherID,
           RelatedContractID: this.ContractParams.selectedObject,
@@ -2029,7 +2083,9 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
                 this.OrginalModuleCode === 2934 ? 6 : // قرارداد چابک پژوهشی
                   this.OrginalModuleCode === 2776 ? 7 : // درخواست معامله ملکی
                     this.OrginalModuleCode === 2901 ? 9 : // درخواست تهاتر ملکی
-                      null
+                      this.OrginalModuleCode === 3034 ? 5 : // قرارداد مشارکتی
+                        this.OrginalModuleCode === 3037 ? 12 : // درخواست معامله نیابتی
+                          null
         };
         this.gridApi.forEachNode(node => {
           var keys = Object.keys(node.data);
@@ -2172,7 +2228,7 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
 
   onPRPersonCellValueChanged(event) {
     if (event.newValue && event.colDef && event.colDef.field === 'RoleName') {
-      this.ProductRequestPersoncolDef[2].cellEditorParams.Items = this.Actor.GetPersonList(event.newValue.RoleID, null, false);
+      this.ProductRequestPersoncolDef[2].cellEditorParams.Items = this.Actor.GetPersonList(event.newValue.RoleID, null, null, false);
       const itemsToUpdate = [];
       this.gridApi.forEachNode(node => {
         if (node.rowIndex === event.rowIndex) {
@@ -2958,18 +3014,15 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
   }
   onCOntractClick() {
     let check = 0;
-    this.ProductRequestObject.RequestPersonList.forEach(item => {
-      if (item.RoleID === 974 || item.RoleID === 975) {
-        check = check + 1;
-      }
-    });
+    if (this.ProductRequestObject && this.ProductRequestObject.RequestPersonList &&
+      this.ProductRequestObject.RequestPersonList !== null) {
+      this.ProductRequestObject.RequestPersonList.forEach(item => {
+        if (item.RoleID === 974 || item.RoleID === 975) {
+          check = check + 1;
+        }
+      });
+    }
     if (check > 0) {
-      // this.ProductRequest.GetProductRequestDealType(this.ProductRequestObject.RegionCode,
-      //   this.ProductRequestDate,
-      //   // tslint:disable-next-line:radix
-      //   this.SumFinalAmount
-      // ).
-      //   subscribe(res => {
       this.PopUpType = 'request-contract-without-flow';
       this.isClicked = true;
       this.PercentWidth = 98;
@@ -2995,8 +3048,8 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
         OrginalModuleCode: this.OrginalModuleCode,
         ProductRequestTypeCode: this.PRTypeParams.selectedObject, // RFC 59678,
         IsAdmin: this.IsAdmin,
+        ContractRelationList: this.ContractRelationList
       };
-      // });
     } else {
       this.ShowMessageBoxWithOkBtn('لطفاً ناظر اول یا دوم را مشخص نمایید');
     }
@@ -3136,7 +3189,8 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
         this.ProductRequest.GetCustomerOrderByRegionPaging(1, 30, '', '', ProdReqObj.RegionCode,
           ProdReqObj.CustomerOrderID),
         this.ProductRequest.GetOnfilterRegion(),
-        this.ProductRequest.GetActLocationByRegionCode(ProdReqObj.RegionCode),
+        this.ProductRequest.GetActLocationByRegionCode(ProdReqObj.ProxyContractorRegionCode !== null ? ProdReqObj.ProxyContractorRegionCode
+          : ProdReqObj.RegionCode),
         this.ProductRequest.GetCostCenterByRegion(ProdReqObj.RegionCode,
           ProdReqObj.SubCostCenterObject ? ProdReqObj.SubCostCenterObject.CostCenterId : null, null,
           false
@@ -3888,88 +3942,88 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
 
   EntityColumnDefinition(ProductID, node, EntityList, hasApiCall) {
 
-    if (ProductID && hasApiCall) {
+    // if (ProductID && hasApiCall) {
 
-      this.ProductRequest.GetProductRequestEntityList(null, ProductID, null).subscribe(
-        res => {
+    //   this.ProductRequest.GetProductRequestEntityList(null, ProductID, null).subscribe(
+    //     res => {
 
-          var columnDef22 = [];
-          this.columnDef.forEach(element => {
-            columnDef22.push(element);
-          });
-          this.columnDef = [];
+    //       var columnDef22 = [];
+    //       this.columnDef.forEach(element => {
+    //         columnDef22.push(element);
+    //       });
+    //       this.columnDef = [];
 
-          node.data.EntityList = res;
-          res.forEach(i => {
-            const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
-            if (!obItem) {
-              const obj = {
-                index: i.EntityTypeID,
-                headerName: i.Subject,
-                field: 'Subject' + i.EntityTypeID.toString(),
-                width: 200,
-                editable: true,
-                resizable: true,
-                cellEditorFramework: NgSelectVirtualScrollComponent,
-                cellEditorParams: {
-                  Params: this.NgSelectContractEntityItemParams,
-                  Items: [],
-                  Owner: this
-                },
-                cellRenderer: 'SeRender',
-                valueFormatter: function currencyFormatter(params) {
-                  if (params.value) {
-                    return params.value.Subject;
-                  } else {
-                    return '';
-                  }
-                },
-              };
-              columnDef22.push(obj);
-            }
-          });
-          this.columnDef = columnDef22;
-        });
-    }
+    //       node.data.EntityList = res;
+    //       res.forEach(i => {
+    //         const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
+    //         if (!obItem) {
+    //           const obj = {
+    //             index: i.EntityTypeID,
+    //             headerName: i.Subject,
+    //             field: 'Subject' + i.EntityTypeID.toString(),
+    //             width: 200,
+    //             editable: true,
+    //             resizable: true,
+    //             cellEditorFramework: NgSelectVirtualScrollComponent,
+    //             cellEditorParams: {
+    //               Params: this.NgSelectContractEntityItemParams,
+    //               Items: [],
+    //               Owner: this
+    //             },
+    //             cellRenderer: 'SeRender',
+    //             valueFormatter: function currencyFormatter(params) {
+    //               if (params.value) {
+    //                 return params.value.Subject;
+    //               } else {
+    //                 return '';
+    //               }
+    //             },
+    //           };
+    //           columnDef22.push(obj);
+    //         }
+    //       });
+    //       this.columnDef = columnDef22;
+    //     });
+    // }
 
-    if (!hasApiCall && EntityList) {
+    // if (!hasApiCall && EntityList) {
 
-      var columnDef22 = [];
-      this.columnDef.forEach(element => {
-        columnDef22.push(element);
-      });
-      this.columnDef = [];
+    //   var columnDef22 = [];
+    //   this.columnDef.forEach(element => {
+    //     columnDef22.push(element);
+    //   });
+    //   this.columnDef = [];
 
-      EntityList.forEach(i => {
-        const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
-        if (!obItem) {
-          const obj = {
-            index: i.EntityTypeID,
-            headerName: i.Subject,
-            field: 'Subject' + i.EntityTypeID.toString(),
-            width: 200,
-            editable: true,
-            resizable: true,
-            cellEditorFramework: NgSelectVirtualScrollComponent,
-            cellEditorParams: {
-              Params: this.NgSelectContractEntityItemParams,
-              Items: [],
-              Owner: this
-            },
-            cellRenderer: 'SeRender',
-            valueFormatter: function currencyFormatter(params) {
-              if (params.value) {
-                return params.value.Subject;
-              } else {
-                return '';
-              }
-            },
-          };
-          columnDef22.push(obj);
-        }
-      });
-      this.columnDef = columnDef22;
-    }
+    //   EntityList.forEach(i => {
+    //     const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
+    //     if (!obItem) {
+    //       const obj = {
+    //         index: i.EntityTypeID,
+    //         headerName: i.Subject,
+    //         field: 'Subject' + i.EntityTypeID.toString(),
+    //         width: 200,
+    //         editable: true,
+    //         resizable: true,
+    //         cellEditorFramework: NgSelectVirtualScrollComponent,
+    //         cellEditorParams: {
+    //           Params: this.NgSelectContractEntityItemParams,
+    //           Items: [],
+    //           Owner: this
+    //         },
+    //         cellRenderer: 'SeRender',
+    //         valueFormatter: function currencyFormatter(params) {
+    //           if (params.value) {
+    //             return params.value.Subject;
+    //           } else {
+    //             return '';
+    //           }
+    //         },
+    //       };
+    //       columnDef22.push(obj);
+    //     }
+    //   });
+    //   this.columnDef = columnDef22;
+    // }
   }
 
   SetEntityDataInDataRow(rowsData) {
@@ -4414,7 +4468,7 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
   }
   ShowModuleTypeName() {
     if (this.ProductRequestObject && this.ProductRequestObject.DealMethodCode
-      && (this.ModuleCode === 2739 || this.ModuleCode === 2776 || this.ModuleCode === 2840)) { // درخواست خ احمدی
+      && (this.ModuleCode === 2739 || this.ModuleCode === 2776 || (this.ModuleCode === 2840))) { // درخواست خ احمدی
       switch (this.ProductRequestObject.DealMethodCode) {
         case 1:
           {
@@ -4511,9 +4565,9 @@ export class ProductRequestPageWithoutFlowComponent implements OnInit {
     this.HaveMaxBtn = false;
     this.PopUpType = 'product-request-invest-page';
     this.startLeftPosition = 304;
-    this.startTopPosition = 40;
-    this.PercentWidth = 58;
-    this.MainMaxwidthPixel = 800;
+    this.startTopPosition = 15;
+    this.PercentWidth = 70;
+    this.MainMaxwidthPixel = 1046;
   }
   ArchiveBtnClick() {
     let DealMethodCode = -1;

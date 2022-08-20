@@ -1,8 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
-import { ActorService } from 'src/app/Services/BaseService/ActorService';
-
 @Component({
   selector: 'app-adjustment-price-range-formulas',
   templateUrl: './adjustment-price-range-formulas.component.html',

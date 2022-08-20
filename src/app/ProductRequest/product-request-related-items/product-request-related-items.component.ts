@@ -1,5 +1,5 @@
-import { ActivatedRoute, Router } from '@angular/router';
-import { Input, Component, OnInit, ViewChild, TemplateRef, Output, EventEmitter } from '@angular/core';
+import { Router } from '@angular/router';
+import { Input, Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 
 @Component({

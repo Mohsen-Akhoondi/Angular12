@@ -1,12 +1,10 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { OverPopUpCellEditorComponent } from 'src/app/Shared/OverPopUpcellEditor/over-pop-up-cell-editor.component';
-import { fork } from 'child_process';
 import { forkJoin } from 'rxjs';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
-declare var jquery: any;
 declare var $: any;
 
 @Component({
@@ -78,7 +76,7 @@ export class ProductRequestEstimateComponent implements OnInit {
 
   constructor(private ProductRequest: ProductRequestService,
     private PriceList: PriceListService,
-    private User: UserSettingsService, ) {
+    private User: UserSettingsService,) {
     this.ProdReqItemColDef = [
       {
         headerName: 'ردیف',

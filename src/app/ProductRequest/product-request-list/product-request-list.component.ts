@@ -3,19 +3,15 @@ import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
-import { single } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
+import { NgSelectConfig } from 'src/app/Shared/ng-select';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { ContractPayService } from 'src/app/Services/ContractService/ContractPayServices/ContractPayService';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
-import { reject } from 'q';
 import { isUndefined } from 'util';
-declare var jquery: any;
-declare var $: any;
 
 @Component({
   selector: 'app-product-request-list',
@@ -98,160 +94,256 @@ export class ProductRequestListComponent implements OnInit {
     this.sub = this.route.params.subscribe(params => {
       this.ModuleCode = +params['ModuleCode'];
     });
-    this.AdmincolumnDef = [
-      {
-        headerName: ' اطلاعات درخواست',
-        children: [
-          {
-            headerName: 'ردیف ',
-            field: 'ItemNo',
-            width: 80,
-            resizable: true
-          },
-          {
-            headerName: 'شماره',
-            field: 'ProductRequestNo',
-            width: 100,
-            resizable: true,
-            sortable: true,
-          },
-          {
-            headerName: 'تاریخ',
-            field: 'PersianProductRequestDates',
-            width: 120,
-            resizable: true
-          },
-          {
-            headerName: 'درخواست کننده',
-            field: 'PersonName',
-            width: 150,
-            resizable: true,
-            sortable: true,
-          },
-          {
-            headerName: 'موضوع',
-            field: 'Subject',
-            width: 350,
-            resizable: true
-          },
-        ]
-      },
-      {
-        headerName: 'اطلاعات قرارداد پیشنهادی',
-        children: [
-          {
-            headerName: 'سال مالی',
-            field: 'FinYearCode',
-            width: 100,
-            resizable: true
-          },
-          {
-            headerName: 'کد',
-            field: 'ContractCodes',
-            width: 100,
-            resizable: true
-          },
-          {
-            headerName: 'پیمانکار',
-            field: 'ContractorName',
-            width: 210,
-            resizable: true
-          }
-        ]
-      },
-      {
-        headerName: 'نوع نمایش فعالیت',
-        field: 'ModuleViewTypeCodeName',
-        cellEditorFramework: NgSelectVirtualScrollComponent,
-        cellEditorParams: {
-          Params: this.NgSelectMVTParams,
-          Items: [],
-          Owner: this
-        },
-        cellRenderer: 'SeRender',
-        valueFormatter: function currencyFormatter(params) {
-          if (params.value) {
-            return params.value.ModuleViewTypeCodeName;
-          } else {
-            return '';
-          }
-        },
-        editable: true,
-        width: 170,
-        resizable: true
-      },
-    ];
-    this.columnDef = [
-      {
-        headerName: 'اطلاعات درخواست',
-        children: [
-          {
-            headerName: 'ردیف ',
-            field: 'ItemNo',
-            width: 80,
-            resizable: true
-          },
-          // {
-          //   headerName: 'محل هزینه ',
-          //   field: 'UnitTopicName',
-          //   width: 90,
-          //   resizable: true,
-          //   sortable: true,
-          // },
-          {
-            headerName: 'شماره',
-            field: 'ProductRequestNo',
-            width: 100,
-            resizable: true,
-            sortable: true,
-          },
-          {
-            headerName: 'تاریخ',
-            field: 'PersianProductRequestDates',
-            width: 120,
-            resizable: true
-          },
-          {
-            headerName: 'درخواست کننده',
-            field: 'PersonName',
-            width: 150,
-            resizable: true,
-            sortable: true,
-          },
-          {
-            headerName: 'موضوع',
-            field: 'Subject',
-            width: 350,
-            resizable: true
-          },
-        ]
-      },
-      {
-        headerName: 'اطلاعات قرارداد پیشنهادی',
-        children: [
-          {
-            headerName: 'سال مالی',
-            field: 'FinYearCode',
-            width: 100,
-            resizable: true
-          },
-          {
-            headerName: 'کد',
-            field: 'ContractCodes',
-            width: 100,
-            resizable: true
-          }
-          ,
-          {
-            headerName: 'پیمانکار',
-            field: 'ContractorName',
-            width: 210,
-            resizable: true
-          }
-        ]
-      },
 
-    ];
+
+    if (this.ModuleCode === 3094) {
+      this.AdmincolumnDef = [
+
+        {
+          headerName: 'ردیف ',
+          field: 'ItemNo',
+          width: 80,
+          resizable: true
+        },
+        // {
+        //   headerName: 'محل هزینه ',
+        //   field: 'UnitTopicName',
+        //   width: 90,
+        //   resizable: true,
+        //   sortable: true,
+        // },
+        {
+          headerName: 'شماره',
+          field: 'ProductRequestNo',
+          width: 100,
+          resizable: true,
+          sortable: true,
+        },
+        {
+          headerName: 'تاریخ',
+          field: 'PersianProductRequestDates',
+          width: 120,
+          resizable: true
+        },
+        {
+          headerName: 'درخواست کننده',
+          field: 'PersonName',
+          width: 150,
+          resizable: true,
+          sortable: true,
+        },
+        {
+          headerName: 'موضوع',
+          field: 'Subject',
+          width: 350,
+          resizable: true
+        },
+      ];
+    }
+    else {
+
+      this.AdmincolumnDef = [
+        {
+          headerName: ' اطلاعات درخواست',
+          children: [
+            {
+              headerName: 'ردیف ',
+              field: 'ItemNo',
+              width: 80,
+              resizable: true
+            },
+            {
+              headerName: 'شماره',
+              field: 'ProductRequestNo',
+              width: 100,
+              resizable: true,
+              sortable: true,
+            },
+            {
+              headerName: 'تاریخ',
+              field: 'PersianProductRequestDates',
+              width: 120,
+              resizable: true
+            },
+            {
+              headerName: 'درخواست کننده',
+              field: 'PersonName',
+              width: 150,
+              resizable: true,
+              sortable: true,
+            },
+            {
+              headerName: 'موضوع',
+              field: 'Subject',
+              width: 350,
+              resizable: true
+            },
+          ]
+        },
+        {
+          headerName: 'اطلاعات قرارداد پیشنهادی',
+          children: [
+            {
+              headerName: 'سال مالی',
+              field: 'FinYearCode',
+              width: 100,
+              resizable: true
+            },
+            {
+              headerName: 'کد',
+              field: 'ContractCodes',
+              width: 100,
+              resizable: true
+            },
+            {
+              headerName: 'پیمانکار',
+              field: 'ContractorName',
+              width: 210,
+              resizable: true
+            }
+          ]
+        },
+        {
+          headerName: 'نوع نمایش فعالیت',
+          field: 'ModuleViewTypeCodeName',
+          cellEditorFramework: NgSelectVirtualScrollComponent,
+          cellEditorParams: {
+            Params: this.NgSelectMVTParams,
+            Items: [],
+            Owner: this
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.ModuleViewTypeCodeName;
+            } else {
+              return '';
+            }
+          },
+          editable: true,
+          width: 170,
+          resizable: true
+        },
+      ];
+    }
+    if (this.ModuleCode === 3094) {
+      this.columnDef = [
+
+        {
+          headerName: 'ردیف ',
+          field: 'ItemNo',
+          width: 80,
+          resizable: true
+        },
+        // {
+        //   headerName: 'محل هزینه ',
+        //   field: 'UnitTopicName',
+        //   width: 90,
+        //   resizable: true,
+        //   sortable: true,
+        // },
+        {
+          headerName: 'شماره',
+          field: 'ProductRequestNo',
+          width: 100,
+          resizable: true,
+          sortable: true,
+        },
+        {
+          headerName: 'تاریخ',
+          field: 'PersianProductRequestDates',
+          width: 120,
+          resizable: true
+        },
+        {
+          headerName: 'درخواست کننده',
+          field: 'PersonName',
+          width: 150,
+          resizable: true,
+          sortable: true,
+        },
+        {
+          headerName: 'موضوع',
+          field: 'Subject',
+          width: 350,
+          resizable: true
+        },
+      ];
+    }
+    else {
+      this.columnDef = [
+        {
+          headerName: 'اطلاعات درخواست',
+          children: [
+            {
+              headerName: 'ردیف ',
+              field: 'ItemNo',
+              width: 80,
+              resizable: true
+            },
+            // {
+            //   headerName: 'محل هزینه ',
+            //   field: 'UnitTopicName',
+            //   width: 90,
+            //   resizable: true,
+            //   sortable: true,
+            // },
+            {
+              headerName: 'شماره',
+              field: 'ProductRequestNo',
+              width: 100,
+              resizable: true,
+              sortable: true,
+            },
+            {
+              headerName: 'تاریخ',
+              field: 'PersianProductRequestDates',
+              width: 120,
+              resizable: true
+            },
+            {
+              headerName: 'درخواست کننده',
+              field: 'PersonName',
+              width: 150,
+              resizable: true,
+              sortable: true,
+            },
+            {
+              headerName: 'موضوع',
+              field: 'Subject',
+              width: 350,
+              resizable: true
+            },
+          ]
+        },
+        {
+          headerName: 'اطلاعات قرارداد پیشنهادی',
+          children: [
+            {
+              headerName: 'سال مالی',
+              field: 'FinYearCode',
+              width: 100,
+              resizable: true
+            },
+            {
+              headerName: 'کد',
+              field: 'ContractCodes',
+              width: 100,
+              resizable: true
+            }
+            ,
+            {
+              headerName: 'پیمانکار',
+              field: 'ContractorName',
+              width: 210,
+              resizable: true
+            }
+          ]
+        },
+
+      ];
+    }
+
 
     this.defaultColDef = { resizable: true };
     this.rowSelection = 'single';
@@ -267,7 +359,8 @@ export class ProductRequestListComponent implements OnInit {
 
   popupclosed() {
     if (this.type === 'completion-contract-info' || this.type === 'product-request-page'
-        || this.type === 'researcher-product-request-list' || this.type === 'pure-product-request-page') {
+      || this.type === 'researcher-product-request-list' || this.type === 'pure-product-request-page'
+      || this.type === 'product-request-invest-archive') {
       this.rowData = this.ProductRequest.GetProductRequestList(this.RegionParams.selectedObject, this.ModuleCode);
     }
     this.HaveMaxBtn = false;
@@ -288,7 +381,8 @@ export class ProductRequestListComponent implements OnInit {
 
   ngOnInit() {
     if (this.ModuleCode === 2939 || this.ModuleCode === 2944
-      || this.ModuleCode === 2951 || this.ModuleCode === 2952) {
+      || this.ModuleCode === 2951 || this.ModuleCode === 2952
+      || this.ModuleCode === 3090) {
       this.NoIsIncomplete = false;
     }
     // tslint:disable-next-line: no-shadowed-variable
@@ -355,7 +449,7 @@ export class ProductRequestListComponent implements OnInit {
   }
   RowClick(InputValue) {
     this.selectedRow = InputValue;
-    if (this.ModuleCode !== 2939) {
+    if (this.ModuleCode !== 2939 && this.ModuleCode !== 3090) {
       switch (this.ModuleCode) {
         case 2730:
           this.WorkflowObjectCode = 3;
@@ -369,6 +463,14 @@ export class ProductRequestListComponent implements OnInit {
         case 2951: // تکمیل اطلاعات قرارداد ملکی
         case 2952:
           this.WorkflowObjectCode = 6;
+          break;
+        case 2895: // قرارداد مشارکتي
+          this.WorkflowObjectCode = 9;
+          break;
+        case 3094:
+          this.WorkflowObjectCode = 30;
+        case 3095:
+          this.WorkflowObjectCode = 31;
           break;
         default:
           break;
@@ -395,29 +497,54 @@ export class ProductRequestListComponent implements OnInit {
   Btnclick(BtnName) {
     this.gridApi.stopEditing();
     if (BtnName === 'insert') {
-      this.type = (this.ModuleCode === 2895) ? 'researcher-product-request-list' :
-        (this.ModuleCode === 2862) ? 'pure-product-request-page' : 'product-request-page';
-      this.HaveHeader = true;
-      this.btnclicked = true;
-      this.startLeftPosition = (this.ModuleCode === 2895) ? 68 : 15;
-      this.startTopPosition = 5;
-      this.HaveMaxBtn = true;
-      this.HeightPercentWithMaxBtn = 97;
-      this.PercentWidth = 90;
-      this.MainMaxwidthPixel = 2000;
-      this.MinHeightPixel = 645;
-      this.paramObj = {
-        CostFactorID: -1,
-        Mode: 'InsertMode',
-        WorkFlowID: null,
-        ReadyToConfirm: null,
-        IsRegionReadOnly: this.SelectedRegionObject.IsReadOnly
-      };
+
+      if (this.ModuleCode === 3094) {
+        this.type = 'product-request-invest-archive';
+        this.HaveHeader = true;
+        this.btnclicked = true;
+        this.HaveMaxBtn = true;
+        this.HeightPercentWithMaxBtn = 97;
+        this.PercentWidth = 85;
+        // this.MainMaxwidthPixel = 1200;
+        this.MinHeightPixel = 626;
+        this.startLeftPosition = 115;
+        this.startTopPosition = 11;
+        this.paramObj = {
+          CostFactorID: -1,
+          Mode: 'InsertMode',
+          WorkFlowID: null,
+          ReadyToConfirm: null,
+          IsRegionReadOnly: this.SelectedRegionObject.IsReadOnly
+        };
+      }
+      else {
+
+        this.type = (this.ModuleCode === 2895) ? 'researcher-product-request-list' :
+          (this.ModuleCode === 2862) ? 'pure-product-request-page' : 'product-request-page';
+        this.HaveHeader = true;
+        this.btnclicked = true;
+        this.startLeftPosition = (this.ModuleCode === 2895) ? 68 : 15;
+        this.startTopPosition = 5;
+        this.HaveMaxBtn = true;
+        this.HeightPercentWithMaxBtn = 97;
+        this.PercentWidth = 90;
+        this.MainMaxwidthPixel = 2000;
+        this.MinHeightPixel = 645;
+        this.paramObj = {
+          CostFactorID: -1,
+          Mode: 'InsertMode',
+          WorkFlowID: null,
+          ReadyToConfirm: null,
+          IsRegionReadOnly: this.SelectedRegionObject.IsReadOnly
+        };
+      }
+
+
       return;
     }
 
     if (BtnName === 'update') {
-      if (this.selectedRow === null) {
+      if (!this.selectedRow) {
         this.type = 'message-box';
         this.HaveHeader = true;
         this.alertMessageParams.message = 'قراردادی جهت مشاهده انتخاب نشده است';
@@ -427,6 +554,7 @@ export class ProductRequestListComponent implements OnInit {
         this.startTopPosition = 250;
         return;
       }
+
       if (this.ModuleCode === 2939 || this.ModuleCode === 2951) {
         if (this.selectedRow.IsConvert === true) {
           this.type = 'message-box';
@@ -463,7 +591,30 @@ export class ProductRequestListComponent implements OnInit {
           IsRegionReadOnly: this.SelectedRegionObject.IsReadOnly,
           ModuleViewTypeCode: 110000,
         };
-      } else {
+      }
+      else if (this.ModuleCode === 3094) {
+        this.type = 'product-request-invest-archive';
+        this.HaveHeader = true;
+        this.btnclicked = true;
+        this.HaveMaxBtn = true;
+        this.HeightPercentWithMaxBtn = 97;
+        this.PercentWidth = 80;
+        this.MainMaxwidthPixel = 1200;
+        this.MinHeightPixel = 626;
+        this.startLeftPosition = 115;
+        this.startTopPosition = 11;
+        this.paramObj = {
+          CostFactorID: this.selectedRow.data.CostFactorID,
+          Mode: 'EditMode',
+          WorkFlowID: null,
+          ReadyToConfirm: null,
+          ContractTypeCode: -1,
+          SelectedRow: null,
+          ModuleViewTypeCode: this.selectedRow.data.ModuleViewTypeCode, // RFC 61879
+          IsRegionReadOnly: this.SelectedRegionObject.IsReadOnly
+        };
+      }
+      else {
         // tslint:disable-next-line:max-line-length
         this.type = this.ModuleCode === 2862 ? 'pure-product-request-page' : 'product-request-page';
         this.HaveHeader = true;
@@ -609,5 +760,39 @@ export class ProductRequestListComponent implements OnInit {
       };
     }
 
+  }
+  ShowProdReq() {
+    this.gridApi.stopEditing();
+    if (!this.selectedRow) {
+      this.type = 'message-box';
+      this.HaveHeader = true;
+      this.alertMessageParams.message = 'درخواستی جهت مشاهده انتخاب نشده است';
+      this.btnclicked = true;
+      this.HaveMaxBtn = false;
+      this.startLeftPosition = 500;
+      this.startTopPosition = 250;
+      return;
+    } else {
+      this.type = 'product-request-page';
+      this.HaveHeader = true;
+      this.btnclicked = true;
+      this.startLeftPosition = 15;
+      this.startTopPosition = 5;
+      this.HaveMaxBtn = true;
+      this.HeightPercentWithMaxBtn = 97;
+      this.PercentWidth = 90;
+      this.MainMaxwidthPixel = 2000;
+      this.MinHeightPixel = 645;
+      this.paramObj = {
+        CostFactorID: this.selectedRow.data.CostFactorID,
+        Mode: 'EditMode',
+        WorkFlowID: null,
+        ReadyToConfirm: null,
+        ContractTypeCode: -1,
+        SelectedRow: null,
+        ModuleViewTypeCode: 900009, // به صورت نمایشی و تنها با امکان امضای الکترونیک
+        IsRegionReadOnly: this.SelectedRegionObject.IsReadOnly
+      };
+    }
   }
 }

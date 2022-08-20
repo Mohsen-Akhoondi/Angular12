@@ -133,9 +133,9 @@
             </table>
             <table style="width: 100%;">
               <tr>
-                <td width="36%">
+                <td width="39%">
                   <span class="table-cell-Lable">نوع شروع</span>
-                  <div class="redio-div" style="width: 54%;">
+                  <div class="redio-div" style="width: 67%;">
                     <div class="custom-control custom-radio custom-control-inline">
                       <input [checked]="StartType === 1" type="radio" class="custom-control-input" id="ISContractRadio"
                         name="rdoStartType" (click)="rdoStartTypeClick(1)" [attr.disabled]="DisableAll ? '' : null">
@@ -149,11 +149,17 @@
                       <label style="margin: auto;" class="custom-control-label redio-label" for="ISDateRadio">از تاريخ
                         دلخواه</label>
                     </div>
+                    <div  class="custom-control custom-radio custom-control-inline">
+                      <input [checked]="StartType === 3" type="radio" class="custom-control-input" id="ISSignRadio" 
+                      name="rdoStartType" (click)="rdoStartTypeClick(3)" [attr.disabled]="DisableAll ? '' : null">
+                      <label style="margin: auto;" class="custom-control-label redio-label" for="ISSignRadio">از تاريخ
+                        ابلاغ</label>
+                    </div>
                   </div>
                 </td>
-                <td width="30%">
+                <td width="28%">
                   <span class="table-cell-Lable">نوع مبلغ</span>
-                  <div class="redio-div" style="width: 53%;">
+                  <div class="redio-div" style="width: 62%;">
                     <div class="custom-control custom-radio custom-control-inline">
                       <input [checked]="AmountType" type="radio" class="custom-control-input" id="rdoFinalAmount"
                         name="ChoosenrdoAmount" (click)="rdoAmountClick(true)" [attr.disabled]="DisableAll ? '' : null">
@@ -289,11 +295,11 @@
                   چاپ متره
                 </button>
                 <div style="min-width: 100px;font-weight: bold; float: right; margin: 5px;">
-                  <span id="sum-final-estimate-amount" class="table-cell-Lable">جمع کل با احتساب ضرایب:</span>
+                  <span id="sum-final-estimate-amount" class="table-cell-Lable">جمع کل :</span>
                   <label for="sum-final-estimate-amount" style="margin:2px"> {{SumFinalItemAmount}} </label>
                 </div>
                 <div style="min-width: 100px;font-weight: bold; float: left; margin: 5px;">
-                  <span id="sum-final-estimate-amount" class="table-cell-Lable">جمع کل:</span>
+                  <span id="sum-final-estimate-amount" class="table-cell-Lable">جمع کل متره:</span>
                   <label for="sum-final-estimate-amount" style="margin:2px"> {{SumFinalEstimateAmount}} </label>
                 </div>
               </div>

@@ -5,7 +5,6 @@ import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
-import * as moment from 'jalali-moment';
 @Component({
   selector: 'app-commition-proceed-variable',
   templateUrl: './commition-proceed-variable.component.html',
@@ -34,10 +33,10 @@ export class CommitionProceedVariableComponent implements OnInit {
   HaveSave = false;
   HaveDelete = false;
   private gridApi;
-   @Input() PopupParam;
-    RowData: any = [];
-   CommitionProceedVariableRow: any;
-   VariableTypeParams = {
+  @Input() PopupParam;
+  RowData: any = [];
+  CommitionProceedVariableRow: any;
+  VariableTypeParams = {
     bindLabelProp: 'VariableTypeName',
     bindValueProp: 'VariableTypeCode',
     placeholder: '',
@@ -49,17 +48,17 @@ export class CommitionProceedVariableComponent implements OnInit {
     type: 'variable-type'
   };
   constructor(private route: ActivatedRoute,
-              private User: UserSettingsService,
-              private router: Router,
-              private RefreshItems: RefreshServices,
-              private VariableService: ProductRequestService ) {
+    private User: UserSettingsService,
+    private router: Router,
+    private RefreshItems: RefreshServices,
+    private VariableService: ProductRequestService) {
     this.columnDef = [
-       {
-         headerName: 'ردیف',
-         field: 'ItemNo',
-         width: 80,
-         resizable: true
-       },
+      {
+        headerName: 'ردیف',
+        field: 'ItemNo',
+        width: 80,
+        resizable: true
+      },
       {
         headerName: ' نوع متغیر',
         field: 'VariableTypeName',
@@ -68,25 +67,25 @@ export class CommitionProceedVariableComponent implements OnInit {
           Params: this.VariableTypeParams,
           Items: [],
         },
-         cellRenderer: 'SeRender',
-         valueFormatter: function currencyFormatter(params) {
-           if (params.value) {
-              return params.value.VariableTypeName;
-           } else {
-             return '';
-           }
-         },
-         valueSetter: (params) => {
-           if (params.newValue && params.newValue.VariableTypeName) {
-             params.data.VariableTypeName = params.newValue.VariableTypeName;
-             params.data.VariableTypeCode = params.newValue.VariableTypeCode;
-              return true;
-           } else {
-             params.data.VariableTypeCode = null;
-             params.data.VariableTypeName = '';
-             return false;
-           }
-         },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.VariableTypeName;
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.VariableTypeName) {
+            params.data.VariableTypeName = params.newValue.VariableTypeName;
+            params.data.VariableTypeCode = params.newValue.VariableTypeCode;
+            return true;
+          } else {
+            params.data.VariableTypeCode = null;
+            params.data.VariableTypeName = '';
+            return false;
+          }
+        },
         editable: true,
         width: 210,
         resizable: true,
@@ -168,100 +167,100 @@ export class CommitionProceedVariableComponent implements OnInit {
             params.data.PersianEndDate = '';
             return false;
           }
-       }
+        }
       },
     ];
-   }
-onGridReady(params: { api: any; }) {
-  this.gridApi = params.api;
-}
+  }
+  onGridReady(params: { api: any; }) {
+    this.gridApi = params.api;
+  }
 
-ngOnInit() {
-  this.route.params.subscribe(params => {
-    this.ModuleCode = +params['ModuleCode'];
-  });
-  this.User.GetModulOPByUser(this.ModuleCode).subscribe(res => {
-    this.HaveSave = false;
-    this.HaveDelete = false;
-    res.forEach(node => {
-      switch (node.OperationCode) {
-        case 7:
-          this.HaveSave = true;
-          break;
-        default:
-          break;
-      }
+  ngOnInit() {
+    this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
     });
-  });
-  this.GetAllCommitionProceedVariable();
-}
-GetAllCommitionProceedVariable() {
-   this.VariableService.GetAllCommitionProceedVariable().subscribe (res => {
-    this.RowData = res;
-  });
- }
-closeModal() {
-  this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
-}
-popupclosed() {
-  this.btnclicked = false;
-}
-oncellEditingStarted(event) {
-   if (event.colDef && event.colDef.field === 'VariableTypeName') {// For InvalidSelected When Old IsValid
-      this.VariableService.GetAllVariableType().subscribe(res => {
-      this.RefreshItems.RefreshItemsVirtualNgSelect({
-        List: res,
-        type: 'variable-type'
+    this.User.GetModulOPByUser(this.ModuleCode).subscribe(res => {
+      this.HaveSave = false;
+      this.HaveDelete = false;
+      res.forEach(node => {
+        switch (node.OperationCode) {
+          case 7:
+            this.HaveSave = true;
+            break;
+          default:
+            break;
+        }
       });
     });
+    this.GetAllCommitionProceedVariable();
   }
-}
-RowClick(InputValue) {
-  this.selectedRow = InputValue;
- }
-onSave() {
-  this.gridApi.stopEditing();
-  this.Dto = [];
-  this.RowData = [];
-  this.gridApi.forEachNode(res => {
-    this.RowData.push(res.data);
-  });
-  this.RowData.forEach(res => {
-    const CommitionProceedVariable = {
-      VariableTypeName : res.VariableTypeName,
-      VariableTypeCode : res.VariableTypeCode,
-      FromDate: (res.PersianStartDate && res.PersianStartDate.MDate)  ? res.PersianStartDate.MDate : res.ShortStartDate,
-      ToDate: (res.PersianEndDate && res.PersianEndDate.MDate) ? res.PersianEndDate.MDate : res.ShortEndDate,
-      VariableValue : res.VariableValue,
-         };
-        this.Dto.push(CommitionProceedVariable);
-  });
-    this.VariableService.SaveCommitionProceedVariable(this.Dto).subscribe(res => {
-    this.btnclicked = true;
-    this.type = 'message-box';
-    this.HaveHeader = true;
-    this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
-    this.VariableService.GetAllCommitionProceedVariable().subscribe((res2: any) => {
-      this.RowData = [];
-      this.RowData = res2;
-  });
-  },
-  err => {
-    if (!err.error.Message.includes('|')) {
-      this.ShowMessageBoxWithOkBtn('خطای پیش بینی نشده');
+  GetAllCommitionProceedVariable() {
+    this.VariableService.GetAllCommitionProceedVariable().subscribe(res => {
+      this.RowData = res;
+    });
+  }
+  closeModal() {
+    this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
+  }
+  popupclosed() {
+    this.btnclicked = false;
+  }
+  oncellEditingStarted(event) {
+    if (event.colDef && event.colDef.field === 'VariableTypeName') {// For InvalidSelected When Old IsValid
+      this.VariableService.GetAllVariableType().subscribe(res => {
+        this.RefreshItems.RefreshItemsVirtualNgSelect({
+          List: res,
+          type: 'variable-type'
+        });
+      });
     }
-  });
-}
-ShowMessageBoxWithOkBtn(message) {
-  this.isClicked = true;
-  this.PopUpType = 'message-box';
-  this.HaveHeader = true;
-  this.HaveMaxBtn = false;
-  this.startLeftPosition = 530;
-  this.startTopPosition = 200;
-  this.alertMessageParams.message = message;
-  this.alertMessageParams.HaveOkBtn = true;
-  this.alertMessageParams.HaveYesBtn = false;
-  this.alertMessageParams.HaveNoBtn = false;
-}
+  }
+  RowClick(InputValue) {
+    this.selectedRow = InputValue;
+  }
+  onSave() {
+    this.gridApi.stopEditing();
+    this.Dto = [];
+    this.RowData = [];
+    this.gridApi.forEachNode(res => {
+      this.RowData.push(res.data);
+    });
+    this.RowData.forEach(res => {
+      const CommitionProceedVariable = {
+        VariableTypeName: res.VariableTypeName,
+        VariableTypeCode: res.VariableTypeCode,
+        FromDate: (res.PersianStartDate && res.PersianStartDate.MDate) ? res.PersianStartDate.MDate : res.ShortStartDate,
+        ToDate: (res.PersianEndDate && res.PersianEndDate.MDate) ? res.PersianEndDate.MDate : res.ShortEndDate,
+        VariableValue: res.VariableValue,
+      };
+      this.Dto.push(CommitionProceedVariable);
+    });
+    this.VariableService.SaveCommitionProceedVariable(this.Dto).subscribe(res => {
+      this.btnclicked = true;
+      this.type = 'message-box';
+      this.HaveHeader = true;
+      this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
+      this.VariableService.GetAllCommitionProceedVariable().subscribe((res2: any) => {
+        this.RowData = [];
+        this.RowData = res2;
+      });
+    },
+      err => {
+        if (!err.error.Message.includes('|')) {
+          this.ShowMessageBoxWithOkBtn('خطای پیش بینی نشده');
+        }
+      });
+  }
+  ShowMessageBoxWithOkBtn(message) {
+    this.isClicked = true;
+    this.PopUpType = 'message-box';
+    this.HaveHeader = true;
+    this.HaveMaxBtn = false;
+    this.startLeftPosition = 530;
+    this.startTopPosition = 200;
+    this.alertMessageParams.message = message;
+    this.alertMessageParams.HaveOkBtn = true;
+    this.alertMessageParams.HaveYesBtn = false;
+    this.alertMessageParams.HaveNoBtn = false;
+  }
 }

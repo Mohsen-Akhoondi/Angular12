@@ -3,16 +3,11 @@ import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/n
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
-import { of } from 'rxjs';
-import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { ActivatedRoute } from '@angular/router';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
-import { isUndefined } from 'util';
-declare var jquery: any;
-declare var $: any;
+
 
 @Component({
   selector: 'app-product-request-estate',
@@ -152,7 +147,7 @@ export class ProductRequestEstateComponent implements OnInit {
     this.ColumnDefinitions();
 
 
-    if (this.ModuleCode === 2776 && this.PopupParam.ModuleViewTypeCode) {
+    if ((this.ModuleCode === 2776 || this.ModuleCode === 2901) && this.PopupParam.ModuleViewTypeCode) {
       switch (Number(this.PopupParam.ModuleViewTypeCode)) {
         case 2:
           this.HaveSave = false;
@@ -840,9 +835,8 @@ export class ProductRequestEstateComponent implements OnInit {
     this.startTopPosition = 40;
     this.PopupParam = {
       ProductRequestObject: this.ProductRequestObject,
-      //  ModuleViewTypeCode: this.ModuleViewTypeCode,
       ModuleCode: this.ModuleCode,
-      // OrginalModuleCode: this.OrginalModuleCode
+      ShowOnly: !this.IsEditable,
     };
   }
 

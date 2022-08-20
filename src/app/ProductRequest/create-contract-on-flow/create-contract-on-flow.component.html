@@ -17,7 +17,7 @@
                 <td style="width: 50%">
                   <span class="table-cell-Lable">تاريخ پايان قرارداد</span>
                   <app-jalali-datepicker [WidthPC]="60" [CurrMiladiDateValue]="EndDate"
-                    (Change)="OnContractEndDateChange($event)" [Disabled]="true" >
+                    (Change)="OnContractEndDateChange($event)" [Disabled]="DisableEndDate" >
                   </app-jalali-datepicker>
                 </td>
               </tr>

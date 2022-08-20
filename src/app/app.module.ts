@@ -353,6 +353,7 @@ import { CorporateWithoutInquiryComponent } from './Actors/corporate-without-inq
 import { RichTextBoxInputPageComponent } from './Shared/rich-text-box-input-page/rich-text-box-input-page.component';
 import { RoutNavigateComponent } from './Shared/rout-navigate/rout-navigate.component';
 import { SharedOverPopupComponent } from './Shared/shared-over-popup/shared-over-popup.component';
+import { CfmModule } from './CRM/CfmModule/cfm.module';
 @NgModule({
   declarations: [
     LoginPageComponent,
@@ -662,7 +663,6 @@ import { SharedOverPopupComponent } from './Shared/shared-over-popup/shared-over
     MalihuScrollbarModule.forRoot(),
     AgGridModule.withComponents([]),
     CustomCheckboxModule,
-    NgSelectModule,
     DpDatePickerModule,
     TreeModule,
     NgxTreeSelectModule.forRoot({
@@ -677,7 +677,8 @@ import { SharedOverPopupComponent } from './Shared/shared-over-popup/shared-over
     }),
     NgxExtendedPdfViewerModule,
     ImageViewerModule,
-    StimulsoftViewerModule
+    StimulsoftViewerModule,
+    CfmModule,
   ],
   providers: [
     JalaliDatepickerComponent,

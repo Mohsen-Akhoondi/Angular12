@@ -1,4 +1,4 @@
-import { Component, OnInit, SimpleChanges, Output, EventEmitter, TemplateRef, ViewChild, Input } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, TemplateRef, ViewChild, Input } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
@@ -6,8 +6,8 @@ import { of, forkJoin } from 'rxjs';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
-import { isDefined } from 'src/app/Shared/ng-select/lib/value-utils';
-declare var jquery: any;
+import { isDefined } from 'src/app/Shared/ng-select/ng-select/value-utils';
+
 declare var $: any;
 
 
@@ -238,7 +238,7 @@ export class ProductRequestArchiveDetailComponent implements OnInit {
     this.ArchiveParam.IsOnline = this.ProductRequestIsOnline;
   }
   getDocumentTypeList(): void {
-    const DocTypeList = [38, 59, 58, 47, 46, 45, 44, 39, 40, 11]; // RFC 52800
+    const DocTypeList = [38, 59, 58, 47, 46, 45, 44, 39, 40, 11, 1387]; // RFC 52800
     forkJoin([
       this.ArchiveList.GetPRoductRequestArchiveDetailList(this.ArchiveParam.CostFactorID),
       this.ArchiveList.GetADocTypeList(DocTypeList)
@@ -340,6 +340,9 @@ export class ProductRequestArchiveDetailComponent implements OnInit {
           case 155:
             this.WarantyItemClick();
             break;
+          case 1387:
+            resolve(this.ArchiveParam.ContractID ? this.ArchiveParam.ContractID : 0); // ContractID
+            break;
           default:
             resolve(0);
             break;
@@ -361,6 +364,7 @@ export class ProductRequestArchiveDetailComponent implements OnInit {
             OrginalModuleCode: this.ArchiveParam.OrginalModuleCode,
             // tslint:disable-next-line: max-line-length
             ModuleViewTypeCode: this.ArchiveParam.ModuleViewTypeCode && isDefined(this.ArchiveParam.ModuleViewTypeCode) && this.ArchiveParam.ModuleViewTypeCode !== null ? this.ArchiveParam.ModuleViewTypeCode : null,
+            IsReadOnly: (this.ArchiveParam.OrginalModuleCode == 2824 && this.ArchiveParam.ModuleViewTypeCode == 300000 && this.ParentDocumentTypeParam.selectedObject == 44) ? true : false, // 65337
           };
           this.paramObj = archiveParam;
         } else if (EntityID === 0) {

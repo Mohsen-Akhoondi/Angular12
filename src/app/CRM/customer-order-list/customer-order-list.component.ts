@@ -2,9 +2,7 @@ import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
-import { of } from 'rxjs';
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
-import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
+import { NgSelectConfig } from 'src/app/Shared/ng-select';
 import { CustomerOrderService } from 'src/app/Services/CRM/CustomerOrderService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 
@@ -14,12 +12,12 @@ import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsSe
   styleUrls: ['./customer-order-list.component.css']
 })
 export class CustomerOrderListComponent implements OnInit {
-
+  @Input() InputParam;
   ActorID;
   private gridApi;
   columnDef;
   SelectedRegionObject;
-  rowData: any;
+  rowData = [];
   selectedRegion = 205;
   RegionListSet = [];
   btnclicked = false;
@@ -30,6 +28,7 @@ export class CustomerOrderListComponent implements OnInit {
   HaveMaxBtn = false;
   alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false };
   @Output() Closed: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() OutPutParam: EventEmitter<any> = new EventEmitter<any>();
   startLeftPosition: number;
   startTopPosition: number;
   MinHeightPixel: number;
@@ -52,6 +51,7 @@ export class CustomerOrderListComponent implements OnInit {
     Required: true
   };
   ModuleCode: number;
+  AddItems = true;
 
   constructor(private router: Router,
     private User: UserSettingsService,
@@ -125,6 +125,11 @@ export class CustomerOrderListComponent implements OnInit {
   ngOnInit() {
     this.getNewData();
 
+    if (this.InputParam && this.InputParam.Mode) {
+      if (this.InputParam.Mode === 'AddNewPopUp') {
+        this.AddItems = false;
+      }
+    }
   }
 
   getNewData(): void {
@@ -140,8 +145,11 @@ export class CustomerOrderListComponent implements OnInit {
   }
 
   getCustomerOrderListData(region): void {
-    this.rowData = of([]);
-    this.rowData = this.CustomerOrder.GetCustomerOrderList(region);
+    this.rowData = [];
+   this.CustomerOrder.GetCustomerOrderList(region).subscribe(res=>{
+
+      this.rowData =res;
+    });
   }
   onGridReady(params) {
     this.gridApi = params.api;
@@ -152,8 +160,16 @@ export class CustomerOrderListComponent implements OnInit {
   }
 
   close(): void {
-    this.btnclicked = false;
-    this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
+
+    if (this.InputParam) {
+      this.btnclicked = false;
+      this.Closed.emit(true);
+    }
+    else {
+      this.btnclicked = false;
+      this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
+    }
+
   }
 
   onDeleteclick() {
@@ -164,14 +180,13 @@ export class CustomerOrderListComponent implements OnInit {
       this.ShowMessageBoxWithYesNoBtn('آیا از حذف  سفارش مشتری مطمئن هستید؟');
     }
   }
-  
+
   DoDelete() {
     this.CustomerOrder.DeleteCustomerOrder(this.selectedRow.CustomerOrderID, this.ModuleCode).subscribe(
       res => {
         if (res === true) {
-
-          this.rowData = this.CustomerOrder.GetCustomerOrderList(this.RegionParams.selectedObject);
-          this.ShowMessageBoxWithOkBtn('حذف با موفقیت انجام شد');
+          this.getCustomerOrderListData(200);
+          this.ShowMessageBoxWithOkBtn('حذف با موفقیت انجام شد')        
         } else {
           this.ShowMessageBoxWithOkBtn('خطای پیش بینی نشده');
         }
@@ -232,6 +247,21 @@ export class CustomerOrderListComponent implements OnInit {
       };
       return;
     }
+    if (BtnName === 'insert') {
+      this.type = 'app-customer-order-product-request'
+
+    }
+    if (BtnName === 'ok') {
+      if (!this.selectedRow) {
+        this.ShowMessageBoxWithOkBtn('سفارشی جهت تایید انتخاب نشده است');
+      }
+      else {
+        this.OutPutParam.emit(this.selectedRow.CustomerOrderID);
+        this.close();
+
+      }
+
+    }
 
     if (BtnName === 'update') {
       if (!this.selectedRow) {
@@ -258,6 +288,7 @@ export class CustomerOrderListComponent implements OnInit {
 
 
   getOutPutParam(event) {
+
     this.getCustomerOrderListData(200);
   }
 }

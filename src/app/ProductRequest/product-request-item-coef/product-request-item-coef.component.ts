@@ -40,8 +40,8 @@ export class ProductRequestItemCoefComponent implements OnInit {
 
   ngOnInit() {
     this.CostFactorID = this.InputParam.CostFactorID;
-    this.CoefLevelCode = this.InputParam.ProductRequestObject.CoefLevelCode;
-    this.ContractCoefLevelCode = this.InputParam.ProductRequestObject.CoefLevelCode;
+    this.CoefLevelCode = this.InputParam.ProductRequestObject.CoefLevelCode ? this.InputParam.ProductRequestObject.CoefLevelCode : 1;
+    this.ContractCoefLevelCode = this.InputParam.ProductRequestObject.CoefLevelCode ? this.InputParam.ProductRequestObject.CoefLevelCode : 1;
     this.ProductRequestItemID = this.InputParam.ProductRequestItemID;
     this.ProductName = this.InputParam.ProductName;
     this.ProductCode = this.InputParam.ProductCode;

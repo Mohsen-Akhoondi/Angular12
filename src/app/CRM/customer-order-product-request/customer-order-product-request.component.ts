@@ -6,6 +6,7 @@ import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
+import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServices';
 
 @Component({
   selector: 'app-customer-order-product-request',
@@ -15,14 +16,19 @@ import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 export class CustomerOrderProductRequestComponent implements OnInit {
   @Input() InputParam;
   @Output() Closed: EventEmitter<any> = new EventEmitter<any>();
+  @ViewChild('TextBtn') TextBtn: TemplateRef<any>;
+  @ViewChild('DeleteBtn') DeleteBtn: TemplateRef<any>;
+  @ViewChild('WorkFlowBtn') WorkFlowBtn: TemplateRef<any>;
   IsEditable = true;
-  IsMore = false;
   gridApi: any;
   gridApiMenu: any;
+  SubGridApiMenu: any;
   gridApiFastMenu: any;
   rowData: any = [];
-  rowsData: any = [];
+  SubrowData: any = [];
+  rowsData = [];
   SelectedColumnDef;
+  SubSelectedColumnDef;
   columnDef;
   CustomerOrderID;
   CustomerOrderDate;
@@ -43,8 +49,34 @@ export class CustomerOrderProductRequestComponent implements OnInit {
   HaveMaxBtn = false;
   type: string;
   HaveHeader: boolean;
+  BtnShowDelete = false;
   paramObj;
+  PopUpType: string;
   ProdcutTypeCode: any;
+  IsEndFlow: any;
+  ReadyToConfirm: any;
+  btnConfirmName;
+  btnConfirmIcon;
+  BTNsShow: false;
+  HaveAlertToFinance: any;
+  IsAdmin;
+  BtnClickedName: string;
+  ChangeDetection;
+  isClicked: boolean;
+  WorkFlowID: any;
+  WorkflowObjectCode: any;
+  ModuleCode;
+  ModuleViewTypeCode = null;
+  OrginalModuleCode;
+  CartableUserID: any;
+  CurrWorkFlow: any;
+  ObjectNo: any;
+  WorkflowTypeName: any;
+  ObjectID: any;
+  WorkflowTypeCode: any;
+  selectedReq = [];
+
+
   NgSelectVSParams = {
     bindLabelProp: 'ProductName',
     bindValueProp: 'ProductID',
@@ -74,13 +106,21 @@ export class CustomerOrderProductRequestComponent implements OnInit {
   { ProductTypeCode: 2, ProductTypeName: 'خدمت' }];
   alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false };
   @ViewChild('IsChosen') IsChosen: TemplateRef<any>;
+  @ViewChild('HasWorkFlow') HasWorkFlow: TemplateRef<any>;
+  PopupParam: { CustomerOrder: any; };
+  selectedSubMenuID: any;
+  CostFactorID: number;
+  MainMinwidthPixel: number;
+  GroupNumber: any;
   constructor(private CustomerOrder: CustomerOrderService,
     private ProductRequest: ProductRequestService,
-    private RefreshPersonItems: RefreshServices) { }
+    private RefreshPersonItems: RefreshServices,
+    private Cartable: CartableServices) { }
 
-  ngOnInit() {
-    // if (this.InputParam) {
-    this.CustomerOrderID =this.InputParam.ObjectID;
+  ngOnInit() { 
+    // if (this.InputParam) {   
+    this.CustomerOrderID = this.InputParam.ObjectID;
+    this.BTNsShow = this.InputParam.BTNs;
     //this.CustomerOrderID = this.InputParam.CustomerOrderID;
     this.CustomerOrder.GetCustomerOrder(this.CustomerOrderID).subscribe(res => {
       this.CustomerOrderDate = res.PersianCustomerOrderDate;
@@ -89,6 +129,32 @@ export class CustomerOrderProductRequestComponent implements OnInit {
       this.CustomerOrderCode = res.CustomerOrderCode;
       this.rowData = res.CustomerOrderItemList;
     });
+    this.CustomerOrder.GetProductRequestByCustomer(this.CustomerOrderID).subscribe(res => {
+      this.SubrowData = res;
+    });
+
+
+    if (!this.IsEndFlow && (!this.ReadyToConfirm || this.ReadyToConfirm === null || this.ReadyToConfirm === 0)) {
+      this.btnConfirmName = 'تایید';
+      this.btnConfirmIcon = 'ok';
+    }
+
+    if (!this.IsEndFlow && this.ReadyToConfirm && this.ReadyToConfirm !== null && this.ReadyToConfirm === 1) {
+      this.btnConfirmName = 'عدم تایید';
+      this.btnConfirmIcon = 'cancel';
+    }
+
+    if (this.IsEndFlow && this.ReadyToConfirm && this.ReadyToConfirm !== null && this.ReadyToConfirm === 1) {
+      this.btnConfirmName = 'بازگشت از تایید نهایی';
+      this.btnConfirmIcon = 'cancel';
+
+    }
+
+    if (this.IsEndFlow && (!this.ReadyToConfirm || this.ReadyToConfirm === null || this.ReadyToConfirm === 0)) {
+      this.btnConfirmName = 'تایید نهایی';
+      this.btnConfirmIcon = 'ok';
+    }
+
     // }
 
   }
@@ -98,13 +164,13 @@ export class CustomerOrderProductRequestComponent implements OnInit {
       {
         headerName: 'ردیف',
         field: 'ItemNo',
-        width: 100,
+        width: 45,
         resizable: true,
       },
       {
         headerName: 'انتخاب',
         field: 'IsChosen',
-        width: 100,
+        width: 60,
         cellEditorFramework: CheckboxFieldEditableComponent,
         cellEditorParams: { MaxLength: 3 },
         cellRendererFramework: TemplateRendererComponent,
@@ -126,17 +192,35 @@ export class CustomerOrderProductRequestComponent implements OnInit {
         resizable: true,
         editable: true
       },
-
       {
         headerName: 'محصول',
-        field: 'ProductName',
-        width: 500,
-        resizable: true
+        field: 'ProductPatternName',
+        width: 200,
+        resizable: true,
       },
+      {
+        headerName: 'معاونت تخصصی',
+        field: 'CostCenterName',
+        width: 200,
+        resizable: true,
+      },
+      {
+        headerName: 'اداره تخصصی',
+        field: 'SubCostCenterName',
+        width: 250,
+        resizable: true,
+      },
+      // {
+      //   headerName: 'محصول',
+      //   field: 'ProductName',
+      //   width: 300,
+      //   resizable: true
+      // },
+
       {
         headerName: 'تعداد',
         field: 'Qty',
-        width: 300,
+        width: 80,
         resizable: true
       },
       {
@@ -144,6 +228,134 @@ export class CustomerOrderProductRequestComponent implements OnInit {
         field: 'RemainQty',
         width: 100,
         resizable: true
+      },
+
+    ]
+
+    this.SubSelectedColumnDef = [
+      {
+        headerName: 'ردیف',
+        field: 'ItemNo',
+        width: 60,
+        resizable: true,
+      },
+      {
+        headerName: 'انتخاب',
+        field: 'IsChosen',
+        width: 80,
+        cellEditorFramework: CheckboxFieldEditableComponent,
+        cellEditorParams: { MaxLength: 3 },
+        cellRendererFramework: TemplateRendererComponent,
+        cellRendererParams: {
+          ngTemplate: this.IsChosen
+        },
+        cellStyle: function (params) {
+          return { 'text-align': 'center' };
+        },
+        valueSetter: (params) => {
+          if (params.newValue) {
+            params.data.IsChosen = true;
+            return true;
+          } else {
+            params.data.IsChosen = false;
+            return false;
+          }
+        },
+        resizable: true,
+        editable: true
+      },
+      {
+        headerName: 'مشاهده',
+        field: '',
+        width: 60,
+        sortable: false,
+        resizable: false,
+        editable: () => { false },
+        cellStyle: function (params) {
+          return { 'text-align': 'center' };
+        },
+        cellRendererFramework: TemplateRendererComponent,
+        cellRendererParams: {
+          ngTemplate: this.TextBtn,
+        }
+      },
+
+      {
+        headerName: 'شماره درخواست',
+        field: 'ProductRequestNo',
+        editable: false,
+        width: 150,
+        resizable: true,
+      },
+      {
+        headerName: 'تاریخ',
+        field: 'PersianProductRequestDate',
+        editable: false,
+        width: 150,
+        resizable: true,
+      },
+      {
+        headerName: 'شماره گروه',
+        field: 'GroupNO',
+        editable: false,
+        width: 150,
+        resizable: true,
+      },
+      {
+        headerName: 'وضعیت گردش',
+        field: 'HasWorkFlow',
+        width: 150,
+        cellEditorFramework: CheckboxFieldEditableComponent,
+        cellEditorParams: { MaxLength: 3 },
+        cellRendererFramework: TemplateRendererComponent,
+        cellRendererParams: {
+          ngTemplate: this.HasWorkFlow
+        },
+        cellStyle: function (params) {
+          return { 'text-align': 'center' };
+        },
+        valueSetter: (params) => {
+          if (params.newValue) {
+            params.data.HasWorkFlow = true;
+            return true;
+          } else {
+            params.data.HasWorkFlow = false;
+            return false;
+          }
+        },
+        resizable: true,
+        editable: false
+      },
+      {
+        headerName: 'جزییات گردش',
+        field: '',
+        width: 150,
+        sortable: false,
+        resizable: false,
+        editable: () => { false },
+        cellStyle: function (params) {
+          return { 'text-align': 'center' };
+        },
+        cellRendererFramework: TemplateRendererComponent,
+        cellRendererParams: {
+          ngTemplate: this.WorkFlowBtn,
+        }
+      },
+
+      {
+        headerName: 'حذف درخواست',
+        field: '',
+        width: 100,
+        sortable: false,
+        resizable: false,
+        editable: () => { false },
+        cellStyle: function (params) {
+          return { 'text-align': 'center' };
+        },
+        cellRendererFramework: TemplateRendererComponent,
+        cellRendererParams: {
+          ngTemplate: this.DeleteBtn,
+        }
       },
 
     ]
@@ -156,7 +368,14 @@ export class CustomerOrderProductRequestComponent implements OnInit {
         resizable: true,
       },
       {
-        headerName: 'نوع درخواستی',
+        headerName: 'گروه محصول',
+        field: 'ProductPatternName',
+        editable: false,
+        width: 300,
+        resizable: true,
+      },
+      {
+        headerName: 'نوع درخواست',
         field: 'ProductTypeName',
         cellEditorFramework: NgSelectCellEditorComponent,
         cellEditorParams: {
@@ -178,26 +397,28 @@ export class CustomerOrderProductRequestComponent implements OnInit {
             if (params.newValue.ProductTypeName !== params.oldValue) {
               params.data.ProductTypeName = params.newValue.ProductTypeName;
               params.data.ProductTypeCode = params.newValue.ProductTypeCode;
-              params.data.ScaleName = null;
-              params.data.ProductID = null;
-              params.data.ProductName = null;
+              //params.data.ScaleName = null;
+              //params.data.ProductID = null;
+              //params.data.ProductName = null;
               return true;
             }
           } else {
             params.data.ProductTypeName = null;
             params.data.ProductTypeCode = null;
-            params.data.ScaleName = null;
-            params.data.ProductID = null;
-            params.data.ProductName = null;
+            //params.data.ScaleName = null;
+            //params.data.ProductID = null;
+            //params.data.ProductName = null;
             return false;
           }
         },
-        editable: () => {
-          return this.IsEditable;
-        },
+        // editable: () => {
+        //   return this.IsEditable;
+        // },
+        editable: false,
         width: 120,
         resizable: true,
       },
+
       {
         headerName: 'کالا/خدمت',
         field: 'ProductName',
@@ -233,42 +454,50 @@ export class CustomerOrderProductRequestComponent implements OnInit {
             return false;
           }
         },
-        editable: () => {
-          return this.IsEditable;
-        },
+        // editable: () => {
+        //   return this.IsEditable;
+        // },
+        editable: false,
         width: 350,
         resizable: true
       },
-      // {
-      //   headerName: 'محصول',
-      //   field: 'ProductName',
-      //   width: 500,
-      //   resizable: true,
-      //   editable: true,
-      // },
       {
         headerName: 'تعداد درخواست',
-        field: 'Qty',
-        width: 300,
-        resizable: true,
-        editable: true,
-      },
-      {
-        headerName: 'تعداد باقیمانده',
-        field: 'RemainQty',
+        field: 'QTY',
         width: 100,
-        resizable: true
+        resizable: true,
+        editable: false,
       },
+      // {
+      //   headerName: 'تعداد باقیمانده',
+      //   field: 'RemainQty',
+      //   width: 200,
+      //   resizable: true,
+      //   editable: false
+      // },
+      {
+        headerName: 'تعداد سفارش',
+        field: 'CustomerQty',
+        width: 100,
+        resizable: true,
+        editable: false,
+      },
+
     ]
   }
 
   MenuRowClick(InputValue: number) {
     this.selectedMenuID = InputValue;
   }
-
+  SubMenuRowClick(InputValue: number) {
+    this.selectedSubMenuID = InputValue;
+  }
 
   onGridReadyMenu(params: { api: any; }) {
     this.gridApiMenu = params.api;
+  }
+  onSubGridReadyMenu(params: { api: any; }) {
+    this.SubGridApiMenu = params.api;
   }
 
 
@@ -286,38 +515,59 @@ export class CustomerOrderProductRequestComponent implements OnInit {
     this.selectedFastMenuItem = this.gridApiFastMenu.getSelectedRows();
     if (this.selectedFastMenuItem != null) {
       this.gridApiFastMenu.updateRowData({ remove: this.selectedFastMenuItem });
-      this.selectedFastMenuItem.forEach((item) => {
-        this.gridApiMenu.updateRowData({ add: [item] });
-      });
+      // this.selectedFastMenuItem.forEach((item) => {
+      //   this.gridApiMenu.updateRowData({ add: [item] });
+      // });
     }
     this.RefreshItemNoFastMenu();
     this.RefreshItemNoMenu();
   }
   addSelectedToFastMenu() {
     this.selectedMenuItem = [];
-    //   this.selectedMenuItem = this.gridApiMenu.getSelectedRows();
-    this.gridApiMenu.forEachNode(node => {
-      if (node.data.IsChosen) {
-        this.selectedMenuItem.push(node.data);
-      }
-    });
-
+    this.selectedMenuItem = this.gridApiMenu.getSelectedRows();
     if (this.selectedMenuItem != null) {
       const fastMenuCount = this.gridApiFastMenu.getDisplayedRowCount();
-      this.gridApiMenu.updateRowData({ remove: this.selectedMenuItem });
+      //this.gridApiMenu.updateRowData({ remove: this.selectedMenuItem });
       if (fastMenuCount === 0) {
         this.selectedMenuItem.forEach((item) => {
-          this.gridApiFastMenu.updateRowData({ add: [item] });
+          const obj = {
+            ItemNo: item.ItemNo,
+            ProductPatternName: item.ProductPatternName,
+            ProductPatternID: item.ProductPatternID,
+            ProductName: item.ProductName,
+            ProductID: item.ProductID,
+            CustomerOrderItemID: item.CustomerOrderItemID,
+            CustomerQty: item.Qty,
+            QTY: item.RemainQty,
+            RemainQty: item.RemainQty,
+            ProductTypeName: item.ProductTypeName
+
+          };
+
+          this.gridApiFastMenu.updateRowData({ add: [obj] });
         });
       } else {
+
         const lastIndex = this.gridApiFastMenu.getLastDisplayedRow();
         const tempData = [];
-        this.gridApiFastMenu.forEachNode(node => tempData.push(node.data));
+        this.gridApiFastMenu.forEachNode(
+          node => tempData.push(node.data));
         let abc: number;
         abc = lastIndex + 1;
         const xx = tempData.filter(x => x.ItemNo === abc)[0];
+
         this.selectedMenuItem.forEach((item) => {
-          this.gridApiFastMenu.updateRowData({ add: [item] });
+
+          const obj = {
+            ItemNo: item.ItemNo,
+            ProductPatternName: item.ProductPatternName,
+            ProductName: item.ProductName,
+            CustomerQty: item.Qty,
+            QTY: item.RemainQty,
+            RemainQty: item.RemainQty,
+            CustomerOrderItemID: item.CustomerOrderItemID
+          };
+          this.gridApiFastMenu.updateRowData({ add: [obj] });
         });
       }
     }
@@ -392,7 +642,7 @@ export class CustomerOrderProductRequestComponent implements OnInit {
     this.RefreshItemNoMenu();
   }
 
-  oncellEditingStarted(event) { 
+  oncellEditingStarted(event) {
     this.gridApiFastMenu.forEachNode(node => {
       if (node.rowIndex === event.rowIndex) {
         this.ProdcutTypeCode = node.data.ProductTypeName && node.data.ProductTypeName.ProductTypeCode
@@ -421,7 +671,7 @@ export class CustomerOrderProductRequestComponent implements OnInit {
         });
     }
   }
-  
+
   FetchMoreProduct(event) {
     event.Owner.columnDef[2].cellEditorParams.Params.loading = true;
     const ResultList = [];
@@ -454,7 +704,7 @@ export class CustomerOrderProductRequestComponent implements OnInit {
     });
   }
 
-  
+
   FetchProductByTerm(event) {
     event.Owner.columnDef[2].cellEditorParams.Params.loading = true;
     event.Owner.ProductRequest.GetProductList(event.SearchOption,
@@ -475,7 +725,7 @@ export class CustomerOrderProductRequestComponent implements OnInit {
       });
   }
 
-  
+
   RedioSelectedChange(event) {
     event.Owner.columnDef[2].cellEditorParams.Params.loading = true;
     event.Owner.ProductRequest.GetProductList(event.SearchOption,
@@ -497,47 +747,54 @@ export class CustomerOrderProductRequestComponent implements OnInit {
       });
   }
 
-  Request() {
-    this.gridApiFastMenu.stopEditing();
-    this.gridApiFastMenu.forEachNode(node => {
-      if (node.data.Qty > node.data.RemainQty) {
-        this.IsMore = true;
-        this.ShowMessageBoxWithOkBtn('اقلام انتخابی بیشتر از میزان مجاز است');
+  BtnRequestClick() {
+    this.gridApiMenu.stopEditing();
+
+    const CustomerOrderItemList = [];
+
+    this.gridApiMenu.forEachNode(node => {
+      if (node.data.IsChosen) {
+        node.data.QTY = node.data.RemainQty;
+        node.data.RemainQty = node.data.RemainQty;
+        node.data.Subject = node.data.Note;
+        node.data.CustomerOrderItemID = node.data.CustomerOrderItemID;
+        node.data.ProductID = node.data.ProductID;
+        node.data.ProductPatternID = node.data.ProductPatternID;
+        CustomerOrderItemList.push(node.data);
       }
     });
-    if (this.IsMore == false) {
-      this.type = 'pure-product-request-page';
+
+    //if (this.IsMore == false) {
+
+    if (CustomerOrderItemList && CustomerOrderItemList.length > 0) {
+      this.type = 'customer-product-request-page';
       this.HaveHeader = true;
       this.btnclicked = true;
-      this.startLeftPosition = 5;
-      this.startTopPosition = 5;
+      this.startLeftPosition = 50;
+      this.startTopPosition = 10;
       this.HaveMaxBtn = true;
       this.HeightPercentWithMaxBtn = 97
       this.PercentWidth = 90;
       this.MainMaxwidthPixel = 2000;
       this.MinHeightPixel = 645;
-      const CustomerOrderItemsList = [];
-
-      this.gridApiFastMenu.forEachNode(node => {
-        node.data.QTY = node.data.Qty;
-        node.data.Subject = node.data.Note;
-        node.data.CustomerOrderItemID = node.data.CustomerOrderItemID;
-        CustomerOrderItemsList.push(node.data);
-
-      });
 
       this.paramObj = {
         CustomerOrderID: this.CustomerOrderID,
-        ProductRequestItemList: CustomerOrderItemsList,
+        ProductRequestItemList: CustomerOrderItemList,
         CostFactorID: -1,
         WorkFlowID: null,
         ReadyToConfirm: null,
         IsRegionReadOnly: false,
         DisableCustomerOrder: true,
-
+        CustomerOrderCode: this.CustomerOrderCode,
       };
 
       return;
+    }
+    else
+    {
+      this.ShowMessageBoxWithOkBtn('ردیفی انتخاب نشده است.');
+
     }
 
   }
@@ -554,9 +811,60 @@ export class CustomerOrderProductRequestComponent implements OnInit {
     this.alertMessageParams.HaveYesBtn = false;
     this.alertMessageParams.HaveNoBtn = false;
   }
+
+  onAddItemsClick() {
+    this.type = 'customer-order-list';
+    this.btnclicked = true;
+    this.HaveMaxBtn = true;
+    this.startLeftPosition = 350;
+    this.startTopPosition = 51;
+    this.paramObj = {
+      Mode: 'AddNewPopUp',
+    };
+  }
+
   getOutPutParam(event) {
-    if (this.type === 'message-box') {
-      this.IsMore = false;
+    // if (this.type === 'message-box') {
+    //   this.IsMore = false;
+    // }
+    if (this.CustomerOrderID) {
+      this.CustomerOrder.GetProductRequestByCustomer(this.CustomerOrderID).subscribe(res => {
+        this.SubrowData = res;
+      });
+    }
+
+    if (this.type == 'add-to-group' && event) {
+      this.GroupNumber = event;
+      const selectedReqestList = [];
+      this.SubGridApiMenu.forEachNode(node => {
+        if (node.data.IsChosen) {
+          selectedReqestList.push(node.data.CostFactorID);
+        }
+      });
+
+      this.ProductRequest.SaveToCurrentGroupRequests(selectedReqestList,this.GroupNumber, 1646).subscribe((res: any) => {
+        this.ShowMessageBoxWithOkBtn('درخواست مورد نظر به گروه انتخاب شده اضافه گردید.');
+        this.CustomerOrder.GetProductRequestByCustomer(this.CustomerOrderID).subscribe(res => {
+          this.SubrowData = res;
+        });
+      });
+
+
+
+    }
+    if (this.type == 'customer-order-list') {
+      this.CustomerOrder.GetCustomerOrder(event).subscribe(res => {
+        if (res.CustomerOrderItemList && res.CustomerOrderItemList.length) {
+          res.CustomerOrderItemList.forEach(element => {
+            this.gridApiFastMenu.updateRowData({ add: [element] });
+          });
+        }
+      });
+    }
+
+    if (this.type === 'customer-product-request-page') {
+      this.ngOnInit();
+      this.rowsData = [];
     }
   }
 
@@ -576,4 +884,294 @@ export class CustomerOrderProductRequestComponent implements OnInit {
     this.btnclicked = false;
     this.Closed.emit(true);
   }
+
+
+  BtnProductReqShowClick(row) {
+    this.type = 'customer-product-request-page';
+    this.HaveHeader = true;
+    this.btnclicked = true;
+    this.startLeftPosition = 50;
+    this.startTopPosition = 10;
+    this.HaveMaxBtn = true;
+    this.HeightPercentWithMaxBtn = 97
+    this.PercentWidth = 90;
+    this.MainMaxwidthPixel = 2000;
+    this.MinHeightPixel = 645;
+    this.paramObj = {
+      CostFactorID: row.CostFactorID,
+      CustomerOrderCode: this.CustomerOrderCode,
+      CustomerName: this.CustomerName,
+      Subject: this.Subject,
+      ProductRequestDate: row.ShortProductRequestDate,
+      SubCostCenterID: row.SubCostCenterID,
+      HasWorkFlow: row.HasWorkFlow,
+      BtnShowDelete: this.BtnShowDelete = true,
+      HeaderName: 'ریز درخواست'
+    };
+  }
+
+  AddGroup() {
+    const selectedReqestList = [];
+    this.SubGridApiMenu.forEachNode(node => {
+      if (node.data.IsChosen) {
+        selectedReqestList.push(node.data.CostFactorID);
+      }
+    });
+
+    if (selectedReqestList != null && selectedReqestList.length > 1) {
+      this.ProductRequest.SaveRelatedProductRequests(selectedReqestList, 1646).subscribe((res: any) => {
+        this.ShowMessageBoxWithOkBtn('گروه بندی ریز درخواست های انتخاب شده با موفقیت انجام شد.');
+        this.CustomerOrder.GetProductRequestByCustomer(this.CustomerOrderID).subscribe(res => {
+          this.SubrowData = res;
+        });
+      });
+    }
+  }
+
+  AddToCurrentGroup() {
+    const selectedReqestList = [];
+    this.SubGridApiMenu.forEachNode(node => {
+      if (node.data.IsChosen) {
+        selectedReqestList.push(node.data.CostFactorID);
+      }
+    });
+
+    if (selectedReqestList != null && selectedReqestList.length > 0) {
+      this.type = 'add-to-group';
+      this.btnclicked = true;
+      this.HaveHeader = true;
+      this.HaveMaxBtn = true;
+      this.PercentWidth = 33;
+      this.MinHeightPixel = 145;
+      //this.MainMaxwidthPixel = 545;
+      this.MainMinwidthPixel = 30;
+      this.HeightPercentWithMaxBtn = 31;
+      this.startLeftPosition = 419;
+      this.startTopPosition = 116;
+    }
+  }
+
+  DeleteFromGroup() {
+    const selectedReqestList = [];
+    this.SubGridApiMenu.forEachNode(node => {
+      if (node.data.IsChosen) {
+        selectedReqestList.push(node.data.CostFactorID);
+      }
+    });
+    if (selectedReqestList != null && selectedReqestList.length > 0) {
+      this.ProductRequest.DeleteFromRelatedGroup(selectedReqestList, 1646).subscribe((res: any) => {
+        this.ShowMessageBoxWithOkBtn('حذف از گروه با موفقیت انجام شد.');
+        this.CustomerOrder.GetProductRequestByCustomer(this.CustomerOrderID).subscribe(res => {
+          this.SubrowData = res;
+        });
+      });
+    }
+
+  }
+
+  ShowMessageBoxWithYesNoBtn(message) {
+    this.isClicked = true;
+    this.btnclicked = true;
+    this.type = 'message-box';
+    this.HaveHeader = true;
+    this.HaveMaxBtn = false;
+    this.startLeftPosition = 449;
+    this.startTopPosition = 87;
+    this.alertMessageParams.message = message;
+    this.alertMessageParams.HaveOkBtn = false;
+    this.alertMessageParams.HaveYesBtn = true;
+    this.alertMessageParams.HaveNoBtn = true;
+  }
+  DOConfirm(HasAlert = true, resolve = null) {
+    if (!this.HaveAlertToFinance || this.IsAdmin === true) {
+      if (this.WorkflowObjectCode === null) {
+        this.ShowMessageBoxWithOkBtn('ماژول گردش کار برای این واحد اجرایی به درستی تعریف نشده است');
+      }
+      this.SubGridApiMenu.forEachNode(node => {
+        if (node.data.IsChosen) {
+          // this.selectedReq.push(node.data.CostFactorID);
+
+          this.Cartable.UserUpdateWorkFlow(this.WorkFlowID,
+            this.CostFactorID,
+            200,
+            this.ModuleCode,
+            1,
+            this.WorkflowObjectCode,
+            this.ModuleViewTypeCode,
+            this.OrginalModuleCode,
+            this.CartableUserID,
+            this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null).
+            subscribe(res => {
+              if (HasAlert) {
+                this.ShowMessageBoxWithOkBtn('تایید درخواست  انجام معامله  با موفقیت انجام شد');
+              }
+              this.RefreshPersonItems.RefreshCartable();
+              this.ReadyToConfirm = 1;
+              this.btnConfirmName = 'عدم تایید';
+              this.btnConfirmIcon = 'cancel';
+              this.IsEditable = false;
+              resolve(true);
+            },
+              err => {
+                if (err.error.Message.includes('|')) {
+                  resolve(false);
+                } else {
+                  this.ShowMessageBoxWithOkBtn('خطای پیش بینی نشده');
+                }
+              }
+            );
+        }
+      });
+    } else {
+      this.ShowMessageBoxWithOkBtn('لطفا جهت تامین اعتبار به سیستم جامع مالی مراجعه نمایید');
+    }
+
+  }
+
+  DOFinalConfirm() {
+    this.Cartable.UserFinalConfirmWorkFlow(
+      this.CurrWorkFlow,
+      this.WorkFlowID,
+      10,
+      '',
+      this.ObjectNo,
+      this.WorkflowTypeName,
+      this.ObjectID,
+      this.WorkflowTypeCode,
+      this.ReadyToConfirm === null || this.ReadyToConfirm === 0,
+      this.WorkflowObjectCode,
+      this.ModuleViewTypeCode,
+      this.CartableUserID
+    )
+      .subscribe(res2 => {
+        let messageStr = '';
+        if (this.ReadyToConfirm && this.ReadyToConfirm === 1) {
+          messageStr = 'بازگشت از تایید نهایی سفارش مشتری با موفقیت انجام شد';
+          this.ReadyToConfirm = 0;
+          this.btnConfirmName = 'تایید نهایی';
+          this.btnConfirmIcon = 'ok';
+
+        } else {
+          messageStr = 'تایید نهایی سفارش مشتری با موفقیت انجام شد';
+          this.ReadyToConfirm = 1;
+          this.btnConfirmName = 'بازگشت از تایید نهایی';
+          this.btnConfirmIcon = 'cancel';
+        }
+        this.ShowMessageBoxWithOkBtn(messageStr);
+      });
+  }
+  onConfirm() {
+
+    if (!this.HaveAlertToFinance || this.IsAdmin === true) {
+      this.BtnClickedName = 'BtnConfirm';
+      if (!this.IsEndFlow) {
+        if (!this.ReadyToConfirm || this.ReadyToConfirm === null || this.ReadyToConfirm === 0) {
+          if (this.ChangeDetection) {
+            this.ShowMessageBoxWithYesNoBtn('اطلاعات  سفارش مشتری تغییر کرده است آیا می خواهید بدون ثبت اطلاعات تایید کنید ؟');
+          } else {
+            this.DOConfirm();
+          }
+        } else {
+          this.Cartable.UserUpdateWorkFlow(this.WorkFlowID,
+            this.CostFactorID,
+            200,
+            this.ModuleCode,
+            0,
+            this.WorkflowObjectCode,
+            this.ModuleViewTypeCode,
+            this.OrginalModuleCode,
+            this.CartableUserID,
+            this.CurrWorkFlow ? this.CurrWorkFlow.JoinWorkflowLogID : null)
+            .subscribe(res => {
+              this.ShowMessageBoxWithOkBtn('عدم تایید سفارش مشتری با موفقیت انجام شد');
+
+              this.ReadyToConfirm = 0;
+              this.btnConfirmName = 'تایید';
+              this.btnConfirmIcon = 'ok';
+            }
+            );
+        }
+      } else {
+        this.DOFinalConfirm();
+      }
+    } else {
+      this.ShowMessageBoxWithOkBtn('لطفا جهت تامین اعتبار به سیستم جامع مالی مراجعه نمایید');
+    }
+  }
+
+  DoDelete() {
+    this.ProductRequest.DeleteProductRequest(this.selectedSubMenuID.data.CostFactorID, 3039).subscribe(
+      res => {
+        this.ShowMessageBoxWithOkBtn('حذف با موفقیت انجام شد');
+        this.CustomerOrder.GetProductRequestByCustomer(this.CustomerOrderID).subscribe(res => {
+          this.SubrowData = res;
+        });
+      });
+  }
+
+
+  MessageBoxAction(ActionResult) {
+    if (this.BtnClickedName === 'BtnDelete' && ActionResult === 'YES') {
+      this.DoDelete();
+    }
+    this.type = '';
+    this.BtnClickedName = '';
+    this.btnclicked = false;
+  }
+
+  onDeleteclick(row) {
+    if (row.HasWorkFlow) {
+      this.ShowMessageBoxWithOkBtn('درخواست دارای گردش می‌باشد امکان حذف وجود ندارد');
+      return;
+    }
+    this.BtnClickedName = 'BtnDelete';
+    this.ShowMessageBoxWithYesNoBtn('آیا از حذف درخواست مطمئن هستید؟');
+  }
+
+  OnCinfirmCustomerOrder() {
+    this.SubGridApiMenu.forEachNode(node => {
+      if (node.data.IsChosen) {
+        this.selectedReq.push(node.data.CostFactorID);
+      }
+    });
+  }
+  BtnWorkFlowShowClick(row){
+    if (row.WorkFlowInstanceId) { 
+      
+      this.type = 'user-work-log-details';
+      this.btnclicked = true;
+      this.HaveHeader = true;
+      this.HaveMaxBtn = true;
+      // this.OverPixelWidth = 1290;
+      this.startLeftPosition = 40;
+      this.startTopPosition = 8;
+      this.HeightPercentWithMaxBtn = 98;
+      this.MinHeightPixel = 640;
+  
+      this.paramObj = {
+        HeaderName: 'جزئیات گردش',
+        // LetterNo: row.CustomerOrderCode,
+        // // Subject: this.selectedRow.data.Subject,
+        // FinYearCode: row.CustomerOrderCode,
+        // ContractNo: row.CustomerOrderCode,
+        // OrderNo: row.CustomerOrderCode,
+        // ContractCode: row.CustomerOrderCode,
+        // ContractId: row.CustomerOrderID,
+        // ContractorName: row.FullCustomerName,
+        // ContractTypeName: row.ContractTypeName,
+        // ContractAmount: 0,
+        // LetterDatePersian: row.PersianCustomerOrderDate,
+        // OrderDate: row.PersianCustomerOrderDate,
+        // // workflowtypeStatus: this.WorkflowObjectCode[0],
+        // ParentModuleCode: this.ModuleCode,
+        // ProductRequestCode: row.CustomerOrderCode,
+        // PersianProductRequestDate: row.PersianCustomerOrderDate,
+        // Subject: row.Subject,
+        // CostFactorID: row.CustomerOrderID,
+        // ProductRequestID: row.CustomerOrderID,
+        WorkFlowInstanceId :row.WorkFlowInstanceId
+      };
+    }
+  }
+
 }

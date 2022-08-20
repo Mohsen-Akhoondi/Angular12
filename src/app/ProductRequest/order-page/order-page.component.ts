@@ -5,7 +5,7 @@ import { forkJoin } from 'rxjs';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { OrderService } from 'src/app/Services/ProductRequest/OrderService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-import { Router, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-order-page',
   templateUrl: './order-page.component.html',
@@ -98,10 +98,11 @@ export class OrderPageComponent implements OnInit {
     private OrderPageService: OrderService,
     private ProductRequest: ProductRequestService,
     private route: ActivatedRoute
-  ) { this.route.params.subscribe(params => {
-    this.ModuleCode = +params['ModuleCode'];
-  });
-}
+  ) {
+    this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
+  }
 
   ngOnInit() {
     forkJoin([

@@ -15,21 +15,25 @@
   <div id="container" style="clear: both;padding-bottom: 5px;">
     <div class="box-dev" style=" width: 100%;" [style.height.%]="BoxDevHeight">
       <app-grid (RowClick)="RowClick($event)" (GridReady)="onGridReady($event)" [columns]="columnDef"
-        [rows]="rowData" 
+      [rowsData]="rowData" 
         [gridHeight]=92>
       </app-grid>
     </div>
   </div>
 </div>
 <div class="buttons-place" style="margin: unset;">
-  <button  (click)="Btnclick('insert')" id="btn2" class="btn btn-primary btnGreen">
+  <button id="btn4"  (click)="Btnclick('ok')"  *ngIf="!AddItems" class="btn btn-primary btnGreen">
+    <img width="15px" height="15px"  src="assets/Icons/ok.png" />
+    تایید
+  </button>
+  <button  (click)="Btnclick('insert')"  *ngIf="AddItems" id="btn2" class="btn btn-primary btnGreen">
     <img width="15px" height="15px" src="assets/Icons/add.png" />
     ایجاد</button>
-  <button (click)="Btnclick('update')" id="btn2" class="btn btn-primary btnGreen">
+  <button (click)="Btnclick('update')"  *ngIf="AddItems" id="btn2" class="btn btn-primary btnGreen">
     <img width="15px" height="15px" src="assets/Icons/show.png" />
     اصلاح
   </button>
-  <button  id="btnTenderRep" class="btn btn-primary btnGreen" (click)="onDeleteclick()">
+  <button  id="btnTenderRep" *ngIf="AddItems" class="btn btn-primary btnGreen" (click)="onDeleteclick()">
     <img width="15px" height="15px" src="assets/Icons/delete.png" />
     حذف
   </button>
@@ -38,10 +42,11 @@
     خروج</button>
 </div>
 
-<app-over-popup *ngIf="btnclicked" [HaveMaxBtn]="HaveMaxBtn" [startLeftPosition]="startLeftPosition"
+<app-cfm-over-popup *ngIf="btnclicked" [HaveMaxBtn]="HaveMaxBtn" [startLeftPosition]="startLeftPosition"
   [startTopPosition]="startTopPosition" [minHeightPixel]="MinHeightPixel" [PercentWidth]="PercentWidth"
   [MainMaxwidthPixel]="MainMaxwidthPixel" [PopupType]="type" [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn"
-  [PopupParam]="type === 'message-box' ? alertMessageParams : paramObj" [HaveHeader]="HaveHeader"
+  [PopupParam]="type === 'message-box' ? alertMessageParams : paramObj"
+  (PopupOutPutParam)="getOutPutParam($event)" [HaveHeader]="HaveHeader"
   (popupclosed)="popupclosed($event)"
   (PopupOutPutParam)="type ==='message-box' ? MessageBoxAction($event) : getOutPutParam($event)">
-</app-over-popup>
+</app-cfm-over-popup>

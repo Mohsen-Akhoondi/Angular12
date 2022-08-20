@@ -3,15 +3,12 @@ import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
-import { single } from 'rxjs/operators';
 import { GridOptions } from 'ag-grid-community';
 import { of } from 'rxjs';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
+import { NgSelectConfig } from 'src/app/Shared/ng-select';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { ContractPayService } from 'src/app/Services/ContractService/ContractPayServices/ContractPayService';
-declare var jquery: any;
-declare var $: any;
 
 @Component({
   selector: 'app-contract-without-flow-list',
@@ -53,6 +50,7 @@ export class ContractWithoutFlowListComponent implements OnInit {
   PercentWidth: number;
   MainMaxwidthPixel: number;
   EnableDelete = false;
+  ShowInsert = false;
   WorkflowObjectCode;
   RegionParams = {
     bindLabelProp: 'RegionName',
@@ -77,109 +75,174 @@ export class ContractWithoutFlowListComponent implements OnInit {
     this.sub = this.route.params.subscribe(params => {
       this.ModuleCode = +params['ModuleCode'];
     });
-    this.columnDef = [
-      {
-        headerName: 'اطلاعات درخواست',
-        children: [
-          {
-            headerName: 'ردیف ',
-            field: 'ItemNo',
-            width: 80,
-            resizable: true
-          },
-          {
-            headerName: 'وضعیت',
-            field: 'WithOutFlowStatus',
-            width: 90,
-            resizable: true,
-            sortable: true,
-          },
-          {
-            headerName: 'شماره',
-            field: 'ProductRequestNo',
-            width: 100,
-            resizable: true,
-            sortable: true,
-          },
-          {
-            headerName: 'تاریخ',
-            field: 'PersianProductRequestDates',
-            width: 120,
-            resizable: true
-          },
-          {
-            headerName: 'درخواست کننده',
-            field: 'PersonName',
-            width: 150,
-            resizable: true,
-            sortable: true,
-          },
-          {
-            headerName: 'موضوع',
-            field: 'ProductRequestSubject',
-            width: 350,
-            resizable: true
-          },
-        ]
-      },
-      {
-        headerName: 'اطلاعات قرارداد',
-        children: [
-          {
-            headerName: 'کد واحد اجرایی',
-            field: 'RegionCode',
-            width: 100,
-            resizable: true
-          },
-          {
-            headerName: 'سال مالی ',
-            field: 'FinYearCode',
-            width: 90,
-            resizable: true,
-            sortable: true,
-          },
-          {
-            headerName: ' کد قرارداد',
-            field: 'ContractCode',
-            width: 100,
-            resizable: true,
-            sortable: true,
-          },
-          {
-            headerName: ' نوع قرارداد',
-            field: 'ContractTypeName',
-            width: 100,
-            resizable: true,
-            sortable: true,
-          },
-          {
-            headerName: 'شماره نامه',
-            field: 'LetterNo',
-            width: 120,
-            resizable: true
-          },
-          {
-            headerName: 'پیمانکار',
-            field: 'ContractorName',
-            width: 120,
-            resizable: true
-          },
-          {
-            headerName: 'مبلغ',
-            field: 'ContractAmount',
-            HaveThousand: true,
-            width: 150,
-            resizable: true
-          },
-          {
-            headerName: 'موضوع',
-            field: 'Subject',
-            width: 600,
-            resizable: true
-          }
-        ]
-      }
-    ];
+    if (this.ModuleCode && this.ModuleCode === 3037) {
+      this.columnDef = [
+        {
+          headerName: 'رديف',
+          field: 'ItemNo',
+          width: 70,
+          resizable: true
+        },
+        {
+          headerName: 'کد واحد اجرایی',
+          field: 'RegionCode',
+          width: 100,
+          resizable: true
+        },
+        {
+          headerName: 'سال مالی ',
+          field: 'FinYearCode',
+          width: 90,
+          resizable: true,
+          sortable: true,
+        },
+        {
+          headerName: ' کد صورتجلسه',
+          field: 'ContractCode',
+          width: 100,
+          resizable: true,
+          sortable: true,
+        },
+        {
+          headerName: ' نوع قرارداد',
+          field: 'ContractTypeName',
+          width: 100,
+          resizable: true,
+          sortable: true,
+        },
+        {
+          headerName: 'شماره نامه',
+          field: 'LetterNo',
+          width: 120,
+          resizable: true
+        },
+        {
+          headerName: 'پیمانکار',
+          field: 'ContractorName',
+          width: 120,
+          resizable: true
+        },
+        {
+          headerName: 'مبلغ',
+          field: 'ContractAmount',
+          HaveThousand: true,
+          width: 150,
+          resizable: true
+        },
+        {
+          headerName: 'موضوع',
+          field: 'Subject',
+          width: 600,
+          resizable: true
+        }
+      ];
+    }
+    else {
+      this.columnDef = [
+        {
+          headerName: 'اطلاعات درخواست',
+          children: [
+            {
+              headerName: 'ردیف ',
+              field: 'ItemNo',
+              width: 80,
+              resizable: true
+            },
+            {
+              headerName: 'وضعیت',
+              field: 'WithOutFlowStatus',
+              width: 90,
+              resizable: true,
+              sortable: true,
+            },
+            {
+              headerName: 'شماره',
+              field: 'ProductRequestNo',
+              width: 100,
+              resizable: true,
+              sortable: true,
+            },
+            {
+              headerName: 'تاریخ',
+              field: 'PersianProductRequestDates',
+              width: 120,
+              resizable: true
+            },
+            {
+              headerName: 'درخواست کننده',
+              field: 'PersonName',
+              width: 150,
+              resizable: true,
+              sortable: true,
+            },
+            {
+              headerName: 'موضوع',
+              field: 'ProductRequestSubject',
+              width: 350,
+              resizable: true
+            },
+          ]
+        },
+        {
+          headerName: 'اطلاعات قرارداد',
+          children: [
+            {
+              headerName: 'کد واحد اجرایی',
+              field: 'RegionCode',
+              width: 100,
+              resizable: true
+            },
+            {
+              headerName: 'سال مالی ',
+              field: 'FinYearCode',
+              width: 90,
+              resizable: true,
+              sortable: true,
+            },
+            {
+              headerName: ' کد قرارداد',
+              field: 'ContractCode',
+              width: 100,
+              resizable: true,
+              sortable: true,
+            },
+            {
+              headerName: ' نوع قرارداد',
+              field: 'ContractTypeName',
+              width: 100,
+              resizable: true,
+              sortable: true,
+            },
+            {
+              headerName: 'شماره نامه',
+              field: 'LetterNo',
+              width: 120,
+              resizable: true
+            },
+            {
+              headerName: 'پیمانکار',
+              field: 'ContractorName',
+              width: 120,
+              resizable: true
+            },
+            {
+              headerName: 'مبلغ',
+              field: 'ContractAmount',
+              HaveThousand: true,
+              width: 150,
+              resizable: true
+            },
+            {
+              headerName: 'موضوع',
+              field: 'Subject',
+              width: 600,
+              resizable: true
+            }
+          ]
+        }
+      ];
+    }
+
     this.defaultColDef = { resizable: true };
     this.rowSelection = 'single';
   }
@@ -205,6 +268,9 @@ export class ContractWithoutFlowListComponent implements OnInit {
 
   ngOnInit() {
     this.getNewData();
+    this.ShowInsert = this.ModuleCode === 3034;
+    this.EnableDelete = this.ModuleCode === 3034;
+
   }
 
   getNewData(): void {
@@ -226,10 +292,10 @@ export class ContractWithoutFlowListComponent implements OnInit {
 
   Btnclick(BtnName) {
     if (BtnName === 'insert') {
-      this.type = (this.ModuleCode === 2934) ? 'researcher-product-request-list' : 'product-request-page-without-flow';
+      this.type = (this.ModuleCode === 2934) ? 'researcher-product-request-list' : ((this.ModuleCode === 3037) ? 'contract' : 'product-request-page-without-flow');
       this.HaveHeader = true;
       this.btnclicked = true;
-      this.startLeftPosition =  (this.ModuleCode === 2934) ? 68 : 15;
+      this.startLeftPosition = (this.ModuleCode === 2934) ? 68 : 15;
       this.startTopPosition = 10;
       this.HaveMaxBtn = true;
       this.HeightPercentWithMaxBtn = 97;
@@ -259,7 +325,7 @@ export class ContractWithoutFlowListComponent implements OnInit {
         return;
       }
 
-      this.type = 'product-request-page-without-flow';
+      this.type = (this.ModuleCode === 3037) ? 'contract' : 'product-request-page-without-flow';
       this.btnclicked = true;
       this.PercentWidth = 90;
       this.MinHeightPixel = 645;
@@ -270,9 +336,13 @@ export class ContractWithoutFlowListComponent implements OnInit {
       this.startTopPosition = 10;
       this.HaveMaxBtn = true;
       this.paramObj = {
+        UnitPatternID: this.selectedRow.data.UnitPatternID,
         CostFactorID: this.selectedRow.data.CostFactorID,
+        ContractReceiveFactorID: this.selectedRow.data.ReceiveFactorID,
+        ContractID: this.selectedRow.data.ContractId,
         Mode: 'EditMode',
-        IsRegionReadOnly: this.SelectedRegionObject.IsReadOnly
+        IsRegionReadOnly: this.SelectedRegionObject.IsReadOnly,
+        ProductRequestID: this.selectedRow.data.ProductRequestID,
       };
     }
   }
@@ -282,10 +352,14 @@ export class ContractWithoutFlowListComponent implements OnInit {
       case 2739:
         this.WorkflowObjectCode = 4;
         break;
+      case 3037:
+        this.WorkflowObjectCode = 29;
+        break;
       case 2776:
         this.WorkflowObjectCode = 6;
         break;
       case 2840:
+      case 3034:
         this.WorkflowObjectCode = 9;
         break;
       default:
@@ -295,8 +369,8 @@ export class ContractWithoutFlowListComponent implements OnInit {
     const ContractId = this.selectedRow.data.ContractId ? this.selectedRow.data.ContractId : null;
     const ReadOnlyRegion = this.SelectedRegionObject.IsReadOnly;
     // tslint:disable-next-line:max-line-length
-    this.ContPayService.HasPermissionToDeleteContract(this.selectedRow.data.CostFactorID, this.WorkflowObjectCode, ReadOnlyRegion, ContractId
-     ).subscribe(res => {
+    this.ContPayService.HasPermissionToDeleteContract(this.selectedRow.data.CostFactorID, this.WorkflowObjectCode, ReadOnlyRegion, this.ModuleCode, ContractId
+    ).subscribe(res => {
       this.EnableDelete = res;
     });
     // this.ContPayService.HaveWorkFlowInstanceForProductRequest(this.selectedRow.data.CostFactorID, 5).subscribe(res => {
@@ -319,7 +393,7 @@ export class ContractWithoutFlowListComponent implements OnInit {
   }
 
   onDeleteclick() {
-    this.ProductRequest.DeleteProductRequest(this.selectedRow.data.CostFactorID, 2739).subscribe(
+    this.ProductRequest.DeleteIncomeContract(this.selectedRow.data.CostFactorID, 3037).subscribe(
       res => {
         if (res === true) {
           this.rowData = this.ProductRequest.GetContractWithoutFlowListData(this.RegionParams.selectedObject, this.ModuleCode);

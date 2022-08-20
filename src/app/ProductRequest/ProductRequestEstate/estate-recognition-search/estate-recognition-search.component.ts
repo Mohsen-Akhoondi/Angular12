@@ -154,14 +154,14 @@ export class EstateRecognitionSearchComponent implements OnInit {
       this.ZoneNo = this.PopupParam.ProductRequestObject.RegionCode;
     }
     this.ProductRequest.SearchRecognitionEstate(this.ZoneNo,
-                                                this.BlockNo,
-                                                this.LandNo,
-                                                this.ApartmentNo,
-                                                this.BusinessNo,
-                                                this.RegRegion,
-                                                this.MajorRegNo,
-                                                this.MinorRegNo,
-                                                this.DivisionSeq
+      this.BlockNo,
+      this.LandNo,
+      this.ApartmentNo,
+      this.BusinessNo,
+      this.RegRegion,
+      this.MajorRegNo,
+      this.MinorRegNo,
+      this.DivisionSeq
     ).subscribe(res => {
       this.EstateRowData = res;
     });
@@ -174,9 +174,9 @@ export class EstateRecognitionSearchComponent implements OnInit {
 
   onAdd() {
     if (this.selectedRow) {
-    this.isClicked = false;
-    this.PopupOutPutParam.emit(this.selectedRow);
-    this.Closed.emit(true);
+      this.isClicked = false;
+      this.PopupOutPutParam.emit(this.selectedRow);
+      this.Closed.emit(true);
     }
   }
   popupclosed() {
@@ -184,6 +184,6 @@ export class EstateRecognitionSearchComponent implements OnInit {
   }
 
   getOutPutParam(event) {
-}
+  }
 
 }

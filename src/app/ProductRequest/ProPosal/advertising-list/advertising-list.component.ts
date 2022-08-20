@@ -2,14 +2,11 @@ import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
-import { single } from 'rxjs/operators';
-import { GridOptions } from 'ag-grid-community';
 import { of } from 'rxjs';
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
+import { NgSelectConfig } from 'src/app/Shared/ng-select';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { ContractPayService } from 'src/app/Services/ContractService/ContractPayServices/ContractPayService';
-declare var jquery: any;
-declare var $: any;
+
 
 @Component({
   selector: 'app-advertising-list',
@@ -157,7 +154,7 @@ export class AdvertisingListComponent implements OnInit {
   }
 
   RowClick(InputValue) {
-     this.selectedRow = InputValue;
+    this.selectedRow = InputValue;
   }
 
   close(): void {
@@ -231,16 +228,16 @@ export class AdvertisingListComponent implements OnInit {
       this.startTopPosition = 250;
       return;
     } else {
-    this.ProductRequest.DeleteAdvertising(this.selectedRow.data.AdvertisingID, this.ModuleCode).subscribe(
-      res => {
-        if (res === true) {
-          this.rowData = this.ProductRequest.GetAdvertisingListByRegionCode(this.RegionParams.selectedObject);
-          this.ShowMessageBoxWithOkBtn('حذف با موفقیت انجام شد');
-          this.selectedRow = null;
-        } else {
-          this.ShowMessageBoxWithOkBtn('خطای پیش بینی نشده');
-        }
-      });
+      this.ProductRequest.DeleteAdvertising(this.selectedRow.data.AdvertisingID, this.ModuleCode).subscribe(
+        res => {
+          if (res === true) {
+            this.rowData = this.ProductRequest.GetAdvertisingListByRegionCode(this.RegionParams.selectedObject);
+            this.ShowMessageBoxWithOkBtn('حذف با موفقیت انجام شد');
+            this.selectedRow = null;
+          } else {
+            this.ShowMessageBoxWithOkBtn('خطای پیش بینی نشده');
+          }
+        });
     }
   }
 
