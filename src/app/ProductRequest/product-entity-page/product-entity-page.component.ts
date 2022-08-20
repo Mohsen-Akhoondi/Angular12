@@ -136,11 +136,11 @@ export class ProductEntityPageComponent implements OnInit {
       {
         headerName: 'نوع درخواستی',
         field: 'ProductTypeName',
-          cellEditorFramework: NgSelectVirtualScrollComponent,
-          cellEditorParams: {
-            Params: this.ProductTypeParams,
-            Items: this.ProductTypeList,
-            Owner: this
+        cellEditorFramework: NgSelectVirtualScrollComponent,
+        cellEditorParams: {
+          Params: this.ProductTypeParams,
+          Items: this.ProductTypeList,
+          Owner: this
         },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {
@@ -260,7 +260,7 @@ export class ProductEntityPageComponent implements OnInit {
               items.push(node.data);
             });
             this.SelectedPRItemRow.ProductRequestEntityList = items;
-            this.ProductRequest.GetAllEntityTypeItem(params.data.EntityTypeID , this.SelectedPRItemRow.ProductID).subscribe(res => {
+            this.ProductRequest.GetAllEntityTypeItem(params.data.EntityTypeID, this.SelectedPRItemRow.ProductID).subscribe(res => {
               this.PEntityItemrowData = res;
               params.data.EntityItemList = this.PEntityItemrowData;
             });
@@ -352,7 +352,7 @@ export class ProductEntityPageComponent implements OnInit {
   }
 
   PRItemRowClick(event) {
-this.PREgridApi.stopEditing();
+    this.PREgridApi.stopEditing();
     if (event.data.ProductRequestEntityList) {
       this.PREntityrowData = event.data.ProductRequestEntityList;
     } else {
@@ -366,12 +366,12 @@ this.PREgridApi.stopEditing();
     this.SelectedPREntityRow = event.data;
     if (!event.data.EntityItemList) {
       // tslint:disable-next-line: max-line-length
-      this.ProductRequest.GetAllEntityTypeItem(event.data.EntityTypeID ? event.data.EntityTypeID : -1 , this.SelectedPRItemRow.ProductID).subscribe(res => {
+      this.ProductRequest.GetAllEntityTypeItem(event.data.EntityTypeID ? event.data.EntityTypeID : -1, this.SelectedPRItemRow.ProductID).subscribe(res => {
         event.data.EntityItemList = res;
         this.PEntityItemrowData = event.data.EntityItemList;
       });
     } else {
-     this.PEntityItemrowData = event.data.EntityItemList;
+      this.PEntityItemrowData = event.data.EntityItemList;
     }
 
   }
