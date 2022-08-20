@@ -4,9 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
-import { isNull, isNullOrUndefined, isUndefined } from 'util';
+import { isUndefined } from 'util';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { RadioBoxModel } from 'src/app/Shared/Radio-Box/Radio-Box-Model/RadioBoxModel';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { ModuleService } from 'src/app/Services/BaseService/ModuleService';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
@@ -517,8 +516,11 @@ export class UsersOrganizationSignComponent implements OnInit {
   onSave() {
     const items = [];
     this.gridApi.forEachNode(element => {
+      let ItemNo = 0;
       element.data.UsersOrganizationSignList.forEach(SignItem => {
-
+        ItemNo++;
+        SignItem.SignTitle = element.data.SignTitle;
+        SignItem.ItemNo = ItemNo;
         items.push(SignItem);
       });
     });

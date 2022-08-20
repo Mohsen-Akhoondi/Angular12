@@ -62,20 +62,20 @@ export class DailyBookComponent implements OnInit {
   cb3Disabled = false;
   FromToVoucherCodeDisabled = false;
   VoucherStatusListSet =
-  [
-    {
-      VoucherStatusName : 'ثبت شده',
-      VoucherStatusCode: 1,
-    },
-    {
-      VoucherStatusName : 'ثبت نشده',
-      VoucherStatusCode: 2,
-    },
-    {
-      VoucherStatusName : 'کلیه اسناد',
-      VoucherStatusCode: 3,
-    },
-  ];
+    [
+      {
+        VoucherStatusName: 'ثبت شده',
+        VoucherStatusCode: 1,
+      },
+      {
+        VoucherStatusName: 'ثبت نشده',
+        VoucherStatusCode: 2,
+      },
+      {
+        VoucherStatusName: 'کلیه اسناد',
+        VoucherStatusCode: 3,
+      },
+    ];
   FinYearListSet = [];
   RegionListSet = [];
   gridcoldef;
@@ -83,14 +83,14 @@ export class DailyBookComponent implements OnInit {
   BoxDevHeight = 84;
   ModuleCode;
   constructor(private RegionService: RegionListService,
-              private Finyearserv: FinYearService,
-              private AccService: AccountingService,
-              private route: ActivatedRoute
-              ) {
-                this.route.params.subscribe(params => {
-                  this.ModuleCode = +params['ModuleCode'];
-                });
-               }
+    private Finyearserv: FinYearService,
+    private AccService: AccountingService,
+    private route: ActivatedRoute
+  ) {
+    this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
+  }
 
   ngOnInit() {
     this.DailyBookRepRows = [];
@@ -136,12 +136,12 @@ export class DailyBookComponent implements OnInit {
     if (this.SelectedRbVoucherStatus === 1) {
       this.AccService.GetDailyBookRep(this.SelectedRegion, this.SelectedFinYear, this.FromDate, this.ToDate,
         this.VoucherStatusCode, this.FromVoucherCode, this.ToVoucherCode)
-       .subscribe(res => {
-         this.DailyBookRepRows = res;
-       });
+        .subscribe(res => {
+          this.DailyBookRepRows = res;
+        });
     }
     if (this.SelectedRbVoucherStatus === 2) {
-      this.AccService.GetMonthlyBookRep (this.SelectedRegion, this.SelectedFinYear, this.FromDate, this.ToDate,
+      this.AccService.GetMonthlyBookRep(this.SelectedRegion, this.SelectedFinYear, this.FromDate, this.ToDate,
         this.VoucherStatusCode, this.FromVoucherCode, this.ToVoucherCode).subscribe(res => {
           this.DailyBookRepRows = res;
         });
@@ -164,12 +164,12 @@ export class DailyBookComponent implements OnInit {
         break;
       case 2:
         this.cb2Selected = param;
-      break;
+        break;
       case 3:
         this.cb3Selected = param;
-      break;
+        break;
       default:
-      break;
+        break;
     }
   }
   MakeVoucherStatusRadio(): void {
@@ -188,14 +188,14 @@ export class DailyBookComponent implements OnInit {
         this.cb1Disabled = true;
         this.cb1Selected = false;
         break;
-        case 3:
-          this.cb1Selected = false;
-          this.cb1Disabled = true;
-          this.cb2Selected = false;
-          this.cb2Disabled = true;
-          this.cb3Selected = false;
-          this.cb3Disabled = true;
-          break;
+      case 3:
+        this.cb1Selected = false;
+        this.cb1Disabled = true;
+        this.cb2Selected = false;
+        this.cb2Disabled = true;
+        this.cb3Selected = false;
+        this.cb3Disabled = true;
+        break;
     }
   }
   getToVoucherCode(param) {

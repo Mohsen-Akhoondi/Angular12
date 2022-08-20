@@ -99,20 +99,20 @@ export class LedgerAccBookComponent implements OnInit {
   FromLedgerAccID;
   ToLedgerAccID;
   VoucherStatusListSet =
-  [
-    {
-      VoucherStatusName : 'ثبت شده',
-      VoucherStatusCode: 1,
-    },
-    {
-      VoucherStatusName : 'ثبت نشده',
-      VoucherStatusCode: 2,
-    },
-    {
-      VoucherStatusName : 'کلیه اسناد',
-      VoucherStatusCode: 3,
-    },
-  ];
+    [
+      {
+        VoucherStatusName: 'ثبت شده',
+        VoucherStatusCode: 1,
+      },
+      {
+        VoucherStatusName: 'ثبت نشده',
+        VoucherStatusCode: 2,
+      },
+      {
+        VoucherStatusName: 'کلیه اسناد',
+        VoucherStatusCode: 3,
+      },
+    ];
   FinYearListSet = [];
   RegionListSet = [];
   LedgerAccFromSet = [];
@@ -123,13 +123,13 @@ export class LedgerAccBookComponent implements OnInit {
   LedgerAccRows: any = [];
   ModuleCode;
   constructor(private RegionService: RegionListService,
-              private Finyearserv: FinYearService,
-              private AccountingServ: AccountingService,
-              private route: ActivatedRoute) {
-                this.route.params.subscribe(params => {
-                  this.ModuleCode = +params['ModuleCode'];
-                });
-              }
+    private Finyearserv: FinYearService,
+    private AccountingServ: AccountingService,
+    private route: ActivatedRoute) {
+    this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
+  }
 
   ngOnInit() {
     this.LedgerAccRows = of([]);
@@ -155,11 +155,11 @@ export class LedgerAccBookComponent implements OnInit {
       case 'From':
         this.FromDate = param ? param.MDate : null;
         break;
-        case 'To':
-          this.ToDate = param ? param.MDate : null;
-          break;
-        default:
-          break;
+      case 'To':
+        this.ToDate = param ? param.MDate : null;
+        break;
+      default:
+        break;
     }
   }
   onChangeFinYear(param) {
@@ -203,14 +203,14 @@ export class LedgerAccBookComponent implements OnInit {
       case 2:
         if (!this.cb2Selected) {
           this.alertMessageParams.message =
-          'چنانچه در تاریخ, ابتدا و انتهای ماه های موردنظر انتخاب نشود ارقام نمایش داده شده دارای مغایرت خواهند بود.';
+            'چنانچه در تاریخ, ابتدا و انتهای ماه های موردنظر انتخاب نشود ارقام نمایش داده شده دارای مغایرت خواهند بود.';
           this.ShowMessage = true;
           this.PopupType = 'message-box';
         }
         this.cb2Selected = param;
-      break;
+        break;
       default:
-      break;
+        break;
     }
   }
   MakeVoucherStatusRadio(): void {
@@ -234,11 +234,11 @@ export class LedgerAccBookComponent implements OnInit {
       case 'From':
         this.FromVoucherCode = param ? param : null;
         break;
-        case 'To':
-          this.ToVoucherCode = param ? param : null;
-          break;
-        default:
-          break;
+      case 'To':
+        this.ToVoucherCode = param ? param : null;
+        break;
+      default:
+        break;
     }
   }
 
@@ -261,12 +261,12 @@ export class LedgerAccBookComponent implements OnInit {
     switch (el) {
       case 'From':
         this.FromLedgerAccID = event;
-      break;
+        break;
       case 'To':
         this.ToLedgerAccID = event;
-      break;
+        break;
       default:
-      break;
+        break;
     }
   }
   DailyColDef() {

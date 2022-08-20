@@ -100,8 +100,8 @@
   </div>
 </div>
 
-<app-over-popup *ngIf="btnclicked" [HaveMaxBtn]="false" [startLeftPosition]="startLeftPosition"
+<app-shared-over-popup *ngIf="btnclicked" [HaveMaxBtn]="false" [startLeftPosition]="startLeftPosition"
   [startTopPosition]="startTopPosition" [minHeightPixel]="''" [PopupType]="PopupType" [HeightPercentWithMaxBtn]="''"
   [PixelWidth]="''" [MainMaxwidthPixel]="''" (popupclosed)="popupclosed($event)" [HaveHeader]="HaveHeader"
   [PopupParam]="PopupType === 'message-box' ? alertMessageParams : PopupParam">
-</app-over-popup>
+</app-shared-over-popup>
