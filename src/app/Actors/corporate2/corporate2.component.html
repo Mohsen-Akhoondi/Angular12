@@ -32,25 +32,28 @@
             </tr>
         </table>
     </fieldset>
-    <div id="container" class="main-form-body" 
-    style="display: inherit; clear: both;padding-bottom: 5px; height: 12.5% !important; ">
+    <div id="container" class="main-form-body"
+        style="display: inherit; clear: both;padding-bottom: 5px; height: 12.5% !important; ">
         <table style="width: 100% ;height: 100%;">
             <tr>
                 <td width="51%" colspan="2">
                     <span class="table-cell-Lable">نام کامل شرکت</span>
                     <input style="width: 82.5%" class="form-control input-style" type="text" name="ActorName"
-                        [(ngModel)]="ActorName" [disabled]="true" />
+                        [(ngModel)]="ActorName" [disabled]="true"
+                        [ngStyle]="{'background-color': CorporateNameChangeFlag ? BackGroundColor:''}" />
                 </td>
                 <td width="26%">
                     <span class="table-cell-Lable">شناسه ملی</span>
                     <input style="width: 65%" class="form-control input-style" type="text" name="IdentityNo"
-                        [(ngModel)]="IdentityNo" [disabled]="true" />
+                        [(ngModel)]="IdentityNo" [disabled]="true"
+                        [ngStyle]="{'background-color': IdentityNoChangeFlag ? BackGroundColor:''}" />
                 </td>
                 <td width="23%">
                     <span class="table-cell-Lable">مرجع ثبت</span>
                     <app-ng-select-virtual-scroll style="display: inline-block;width: 65%; margin: 0 !important;"
                         [NgSelectParams]="NgSelectRegisterReferenceNameParams" [Items]="RegisterReferenceNameItems"
-                        [Disabled]="true">
+                        [Disabled]="!IsAdmin"
+                        [ngStyle]="{'background-color': RegisterReferenceIdChangeFlag ? BackGroundColor:''}">
                     </app-ng-select-virtual-scroll>
                 </td>
             </tr>
@@ -58,30 +61,33 @@
                 <td width="26%">
                     <span class="table-cell-Lable">شماره ثبت</span>
                     <input style="width: 65%" class="form-control input-style" type="text" name="RegisterNo"
-                        [(ngModel)]="RegisterNo" [disabled]="true" />
+                        [(ngModel)]="RegisterNo" [disabled]="!IsAdmin"
+                        [ngStyle]="{'background-color': RegisterNoChangeFlag ? BackGroundColor:''}" />
                 </td>
                 <td width="26%">
                     <span class="table-cell-Lable">کد اقتصادی</span>
                     <input style="width: 65%" class="form-control input-style" type="text" name="EconomicCode"
-                        [(ngModel)]="EconomicCode" [disabled]="true" />
+                        [(ngModel)]="EconomicCode" [disabled]="!IsAdmin"
+                        [ngStyle]="{'background-color': EconomicCodeChangeFlag ? BackGroundColor:''}" />
                 </td>
                 <td width="23%">
                     <span class="table-cell-Lable">تاريخ ثبت</span>
-                    <app-jalali-datepicker [Disabled]="true" [WidthPC]="65" [CurrMiladiDateValue]="RegisterDate"
+                    <app-jalali-datepicker [Disabled]="!IsAdmin" [WidthPC]="65" [CurrMiladiDateValue]="RegisterDate"
                         (Change)="OnRegisterDateChange($event)">
                     </app-jalali-datepicker>
                 </td>
                 <td width="25%">
                     <span class="table-cell-Lable">تاریخ آغاز به کار</span>
                     <app-jalali-datepicker [WidthPC]="65" [CurrMiladiDateValue]="ActivityStartDate"
-                        (Change)="OnActivityStartDateChange($event)" [Disabled]="!IsEditable">
+                        (Change)="OnActivityStartDateChange($event)" [Disabled]="!IsEditable"
+                        [ngStyle]="{'background-color': ActivityStartDateChangeFlag ? BackGroundColor:''}">
                     </app-jalali-datepicker>
                 </td>
             </tr>
         </table>
     </div>
-    <div id="container" class="main-form-body" 
-    style="display: inherit; clear: both;padding-bottom: 5px; height: 10% !important; overflow: auto !important;">
+    <div id="container" class="main-form-body"
+        style="display: inherit; clear: both;padding-bottom: 5px; height: 10% !important; overflow: auto !important;">
         <table style="width: 100% ;height: 100%;">
             <tr>
                 <td width="50%" colspan="2" style="vertical-align: top;">
@@ -92,7 +98,8 @@
                     <div style="display: inline-block ; width: 82.5%;">
                         <textarea [(ngModel)]="Note" name="Note" class="form-control input-style" rows="4" style="display: inline-block;height: 38px;width: 100%; max-width: 100%;
                              font-size: 12px; position: relative; z-index: 8000;" id="indicator-text_note"
-                            [disabled]="(!IsEditable || IsDisplay) && !IsEditableForType3"></textarea>
+                            [disabled]="(!IsEditable || IsDisplay) && !IsEditableForType3"
+                            [ngStyle]="{'background-color': NoteChangeFlag ? BackGroundColor:''}"></textarea>
                     </div>
                 </td>
                 <td width="50%" colspan="2" style="vertical-align: top;">
@@ -104,7 +111,8 @@
                         <textarea name="ActorNote" [(ngModel)]="ActorNote" class="form-control input-style" rows="4"
                             style="display: inline-block; height: 38px; width: 100%; 
                             max-width: 100%; font-size: 12px; position: relative; z-index: 8000;"
-                            [disabled]="!IsEditable" title="ActorNote">
+                            [disabled]="!IsEditable" title="ActorNote"
+                            [ngStyle]="{'background-color': ActorNoteChangeFlag ? BackGroundColor:''}">
                         </textarea>
                     </div>
                 </td>
@@ -200,14 +208,16 @@
                         <td width="100%" colspan="4">
                             <span class="table-cell-Lable">آدرس</span>
                             <input style="width: 91.6%;" class="form-control input-style" type="text" name="Address"
-                                [(ngModel)]="Address" [disabled]="!IsEditable || !HaveNotAllowEditFirstInf" />
+                                [(ngModel)]="Address" [disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                [ngStyle]="{'background-color': AddressChangeFlag ? BackGroundColor:''}" />
                         </td>
                     </tr>
                     <tr>
                         <td width="25%">
                             <span class="table-cell-Lable">کد پستی ده رقمی</span>
                             <input style="width: 66%" class="form-control input-style" type="text" name="PostCode"
-                            [(ngModel)]="PostCode" [disabled]="!IsEditable || !HaveNotAllowEditFirstInf" />
+                                [(ngModel)]="PostCode" [disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                [ngStyle]="{'background-color': PostCodeChangeFlag ? BackGroundColor:''}" />
                         </td>
                         <td width="25%">
                             <span class="table-cell-Lable">تلفن ثابت با کد شهر</span>
@@ -217,41 +227,42 @@
                         <td width="25%">
                             <span class="table-cell-Lable">نمابر با کد شهر</span>
                             <input style="width: 65%" class="form-control input-style" type="text" name="Fax"
-                                [(ngModel)]="Fax" [disabled]="!IsEditable || !HaveNotAllowEditFirstInf" />
+                                [(ngModel)]="Fax" [disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                [ngStyle]="{'background-color': FaxChangeFlag ? BackGroundColor:''}" />
                         </td>
                         <td width="25%">
                             <span class="table-cell-Lable">رتبه درخواستی</span>
                             <input style="width: 65%" class="form-control input-style" type="text" name="GradeReq"
-                                [(ngModel)]="GradeReq" [disabled]="!IsEditable || !HaveNotAllowEditFirstInf" />
+                                [(ngModel)]="GradeReq" [disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                [ngStyle]="{'background-color': GradeRequestChangeFlag ? BackGroundColor:''}" />
                         </td>
                     </tr>
                     <tr>
                         <td width="25%">
                             <span class="table-cell-Lable">وب سایت</span>
                             <input style="width:66%" class="form-control input-style" type="text" name="Web"
-                                [(ngModel)]="Web" [disabled]="!IsEditable || !HaveNotAllowEditFirstInf" />
+                                [(ngModel)]="Web" [disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                [ngStyle]="{'background-color': WebChangeFlag ? BackGroundColor:''}" />
                         </td>
                         <td width="25%">
                             <span class="table-cell-Lable">ایمیل</span>
                             <input style="width: 65%;" class="form-control input-style" type="text" name="Email"
-                                [(ngModel)]="Email" [disabled]="!IsEditable || !HaveNotAllowEditFirstInf" />
+                                [(ngModel)]="Email" [disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                [ngStyle]="{'background-color': EmailChangeFlag ? BackGroundColor:''}" />
                         </td>
                         <td width="25%">
                             <span class="table-cell-Lable">نام قبلی</span>
                             <input style="width: 65%;" class="form-control input-style" type="text" name="OldName"
-                                [(ngModel)]="OldName" [disabled]="!IsEditable || !HaveNotAllowEditFirstInf" />
+                                [(ngModel)]="OldName" [disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                [ngStyle]="{'background-color': OldNameChangeFlag ? BackGroundColor:''}" />
                         </td>
                         <td width="25%">
-                            <!-- <span class="table-cell-Lable">رشته فعالیت</span>
-                            <app-ng-select-virtual-scroll style="display: inline-block; width: 65%;"
-                                [NgSelectParams]="NgSelectActivityFieldParams" [Items]="ActivityFieldItems"
-                                [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf" [multiple]="true">
-                            </app-ng-select-virtual-scroll> -->
                             <span class="table-cell-Lable">محل</span>
                             <app-ng-select-virtual-scroll style="display: inline-block; width: 65%;"
                                 [NgSelectParams]="NgSelectLocationParams" [Items]="LocationItems"
                                 (Open)="OnOpenCityNgSelect()" [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
-                                (FetchMore)="FetchMoreCity($event)" (doSearch)="doCitySearch($event)">
+                                (FetchMore)="FetchMoreCity($event)" (doSearch)="doCitySearch($event)"
+                                [ngStyle]="{'background-color': CorporateCityIDChangeFlag ? BackGroundColor:''}">
                             </app-ng-select-virtual-scroll>
                         </td>
                     </tr>
@@ -259,7 +270,8 @@
                         <td width="25%">
                             <span class="table-cell-Lable">تاریخ درخواست</span>
                             <app-jalali-datepicker [WidthPC]="66" [CurrMiladiDateValue]="RequestDate"
-                                [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf">
+                                [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                [ngStyle]="{'background-color': RequestDateChangeFlag ? BackGroundColor:''}">
                             </app-jalali-datepicker>
                         </td>
                         <td width="25%">
@@ -273,7 +285,8 @@
                         <td width="25%">
                             <span class="table-cell-Lable">تلفن همراه</span>
                             <input style="width: 65%;" class="form-control input-style" type="text" name="CellNo"
-                                [(ngModel)]="CellNo" [disabled]="!IsEditable || !HaveNotAllowEditFirstInf" />
+                                [(ngModel)]="CellNo" [disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                [ngStyle]="{'background-color': CellNoChangeFlag ? BackGroundColor:''}" />
                         </td>
                         <td style="width: 25%;">
                             <span class="table-cell-Lable">مستندات</span>
@@ -339,7 +352,8 @@
                                 <app-custom-check-box style="vertical-align: sub;"
                                     [configurationInfo]="CustomCheckBoxConfig" [isSelected]="IsLimitedRisponsibility"
                                     (PrettyCheckBoxChange)="OnChangeLimitedRisponsibility($event)"
-                                    [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf">
+                                    [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                    [ngStyle]="{'background-color': IsLimitedRisponsibilityChangeFlag ? BackGroundColor:''}">
                                 </app-custom-check-box>
                             </div>
                         </td>
@@ -371,7 +385,8 @@
                                 <app-custom-check-box style="vertical-align: sub; "
                                     [configurationInfo]="CustomCheckBoxConfig" [isSelected]="IsContractor"
                                     (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'IsContractor')"
-                                    [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf">
+                                    [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                    [ngStyle]="{'background-color': IsContractorChangeFlag ? BackGroundColor:''}">
                                 </app-custom-check-box>
                             </div>
                             <div style="width: 16%;display: inline-block; text-align: right; ">
@@ -379,7 +394,8 @@
                                 <app-custom-check-box style="vertical-align: sub; " [isSelected]="IsConsult"
                                     [configurationInfo]="CustomCheckBoxConfig"
                                     (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'IsConsult')"
-                                    [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf">
+                                    [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                    [ngStyle]="{'background-color': IsConsultChangeFlag ? BackGroundColor:''}">
                                 </app-custom-check-box>
                             </div>
                             <div style="width: 16%;display: inline-block; text-align: right; ">
@@ -387,7 +403,8 @@
                                 <app-custom-check-box style="vertical-align: sub;" [isSelected]="IsProducer"
                                     [configurationInfo]="CustomCheckBoxConfig"
                                     (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'IsProducer')"
-                                    [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf">
+                                    [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                    [ngStyle]="{'background-color': IsProducerChangeFlag ? BackGroundColor:''}">
                                 </app-custom-check-box>
                             </div>
                             <div style="width: 16%;display: inline-block; text-align: right; ">
@@ -395,7 +412,8 @@
                                 <app-custom-check-box style="vertical-align: sub;" [isSelected]="IsSupplier"
                                     [configurationInfo]="CustomCheckBoxConfig"
                                     (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'IsSupplier')"
-                                    [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf">
+                                    [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                    [ngStyle]="{'background-color': IsSupplierChangeFlag ? BackGroundColor:''}">
                                 </app-custom-check-box>
                             </div>
                             <div style="width: 16%;display: inline-block; text-align: right; ">
@@ -403,7 +421,8 @@
                                 <app-custom-check-box style="vertical-align: sub;" [isSelected]="IsInternalBuilders"
                                     [configurationInfo]="CustomCheckBoxConfig"
                                     (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'IsInternalBuilders')"
-                                    [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf">
+                                    [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                    [ngStyle]="{'background-color': IsInternalBuildersChangeFlag ? BackGroundColor:''}">
                                 </app-custom-check-box>
                             </div>
                             <div style="width: 16%;display: inline-block; text-align: right; ">
@@ -411,7 +430,8 @@
                                 <app-custom-check-box style="vertical-align: sub;" [isSelected]="IsExternalBuilders"
                                     [configurationInfo]="CustomCheckBoxConfig"
                                     (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'IsExternalBuilders')"
-                                    [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf">
+                                    [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                    [ngStyle]="{'background-color': IsExternalBuildersChangeFlag ? BackGroundColor:''}">
                                 </app-custom-check-box>
                             </div>
                         </div>
@@ -425,7 +445,8 @@
                         <div style="display: inline-block ; width: 64%;">
                             <input style="width: 100%" class="form-control input-style" type="text" name="EmployeCount"
                                 [(ngModel)]="EmployeCount"
-                                [disabled]="(!IsEditable || IsDisplay)  && !IsEditableForType3" />
+                                [disabled]="(!IsEditable || IsDisplay)  && !IsEditableForType3"
+                                [ngStyle]="{'background-color': EmployeCountChangeFlag ? BackGroundColor:''}" />
                         </div>
                     </td>
                 </table>
@@ -440,24 +461,28 @@
                                     [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
                                     [Items]="CompanyAgentActorItems" (FetchMore)="FetchMoreCompanyAgentActor($event)"
                                     (Open)="OpenCompanyAgentActor($event)"
-                                    (doSearch)="doCompanyAgentActorSearch($event)">
+                                    (doSearch)="doCompanyAgentActorSearch($event)"
+                                    [ngStyle]="{'background-color': CompanyAgentActorIDChangeFlag ? BackGroundColor:''}">
                                 </app-ng-select-virtual-scroll>
                             </td>
                             <td width="25%">
                                 <span class="table-cell-Lable">نام و نام خانوادگی</span>
                                 <input style="width: 66%" class="form-control input-style" type="text"
-                                    name="CompanyAgentName" [(ngModel)]="CompanyAgentName" [disabled]="true" />
+                                    name="CompanyAgentName" [(ngModel)]="CompanyAgentName" [disabled]="true"
+                                    [ngStyle]="{'background-color': CompanyAgentNameChangeFlag ? BackGroundColor:''}" />
                             </td>
                             <td width="25%">
                                 <span class="table-cell-Lable">شماره تماس</span>
                                 <input style="width: 66%" class="form-control input-style" type="tel"
                                     name="CompanyAgentTel" [(ngModel)]="CompanyAgentTel"
-                                    [disabled]="!IsEditableForType3" />
+                                    [disabled]="!IsEditableForType3"
+                                    [ngStyle]="{'background-color': CompanyAgentTelChangeFlag ? BackGroundColor:''}" />
                             </td>
                             <td width="25%">
                                 <span class="table-cell-Lable">ایمیل</span>
                                 <input style="width: 66%" class="form-control input-style" type="email"
-                                    name="CompanyAgentEmail" [(ngModel)]="CompanyAgentEmail" [disabled]="true" />
+                                    name="CompanyAgentEmail" [(ngModel)]="CompanyAgentEmail" [disabled]="true"
+                                    [ngStyle]="{'background-color': CompanyAgentEmailChangeFlag ? BackGroundColor:''}" />
                             </td>
                             <td width="25%">
                             </td>
@@ -518,7 +543,7 @@
                 <app-grid [columns]="RankColumnDef" [rowsData]="RankrowsData" (GridReady)="onRankGridReady($event)"
                     [gridHeight]="90" [IsEditable]="(IsEditable && HaveNotAllowEditFirstInf) || CanEdite"
                     (cellEditingStarted)="onRankcellEditingStarted($event)" (RowClick)="RankRowClick($event)"
-                    [GridOptionsRowStyle]="GridOptionsRowStyle">
+                    [GridOptionsRowStyle]="GridOptionsRowStyle" (CellClick)="onCellClickedd($event)">
                 </app-grid>
             </div>
             <div role="tabpanel" id="{{IsShowCompleteInfo ? 'CorporateManagerPosition_2':'CorporateManagerPosition'}}"
@@ -541,7 +566,8 @@
                                             [fontSize]="12" [PixelWidth]="260" [PixelHeight]="25"
                                             [Value]="ManagersCount"
                                             [ReadOnly]="!IsEditable || !HaveNotAllowEditFirstInf"
-                                            (ValueChange)="ManagersCountChange($event)">
+                                            (ValueChange)="ManagersCountChange($event)"
+                                            [ngStyle]="{'background-color': ManagersCountChangeFlag ? BackGroundColor:''}">
                                         </app-number-input-component>
                                     </div>
                                 </td>
@@ -557,7 +583,8 @@
                                             class="form-control input-style" rows="5" style="display: inline-block;height: 38px;width: 100%;
                                              position: relative; z-index: 8000;
                                              max-width: 100%; font-size: 12px !important;" id="text_SignedRightHolders"
-                                            [disabled]="!IsEditable || !HaveNotAllowEditFirstInf"></textarea>
+                                            [disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                            [ngStyle]="{'background-color': SignedRightHoldersChangeFlag ? BackGroundColor:''}"></textarea>
                                     </div>
                                 </td>
                             </tr>
@@ -569,7 +596,8 @@
                                         العاده/سالبانه مورخ</span>
                                     <app-jalali-datepicker [WidthPx]="100" [CurrMiladiDateValue]="ManagersMinutesDate"
                                         (Change)="OnManagersMinutesDateChange($event)"
-                                        [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf">
+                                        [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                        [ngStyle]="{'background-color': ManagersMinutesDateChangeFlag ? BackGroundColor:''}">
                                     </app-jalali-datepicker>
                                 </td>
                                 <td style="width: 65%; text-align: right;">
@@ -581,7 +609,8 @@
                                                 [checked]="IsLimitedManagersEndDate" type="radio"
                                                 class="custom-control-input" id="IsLimitedManagersEndDateRadio"
                                                 name="ChoosenIsLimitedManagersEndDateRadioName"
-                                                (click)="RedioIsLimitedManagersEndDateClick(true)">
+                                                (click)="RedioIsLimitedManagersEndDateClick(true)"
+                                                [ngStyle]="{'background-color': IsLimitedManagersEndDateChangeFlag ? BackGroundColor:''}">
                                             <label style="margin: auto;" class="custom-control-label redio-label"
                                                 for="IsLimitedManagersEndDateRadio">محدود
                                             </label>
@@ -591,7 +620,8 @@
                                                 [checked]="!IsLimitedManagersEndDate" type="radio"
                                                 class="custom-control-input" id="IsNotLimitedManagersEndDateRadio"
                                                 name="ChoosenIsLimitedManagersEndDateRadioName"
-                                                style="padding-left: 0px;">
+                                                style="padding-left: 0px;"
+                                                [ngStyle]="{'background-color': IsLimitedManagersEndDateChangeFlag ? BackGroundColor:''}">
                                             <label style="margin: auto;" class="custom-control-label redio-label"
                                                 for="IsNotLimitedManagersEndDateRadio"
                                                 (click)="RedioIsLimitedManagersEndDateClick(false)">نامحدود
@@ -602,7 +632,8 @@
                                     <span class="table-cell-Lable">تا تاریخ</span>
                                     <app-jalali-datepicker [WidthPx]="100" [CurrMiladiDateValue]="ManagersEndDate"
                                         (Change)="OnManagersEndDateChange($event)" [CheckValidate]="CheckValidate"
-                                        [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf">
+                                        [Disabled]="!IsEditable || !HaveNotAllowEditFirstInf"
+                                        [ngStyle]="{'background-color': ManagersEndDateChangeFlag ? BackGroundColor:''}">
                                     </app-jalali-datepicker>
                                     <span class="table-cell-Lable">به شرح ذیل انتخاب گردیدند</span>
                                 </td>
@@ -617,7 +648,7 @@
                         [columns]="ManagerCorporatePositionColDef" [rowsData]="ManagerCorporatePositionRows"
                         [IsEditable]="IsEditable && HaveNotAllowEditFirstInf"
                         (cellEditingStarted)="onCellEditingStartedMCP($event)" [gridHeight]="80"
-                        (CellValueChanged)="onCellValueChanged($event)">
+                        (CellValueChanged)="onCellValueChanged($event)" [GridOptionsRowStyle]="CpGridOptionsRowStyle">
                     </app-grid>
                 </div>
             </div>
@@ -638,7 +669,8 @@
                 <app-grid [columns]="OfficialGazetteColDef" [rowsData]="OfficialGazetteRows"
                     [IsEditable]="IsEditable && HaveNotAllowEditFirstInf"
                     (cellEditingStarted)="oncellEditingStartedOG($event)" (RowClick)="RowClickOG($event)"
-                    (GridReady)="onGridReadyOG($event)" [gridHeight]="90">
+                    (GridReady)="onGridReadyOG($event)" [gridHeight]="90"
+                    [GridOptionsRowStyle]="OGGridOptionsRowStyle">
                 </app-grid>
             </div>
             <div role="tabpanel"
@@ -687,7 +719,9 @@
                             <div style="display: inline-block ; width: 84.8%;margin-left: 8px;">
                                 <textarea [(ngModel)]="Subject" name="Subject" class="form-control input-style" rows="5"
                                     style="display: inline-block;height: 155px;width: 100%; max-width: 100%;"
-                                    id="indicator-text_subject"></textarea>
+                                    id="indicator-text_subject"
+                                    [ngStyle]="{'background-color': SubjectChangeFlag ? BackGroundColor:''}">
+                                </textarea>
                             </div>
                         </td>
                     </tr>
@@ -703,21 +737,24 @@
                                     نامه)</span>
                                 <app-custom-check-box style="vertical-align: sub; " [isSelected]="HaveHSE"
                                     [configurationInfo]="CustomCheckBoxConfig"
-                                    (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'HaveHSE')">
+                                    (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'HaveHSE')"
+                                    [ngStyle]="{'background-color': HaveHSEChangeFlag ? BackGroundColor:''}">
                                 </app-custom-check-box>
                             </div>
                             <div style="width: 20%;display: inline-block; text-align: right; ">
                                 <span class="table-cell-Lable">گواهینامه HSE</span>
                                 <app-custom-check-box style="vertical-align: sub; "
                                     [configurationInfo]="CustomCheckBoxConfig" [isSelected]="HaveBail"
-                                    (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'HaveBail')">
+                                    (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'HaveBail')"
+                                    [ngStyle]="{'background-color': HaveBailChangeFlag ? BackGroundColor:''}">
                                 </app-custom-check-box>
                             </div>
                             <div style="width: 40%;display: inline-block; text-align: right; ">
                                 <span class="table-cell-Lable">گواهینامه تعیین صلاحیت پیمانکار از وزارت کار</span>
                                 <app-custom-check-box style="vertical-align: sub;" [isSelected]="HaveCertificate"
                                     [configurationInfo]="CustomCheckBoxConfig"
-                                    (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'HaveCertificate')">
+                                    (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'HaveCertificate')"
+                                    [ngStyle]="{'background-color': HaveCertificateChangeFlag ? BackGroundColor:''}">
                                 </app-custom-check-box>
                             </div>
                         </div>
@@ -916,12 +953,13 @@
     </ng-template>
 </div>
 <div style="margin: 0;">
-    <div class="buttons-place" style="float: right;margin: auto;" [style.width.%]="ButtonsBoxWidth">
+    <div class="buttons-place" style="float: right;margin: auto; overflow: auto;" [style.width.%]="ButtonsBoxWidth">
         <button *ngIf="IsEditable" (click)="onSave()" id="btnSave" class="btn btn-primary btnGreen">
             <img width="15px" height="15px" src="assets/Icons/save.png" />
             ثبت
         </button>
-        <button *ngIf="ModuleViewTypeCode === 2 || ModuleViewTypeCode === 6" (click)="onWFSave()" id="btnSave" class="btn btn-primary btnGreen">
+        <button *ngIf="ModuleViewTypeCode === 2 || ModuleViewTypeCode === 6" (click)="onWFSave()" id="btnSave"
+            class="btn btn-primary btnGreen">
             <img width="15px" height="15px" src="assets/Icons/save.png" />
             ثبت
         </button>
@@ -929,32 +967,47 @@
             <img width="15px" height="15px" src="assets/Icons/add.png" />
             ایجاد شخص جدید
         </button>
+        <button (click)="OnshowClick()" id="showdetail" class="btn btn-primary btnGreen">
+            <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
+            مشاهده
+        </button>
+        <!-- <button (click)="OnshowhistorydetailClick()" id="showhistorydetail" class="btn btn-primary btnGreen">
+            <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
+            مشاهده ریز اصلاحات
+        </button> -->
         <button *ngIf="ActorId" id="btnPrint" class="btn btn-primary btnGreen" (click)="btnPrintClick()">
             <img width="15px" height="15px" src="assets/Icons/print.png" />
             چاپ
         </button>
+ 
         <button *ngIf="IsExtraMode" (click)="onSaveRank()" id="btnSave" class="btn btn-primary btnGreen">
             <img width="15px" height="15px" src="assets/Icons/save.png" />
             {{ButtonName}}
         </button>
-        <button *ngIf="ActorId" (click)="onPrinctCart()" id="btnSave" class="btn btn-primary btnGreen">
+        <!-- <button *ngIf="ActorId" (click)="onPrinctCart()" id="btnSave" class="btn btn-primary btnGreen">
             <img width="15px" height="15px" src="assets/Icons/print.png" />
             چاپ کارت پیمانکاری
-        </button>
+        </button> -->
         <!-- <button *ngIf="HaveCompleteInfo" [disabled]="!CorporateObject" id="btnShowDetailsPage"
             class="btn btn-primary btnGreen" (click)="btnShowDetailsClick()">
             <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
             مشاهده کلیه اطلاعات
         </button> -->
 
-        <button *ngIf="ActorId" id="btnShowDetailsPage" class="btn btn-primary btnGreen" (click)="btnWorkFlowClick()">
+        <!-- <button *ngIf="ActorId" id="btnShowDetailsPage" class="btn btn-primary btnGreen" (click)="btnWorkFlowClick()">
             <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
             تاریخچه گردش
-        </button>
-        <button id="RunningContracts" class="btn btn-primary btnGreen" (click)="onShowRunningContractsClick()">
+        </button> -->
+        <!-- <button id="RunningContracts" class="btn btn-primary btnGreen" (click)="onShowRunningContractsClick()">
             <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
-            موارد موثر در کسر ظرقیت کل
-        </button>
+            موارد موثر در کسر ظرفیت کل
+        </button> -->
+
+        <button (click)="ShowActor()" class="btn btn-primary btnGreen">
+            <img width="15px" height="15px" src="assets/Icons/add.png" />
+            افزودن فعالیت و توضیحات
+          </button>
+
         <button (click)="onClose()" id="btn4" class="btn btn-primary btnGreen">
             <img width="15px" height="15px" src="assets/Icons/exit.png" />
             خروج

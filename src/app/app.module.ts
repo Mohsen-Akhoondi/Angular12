@@ -352,6 +352,9 @@ import { CustomizedTreeComponent } from './Shared/customized-tree/customized-tre
 // import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { DeadlineContractListComponent } from './Contract/deadline-contract-list/deadline-contract-list.component';
 import { NgSelectModule } from './Shared/ng-select/public-api';
+import { ActorNoteComponent } from './Actors/actor-note/actor-note.component';
+import { CorporateWithoutInquiryComponent } from './Actors/corporate-without-inquiry/corporate-without-inquiry.component';
+
 @NgModule({
   declarations: [
     LoginPageComponent,
@@ -646,7 +649,9 @@ import { NgSelectModule } from './Shared/ng-select/public-api';
     ContractStatusSummarySearchPageComponent,
     StimulViewerComponent,
     CustomizedTreeComponent,
-    DeadlineContractListComponent
+    DeadlineContractListComponent,
+    ActorNoteComponent,
+    CorporateWithoutInquiryComponent
   ],
   imports: [
     FormsModule,
