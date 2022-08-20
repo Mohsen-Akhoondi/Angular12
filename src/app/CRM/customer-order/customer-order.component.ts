@@ -1,11 +1,10 @@
-import { Component, OnInit, Output, Input, EventEmitter, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Output, Input, EventEmitter, TemplateRef, ViewChild } from '@angular/core';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { forkJoin } from 'rxjs';
-import { Router, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
-import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
@@ -15,7 +14,10 @@ import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsSe
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServices';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
-import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
+import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
+import { ProductPatternService } from 'src/app/Services/CRM/ProductPatternService';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
+import { ReportService } from 'src/app/Services/ReportService/ReportService';
 
 @Component({
   selector: 'app-customer-order',
@@ -26,20 +28,29 @@ export class CustomerOrderComponent implements OnInit {
   @Output() Closed: EventEmitter<any> = new EventEmitter<any>();
   @Input() InputParam;
   @Output() OutPutParam: EventEmitter<any> = new EventEmitter<any>();
+  @ViewChild('TextBtn') TextBtn: TemplateRef<any>;
+  @ViewChild('CostumerOrderBtn') CostumerOrderBtn: TemplateRef<any>;
   CustomCheckBoxConfig: CustomCheckBoxModel = new CustomCheckBoxModel();
+  AgentActorID;
   IsAdmin;
+  WorkFlowDisable = false;
+  BTNDisable = false;
   ActorID;
-  BTNsShow: false;
+  IsGridEditable = false;
+  BTNsShow = false;
   CheckValidate = false;
   CustomerOrderID = -1;
+  IsNoteEditable = true;
   CheckRegionWritable = true;
   ModuleCode;
   RegionItems;
   OrderTypeItems;
+  ActLocationItems;
   OrginalModuleCode;
   CustomerOrderDate;
   PersianOrderRequestDate;
-  IsEditable;
+  IsEditable = true;
+  IsQTYEditable =true;
   OrderCode = '';
   IsPerson = true;
   IsValid = false;
@@ -50,21 +61,59 @@ export class CustomerOrderComponent implements OnInit {
   gridApi: any;
   ProdcutTypeCode: any;
   IsRowClick = false;
-  gridHeightDiv = 80;
+  gridHeightDiv = 78;
   GridHeight = 92;
   PersonReqItems: any;
   AgentPersonReqItems: any;
   EmployerPersonReqItems: any;
   isClicked: boolean;
   PopUpType: string;
+  HaveHeader;
   startLeftPosition: number;
   startTopPosition: number;
   ContractPageCount;
+  IsProject = false;
+  ContractTotalItemCount;
+  HaveRevocation = false;
+  ProductRequestList = [];
+  // HasShowBtn = false ;
+  btnRevocationName = 'ابطال';
+  btnRevocationIcon = 'revocation';
   alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false };
   currentContractSearchTerm;
 
   ProductTypeList = [{ ProductTypeCode: 1, ProductTypeName: 'کالا' },
   { ProductTypeCode: 2, ProductTypeName: 'خدمت' }];
+  ContractItems;
+  ContractParams = {
+    bindLabelProp: 'SelectedSubject',
+    bindValueProp: 'ContractId',
+    placeholder: '',
+    MinWidth: '155px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: true,
+    IsDisabled: false,
+    PageSize: 30,
+    PageCount: 0,
+    TotalItemCount: 0,
+    Required: false,
+    DropDownMinWidth: '320px',
+    type: 'related-contract',
+    AdvanceSearch: {
+      SearchLabel: 'جستجو:',
+      SearchItemDetails:
+        [{ HeaderCaption: 'شماره نامه', HeaderName: 'LetterNo', width: 35, MinTermLenght: 1, SearchOption: 'LetterNo' },
+        { HeaderCaption: 'موضوع', HeaderName: 'Subject', width: 53, SearchOption: 'Subject', MinTermLenght: 3 },
+        { HeaderCaption: 'کد قرارداد', HeaderName: 'ContractCode', width: 35, MinTermLenght: 1, SearchOption: 'ContractCode' }],
+      SearchItemHeader:
+        [{ HeaderCaption: 'شماره نامه', width: 35, },
+        { HeaderCaption: 'موضوع', width: 53, },
+        { HeaderCaption: 'کد قرارداد', width: 35, }],
+      HaveItemNo: true,
+      ItemNoWidth: 15
+    }
+  };
   NgSelectVSParams = {
     bindLabelProp: 'ProductCodeName',
     bindValueProp: 'ProductID',
@@ -105,6 +154,17 @@ export class CustomerOrderComponent implements OnInit {
     type: 'region',
   };
 
+  ActLocationParams = {
+    bindLabelProp: 'ActLocationName',
+    bindValueProp: 'ActLocationID',
+    placeholder: '',
+    MinWidth: '155px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    Required: true
+  };
 
   OrderTypeParams = {
     bindLabelProp: 'CustomerOrderTypeName',
@@ -137,14 +197,12 @@ export class CustomerOrderComponent implements OnInit {
     AdvanceSearch: {
       SearchLabel: 'جستجو:',
       SearchItemDetails:
-        [{ HeaderCaption: 'شناسه', HeaderName: 'ActorId', width: 35, MinTermLenght: 1, SearchOption: 'ActorID' },
-        { HeaderCaption: 'کد ملي', HeaderName: 'IdentityNo', width: 35, MinTermLenght: 10, SearchOption: 'IdentityNo' },
+        [{ HeaderCaption: 'شناسه ملي', HeaderName: 'IdentityNo', width: 35, MinTermLenght: 10, SearchOption: 'IdentityNo' },
         // tslint:disable-next-line:max-line-length
-        { HeaderCaption: 'نام و نام خانوادگي', HeaderName: 'ActorName', width: 53, MinTermLenght: 3, SearchOption: 'ActorName' }],
+        { HeaderCaption: 'نام شخص', HeaderName: 'ActorName', width: 53, MinTermLenght: 3, SearchOption: 'ActorName' }],
       SearchItemHeader:
-        [{ HeaderCaption: 'شناسه', width: 35, },
-        { HeaderCaption: 'کد ملي', width: 35, },
-        { HeaderCaption: 'نام و نام خانوادگي', width: 53, }],
+        [{ HeaderCaption: 'شناسه ملي', width: 35, },
+        { HeaderCaption: 'نام شخص', width: 53, }],
       HaveItemNo: true,
       ItemNoWidth: 16
     }
@@ -168,13 +226,11 @@ export class CustomerOrderComponent implements OnInit {
     AdvanceSearch: {
       SearchLabel: 'جستجو:',
       SearchItemDetails:
-        [{ HeaderCaption: 'شناسه', HeaderName: 'ActorId', width: 35, MinTermLenght: 1, SearchOption: 'ActorID' },
-        { HeaderCaption: 'کد ملي', HeaderName: 'IdentityNo', width: 35, MinTermLenght: 10, SearchOption: 'IdentityNo' },
+        [{ HeaderCaption: 'کد ملي', HeaderName: 'IdentityNo', width: 35, MinTermLenght: 10, SearchOption: 'IdentityNo' },
         // tslint:disable-next-line:max-line-length
         { HeaderCaption: 'نام و نام خانوادگي', HeaderName: 'ActorName', width: 53, MinTermLenght: 3, SearchOption: 'ActorName' }],
       SearchItemHeader:
-        [{ HeaderCaption: 'شناسه', width: 35, },
-        { HeaderCaption: 'کد ملي', width: 35, },
+        [{ HeaderCaption: 'کد ملي', width: 35, },
         { HeaderCaption: 'نام و نام خانوادگي', width: 53, }],
       HaveItemNo: true,
       ItemNoWidth: 16
@@ -200,13 +256,13 @@ export class CustomerOrderComponent implements OnInit {
       SearchLabel: 'جستجو:',
       SearchItemDetails:
         [{ HeaderCaption: 'شناسه', HeaderName: 'ActorId', width: 35, MinTermLenght: 1, SearchOption: 'ActorID' },
-        { HeaderCaption: 'کد ملي', HeaderName: 'IdentityNo', width: 35, MinTermLenght: 10, SearchOption: 'IdentityNo' },
+        { HeaderCaption: 'شناسه ملي', HeaderName: 'IdentityNo', width: 35, MinTermLenght: 10, SearchOption: 'IdentityNo' },
         // tslint:disable-next-line:max-line-length
-        { HeaderCaption: 'نام و نام خانوادگي', HeaderName: 'ActorName', width: 53, MinTermLenght: 3, SearchOption: 'ActorName' }],
+        { HeaderCaption: 'نام شخص', HeaderName: 'ActorName', width: 53, MinTermLenght: 3, SearchOption: 'ActorName' }],
       SearchItemHeader:
         [{ HeaderCaption: 'شناسه', width: 35, },
-        { HeaderCaption: 'کد ملي', width: 35, },
-        { HeaderCaption: 'نام و نام خانوادگي', width: 53, }],
+        { HeaderCaption: 'شناسه ملي', width: 35, },
+        { HeaderCaption: 'نام شخص', width: 53, }],
       HaveItemNo: true,
       ItemNoWidth: 16
     }
@@ -228,38 +284,8 @@ export class CustomerOrderComponent implements OnInit {
   Subject;
   FromContractTotalItemCount;
   FromContractPageCount;
-  NgSelectContractParamsFrom = {
-    Items: [],
-    bindLabelProp: 'Subject',
-    bindValueProp: 'ContractId',
-    MinWidth: '130px',
-    DropDownMinWidth: '320px',
-    selectedObject: null,
-    loading: false,
-    IsVirtualScroll: true,
-    IsDisabled: false,
-    PageSize: 30,
-    PageCount: 0,
-    TotalItemCount: 0,
-    Required: true,
-    type: 'User-Work-Log',
-    AdvanceSearch: {
-      SearchLabel: 'جستجو:',
-      SearchItemDetails:
-        [{ HeaderCaption: 'شماره قرارداد', HeaderName: 'LetterNo', width: 35, MinTermLenght: 1, SearchOption: 'LetterNo' },
-        { HeaderCaption: 'موضوع', HeaderName: 'Subject', width: 53, SearchOption: 'Subject', MinTermLenght: 3 },
-        { HeaderCaption: 'کد قرارداد', HeaderName: 'ContractCode', width: 35, MinTermLenght: 1, SearchOption: 'ContractCode' }],
-      SearchItemHeader:
-        [{ HeaderCaption: 'شماره قرارداد', width: 35, },
-        { HeaderCaption: 'موضوع', width: 53, },
-        { HeaderCaption: 'کد قرارداد', width: 35, }],
-      HaveItemNo: true,
-      ItemNoWidth: 16
-    }
-  };
-  RequiredComponents = [this.OrderTypeParams, this.NgSelectPersonReqParams, this.NgSelectAgentPersonReqParams];
+  RequiredComponents = [this.NgSelectPersonReqParams, this.NgSelectAgentPersonReqParams];
 
-  ContractListSetFrom = [];
   CustomerOrderObject: any;
   RegionGroupCode: any;
   btnConfirmName;
@@ -288,7 +314,34 @@ export class CustomerOrderComponent implements OnInit {
   PercentWidth: number;
   MainMaxwidthPixel: number;
   HaveMaxBtn: boolean;
-
+  IsDisabledPerson = false;
+  IsDisabledCustomerOrderCode: boolean;
+  IsDisabledCustomerOrderDate: boolean;
+  IsDisabledOrderType: boolean;
+  IsDisabledSubject: boolean;
+  TooltipText: any;
+  ProductPatternParams =
+    {
+      bindLable: 'ProductPatternName',
+      bindValue: 'ProductPatternID',
+      ObjectID: 'ProductPatternID',
+      ParentObjectID: 'ParentProductPatternID',
+      SelectedValue: null,
+      Disabled: false,
+      AllowParentSelection: false,
+      TextSpanWidth: 150,
+    };
+  CostumerOrderQty;
+  ProductPatternID: any;
+  IsDisabledAgent = false;
+  IsDisabledActLocation = false;
+  IsDisabled = false;
+  WorkFlowInstanceID: any;
+  SecondID: any;
+  FullCustomerName: string;
+  AgentName: number;
+  ActLocationName: number;
+  UserID: any;
   constructor(private RegionList: RegionListService,
     private ActorList: ActorService,
     private route: ActivatedRoute,
@@ -300,39 +353,54 @@ export class CustomerOrderComponent implements OnInit {
     private FlowService: WorkflowService,
     private Cartable: CartableServices,
     private CommonService: CommonServices,
+    private ProductPattern: ProductPatternService,
+    private Report: ReportService,
     // private RefreshCartable: RefreshServices,
   ) {
     this.route.params.subscribe(params => {
       this.ModuleCode = +params['ModuleCode'];
       this.OrginalModuleCode = +params['ModuleCode'];
     });
-
-
   }
 
-
   ngOnInit() {
+    console.log("this.InputParame",this.InputParam);
+    //this.ModuleViewTypeCode = 2;
     this.CustomCheckBoxConfig.color = 'state p-primary';
     this.CustomCheckBoxConfig.icon = 'fa fa-check';
     this.CustomCheckBoxConfig.styleCheckBox = 'pretty p-icon p-rotate';
     this.CustomCheckBoxConfig.AriaWidth = 6;
 
     if (this.InputParam) {
-      this.CurrWorkFlow = this.InputParam.CurrWorkFlow;  
+      this.WorkFlowInstanceID = this.InputParam.WorkFlowInstanceId ? this.InputParam.WorkFlowInstanceId : null;
+      this.CurrWorkFlow = this.InputParam.CurrWorkFlow;
       this.CustomerOrderID = this.InputParam.CustomerOrderID;
       this.IsEndFlow = this.InputParam.IsEnd === 1;
-      this.ReadyToConfirm = this.CurrWorkFlow.ReadyToConfirm;
-      this.WorkflowTypeName = this.CurrWorkFlow.WorkflowTypeName;
-      this.WorkflowTypeCode = this.CurrWorkFlow.WorkflowTypeCode;
-      this.WorkflowObjectCode = this.CurrWorkFlow.WorkflowObjectCode;
-      this.ObjectNo = this.CurrWorkFlow.ObjectNo;
-      this.ObjectID = this.CurrWorkFlow.ObjectID;
-      this.WorkFlowID = this.CurrWorkFlow.WorkFlowID;
+      if (this.CurrWorkFlow) {
+        this.ReadyToConfirm = this.CurrWorkFlow.ReadyToConfirm;
+        this.WorkflowTypeName = this.CurrWorkFlow.WorkflowTypeName;
+        this.WorkflowTypeCode = this.CurrWorkFlow.WorkflowTypeCode;
+        this.WorkflowObjectCode = this.CurrWorkFlow.WorkflowObjectCode;
+        this.ObjectNo = this.CurrWorkFlow.ObjectNo;
+        this.ObjectID = this.CurrWorkFlow.ObjectID;
+        this.WorkFlowID = this.CurrWorkFlow.WorkflowID;
+        this.CartableUserID = this.CurrWorkFlow.CartableUserID;
+        this.MinimumPosting = this.CurrWorkFlow.MinimumPosting;
+        this.ModuleCode = this.OrginalModuleCode = 1646;
+      }
+
+      if(!this.ModuleCode ){
+        this.ModuleCode = this.OrginalModuleCode = 1646;
+      }
+
       this.ModuleViewTypeCode = this.InputParam.ModuleViewTypeCode;
       this.BTNsShow = this.InputParam.BTNs;
-      
-      this.CartableUserID = this.CurrWorkFlow.CartableUserID;
-      this.MinimumPosting = this.CurrWorkFlow.MinimumPosting;
+      if (this.OrginalModuleCode === 3017) {
+        this.IsEditable = this.HaveRevocation = false;
+        this.IsDisabledPerson = this.IsDisabled = this.IsDisabledActLocation = true;
+        this.IsDisabledCustomerOrderDate = this.IsDisabledOrderType = true;
+        this.IsDisabledSubject = this.IsDisabledAgent = true;
+      }
     }
 
     if (!this.IsEndFlow && (!this.ReadyToConfirm || this.ReadyToConfirm === null || this.ReadyToConfirm === 0)) {
@@ -360,18 +428,24 @@ export class CustomerOrderComponent implements OnInit {
     }
 
     forkJoin([
-      this.RegionList.GetRegionList(this.ModuleCode, !this.CheckRegionWritable),
-      this.CustomerOrder.GetOrderTypeList(),
+      // this.RegionList.GetRegionList(this.ModuleCode, !this.CheckRegionWritable),
+      // this.CustomerOrder.GetOrderTypeList(),
+      this.CustomerOrder.GetOrderType(),
       this.CustomerOrder.GetCustomerOrder(this.CustomerOrderID),
       this.User.CheckAdmin(),
       this.User.GetActiveActorID(),
-
+      this.ProductRequest.GetMaxCustomerOrderCode(200),
+      this.ProductRequest.GetActLocation(),
 
     ]).subscribe((res: any) => {
-      this.RegionItems = res[0];
-      this.OrderTypeItems = res[1];
-      this.CustomerOrderObject = res[2];
-      this.IsAdmin = res[3];
+      //this.RegionItems = res[0];
+      this.OrderTypeItems = res[0];
+      this.CustomerOrderObject = res[1];
+      this.IsAdmin = res[2];
+      this.ActLocationItems = res[5];
+
+      //this.IsDisabledPerson = !this.IsAdmin;
+      this.onChangeRegion(200);
       if (this.CustomerOrderObject && this.CustomerOrderObject.CustomerOrderID > 0) {
         this.CustomerOrderDate = this.CustomerOrderObject.ShortCustomerOrderDate;
         this.Subject = this.CustomerOrderObject.Subject;
@@ -379,16 +453,21 @@ export class CustomerOrderComponent implements OnInit {
         this.IsValid = this.CustomerOrderObject.IsValid;
         this.RegionParams.selectedObject = this.CustomerOrderObject.RegionCode;
         this.OrderTypeParams.selectedObject = this.CustomerOrderObject.CustomerOrderTypeCode;
+        this.ActLocationParams.selectedObject = this.CustomerOrderObject.ActLocationID;
         this.rowsData = this.CustomerOrderObject.CustomerOrderItemList;
         this.IsPerson = this.CustomerOrderObject.IsPerson;
         this.PersonReqOpened(this.CustomerOrderObject.CustomerID);
         this.AgentPersonReqOpened(this.CustomerOrderObject.AgentID);
         this.EmployerPersonReqOpened(this.CustomerOrderObject.EmployerID);
-        this.FromContractOpened(this.CustomerOrderObject.ContractID);
+        this.OnOpenNgSelect();
         this.NgSelectPersonReqParams.selectedObject = this.CustomerOrderObject.CustomerID;
         this.NgSelectAgentPersonReqParams.selectedObject = this.CustomerOrderObject.AgentID;
         this.NgSelectEmployerPersonReqParams.selectedObject = this.CustomerOrderObject.EmployerID;
-        this.NgSelectContractParamsFrom.selectedObject = this.CustomerOrderObject.ContractID;
+        if (this.CustomerOrderObject.CustomerOrderTypeCode == 1) {
+          this.IsProject = true;
+          this.ContractParams.selectedObject = this.CustomerOrderObject.ContractID;
+        }
+
         this.SetEntityDataInDataRow(this.rowsData);
         this.rowsData.forEach(element => {
           this.EntityColumnDefinition(null, null, element.EntityList, false);
@@ -397,26 +476,31 @@ export class CustomerOrderComponent implements OnInit {
         this.ProductRequest.GetCurrentDate().subscribe(resss => {
           this.CustomerOrderDate = resss;
         });
-        this.ActorID = res[4].ActorID;
-        this.IsPerson = res[4].IsPerson;
-        if (this.IsPerson) {
-          this.NgSelectAgentPersonReqParams.selectedObject = this.ActorID;
-          this.AgentPersonReqOpened(this.ActorID);
-        }
-        else {
-          this.ProductRequest.GetCurrentDate().subscribe(resss => {
-            this.CustomerOrderDate = resss;
-          });
-          this.ActorList.GetAgentActorID(this.ActorID, this.CustomerOrderDate).subscribe((res: any) => {
-            this.NgSelectAgentPersonReqParams.selectedObject = res;
-            this.AgentPersonReqOpened(res);
+        this.ActorID = res[3].ActorID;
+        this.IsPerson = res[3].IsPerson;
+        this.CustomerOrderCode = res[4];
+        this.AgentPersonReqOpened(this.ActorID);
+        this.NgSelectAgentPersonReqParams.selectedObject = this.ActorID;
+        // if (this.IsPerson) {
+        //   this.NgSelectAgentPersonReqParams.selectedObject = this.ActorID;
+        //   this.AgentPersonReqOpened(this.ActorID);
+        // }
+        // else {
+        //   this.ProductRequest.GetCurrentDate().subscribe(resss => {
+        //     this.CustomerOrderDate = resss;
+        //   });
+        //   this.ActorList.GetAgentActorID(this.ActorID, this.CustomerOrderDate).subscribe((res: any) => {
+        //     this.NgSelectAgentPersonReqParams.selectedObject = res;
+        //     this.AgentPersonReqOpened(res);
 
-          })
-        }
-        this.NgSelectPersonReqParams.selectedObject = this.ActorID;
-        this.PersonReqOpened(this.ActorID);
+        //   })
+        // }
+        // this.NgSelectPersonReqParams.selectedObject = this.ActorID;
+        // this.PersonReqOpened(this.ActorID);
       }
     });
+
+
   }
 
   SetStartedWFInfo(Resolve) {
@@ -436,6 +520,78 @@ export class CustomerOrderComponent implements OnInit {
         }
         Resolve();
       });
+  }
+
+  ViewTypeChange() {
+    //this.ModuleViewTypeCode = 2;
+    switch (this.ModuleViewTypeCode) {
+      case 1:
+        this.IsDisabledOrderType = true;
+        this.IsDisabledCustomerOrderCode = true;
+        this.IsDisabledCustomerOrderDate = true;
+        this.IsGridEditable = true;
+        //this.BTNDisable = false;
+        break;
+      case 2:
+        this.IsDisabledPerson = false;
+        this.IsDisabledAgent = false;
+        this.IsDisabledOrderType = false;
+        this.IsDisabledSubject = false;
+        this.IsDisabledActLocation = false;
+        this.IsDisabledCustomerOrderCode = false;
+        this.IsDisabledCustomerOrderDate = false;
+        this.BTNDisable = true;
+        break;
+      case 3:
+        this.HaveRevocation = true;
+        break;
+      case 6:
+      case 9:
+        this.IsQTYEditable = false;
+        break;
+      case 12:
+        this.IsQTYEditable = true;
+        break;
+      case 5000:
+      case 5:
+        this.BTNDisable = true;
+        this.HaveRevocation = true;
+        // // case 9 :
+        // //   this.IsDisabledOrderType = true;
+        // //   this.IsDisabledCustomerOrderCode = true;
+        // //   this.IsDisabledCustomerOrderDate = true;
+        // //   this.HasShowBtn = true ;
+        break;
+      case 100:
+        // کیس 2 قبل 
+        this.IsEditable = false;
+        this.IsQTYEditable = false;
+        this.IsDisabledPerson = true;
+        this.IsDisabledCustomerOrderCode = true;
+        this.IsDisabledCustomerOrderDate = true;
+        this.IsDisabledOrderType = true;
+        this.IsDisabledSubject = true;
+        this.IsDisabledAgent = true;
+        this.IsDisabledActLocation = true;
+        this.BTNDisable = true;
+        break;
+        case 200000:
+          this.IsDisabledPerson = true;
+          this.IsDisabledAgent = true;
+          this.IsDisabledOrderType = true;
+          this.IsDisabledSubject = true;
+          this.IsDisabledActLocation = true;
+          this.IsDisabledCustomerOrderCode = true;
+          this.IsDisabledCustomerOrderDate = true;
+          this.BTNDisable = false;
+          this.IsEditable = false;
+          this.IsQTYEditable = false;
+          this.IsNoteEditable =false;
+          break;
+      default:
+        break;
+
+    }
   }
 
   FetchMoreProduct(event) {
@@ -516,88 +672,88 @@ export class CustomerOrderComponent implements OnInit {
 
   EntityColumnDefinition(ProductID, node, EntityList, hasApiCall) {
 
-    if (ProductID && hasApiCall) {
+    // if (ProductID && hasApiCall) {
 
-      this.ProductRequest.GetProductRequestEntityList(null, ProductID, null).subscribe(
-        res => {
+    //   this.ProductRequest.GetProductRequestEntityList(null, ProductID, null).subscribe(
+    //     res => {
 
-          var columnDef22 = [];
-          this.columnDef.forEach(element => {
-            columnDef22.push(element);
-          });
-          this.columnDef = [];
+    //       var columnDef22 = [];
+    //       this.columnDef.forEach(element => {
+    //         columnDef22.push(element);
+    //       });
+    //       this.columnDef = [];
 
-          node.data.EntityList = res;
-          res.forEach(i => {
-            const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
-            if (!obItem) {
-              const obj = {
-                index: i.EntityTypeID,
-                headerName: i.Subject,
-                field: 'Subject' + i.EntityTypeID.toString(),
-                width: 200,
-                editable: true,
-                resizable: true,
-                cellEditorFramework: NgSelectVirtualScrollComponent,
-                cellEditorParams: {
-                  Params: this.NgSelectContractEntityItemParams,
-                  Items: [],
-                  Owner: this
-                },
-                cellRenderer: 'SeRender',
-                valueFormatter: function currencyFormatter(params) {
-                  if (params.value) {
-                    return params.value.Subject;
-                  } else {
-                    return '';
-                  }
-                },
-              };
-              columnDef22.push(obj);
-            }
-          });
-          this.columnDef = columnDef22;
-        });
-    }
+    //       node.data.EntityList = res;
+    //       res.forEach(i => {
+    //         const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
+    //         if (!obItem) {
+    //           const obj = {
+    //             index: i.EntityTypeID,
+    //             headerName: i.Subject,
+    //             field: 'Subject' + i.EntityTypeID.toString(),
+    //             width: 200,
+    //             editable: true,
+    //             resizable: true,
+    //             cellEditorFramework: NgSelectVirtualScrollComponent,
+    //             cellEditorParams: {
+    //               Params: this.NgSelectContractEntityItemParams,
+    //               Items: [],
+    //               Owner: this
+    //             },
+    //             cellRenderer: 'SeRender',
+    //             valueFormatter: function currencyFormatter(params) {
+    //               if (params.value) {
+    //                 return params.value.Subject;
+    //               } else {
+    //                 return '';
+    //               }
+    //             },
+    //           };
+    //           columnDef22.push(obj);
+    //         }
+    //       });
+    //       this.columnDef = columnDef22;
+    //     });
+    // }
 
-    if (!hasApiCall && EntityList) {
+    // if (!hasApiCall && EntityList) {
 
-      var columnDef22 = [];
-      this.columnDef.forEach(element => {
-        columnDef22.push(element);
-      });
-      this.columnDef = [];
+    //   var columnDef22 = [];
+    //   this.columnDef.forEach(element => {
+    //     columnDef22.push(element);
+    //   });
+    //   this.columnDef = [];
 
-      EntityList.forEach(i => {
-        const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
-        if (!obItem) {
-          const obj = {
-            index: i.EntityTypeID,
-            headerName: i.Subject,
-            field: 'Subject' + i.EntityTypeID.toString(),
-            width: 200,
-            editable: true,
-            resizable: true,
-            cellEditorFramework: NgSelectVirtualScrollComponent,
-            cellEditorParams: {
-              Params: this.NgSelectContractEntityItemParams,
-              Items: [],
-              Owner: this
-            },
-            cellRenderer: 'SeRender',
-            valueFormatter: function currencyFormatter(params) {
-              if (params.value) {
-                return params.value.Subject;
-              } else {
-                return '';
-              }
-            },
-          };
-          columnDef22.push(obj);
-        }
-      });
-      this.columnDef = columnDef22;
-    }
+    //   EntityList.forEach(i => {
+    //     const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
+    //     if (!obItem) {
+    //       const obj = {
+    //         index: i.EntityTypeID,
+    //         headerName: i.Subject,
+    //         field: 'Subject' + i.EntityTypeID.toString(),
+    //         width: 200,
+    //         editable: true,
+    //         resizable: true,
+    //         cellEditorFramework: NgSelectVirtualScrollComponent,
+    //         cellEditorParams: {
+    //           Params: this.NgSelectContractEntityItemParams,
+    //           Items: [],
+    //           Owner: this
+    //         },
+    //         cellRenderer: 'SeRender',
+    //         valueFormatter: function currencyFormatter(params) {
+    //           if (params.value) {
+    //             return params.value.Subject;
+    //           } else {
+    //             return '';
+    //           }
+    //         },
+    //       };
+    //       columnDef22.push(obj);
+    //     }
+    //   });
+    //   this.columnDef = columnDef22;
+    // }
   }
 
   OnOrderRequestDateChange(ADate) {
@@ -619,49 +775,54 @@ export class CustomerOrderComponent implements OnInit {
     this.gridApi = params.api;
   }
 
-  oncellEditingStarted(event) {
-    if (event.colDef && event.colDef.field === 'ProductCodeName') {
-      this.gridApi.forEachNode(node => {
-        if (node.rowIndex === event.rowIndex) {
-          // tslint:disable-next-line:max-line-length
-          this.ProdcutTypeCode = node.data.ProductTypeCode;
-        }
-      });
-      this.columnDef[2].cellEditorParams.Params.loading = true;
-      this.ProductRequest.GetProductList(0,
-        this.RegionParams.selectedObject,
-        '',
-        1,
-        30,
-        this.ProdcutTypeCode,
-        this.IsPerson,
-        event.data.ProductID).
-        subscribe(res => {
-          this.columnDef[2].cellEditorParams.Params.loading = false;
-          this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
-            List: res.List,
-            TotalItemCount: res.TotalItemCount,
-            PageCount: Math.ceil(res.TotalItemCount / 30),
-            type: 'PRI-product'
-          });
-        });
-    }
+  // oncellEditingStarted(event) {
+  //   if (event.colDef && event.colDef.field === 'ProductPatternName') {
 
-    if (event.colDef && event.colDef.index && event.colDef.field === 'Subject' + event.colDef.index.toString()) {
-      this.ProductRequest.GetEntityTypeItemList(event.colDef.index, event.data.ProductID, null, null)
-        .subscribe(res => {
-          this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
-            List: res,
-            type: 'entity-item'
-          });
-        });
 
-    }
-  }
+  //     this.gridApi.forEachNode(node => {
+
+  //       if (node.rowIndex === event.rowIndex) {
+  //         // tslint:disable-next-line:max-line-length
+  //         this.ProdcutTypeCode = node.data.ProductTypeCode;
+  //       }
+  //     });
+  //     this.columnDef[3].cellEditorParams.Params.loading = true;
+  //     this.ProductRequest.GetProductList(0,
+  //       this.RegionParams.selectedObject,
+  //       '',
+  //       1,
+  //       30,
+  //       this.ProdcutTypeCode,
+  //       this.IsPerson,
+  //       event.data.ProductID).
+  //       subscribe(res => {
+  //         this.columnDef[3].cellEditorParams.Params.loading = false;
+  //         this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
+  //           List: res.List,
+  //           TotalItemCount: res.TotalItemCount,
+  //           PageCount: Math.ceil(res.TotalItemCount / 30),
+  //           type: 'PRI-product'
+  //         });
+  //       });
+  //   }
+
+  //   if (event.colDef && event.colDef.index && event.colDef.field === 'Subject' + event.colDef.index.toString()) {
+  //     this.ProductRequest.GetEntityTypeItemList(event.colDef.index, event.data.ProductID, null, null)
+  //       .subscribe(res => {
+  //         this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
+  //           List: res,
+  //           type: 'entity-item'
+  //         });
+  //       });
+
+  //   }
+  // }
 
 
   RowClick(event) {
     this.selectedrow = event;
+    this.ProductPatternID = this.selectedrow.data.ProductPatternID;
+    this.columnDef[1].cellEditorParams.PopupParam.SecondID = this.selectedrow.ProductPatternName;
   }
 
   onSave() {
@@ -678,7 +839,7 @@ export class CustomerOrderComponent implements OnInit {
         }
       });
     }).then(() => {
-      ValidateForm = ValidateForm && this.CustomerOrderDate && this.CustomerOrderCode && this.Subject
+      ValidateForm = ValidateForm && this.CustomerOrderDate && this.Subject
 
       if (ValidateForm) {
         let ItemNo = 0;
@@ -692,9 +853,10 @@ export class CustomerOrderComponent implements OnInit {
           CustomerID: this.NgSelectPersonReqParams.selectedObject,
           AgentID: this.NgSelectAgentPersonReqParams.selectedObject,
           CustomerOrderTypeCode: this.OrderTypeParams.selectedObject,
+          ActLocationID: this.ActLocationParams.selectedObject,
           IsValid: true,
           //EmployerID: this.NgSelectEmployerPersonReqParams.selectedObject,
-          //ContractID: this.NgSelectContractParamsFrom.selectedObject,
+          ContractID: this.ContractParams.selectedObject ? this.ContractParams.selectedObject : null,
           IsWeb: true,
         }
 
@@ -722,13 +884,16 @@ export class CustomerOrderComponent implements OnInit {
           }
 
           const CustomerOrderItemObj = {
+
             CustomerOrderItemID: node.data.CustomerOrderItemID ? node.data.CustomerOrderItemID : -1,
             ItemNo: ++ItemNo,
             Qty: parseFloat(node.data.Qty),
             Note: node.data.Note,
+            CustomerOrderReasonCode: node.data.CustomerOrderReasonCode,
             ProductID: (node.data.ProductID ? node.data.ProductID : null),
-            StartDate: node.data.ShortStartDate,
-            EndDate: node.data.ShortEndDate,
+            // StartDate: node.data.ShortStartDate,
+            // EndDate: node.data.ShortEndDate,
+            ProductPatternID: node.data.ProductPatternID,
             EntityTypeItemIDList: EntityTypeItemIDList,
           };
           CustomerOrderItemList.push(CustomerOrderItemObj);
@@ -737,6 +902,7 @@ export class CustomerOrderComponent implements OnInit {
         this.CustomerOrder.SaveCustomerOrder(CustomerOrder, CustomerOrderItemList, this.ModuleCode).subscribe((res: any) => {
           this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
           this.CustomerOrderObject = res;
+
           this.CustomerOrderID = this.CustomerOrderObject.CustomerOrderID;
           this.rowsData = this.CustomerOrderObject.CustomerOrderItemList;
           this.SetEntityDataInDataRow(this.rowsData);
@@ -770,12 +936,190 @@ export class CustomerOrderComponent implements OnInit {
       {
         headerName: 'ردیف',
         field: 'ItemNo',
-        width: 70,
+        width: 45,
         resizable: true
       },
       {
-        headerName: 'نوع',
+        headerName: 'محصول',
+        field: 'ProductName',
+        hide: true,
+        cellEditorFramework: OverPopUpCellEditorComponent,
+        tooltip: (params) => 'فراخوان از کالای فروش',
+        cellEditorParams: {
+          SearchPopupType: 'product-pattern',
+          PopupParam: { RegionGroupCode: 2, ProductPatternID: this.ProductPatternID, MainContentHeight: 92, ShowGrid: false },
+        },
+        cellRenderer: 'SeRender',
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue[0] && params.newValue[0].ProductPatternProductsID) {
+            params.data.ProductCode = params.newValue[0].ProductCode;
+            params.data.ProductID = params.newValue[0].ProductID;
+            params.data.ProductName = params.newValue[0].ProductName;
+            params.data.ProductPatternID = params.newValue[0].ProductPatternID;
+            params.data.ProductPatternProductsID = params.newValue[0].ProductPatternProductsID;
+            this.ProductRequest.GetProduct(params.data.ProductID, null, params.data.ProductPatternID).subscribe(res => {
+              params.data.ScaleName = res.ScaleName;
+              params.data.ProductTypeName = res.ProductTypeName;
+
+              this.ProductRequest.GetProductPatternName(params.data.ProductPatternProductsID).subscribe(ress1 => {
+                params.data.ProductPatternName = ress1;
+              });
+            });
+            this.ContractList.GetCostumerOrderQty(200, this.CustomerOrderDate, params.data.ProductPatternID).subscribe(res3 => {
+              params.data.CostumerOrderQty = res3.Qty;
+              params.data.Products = res3.ProductList;
+            });
+
+            this.EntityColumnDefinition(params.data.ProductID, params, null, true)
+            return true;
+          }
+          else if (params.newValue && params.newValue !== params.oldValue) {
+            this.ProductPattern.GetProductPatternProductsListSearch(params.newValue).subscribe(res => {
+              this.CostumerOrderColumnBtn(res, true);
+            });
+            return true;
+          }
+          else if (!params.newValue || params.newValue === "") {
+            params.data.ProductPatternProductsID = null;
+            params.data.ProductName = null;
+            params.data.ProductID = null;
+            params.data.ProductPatternID = null;
+            params.data.ProductPatternID = null;
+            params.data.ProductCode = null;
+            return false;
+          }
+        },
+
+        valueGetter: (params) => {
+          if (params.data.ProductName) {
+            return params.data.ProductCode + params.data.ProductName;
+          }
+        },
+
+        editable: () => {
+          if (this.IsEditable) {
+            return true;
+          } else {
+            return false;
+          }
+        },
+        width: 200,
+        resizable: true
+      },
+      {
+        headerName: 'محصول',
+        field: 'ProductPatternName',
+        cellEditorFramework: OverPopUpCellEditorComponent,
+        tooltip: (params) => 'فراخوان از کالای فروش',
+        cellEditorParams: {
+          SearchPopupType: 'product-pattern',
+          PopupParam: { RegionGroupCode: 2, MainContentHeight: 92, ModuleViewTypeCode: 1 },
+        },
+        cellRenderer: 'SeRender',
+        valueSetter: (params) => {
+          if (params.newValue && (!params.oldValue || params.newValue !== params.oldValue)) {
+            params.data.ProductPatternID = params.newValue;
+            this.ProductRequest.GetProductPatternByID(params.newValue).subscribe(ress1 => {
+              params.data.ProductPatternName = ress1.ProductPatternName + "/" + ress1.ProductPatternCode;
+            });
+          }
+          if (!params.newValue) {
+            params.newValue = "";
+            params.data.ProductPatternName = "";
+          }
+        },
+        // valueFormatter: function currencyFormatter(params) {
+        //   if (params.value) {
+        //     return params.value.ProductPatternName;
+        //   } else {
+        //     return '';
+        //   }
+        // },
+
+        valueGetter: (params) => {
+          if (params.data.ProductPatternName) {
+            return params.data.ProductPatternName;
+          }
+        },
+
+        editable: () => {
+          if (this.IsEditable) {
+            return true;
+          } else {
+            return false;
+          }
+        },
+        width: 200,
+        resizable: true
+      },
+      // {
+      //   headerName: 'گروه محصول',
+      //   field: 'ProductPatternName',
+      //   editable: true,
+      //   // editable: () => {
+      //   //   return true;
+      //   // },
+
+      //   width: 200,
+      //   resizable: true,
+      //   cellEditorFramework: TreeSelectComponent,
+      //   cellEditorParams: {
+      //     Params: this.ProductPatternParams,
+      //     Items: [],
+      //   },
+      //   cellRenderer: 'SeRender',
+      //   valueFormatter: function currencyFormatter(params) {
+      //     if (params.value) {
+      //       return params.value.ProductPatternName;
+      //     } else {
+      //       return '';
+      //     }
+      //   },
+      //   valueSetter: (params) => {
+      //     if (params.newValue && params.newValue.ProductPatternName) {
+      //       params.data.ProductPatternName = params.newValue.ProductPatternName;
+      //       params.data.ProductPatternID = params.newValue.ProductPatternID;
+      //       this.ProductPatternID = params.data.ProductPatternID;
+      //       params.data.ProductPatternProductsID = null;
+      //       params.data.ProductName = null;
+      //       params.data.ProductID = '';
+      //       params.data.ProductCode = null;
+      //       params.data.ProductCode = null;
+      //       params.data.ScaleName = null;
+      //       params.data.ProductTypeName = null;
+
+      //       // this.ProductPattern.GetProductPatternProductsList(params.data.ProductPatternID).subscribe(res2 => {
+      //       //   if (res2 && res2.length > 0) {
+      //       //     let SumCostumerOrderQty = 0;
+      //       // res2.forEach(element => {
+      //       // this.ContractList.GetCostumerOrderQty( 200, this.CustomerOrderDate,params.data.ProductPatternID).subscribe(res3 => {
+      //       //         // SumCostumerOrderQty += res3;
+      //       //  params.data.CostumerOrderQty =res3.Qty ;
+      //       //  params.data.Products = res3.ProductList;
+      //       // });
+      //       // });
+      //       //   } else {
+      //       //     params.data.CostumerOrderQty = 0;
+      //       //   }
+      //       // // });
+      //       return true;
+      //     } else {
+      //       params.data.ProductPatternProductsID = null;
+      //       params.data.ProductName = null;
+      //       params.data.ProductID = '';
+      //       params.data.ProductPatternID = null;
+      //       params.data.ProductCode = null;
+      //       params.data.ScaleName = null;
+      //       params.data.ProductTypeName = null;
+      //       return false;
+      //     }
+      //   },
+
+      // },
+      {
+        headerName: 'نوع درخواست',
         field: 'ProductTypeName',
+        hide: true,
         cellEditorFramework: NgSelectCellEditorComponent,
         cellEditorParams: {
           HardCodeItems: this.ProductTypeList,
@@ -795,6 +1139,7 @@ export class CustomerOrderComponent implements OnInit {
           params.data.ScaleName = null;
           params.data.ProductID = null;
           params.data.ProductName = null;
+          params.data.ProductCode = null;
           if (params.newValue && params.newValue.ProductTypeName) {
             params.data.ProductTypeName = params.newValue.ProductTypeName;
             params.data.ProductTypeCode = params.newValue.ProductTypeCode;
@@ -805,174 +1150,202 @@ export class CustomerOrderComponent implements OnInit {
             return false;
           }
         },
-        editable: true,
-        width: 70,
+        editable: false,
+        width: 150,
         resizable: true
       },
       // {
-      //   headerName: 'کالا/خدمت',
-      //   field: 'ProductCodeName',
-      //   cellEditorFramework: NgSelectVirtualScrollComponent,
+      //   headerName: 'نام محصول',
+      //   field: 'ProductName',
+      //   width: 150,
+      //   resizable: true,
+
+      // },
+
+      {
+        headerName: 'واحد',
+        field: 'ScaleName',
+        hide: true,
+        width: 90,
+        resizable: true
+      },
+      {
+        headerName: 'موجودی انبار',
+        field: 'CostumerOrderQty',
+        editable: false,
+        hide: true,
+        width: 120,
+        resizable: true
+      },
+      {
+        headerName: 'موجودی',
+        field: '',
+        width: 120,
+        sortable: false,
+        resizable: false,
+        hide: true,
+        editable: () => { false },
+        cellStyle: function (params) {
+          return { 'text-align': 'center' };
+        },
+        cellRendererFramework: TemplateRendererComponent,
+        cellRendererParams: {
+          ngTemplate: this.CostumerOrderBtn,
+        }
+      },
+
+      {
+        headerName: 'تعداد',
+        field: 'Qty',
+        editable: () => {
+          if (this.IsQTYEditable) {
+            return true;
+          } else {
+            return false;
+          }
+        },
+        cellEditorFramework: NumberInputComponentComponent,
+        HaveThousand: true,
+        width: 80,
+        resizable: true
+      },
+      // {
+      //   headerName: 'ابتدای تامین',
+      //   field: 'PersianStartDate',
+      //   width: 130,
+      //   resizable: true,
+      //   editable: true,
+      //   cellEditorFramework: JalaliDatepickerComponent,
       //   cellEditorParams: {
-      //     Params: this.NgSelectVSParams,
-      //     Items: [],
-      //     MoreFunc: this.FetchMoreProduct,
-      //     FetchByTerm: this.FetchProductByTerm,
-      //     RedioChangeFunc: this.RedioSelectedChange,
-      //     Owner: this
+      //     CurrShamsiDateValue: 'PersianStartDate',
+      //     DateFormat: 'YYYY/MM/DD',
+      //     WidthPC: 100,
+      //     AppendTo: '.for-append-date'
       //   },
       //   cellRenderer: 'SeRender',
       //   valueFormatter: function currencyFormatter(params) {
       //     if (params.value) {
-      //       return params.value.ProductCodeName;
+      //       return params.value.SDate;
       //     } else {
       //       return '';
       //     }
       //   },
       //   valueSetter: (params) => {
-      //     if (params.newValue && params.newValue.ProductCodeName) {
-      //       params.data.ProductCodeName = params.newValue.ProductCodeName;
-      //       params.data.ProductID = params.newValue.ProductID;
-      //       this.ProductRequest.GetProductScaleName(params.newValue.ProductID).subscribe(res => {
-      //         params.data.ScaleName = res;
-      //       });
-      //       this.EntityColumnDefinition(params.data.ProductID, this.selectedrow, null, true);
+      //     if (params.newValue && params.newValue.MDate) {
+      //       params.data.ShortStartDate = params.newValue.MDate;
+      //       params.data.StartDate = params.newValue.MDate;
+      //       params.data.PersianStartDate = params.newValue.SDate;
       //       return true;
       //     } else {
-      //       params.data.ProductCodeName = '';
-      //       params.data.ProductID = null;
-      //       params.data.ScaleName = '';
+      //       params.data.ShortStartDate = null;
+      //       params.data.StartDate = null;
+      //       params.data.PersianStartDate = '';
       //       return false;
       //     }
-      //   },
-      //   editable: true,
-      //   width: 350,
-      //   resizable: true
+      //   }
       // },
-
+      // {
+      //   headerName: 'انتهای تامین',
+      //   field: 'PersianEndDate',
+      //   width: 130,
+      //   resizable: true,
+      //   editable: true,
+      //   cellEditorFramework: JalaliDatepickerComponent,
+      //   cellEditorParams: {
+      //     CurrShamsiDateValue: 'PersianEndDate',
+      //     DateFormat: 'YYYY/MM/DD',
+      //     WidthPC: 100,
+      //     AppendTo: '.for-append-date'
+      //   },
+      //   cellRenderer: 'SeRender',
+      //   valueFormatter: function currencyFormatter(params) {
+      //     if (params.value) {
+      //       return params.value.SDate;
+      //     } else {
+      //       return '';
+      //     }
+      //   },
+      //   valueSetter: (params) => {
+      //     if (params.newValue && params.newValue.MDate) {
+      //       params.data.ShortEndDate = params.newValue.MDate;
+      //       params.data.EndDate = params.newValue.MDate;
+      //       params.data.PersianEndDate = params.newValue.SDate;
+      //       this.gridApi.forEachNode(node => {
+      //       });
+      //       return true;
+      //     } else {
+      //       params.data.ShortEndDate = null;
+      //       params.data.EndDate = null;
+      //       params.data.PersianEndDate = '';
+      //       return false;
+      //     }
+      //   }
+      // },
       {
-        headerName: 'کد محصول',
-        field: 'ProductCode',
-        cellEditorFramework: OverPopUpCellEditorComponent,
-        tooltip: (params) => 'فراخوان از کالای فروش',
-        cellEditorParams: {
-          SearchPopupType: 'product-pattern',
-          PopupParam: { RegionGroupCode: 2 }
-        },
-        cellRenderer: 'SeRender',
-        valueFormatter: (params) => {
-          if (params.value) {
-            return params.value.ProductCode;
-          } else {
-            return '';
-          }
-        },
-        editable: true,
-        width: 170,
-        resizable: true
-      },
-      {
-        headerName: 'نام محصول',
-        field: 'ProductName',
+        headerName: 'علت درخواست',
+        field: 'CustomerOrderReasonName',
         width: 150,
+        cellEditorFramework: NgSelectCellEditorComponent,
+        cellEditorParams: {
+          Items: this.CustomerOrder.GetAllCustomerOrderReason(),
+          bindLabelProp: 'CustomerOrderReasonName',
+          bindValueProp: 'CustomerOrderReasonCode',
+        },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.CustomerOrderReasonName) {
+            params.data.CustomerOrderReasonName = params.newValue.CustomerOrderReasonName;
+            params.data.CustomerOrderReasonCode = params.newValue.CustomerOrderReasonCode;
+            params.data.Rank = '';
+            return true;
+          }
+        },
+        cellRenderer: 'SeRender',
+        editable: () => {
+          if (this.IsEditable) {
+            return true;
+          } else {
+            return false;
+          }
+        },
+        resizable: true,
+      },
+      {
+        headerName: 'توضیحات',
+        field: 'Note',
+        editable: () => {
+          if (this.IsNoteEditable) {
+            return true;
+          } else {
+            return false;
+          }
+        },
+
+        // editable: () => {
+        //   return true;
+        // },
+        width: 500,
         resizable: true
+      },
+      {
+        headerName: 'افزودن توضیحات',
+        field: '',
+        width: 120,
+        sortable: false,
+        resizable: false,
+        hide: this.OrginalModuleCode === 3017 || this.IsNoteEditable,
+        editable: () => { true },
+        cellStyle: function (params) {
+          return { 'text-align': 'center' };
+        },
+        cellRendererFramework: TemplateRendererComponent,
+        cellRendererParams: {
+          ngTemplate: this.TextBtn,
+        }
       },
 
-      {
-        headerName: 'واحد',
-        field: 'ScaleName',
-        width: 90,
-        resizable: true
-      },
-      {
-        headerName: 'تعداد',
-        field: 'Qty',
-        editable: true,
-        HaveThousand: true,
-        width: 90,
-        resizable: true
-      },
-      {
-        headerName: 'ابتدای تامین',
-        field: 'PersianStartDate',
-        width: 130,
-        resizable: true,
-        editable: true,
-        cellEditorFramework: JalaliDatepickerComponent,
-        cellEditorParams: {
-          CurrShamsiDateValue: 'PersianStartDate',
-          DateFormat: 'YYYY/MM/DD',
-          WidthPC: 100,
-          AppendTo: '.for-append-date'
-        },
-        cellRenderer: 'SeRender',
-        valueFormatter: function currencyFormatter(params) {
-          if (params.value) {
-            return params.value.SDate;
-          } else {
-            return '';
-          }
-        },
-        valueSetter: (params) => {
-          if (params.newValue && params.newValue.MDate) {
-            params.data.ShortStartDate = params.newValue.MDate;
-            params.data.StartDate = params.newValue.MDate;
-            params.data.PersianStartDate = params.newValue.SDate;
-            return true;
-          } else {
-            params.data.ShortStartDate = null;
-            params.data.StartDate = null;
-            params.data.PersianStartDate = '';
-            return false;
-          }
-        }
-      },
-      {
-        headerName: 'انتهای تامین',
-        field: 'PersianEndDate',
-        width: 130,
-        resizable: true,
-        editable: true,
-        cellEditorFramework: JalaliDatepickerComponent,
-        cellEditorParams: {
-          CurrShamsiDateValue: 'PersianEndDate',
-          DateFormat: 'YYYY/MM/DD',
-          WidthPC: 100,
-          AppendTo: '.for-append-date'
-        },
-        cellRenderer: 'SeRender',
-        valueFormatter: function currencyFormatter(params) {
-          if (params.value) {
-            return params.value.SDate;
-          } else {
-            return '';
-          }
-        },
-        valueSetter: (params) => {
-          if (params.newValue && params.newValue.MDate) {
-            params.data.ShortEndDate = params.newValue.MDate;
-            params.data.EndDate = params.newValue.MDate;
-            params.data.PersianEndDate = params.newValue.SDate;
-            this.gridApi.forEachNode(node => {
-            });
-            return true;
-          } else {
-            params.data.ShortEndDate = null;
-            params.data.EndDate = null;
-            params.data.PersianEndDate = '';
-            return false;
-          }
-        }
-      },
-      {
-        headerName: 'موضوع',
-        field: 'Note',
-        editable: true,
-        width: 250,
-        resizable: true
-      },
     ];
 
+    this.columnDef[1].cellEditorParams.Items = this.ProductRequest.GetProductPattern();
   }
 
   PersonReq_FetchMore(event) {
@@ -980,12 +1353,11 @@ export class CustomerOrderComponent implements OnInit {
     const ResultList = [];
     // tslint:disable-next-line: no-shadowed-variable
     const promise = new Promise((resolve, reject) => {
-      this.ActorList.GetActorPaging(event.PageNumber,
+      this.ActorList.GetCRMCustomerActorPaging(event.PageNumber,
         event.PageSize,
         event.term,
         event.SearchOption,
-        this.IsPerson,
-        false, false).subscribe(res => {
+        this.AgentActorID).subscribe(res => {
           event.CurrentItems.forEach(el => {
             ResultList.push(el);
             this.PersonReqItems.push(el);
@@ -1009,7 +1381,15 @@ export class CustomerOrderComponent implements OnInit {
   }
 
   PersonReqOpened(ActorID = null) {
-    this.ActorList.GetActorPaging(1, 30, '', 'ActorID', this.IsPerson, false, false, ActorID).subscribe(res => {
+
+    if (this.NgSelectAgentPersonReqParams.selectedObject) {
+      this.AgentActorID = this.NgSelectAgentPersonReqParams.selectedObject;
+    }
+    else {
+      this.AgentActorID = this.CustomerOrderObject.AgentID
+    }
+   this.ActorList.GetCRMCustomerActorPaging(1, 30, '', '', this.AgentActorID, ActorID).subscribe(res => {
+      //this.ActorList.GetActorPaging(1, 30, '', '', this.AgentActorID, ActorID).subscribe(res => {
       this.PersonReqItems = res.List;
       this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
         List: res.List,
@@ -1022,12 +1402,11 @@ export class CustomerOrderComponent implements OnInit {
 
   Person_Req_DoSearch(event) {
     this.NgSelectPersonReqParams.loading = true;
-    this.ActorList.GetActorPaging(event.PageNumber,
+    this.ActorList.GetCRMCustomerActorPaging(event.PageNumber,
       event.PageSize,
       event.term,
       event.SearchOption,
-      this.IsPerson,
-      false, false).subscribe(res => {
+      this.AgentActorID).subscribe(res => {
         this.PersonReqItems = res.List,
           this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
             List: res.List,
@@ -1075,7 +1454,7 @@ export class CustomerOrderComponent implements OnInit {
   }
   AgentPersonReqOpened(AgentID = null) {
     this.ActorList.GetActorPaging(1, 30, '', 'ActorID', true, false, false, AgentID).subscribe(res => {
-      this.PersonReqItems = res.List;
+      this.AgentPersonReqItems = res.List;
       this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
         List: res.List,
         TotalItemCount: res.TotalItemCount,
@@ -1092,7 +1471,7 @@ export class CustomerOrderComponent implements OnInit {
       event.SearchOption,
       this.IsPerson,
       false, false).subscribe(res => {
-        this.PersonReqItems = res.List,
+        this.AgentPersonReqItems = res.List,
           this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
             List: res.List,
             term: event.term,
@@ -1168,54 +1547,7 @@ export class CustomerOrderComponent implements OnInit {
     this.NgSelectEmployerPersonReqParams.loading = false;
   }
 
-
-  FetchMoreFromContract(event) {
-    this.NgSelectContractParamsFrom.loading = true;
-    const ResultList = [];
-    this.ContractList.GetRelatedContractpaging(event.PageNumber, event.PageSize, event.term, event.SearchOption,
-      this.RegionParams.selectedObject, true, null).subscribe((res: any) => {
-        event.CurrentItems.forEach(el => {
-          ResultList.push(el);
-        });
-        res.List.forEach(element => {
-          ResultList.push(element);
-        });
-        this.ContractListSetFrom = ResultList;
-      });
-
-    this.NgSelectContractParamsFrom.loading = false;
-  }
-  doFromContractSearch(event) {
-    this.currentContractSearchTerm = event.term;
-    this.NgSelectContractParamsFrom.loading = true;
-    if (event.SearchOption === 'null' || event.SearchOption == null) {
-      event.SearchOption = 'ContractCode';
-    }
-    this.ContractList.GetRelatedContractpaging(event.PageNumber, event.PageSize, event.term,
-      event.SearchOption, this.RegionParams.selectedObject,
-      true, null).subscribe((res: any) => {
-        if (this.currentContractSearchTerm === event.term) {
-          this.ContractListSetFrom = res.List;
-          this.FromContractTotalItemCount = res.TotalItemCount;
-          this.FromContractPageCount = Math.ceil(res.TotalItemCount / 30);
-          this.NgSelectContractParamsFrom.loading = false;
-        }
-      });
-  }
-
-  FromContractOpened(ContractID = null) {
-    this.NgSelectContractParamsFrom.loading = true;
-    this.ContractList.GetRelatedContractpaging(1, 30, '', '',
-      this.RegionParams.selectedObject, true, ContractID).subscribe((res: any) => {
-        this.ContractListSetFrom = res.List;
-        this.FromContractTotalItemCount = res.TotalItemCount;
-        this.FromContractPageCount = Math.ceil(res.TotalItemCount / 30);
-      });
-    this.NgSelectContractParamsFrom.loading = false;
-  }
-
   FromContractChanged(event) {
-    //  this.CostContractID = event;
   }
 
   popupclosed(event) {
@@ -1224,118 +1556,135 @@ export class CustomerOrderComponent implements OnInit {
     this.PercentWidth = null;
     this.MainMaxwidthPixel = null;
     this.MinHeightPixel = null;
+    this.HaveMaxBtn = false;
+
   }
 
   onChangeRegion(RegionCode) {
-    const Region = this.RegionItems.find(x => x.RegionCode === RegionCode);
-    this.RegionGroupCode = Region.RegionGroupCode;
-    //  this.rowsData = [];
-    this.ngAfterViewInit();
+      new Promise((StartedWFResolve, reject) => {
+        this.SetStartedWFInfo(StartedWFResolve);
+      }).then(() => {
+        this.ViewTypeChange();
+      });
+    
   }
 
   onCellValueChanged(event) {
-    const value = event.newValue;
-    let itemsToUpdate = [];
-    let ProductTypeCode = event.data.ProductTypeCode;
-    if (event.colDef && event.colDef.field === 'ProductCode') {
+    // const value = event.newValue[0].ProductID;
+    //   const ProductPatternProductsID = event.newValue[0].ProductPatternProductsID;
+    //   let itemsToUpdate = [];
+    //   let ProductTypeCode = event.data.ProductTypeCode;
+    //   if (event.colDef && event.colDef.field === 'ProductCode') {
 
-      itemsToUpdate = [];
-      this.gridApi.forEachNode(node => {
-        if (node.rowIndex === event.rowIndex) {
+    //     itemsToUpdate = [];
+    //     this.gridApi.forEachNode(node => {
+    //       if (node.rowIndex === event.rowIndex) {
 
-          node.data.ProductID = '';
-          node.data.ProductCode = '';
-          node.data.ScaleName = '';
-          node.data.ProductName = '';
-          node.data.ProductTypeName = '';
-          itemsToUpdate.push(node.data);
-        }
-      });
+    //         node.data.ProductID = '';
+    //         node.data.ProductCode = '';
+    //         node.data.ScaleName = '';
+    //         node.data.ProductName = '';
+    //         node.data.ProductTypeName = '';
+    //         itemsToUpdate.push(node.data);
+    //       }
+    //     });
 
-      this.gridApi.updateRowData({ update: itemsToUpdate });
-      const ProductCodevalue = (typeof (value) === 'object') ? value[0] : value;
-      ProductTypeCode = (typeof (value) === 'object') ? null : ProductTypeCode;
-      this.ProductRequest.GetProduct(ProductCodevalue, ProductTypeCode).subscribe(res => {
-        itemsToUpdate = [];
+    //     this.gridApi.updateRowData({ update: itemsToUpdate });
+    // const ProductCodevalue = (typeof (value) === 'object') ? value[0] : value;
+    //     ProductTypeCode = (typeof (value) === 'object') ? null : ProductTypeCode;
+    //     this.ProductRequest.GetProduct(ProductCodevalue, ProductTypeCode).subscribe(res => {
+    //       itemsToUpdate = [];
 
-        this.gridApi.forEachNode(node => {
-          if (node.rowIndex === event.rowIndex) {
-            node.data.ProductID = res.ProductID;
-            node.data.ProductCode = res.ProductCode;
-            node.data.ScaleName = res.ScaleName;
-            node.data.ProductName = res.ProductName;
-            node.data.ProductTypeName = res.ProductTypeName;
-            itemsToUpdate.push(node.data);
-            this.EntityColumnDefinition(node.data.ProductID, node, null, true)
-          }
-        });
-        this.gridApi.updateRowData({ update: itemsToUpdate });
-      });
-      // itemsToUpdate = [];
-      // this.gridApi.forEachNode(node => {
-      //   if (node.rowIndex === event.rowIndex) {
-      //     node.data.PriceListPatternID = '';
-      //     node.data.PriceListNo = value;
-      //     node.data.PriceListNo = IsDuplicate && !this.HasCOIEntity ? '' : PriceListNovalue;
-      //     node.data.PriceListName = '';
-      //     node.data.WorkUnitName = '';
-      //     node.data.Amount = '';
-      //     node.data.IsStar = '';
-      //     node.data.IsStarCode = '';
-      //     node.data.Qty = '';
-      //     node.data.FinalAmount = '';
-      //     itemsToUpdate.push(node.data);
-      //   }
-      // });
-      // this.gridApi.updateRowData({ update: itemsToUpdate });
-      // if (IsDuplicate && !this.HasCOIEntity) {
-      //   return;
-      // }
-      // const Values = [];
-      // if (value != null && value !== '') {
-      //   Values.push(value);
-      //   // if (PriceListNovalue != null && PriceListNovalue !== '') {
-      //   //   Values.push(PriceListNovalue);
-      //   this.PriceList.GetPriceListTopicList(Values, this.PriceListTypeCode + this.CostListFinYearCode, null, null).subscribe(
-      //     res => {
-      //       if (res[0]) {
-      //         itemsToUpdate = [];
-      //         this.gridApi.forEachNode(node => {
-      //           if (node.rowIndex === event.rowIndex) {
-      //             node.data.PriceListPatternID = res[0].PriceListPatternID;
-      //             node.data.ContractOrderItemID = this.selectedContractOrderItemID;
-      //             node.data.PriceListNo = res[0].PriceListTopicCode;
-      //             node.data.PriceListName = res[0].PriceListTopicName;
-      //             node.data.WorkUnitName = res[0].WorkUnitName;
-      //             node.data.WorkUnitCode = res[0].WorkUnitCode;
-      //             node.data.Amount = res[0].Amount;
-      //             node.data.IsStar = res[0].IsStar;
-      //             node.data.IsStarCode = res[0].IsStarCode;
-      //             node.data.Qty = '';
-      //             node.data.FinalAmount = node.data.Qty * node.data.Amount;
-      //             node.data.IsRelated = res[0].IsRelated;
-      //             itemsToUpdate.push(node.data);
-      //             if (node.data.IsRelated) {
-      //               this.ShowMessageBoxWithYesNoBtn('فهرست بهای انتخاب شده دارای ردیف مرتبط است آیا مایل به درج می باشید؟');
-      //               this.BtnClickedName = 'IsRelatedShow';
-      //               this.IsNotFound = true;
-      //             }
-      //           }
-      //         });
-      //         this.gridApi.updateRowData({ update: itemsToUpdate });
-      //         // tslint:disable-next-line:max-line-length
-      //       } else {
-      //         this.ShowMessageBoxWithYesNoBtn(' ردیف وارد شده موجود نیست. آیا مایل به افزودن اطلاعات این ردیف فهرست بها می باشید؟');
-      //         this.BtnClickedName = 'PriceListTopicNotFound';
-      //         this.IsNotFound = true;
-      //       }
-      //     }
-      //   );
-      // }
-    }
+    //       this.gridApi.forEachNode(node => {
+    //         if (node.rowIndex === event.rowIndex) {
+    //           node.data.ProductID = res.ProductID;
+    //           if (node.data.ProductID) {
+    //             this.ContractList.GetCostumerOrderQty(node.data.ProductID, 200, this.CustomerOrderDate).subscribe(ress => {
+    //               node.data.CostumerOrderQty = ress;
+    //             });
+    //           }
+    //           if (ProductPatternProductsID) {
+    //             this.ProductRequest.GetProductPatternName(ProductPatternProductsID).subscribe(ress1 => {
+    //               node.data.ProductPatternName = ress1;
+    //             });
+    //           }
+    //           node.data.ProductCode = res.ProductCode;
+    //           node.data.ScaleName = res.ScaleName;
+    //           node.data.ProductName = res.ProductName;
+    //           node.data.ProductTypeName = res.ProductTypeName;
+    //           itemsToUpdate.push(node.data);
+    //           this.EntityColumnDefinition(node.data.ProductID, node, null, true)
+    //         }
+    //       });
+    //       this.gridApi.updateRowData({ update: itemsToUpdate });
+    //     });
+    // itemsToUpdate = [];
+    // this.gridApi.forEachNode(node => {
+    //   if (node.rowIndex === event.rowIndex) {
+    //     node.data.PriceListPatternID = '';
+    //     node.data.PriceListNo = value;
+    //     node.data.PriceListNo = IsDuplicate && !this.HasCOIEntity ? '' : PriceListNovalue;
+    //     node.data.PriceListName = '';
+    //     node.data.WorkUnitName = '';
+    //     node.data.Amount = '';
+    //     node.data.IsStar = '';
+    //     node.data.IsStarCode = '';
+    //     node.data.Qty = '';
+    //     node.data.FinalAmount = '';
+    //     itemsToUpdate.push(node.data);
+    //   }
+    // });
+    // this.gridApi.updateRowData({ update: itemsToUpdate });
+    // if (IsDuplicate && !this.HasCOIEntity) {
+    //   return;
+    // }
+    // const Values = [];
+    // if (value != null && value !== '') {
+    //   Values.push(value);
+    //   // if (PriceListNovalue != null && PriceListNovalue !== '') {
+    //   //   Values.push(PriceListNovalue);
+    //   this.PriceList.GetPriceListTopicList(Values, this.PriceListTypeCode + this.CostListFinYearCode, null, null).subscribe(
+    //     res => {
+    //       if (res[0]) {
+    //         itemsToUpdate = [];
+    //         this.gridApi.forEachNode(node => {
+    //           if (node.rowIndex === event.rowIndex) {
+    //             node.data.PriceListPatternID = res[0].PriceListPatternID;
+    //             node.data.ContractOrderItemID = this.selectedContractOrderItemID;
+    //             node.data.PriceListNo = res[0].PriceListTopicCode;
+    //             node.data.PriceListName = res[0].PriceListTopicName;
+    //             node.data.WorkUnitName = res[0].WorkUnitName;
+    //             node.data.WorkUnitCode = res[0].WorkUnitCode;
+    //             node.data.Amount = res[0].Amount;
+    //             node.data.IsStar = res[0].IsStar;
+    //             node.data.IsStarCode = res[0].IsStarCode;
+    //             node.data.Qty = '';
+    //             node.data.FinalAmount = node.data.Qty * node.data.Amount;
+    //             node.data.IsRelated = res[0].IsRelated;
+    //             itemsToUpdate.push(node.data);
+    //             if (node.data.IsRelated) {
+    //               this.ShowMessageBoxWithYesNoBtn('فهرست بهای انتخاب شده دارای ردیف مرتبط است آیا مایل به درج می باشید؟');
+    //               this.BtnClickedName = 'IsRelatedShow';
+    //               this.IsNotFound = true;
+    //             }
+    //           }
+    //         });
+    //         this.gridApi.updateRowData({ update: itemsToUpdate });
+    //         // tslint:disable-next-line:max-line-length
+    //       } else {
+    //         this.ShowMessageBoxWithYesNoBtn(' ردیف وارد شده موجود نیست. آیا مایل به افزودن اطلاعات این ردیف فهرست بها می باشید؟');
+    //         this.BtnClickedName = 'PriceListTopicNotFound';
+    //         this.IsNotFound = true;
+    //       }
+    //     }
+    //   );
+    // }
+    //}
+
   }
 
   SetEntityDataInDataRow(rowsData) {
+
     rowsData.forEach(element => {
       if (element.CustomerOrderEntityList) {
         element.CustomerOrderEntityList.forEach(
@@ -1345,6 +1694,8 @@ export class CustomerOrderComponent implements OnInit {
             element[Name] = EntityItem.Subject;
             element[ID] = EntityItem.EntityTypeItemID;
           });
+
+
       }
     });
   }
@@ -1393,44 +1744,6 @@ export class CustomerOrderComponent implements OnInit {
     }
   }
 
-  // onRevocation() {
-  //   // tslint:disable-next-line:max-line-length
-  //   if (this.ModuleCode === 2730 && (this.ModuleViewTypeCode === 200000 || this.ModuleViewTypeCode === 300000 || this.ModuleViewTypeCode === 100000)) {
-  //     this.startLeftPosition = 50;
-  //     this.startTopPosition = 20;
-  //     this.HaveMaxBtn = true;
-  //     this.HeightPercentWithMaxBtn = 97;
-  //     this.PercentWidth = 90;
-  //     this.MainMaxwidthPixel = 1500;
-  //     this.MinHeightPixel = 545;
-  //     this.isClicked = true;
-  //     this.PopUpType = 'choosen-request-revocation';
-  //     this.PopupParam = {
-  //       ObjectID: this.CostFactorID,
-  //       RegionCode: this.ProductRequestObject.RegionCode,
-  //       OrganizationCode: this.RegionItems.find(x => x.RegionCode === this.ProductRequestObject.RegionCode).OrganizationCode,
-  //       OrginalModuleCode: this.OrginalModuleCode
-  //     };
-  //   } else {
-  //     // tslint:disable-next-line:max-line-length
-  //     this.ProductRequest.RequestRevocation(this.CurrWorkFlow, this.WorkFlowID, this.CostFactorID, this.WorkflowTypeCode, this.ModuleCode, this.OrginalModuleCode).subscribe(res => {
-  //       this.ProductRequestObject.ProductRequestStatusCode = res;
-  //       if (res === 3) {
-  //         this.btnRevocationName = 'بازگشت از ابطال';
-  //         this.btnRevocationIcon = 'ok';
-  //         this.ShowMessageBoxWithOkBtn('ابطال درخواست انجام معامله با موفقیت انجام شد');
-  //       } else if (res === 2) {
-  //         this.btnRevocationName = 'ابطال';
-  //         this.btnRevocationIcon = 'revocation';
-  //         this.ShowMessageBoxWithOkBtn('بازگشت از ابطال درخواست انجام معامله با موفقیت انجام شد');
-  //       } else if (res === -1) {
-  //         this.ShowMessageBoxWithOkBtn('مسیر ' + ' ' + this.btnRevocationName + ' ' + ' به درستی تعریف نشده است با راهبر تماس بگیرید');
-  //       } else {
-  //         this.ShowMessageBoxWithOkBtn(' امکان' + ' ' + this.btnRevocationName + ' ' + 'وجود ندارد ');
-  //       }
-  //     });
-  //   }
-  // }
 
   onConfirmAndSend() {
     // if (this.CheckRegionWritable) {
@@ -1470,7 +1783,7 @@ export class CustomerOrderComponent implements OnInit {
                   res.forEach(element => {
                     element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
                   });
-                  this.PopUpType = 'work-flow-send';
+                  this.PopUpType = 'cfm-workflow-send';
                   this.startLeftPosition = 350;
                   this.startTopPosition = 105;
                   // this.PercentWidth = undefined;
@@ -1515,6 +1828,7 @@ export class CustomerOrderComponent implements OnInit {
       if (this.WorkflowObjectCode === null) {
         this.ShowMessageBoxWithOkBtn('ماژول گردش کار برای این واحد اجرایی به درستی تعریف نشده است');
       }
+
       this.Cartable.UserUpdateWorkFlow(this.WorkFlowID,
         this.CustomerOrderID,
         200,
@@ -1646,7 +1960,7 @@ export class CustomerOrderComponent implements OnInit {
                     res.forEach(element => {
                       element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
                     });
-                    this.PopUpType = 'work-flow-send';
+                    this.PopUpType = 'cfm-workflow-send';
                     this.startLeftPosition = 350;
                     this.startTopPosition = 105;
                     // this.PercentWidth = null;
@@ -1667,7 +1981,7 @@ export class CustomerOrderComponent implements OnInit {
                       WorkflowTypeCode: this.WorkflowTypeCode,
                       WorkflowObjectCode: this.WorkflowObjectCode,
                       ObjectID: this.ObjectID,
-                      MinimumPosting: this.InputParam.MinimumPosting,
+                      MinimumPosting: this.MinimumPosting,
                       OrginalModuleCode: this.OrginalModuleCode,
                       CartableUserID: this.CartableUserID
                     };
@@ -1735,23 +2049,301 @@ export class CustomerOrderComponent implements OnInit {
     if (this.PopUpType === 'message-box' && this.IsEndFlow === 1 && this.BtnClickedName === 'ConfirmAndSend') {
       this.OnFinalConfirm();
     }
-
+    if ((this.BtnClickedName === 'Revoke') && event === 'YES') {
+      this.Revoke();
+    }
   }
 
-  getOutPutParam(event) { }
+  getOutPutParam(event) {
+
+    if (this.PopUpType == 'text-request-page') {
+      this.selectedrow.data.Note = event;
+      this.TooltipText = event;
+    }
+
+    if (this.PopUpType == 'inventory-qty-page') {
+      this.selectedrow.data.ProductCode = event.ProductCode;
+      this.selectedrow.data.ProductID = event.ProductID;
+      this.selectedrow.data.ProductName = event.ProductName;
+      this.selectedrow.data.ProductPatternID = event.ProductPatternID;
+      this.selectedrow.data.ProductPatternProductsID = event.ProductPatternProductsID;
+
+      this.ProductRequest.GetProduct(event.ProductID, null, event.ProductPatternID).subscribe(res => {
+        this.selectedrow.data.ScaleName = res.ScaleName;
+        this.selectedrow.data.ProductTypeName = res.ProductTypeName;
+
+        this.ProductRequest.GetProductPatternName(event.ProductPatternProductsID).subscribe(ress1 => {
+          this.selectedrow.data.ProductPatternName = ress1;
+        });
+      });
+
+      // itemsToUpdate = [];
+      // this.gridApi.forEachNode(node => {
+      //   if (node.rowIndex === event.rowIndex) {
+      //     if (node.data.ContractPayItemQty && node.data.ContractPayItemQty > 0) {
+      //       // tslint:disable-next-line: radix
+      //       // tslint:disable-next-line: max-line-length
+      //       // tslint:disable-next-line: radix
+      //       node.data.ContractPayItemAmount = parseInt((parseFloat(node.data.ContractPayItemUnitAmount) * parseFloat(node.data.ContractPayItemQty)).toString());
+      //       // tslint:disable-next-line: max-line-length
+      //       node.data.ContractPayItemAmountCOEF = node.data.Qty ? (parseInt(node.data.AmountCOEFPact) / parseInt(node.data.Qty)) * parseFloat(node.data.ContractPayItemQty) : parseInt(node.data.AmountCOEFPact) * parseFloat(node.data.ContractPayItemQty);
+      //       node.data.CumultiveAmountCOEF = parseInt(node.data.BeforeAmountCOEF) + parseInt(node.data.ContractPayItemAmountCOEF);
+      //       if (node.data.IsTaxValue) {
+      //         // tslint:disable-next-line: radix
+      //         node.data.TaxValue = Math.round(parseInt(node.data.ContractPayItemAmount) * 0.09);
+      //         // tslint:disable-next-line: radix
+      //         node.data.ContractPayItemAmountFinal = parseInt(node.data.ContractPayItemAmount) + parseInt(node.data.TaxValue);
+      //       } else {
+      //         node.data.ContractPayItemAmountFinal = parseInt(node.data.ContractPayItemAmount);
+      //       }
+      //       node.data.CumultiveAmount = parseInt(node.data.ContractPayItemAmount) + parseInt(node.data.BeforeAmount);
+      //     }
+      //     itemsToUpdate.push(node.data);
+      //   }
+      // });
+      // this.gridApi.updateRowData({ update: itemsToUpdate });
+
+
+    }
+  }
 
 
   OnClickPrintFlow() {
+    this.Report.ShowReportCustomerOrder(
+      this.CustomerOrderID, // ObjID
+      this.ModuleCode, // ModuleCode
+      this.RegionParams.selectedObject, // RegCode
+      null // HaveSave
+    );
+  }
+
+
+  OnOpenNgSelect() {
+    const CurrentRelatedContractID = this.CustomerOrderObject && this.CustomerOrderObject.ContractID ? this.CustomerOrderObject.ContractID : null;
+    this.ContractParams.loading = true;
+    const ResultList = [];
+    this.ContractList.GetRelatedContractpagingForExtended(1, 30, '', '', 200,
+      false, true, CurrentRelatedContractID, null)
+      .subscribe((res: any) => {
+        this.ContractItems = res.List;
+        this.ContractTotalItemCount = res.TotalItemCount;
+        this.ContractPageCount = Math.ceil(res.TotalItemCount / 30);
+        this.ContractParams.loading = false;
+        this.ContractParams.selectedObject = CurrentRelatedContractID;
+
+      });
+  }
+
+  FetchMoreContract(event) {
+    this.ContractParams.loading = true;
+    const ResultList = [];
+    this.ContractList.GetRelatedContractpagingForExtended(event.PageNumber, event.PageSize, event.term, event.SearchOption,
+      200, false, true, null, null).subscribe((res: any) => {
+        event.CurrentItems.forEach(el => {
+          ResultList.push(el);
+        });
+        res.List.forEach(element => {
+          ResultList.push(element);
+        });
+        this.ContractItems = ResultList;
+        this.ContractParams.loading = false;
+      });
+  }
+  doContractSearch(event) {
+    this.currentContractSearchTerm = event.term;
+    this.ContractParams.loading = true;
+    if (event.SearchOption === 'null' || event.SearchOption == null) {
+      event.SearchOption = 'LetterNo';
+    }
+    this.ContractParams.loading = true;
+    this.ContractList.GetRelatedContractpagingForExtended(event.PageNumber, 30, event.term,
+      event.SearchOption, 200, false, true, null, null).subscribe((res: any) => {
+        if (this.currentContractSearchTerm === event.term) {
+          this.ContractItems = res.List;
+          this.ContractTotalItemCount = res.TotalItemCount;
+          this.ContractPageCount = Math.ceil(res.TotalItemCount / 30);
+          this.ContractParams.loading = false;
+        }
+      });
+  }
+  OrderTypeSelectedChange(OrderType) {
+    if (OrderType === 1) {
+      this.IsProject = true;
+      this.ContractParams.selectedObject = "";
+
+    }
+    else { this.IsProject = false; }
+
+  }
+
+  TextColumnBtn(row) {
+    this.isClicked = true;
+    this.PopUpType = 'text-request-page';
+    this.HaveHeader = true;
+    this.HaveMaxBtn = false;
+    this.PercentWidth = 55;
+    this.MinHeightPixel = 345;
+    this.MainMaxwidthPixel = 745;
+    this.HeightPercentWithMaxBtn = 72;
+    this.startLeftPosition = 307;
+    this.startTopPosition = 10;
+    this.PopupParam =
+    {
+      Note: row.Note,
+    }
+  }
+
+  onRevocation() {
+    this.CustomerOrder.GetProductRequestByCustomer(this.CustomerOrderID).subscribe(res => {
+      this.ProductRequestList = res;
+
+    });
+    if (this.ProductRequestList.length == 0) {
+      this.Revoke();
+    }
+    else {
+      this.BtnClickedName = 'Revoke';
+      this.ShowMessageBoxWithYesNoBtn('این سفارش دارای ریزدرخواست است،آیا از ابطال آن اطمینان دارید؟');
+    }
+
+
+  }
+
+  Revoke() {
+    this.CustomerOrder.RequestRevocation(this.CurrWorkFlow, this.WorkFlowID, this.CustomerOrderID, this.WorkflowTypeCode, this.ModuleCode, this.OrginalModuleCode).subscribe(res => {
+      this.CustomerOrder.IsValid = res;
+      if (!res) {
+        this.btnRevocationName = 'بازگشت از ابطال';
+        this.btnRevocationIcon = 'ok';
+        this.ShowMessageBoxWithOkBtn('ابطال درخواست با موفقیت انجام شد');
+      } else if (res) {
+        this.btnRevocationName = 'ابطال';
+        this.btnRevocationIcon = 'revocation';
+        this.ShowMessageBoxWithOkBtn('بازگشت از ابطال با موفقیت انجام شد');
+      }
+    });
+    this.ProductRequestList.forEach(element => {
+      this.ProductRequest.RevokeProductRequest(element.CostFactorID, this.ModuleCode).subscribe(res => {
+      });
+    });
+  }
+
+
+  onChangePerson(ActorID) {
+    // if (this.IsPerson) {
+    //   this.AgentPersonReqOpened(ActorID);
+    // }
+    // else {
+    // this.ActorList.GetAgentActorID(ActorID, this.CustomerOrderDate).subscribe((res: any) => {
+    //   this.NgSelectAgentPersonReqParams.selectedObject = res;
+    //   this.AgentPersonReqOpened(res);
+    // });
+    // }
+  }
+
+  OnRequestClick() {
     this.PopUpType = 'customer-order-product-request';
     this.isClicked = true;
-    this.startLeftPosition = 5;
-    this.startTopPosition = 5;
+    this.startLeftPosition = 50;
+    this.startTopPosition = 10;
     this.HaveMaxBtn = true;
     this.HeightPercentWithMaxBtn = 97
     this.PercentWidth = 90;
     this.MainMaxwidthPixel = 2000;
     this.MinHeightPixel = 645;
+    this.PopupParam = { ObjectID: this.CustomerOrderID, HeaderName: 'تفکیک درخواست' };
+  }
+  onDocArchiveClick() {
+    if (this.CustomerOrderID) {
+      this.PopUpType = 'archive-details';
+      this.HaveHeader = true;
+      this.isClicked = true;
+      this.HaveMaxBtn = false;
+      this.startLeftPosition = 307;
+      this.startTopPosition = 10;
+      this.PopupParam = {
+        EntityID: this.CustomerOrderID,
+        TypeCodeStr: '1250-',
+        DocTypeCode: 1250,
+        ModuleCode: this.ModuleCode,
+        IsReadOnly: !this.IsEditable
+      };
+    } else {
+      this.ShowMessageBoxWithOkBtn('مقادیر به درستی وارد نشده است، لطفا با راهبر سیستم تماس بگیرید');
+    }
+  }
 
-    this.PopupParam = {ObjectID : this.CustomerOrderID} ;
+  CostumerOrderColumnBtn(row, IsCul = false) {
+    this.PopUpType = 'inventory-qty-page';
+    this.isClicked = true;
+    this.HaveHeader = true;
+    this.HaveMaxBtn = true;
+    this.PercentWidth = 55;
+    this.MinHeightPixel = 345;
+    this.MainMaxwidthPixel = 745;
+    this.HeightPercentWithMaxBtn = 72;
+    this.startLeftPosition = 307;
+    this.startTopPosition = 10;
+    this.PopupParam =
+    {
+      IsCustomerOrder: true,
+      ProductList: !IsCul ? this.selectedrow.data.Products : row,
+    }
+
+  }
+  BtnVeiwclick() {
+    this.isClicked = true;
+    this.PopUpType = 'user-work-log-details';
+    this.HaveHeader = true;
+    this.HaveMaxBtn = true;
+    // this.OverPixelWidth = 1290;
+    this.startLeftPosition = 40;
+    this.startTopPosition = 8;
+    this.HeightPercentWithMaxBtn = 98;
+    this.MinHeightPixel = 640;
+
+    this.PopupParam = {
+      HeaderName: 'جزئیات گردش',
+      LetterNo: this.CustomerOrderCode,
+      // Subject: this.selectedRow.data.Subject,
+      FinYearCode: this.CustomerOrderCode,
+      ContractNo: this.CustomerOrderCode,
+      OrderNo: this.CustomerOrderCode,
+      ContractCode: this.CustomerOrderCode,
+      ContractId: this.CustomerOrderID,
+      //ContractorName: this.FullCustomerName,
+      //ContractTypeName: this.ContractTypeName,
+      ContractAmount: 0,
+      //LetterDatePersian: this.PersianCustomerOrderDate,
+      //OrderDate: this.PersianCustomerOrderDate,
+      // workflowtypeStatus: this.WorkflowObjectCode[0],
+      WorkFlowInstanceId: this.WorkFlowInstanceID,
+      ParentModuleCode: this.ModuleCode,
+      ProductRequestCode: this.CustomerOrderCode,
+      //PersianProductRequestDate: this.PersianCustomerOrderDate,
+      Subject: this.Subject,
+      CostFactorID: this.CustomerOrderID,
+      ProductRequestID: this.CustomerOrderID
+    };
+
+  }
+
+  CustomerFileVeiwclick() {
+    this.PopUpType = 'customer-file';
+    this.isClicked = true;
+    this.HaveHeader = true;
+    this.HaveMaxBtn = true;
+    this.startLeftPosition = 50;
+    this.startTopPosition = 10;
+    this.HeightPercentWithMaxBtn = 97
+    this.PercentWidth = 90;
+    this.MainMaxwidthPixel = 2000;
+    this.MinHeightPixel = 645;
+
+    this.PopupParam = {
+      ActorId: this.NgSelectPersonReqParams.selectedObject,
+      HeaderName: 'پرونده مشتری',
+      DisablePerson: true,
+    };
   }
 }
