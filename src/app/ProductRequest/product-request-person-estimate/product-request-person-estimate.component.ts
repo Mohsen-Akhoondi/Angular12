@@ -3,7 +3,6 @@ import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRe
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { TreeSelectComponent } from 'src/app/Shared/tree-select/tree-select.component';
-declare var jquery: any;
 declare var $: any;
 
 @Component({
