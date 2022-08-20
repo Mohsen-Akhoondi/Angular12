@@ -17,7 +17,6 @@ export class AssetPageSearchComponent implements OnInit {
   paramObj;
   type: string;
   HaveHeader: boolean;
-  btnclicked = false;
   startLeftPosition: number;
   startTopPosition: number;
   MinHeightPixel: number;
@@ -25,6 +24,7 @@ export class AssetPageSearchComponent implements OnInit {
   MainMaxwidthPixel: any;
   HeightPercentWithMaxBtn: number;
   HaveMaxBtn = false;
+  isClicked: boolean;
 
   constructor(private ProductRequest: ProductRequestService,
     private router: Router,) { }
@@ -97,18 +97,19 @@ export class AssetPageSearchComponent implements OnInit {
 
     this.type = 'app-asset';
     this.HaveHeader = true;
-    this.btnclicked = true;
     this.startLeftPosition = 15;
     this.startTopPosition = 5;
     this.HaveMaxBtn = true;
     this.HeightPercentWithMaxBtn = 97;
-    this.PercentWidth = 90;
+    this.PercentWidth = 97;
     this.MainMaxwidthPixel = 2000;
     this.MinHeightPixel = 645;
+    this.isClicked = true ;
     this.paramObj = {
       //CostFactorID: this.selectedRow.data.CostFactorID,
       selectedRow: this.selectedRow.data,
       Mode: 'EditMode',
+      
     };
     return;
 
@@ -116,19 +117,20 @@ export class AssetPageSearchComponent implements OnInit {
 
   
   close(): void {
-    this.btnclicked = false;
     this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
+
   }
 
   
   popupclosed() {
     this.HaveMaxBtn = false;
-    this.btnclicked = false;
     this.PercentWidth = null;
     this.MainMaxwidthPixel = null;
     this.MinHeightPixel = null;
     this.type = '';
     this.HeightPercentWithMaxBtn = 95;
+    this.isClicked = false ;
+
   }
 
 }
