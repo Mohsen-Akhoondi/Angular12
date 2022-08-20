@@ -10,7 +10,6 @@ import { OverPopUpCellEditorComponent } from 'src/app/Shared/OverPopUpcellEditor
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { TreeSelectComponent } from 'src/app/Shared/tree-select/tree-select.component';
-import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
 import { ActivatedRoute } from '@angular/router';
 import { RadioBoxModel } from 'src/app/Shared/Radio-Box/Radio-Box-Model/RadioBoxModel';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
@@ -20,7 +19,6 @@ import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
-import { environment } from 'src/environments/environment';
 import { AutomationService } from 'src/app/Services/BaseService/AutomationService';
 import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 
@@ -640,7 +638,7 @@ export class ProductRequestShowDetailsPageComponent implements OnInit {
       },
       { // RFC 52241
         headerName: 'شماره قرارداد',
-        field: 'ContractLetterNo',
+        field: 'LetterNo',
         editable: () => {
           return !this.DisableAll;
         },
@@ -648,8 +646,8 @@ export class ProductRequestShowDetailsPageComponent implements OnInit {
         resizable: true
       },
       {
-        headerName: 'قرارداد ',
-        field: 'Contract',
+        headerName: 'کد قرارداد',
+        field: 'ContractCode',
         cellEditorFramework: NgSelectVirtualScrollComponent,
         cellEditorParams: {
           Params: this.NgSelectVCParams,
@@ -1314,62 +1312,62 @@ export class ProductRequestShowDetailsPageComponent implements OnInit {
         this.ConsultantSelectTypeParams.selectedObject = this.ProductRequestObject.ConsultantSelectTypeCode;
         this.ConsultantSelectedWayParams.selectedObject = this.ProductRequestObject.ConsultantSelectedWayCode;
       });
-    if (this.PopupParam.ModuleViewTypeCode === 118) {
-      this.ShowContractorDetails = true;
-    }
-    if (this.PopupParam.ModuleViewTypeCode === 69) {
-      this.IsDisable = true;
-      this.IsEditable = false;
-      this.IsSupplierEditable = true;
-      this.HasSupplierSave = true;
-    }
-    if (this.PopupParam.ModuleViewTypeCode > 4 && this.PopupParam.ModuleViewTypeCode !== 146
-      && this.PopupParam.ModuleViewTypeCode !== 150) {
-      this.ShowProvisionRep = true;
-    }
-    this.ProductRequestObject.ProductRequestItemList.forEach(element => {
-      if (element.ProductRequestEstimateList) {
-        this.HaveEstiamte = true;
+    if (this.ProductRequestObject && this.ProductRequestObject.ProductRequestTypeCode
+      && this.ProductRequestObject.ProductRequestTypeCode !== 3) { // RFC 62290
+      this.ProductRequest.HasProductRequestEstimate(this.ProductRequestObject.CostFactorID).subscribe(res => {
+        if (res) {
+          this.HasTripleReport = true;
+        }
+      });
+      if (this.PopupParam.ModuleViewTypeCode === 118) {
+        this.ShowContractorDetails = true;
       }
-      if (element.RequestPersonEstimateList) {
-        this.HaveConsultation = true;
+      if (this.PopupParam.ModuleViewTypeCode === 69) {
+        this.IsDisable = true;
+        this.IsEditable = false;
+        this.IsSupplierEditable = true;
+        this.HasSupplierSave = true;
       }
-    });
-    if (this.ProductRequestObject.IsBaselineScrolling != null) {
-      this.IsBaselineScrolling = this.ProductRequestObject.IsBaselineScrolling;
-    }
-    if (this.ProductRequestObject.ContractTypeCode === 19) { // RFC 51439
-      this.IsEditable = false;
-      this.SupplierTabPanelHeight = 90;
-      this.IsContractType19 = true;
-      this.ISErrorBilldingSetting = true;
-    }
+      if (this.PopupParam.ModuleViewTypeCode !== 146
+        && this.PopupParam.ModuleViewTypeCode !== 150) {
+        this.ShowProvisionRep = true;
+      }
+      this.ProductRequestObject.ProductRequestItemList.forEach(element => {
+        if (element.ProductRequestEstimateList) {
+          this.HaveEstiamte = true;
+        }
+        if (element.RequestPersonEstimateList) {
+          this.HaveConsultation = true;
+        }
+      });
+      if (this.ProductRequestObject.IsBaselineScrolling != null) {
+        this.IsBaselineScrolling = this.ProductRequestObject.IsBaselineScrolling;
+      }
+      if (this.ProductRequestObject.ContractTypeCode === 19) { // RFC 51439
+        this.IsEditable = false;
+        this.SupplierTabPanelHeight = 90;
+        this.IsContractType19 = true;
+        this.ISErrorBilldingSetting = true;
+      }
 
-    if (this.PopupParam.ModuleViewTypeCode === 400000 ||
-      this.PopupParam.ModuleViewTypeCode === 500000) {
-      this.TabRahbari = true;
-      this.QuestionLabel = 'آیا شرکت کننده ای وجود دارد ؟';
-      this.WinnerQuestion = 'آیا مناقصه عمومی برنده دارد؟';
-      this.ReNewQuestion = 'درخواست تجدید شود؟';
-      if (this.ProductRequestObject.LastInquiryObject.IsReturn != null) {
-        this.IsLawful = !this.ProductRequestObject.LastInquiryObject.IsReturn;
-      } else {
-        this.IsLawful = true;
-      }
-      // tslint:disable-next-line: max-line-length
-      this.ProductRequestObject.HaveWinner !== null ? this.IsYes = this.ProductRequestObject.HaveWinner : this.IsYes = true;
-      if (this.ProductRequestObject.IsRenewal != null) {
-        this.IsRenewal = this.ProductRequestObject.IsRenewal;
-      } else {
-        this.IsRenewal = true;
-      }
-      if (this.ProductRequestObject && this.ProductRequestObject.ProductRequestTypeCode
-        && this.ProductRequestObject.ProductRequestTypeCode !== 3) { // RFC 62290
-        this.ProductRequest.HasProductRequestEstimate(this.ProductRequestObject.CostFactorID).subscribe(res => {
-          if (res) {
-            this.HasTripleReport = true;
-          }
-        });
+      if (this.PopupParam.ModuleViewTypeCode === 400000 ||
+        this.PopupParam.ModuleViewTypeCode === 500000) {
+        this.TabRahbari = true;
+        this.QuestionLabel = 'آیا شرکت کننده ای وجود دارد ؟';
+        this.WinnerQuestion = 'آیا مناقصه عمومی برنده دارد؟';
+        this.ReNewQuestion = 'درخواست تجدید شود؟';
+        if (this.ProductRequestObject.LastInquiryObject.IsReturn != null) {
+          this.IsLawful = !this.ProductRequestObject.LastInquiryObject.IsReturn;
+        } else {
+          this.IsLawful = true;
+        }
+        // tslint:disable-next-line: max-line-length
+        this.ProductRequestObject.HaveWinner !== null ? this.IsYes = this.ProductRequestObject.HaveWinner : this.IsYes = true;
+        if (this.ProductRequestObject.IsRenewal != null) {
+          this.IsRenewal = this.ProductRequestObject.IsRenewal;
+        } else {
+          this.IsRenewal = true;
+        }
       }
     }
   }
@@ -2080,10 +2078,17 @@ export class ProductRequestShowDetailsPageComponent implements OnInit {
       'پیشنهاد تامین اعتبار');
   }
   ProvisionRepShow() {
-    this.Report.ProvisionRep(this.CostFactorID,
-      this.ModuleCode,
-      'تامین اعتبار', this.ProductRequestObject.RegionCode);
-  }
+    this.ProductRequest.GetProvision(this.ProductRequestObject.CostFactorID).subscribe(res => {
+      if (res) {
+        this.Report.ProvisionRep(this.CostFactorID,
+          this.ModuleCode,
+          'تامین اعتبار', this.ProductRequestObject.RegionCode);
+      } else {
+        this.ShowMessageBoxWithOkBtn('تامین اعتبار ندارد');
+        return;
+      }
+    });
+  } // 64058
   SetSumFinalAmount() {
     let SumFinalAmount = 0;
     this.ProdReqEstApi.forEachNodeAfterFilter(function (node) {

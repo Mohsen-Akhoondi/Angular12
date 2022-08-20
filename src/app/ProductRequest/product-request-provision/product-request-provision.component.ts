@@ -292,34 +292,29 @@ export class ProductRequestProvisionComponent implements OnInit {
     //  this.rowsData = this.ProductRequestObject.ProductRequestProvisionList;
     this.SetRowData();
 
-    this.ProductRequest.HasProductRequestEstimate(this.ProductRequestObject.CostFactorID).subscribe(res => {
-      if (res) {
-        this.ProductRequestObject.ProductRequestItemList.forEach(element => {
-          this.Amount += element.AmountCOEFPact;
-          this.ProductRequestAmount += element.AmountCOEFPact;
-        });
-      } else {
-        this.ProductRequestObject.ProductRequestItemList.forEach(element => {
-          this.Amount += element.AmountCOEFPact;
-          this.ProductRequestAmount += element.AmountCOEFPact;
+
+
+    this.ProductRequestObject.ProductRequestItemList.forEach(element => {
+      this.Amount += element.AmountCOEFPact;
+      this.ProductRequestAmount += element.AmountCOEFPact;
+    });
+
+    this.ProductRequest.GetProvision(this.ProductRequestObject.CostFactorID).subscribe(ProvisionRes => {
+      if (ProvisionRes) {
+        this.ProvisionID = ProvisionRes.ProvisionID;
+        ProvisionRes.ProvisionItemList.forEach(function (node) {
+          if (node.Amount) {
+            SumProvisionAmountCol = SumProvisionAmountCol + node.Amount;
+          }
         });
       }
-      this.ProductRequest.GetProvision(this.ProductRequestObject.CostFactorID).subscribe(ProvisionRes => {
-        if (ProvisionRes) {
-          this.ProvisionID = ProvisionRes.ProvisionID;
-          ProvisionRes.ProvisionItemList.forEach(function (node) {
-            if (node.Amount) {
-              SumProvisionAmountCol = SumProvisionAmountCol + node.Amount;
-            }
-          });
-        }
-        // this.CreditBalance = Math.round(parseFloat((this.FinalAmount.toString()).replace(/,/g, '')) - SumProvisionAmountCol);
-        this.SumProAmountCol = SumProvisionAmountCol.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        // this.CreditBalanceStr = this.CreditBalance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        this.OnChTaxValueChange(this.IsTaxValue);
-      });
-      this.Amount = this.Amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      // this.CreditBalance = Math.round(parseFloat((this.FinalAmount.toString()).replace(/,/g, '')) - SumProvisionAmountCol);
+      this.SumProAmountCol = SumProvisionAmountCol.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      // this.CreditBalanceStr = this.CreditBalance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      this.OnChTaxValueChange(this.IsTaxValue);
     });
+    this.Amount = this.Amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
     // tslint:disable-next-line: radix
     if (!this.ModuleCode) {
       this.ModuleCode = this.PopupParam.ModuleCode;
@@ -419,7 +414,7 @@ export class ProductRequestProvisionComponent implements OnInit {
       Math.round(parseFloat(this.TaxValue.toString().replace(/,/g, '')));
     this.FinalAmount = this.FinalAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     // tslint:disable-next-line: max-line-length
-    this.CreditBalance = Math.round(parseFloat((this.FinalAmount.toString()).replace(/,/g, '')) - parseFloat((this.SumProAmountCol.toString()).replace(/,/g, '')));
+    this.CreditBalance = Math.round(parseFloat((this.FinalAmount.toString()).replace(/,/g, '')) - parseFloat((this.SumProAmountCol.toString()).replace(/,/g, ''))); // نحوه محاسبه صحیح است. برای تغییر با آقای آخوندی و یا مهندس حسینی هماهنگ کنید.
     this.CreditBalanceStr = this.CreditBalance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
 
@@ -466,7 +461,9 @@ export class ProductRequestProvisionComponent implements OnInit {
         return;
       }
     }
-    if (this.ProductRequestObject.RelatedContractID) { // 61063
+
+    // this.ProvisionAmount : مبلغ تامین که در نوع نمایش 6 تامین مانده اعتبار باز است
+    if (this.ProductRequestObject.ProvisionContractID) { // 64431
       if (this.ProductRequestObject.ContractObject != null && !this.ProductRequestObject.ContractObject.Adjustment) { // RFC 60991
         if (this.ProvisionAmount > this.CreditBalance) {
           this.ShowMessageBoxWithOkBtn('مبلغ درخواست تامین اعتبار نمی تواند از سقف مجاز تامین بیشتر باشد.');
