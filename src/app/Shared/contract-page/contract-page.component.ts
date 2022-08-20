@@ -19,6 +19,7 @@ import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRe
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
+import { max } from 'jalali-moment';
 @Component({
   selector: 'app-contract-page',
   templateUrl: './contract-page.component.html',
@@ -33,18 +34,23 @@ export class ContractPageComponent implements OnInit {
   CustomCheckBoxConfig: CustomCheckBoxModel = new CustomCheckBoxModel();
   CustomCheckBoxConfig1: CustomCheckBoxModel = new CustomCheckBoxModel();
   CustomCheckBoxConfig2: CustomCheckBoxModel = new CustomCheckBoxModel();
+  CustomCheckBoxConfig5: CustomCheckBoxModel = new CustomCheckBoxModel();
   sumFinalAmountStr = '0';
+  BtnClickedName: string;
+  MaxNo;
   MaxEndDate;
   MinStartDate;
   ContractTypeCode;
   ContractID;
   IsVolumetric = false;
+  IsEstimate = false;
   IsCumulative = false;
   HaveSave = false;
   HaveDelete = false;
   selectedContractID;
   selectedContractOrderID;
   selectedPriceListPatternID = -1;
+  SelectedContractOrderID;
   agContrcatOrderCol;
   ContractOrderListData: any;
   adContractPersoncol = [];
@@ -56,6 +62,7 @@ export class ContractPageComponent implements OnInit {
   RolesSet;
   ReigonCode;
   HaveHeader = true;
+  HasExpiredSupervision = false;
   alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false };
   isAdd = true;
   type: string;
@@ -273,6 +280,8 @@ export class ContractPageComponent implements OnInit {
   PersonTypeList: any;
   IsPerson = true;
   ContractPersonSelectedRow: any;
+  HaveEstimate = false;
+  ShowDelete: any = false;
 
   constructor(private ContractList: ContractListService,
     private route: ActivatedRoute,
@@ -294,8 +303,8 @@ export class ContractPageComponent implements OnInit {
         { SeasonCode: 3, SeasonName: 'فصل سوم' },
         { SeasonCode: 4, SeasonName: 'فصل جهارم' },
       ];
-      this.PersonTypeList = [{ PersonTypeName: 'حقیقی', PersonTypeCode: 1 },
-      { PersonTypeName: 'حقوقی', PersonTypeCode: 2 }];
+    this.PersonTypeList = [{ PersonTypeName: 'حقیقی', PersonTypeCode: 1 },
+    { PersonTypeName: 'حقوقی', PersonTypeCode: 2 }];
 
     this.adContractPersoncol = [
       {
@@ -598,7 +607,11 @@ export class ContractPageComponent implements OnInit {
     this.CustomCheckBoxConfig2.color = 'state p-primary';
     this.CustomCheckBoxConfig2.icon = 'fa fa-check';
     this.CustomCheckBoxConfig2.styleCheckBox = 'pretty p-icon p-rotate';
-    this.CustomCheckBoxConfig2.AriaWidth = 5;
+    this.CustomCheckBoxConfig2.AriaWidth = 5.5;
+    this.CustomCheckBoxConfig5.color = 'state p-primary';
+    this.CustomCheckBoxConfig5.icon = 'fa fa-check';
+    this.CustomCheckBoxConfig5.styleCheckBox = 'pretty p-icon p-rotate';
+    this.CustomCheckBoxConfig5.AriaWidth = 5;
     if (this.PopupParam && this.PopupParam.BeforPageTypeName) {
       this.BeforPageTypeName = this.PopupParam.BeforPageTypeName;
     }
@@ -628,7 +641,7 @@ export class ContractPageComponent implements OnInit {
       if (this.PopupParam.ModuleViewTypeCode === 5555) {
         this.IsEditable = this.IsDisplay = false;
       }
-      this.OuterDivPanelHeight = this.PopupParam.ModuleCode === 2687 ? 60 : 55;
+      this.OuterDivPanelHeight = 55;
       this.GridHeight = this.PopupParam.ModuleCode === 2687 ? 80 : 82;
       res.forEach(node => {
         switch (node.OperationCode) {
@@ -698,10 +711,12 @@ export class ContractPageComponent implements OnInit {
       this.IsDown = true;
       this.IsVolumetric = res[0].IsVolumetric;
       this.IsCumulative = res[0].IsCumulative;
+      this.IsEstimate = res[0].IsEstimate;
       this.NotControllingPayDatePeriod = res[0].NotControllingPayDatePeriod;
       this.IsMultiInvoice = res[0].IsMultiInvoice;
       this.ProductRequestID = res[0].ProductRequestID;
       this.RelatedProductRowData = res[0].RequestRelatedProductList;
+      this.HasExpiredSupervision = res[0].HasExpiredSupervision;
       if (this.ProductRequestID && this.ProductRequestID != null) {
         this.HasProductRequest = true;
       }
@@ -723,7 +738,8 @@ export class ContractPageComponent implements OnInit {
     this.ContractList.GetLastContractOrderList(this.selectedContractID).subscribe(res => {
       this.MinStartDate = res.PersianStartDate;
       this.MaxEndDate = res.PersianEndDate;
-      this.sumFinalAmountStr = res.FinalAmount;
+      this.sumFinalAmountStr = res.FinalAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
     });
     this.ProductRequestServices.GetCurrentDate().subscribe(res => { this.ContractPayDate = res });
     this.RelatedProductCol = [
@@ -871,11 +887,25 @@ export class ContractPageComponent implements OnInit {
         resizable: true
       },
       {
+        headerName: 'مبلغ نهایی ',
+        field: 'FinalOrderItemAmount',
+        HaveThousand: true,
+        width: 150,
+        resizable: true
+      },
+      {
+        headerName: 'مبلغ الحاقی ',
+        field: 'DiffrentOrderItemAmount',
+        HaveThousand: true,
+        width: 150,
+        resizable: true
+      },
+      {
         headerName: '  توضيحات',
         field: 'Note',
         width: 1000,
         resizable: true
-      }
+      },
     ];
     forkJoin([
       this.ContractList.GetBalanceFactors(this.selectedContractID),
@@ -885,6 +915,7 @@ export class ContractPageComponent implements OnInit {
     ]).subscribe(res => {
       if (res[0] && res[0][0]) {
         this.selectedPriceListPatternID = res[0][0].PriceListPatternID;
+        this.HaveEstimate = this.selectedPriceListPatternID > 0 ? true : false;
         this.PriceListTopicParams.selectedObject = res[0][0].PriceListFineYearCode;
         this.PriceListTypeParams.selectedObject = res[0][0].PriceListTypeCode;
         this.PriceList.GetPriceListType(this.PriceListTopicParams.selectedObject).subscribe(ress => {
@@ -968,12 +999,14 @@ export class ContractPageComponent implements OnInit {
   }
 
   ContractPersonRowClick(InputValue) {
+
     if (InputValue.data.RoleName.RoleID) {
       this.SelectedRoleId = InputValue.data.RoleName.RoleID;
     } else {
       this.SelectedRoleId = InputValue.data.RoleID;
     }
     this.ContractPersonSelectedRow = InputValue.data;
+
   }
 
   onSave() {
@@ -1072,7 +1105,9 @@ export class ContractPageComponent implements OnInit {
         this.ProductRequestID,
         this.ModuleCode,
         this.NotControllingPayDatePeriod,
-        this.IsMultiInvoice)
+        this.IsMultiInvoice,
+        this.IsEstimate,
+        this.HasExpiredSupervision)
         .subscribe(res => {
           this.showMessageBox('ثبت با موفقيت انجام شد');
           //  this.ContractPersonListData = this.ContractList.GetContractPersonList(this.selectedContractID, false);
@@ -1111,7 +1146,9 @@ export class ContractPageComponent implements OnInit {
         this.RelatedProductList,
         this.ProductRequestID,
         this.NotControllingPayDatePeriod,
-        this.IsMultiInvoice)
+        this.IsMultiInvoice,
+        this.IsEstimate,
+        this.HasExpiredSupervision)
         .subscribe(res => {
           this.showMessageBox('ثبت با موفقيت انجام شد');
         },
@@ -1126,6 +1163,12 @@ export class ContractPageComponent implements OnInit {
     this.type = 'message-box';
     this.HaveHeader = true;
     this.alertMessageParams.message = message;
+    this.alertMessageParams.HaveOkBtn = true;
+    this.alertMessageParams.HaveYesBtn = false;
+    this.alertMessageParams.HaveNoBtn = false;
+    this.HaveMaxBtn = false;
+    // this.startLeftPosition = 530;
+    // this.startTopPosition = 200;
   }
 
   onClose() {
@@ -1198,12 +1241,20 @@ export class ContractPageComponent implements OnInit {
   }
 
   RowClick(InputValue) {
+    this.ShowDelete = false;
     this.SelectedOrderNo = InputValue.data.OrderNo;
     this.SelectedOrderID = InputValue.data.ContractOrderID;
     this.PersianOrderDate = InputValue.data.PersianOrderDate;
     // this.Note = InputValue.data.Note;
     this.ContractOrderID = InputValue.data.ContractOrderID;
     this.IsLastOrderNo = true;
+    this.ContractOrderListData.forEach(element => {
+      this.MaxNo = element.OrderNo;
+    });
+    if (InputValue.data.OrderNo == this.MaxNo && this.ModuleCode == 3008) {
+      this.ShowDelete = true;
+    }
+
     // this.IsLastOrderNo = false;
     // let Count = 0;
     // this.gridApi_Contract_Order.forEachNode(node => {
@@ -1236,15 +1287,37 @@ export class ContractPageComponent implements OnInit {
   }
   btnClick(data) {
     switch (data) {
-      case 'view-estimate': {
-        this.type = this.selectedPriceListPatternID === -1 ? 'view-no-estimate' : 'view-estimate';
+      case 'view-no-estimate': {
+        this.type = 'view-no-estimate';
         this.startLeftPosition = 74;
         this.startTopPosition = 15;
         this.HaveHeader = true;
         this.isClicked = true;
-        // this.MinHeightPixel = 630;
+        this.MinHeightPixel = 630;
         this.ViewEstimateParam = {
           HeaderName: 'اطلاعات مرحله',
+          OrderNo: this.SelectedOrderNo,
+          ContractOrderID: this.ContractOrderID,
+          ContractID: this.selectedContractID,
+          PersianOrderDate: this.PersianOrderDate,
+          Note: this.Note,
+          RegionCode: this.PopupParam.selectedRegion,
+          ModuleCode: this.PopupParam.ModuleCode,
+          HaveSave: this.HaveSave && this.IsLastOrderNo && this.IsEditable,
+          ModuleViewTypeCode: this.PopupParam.ModuleViewTypeCode,
+          selectedRegion: this.PopupParam.selectedRegion,
+        };
+      }
+        break;
+      case 'view-estimate': {
+        this.type = 'view-estimate';
+        this.startLeftPosition = 74;
+        this.startTopPosition = 15;
+        this.MinHeightPixel = 630;
+        this.HaveHeader = true;
+        this.isClicked = true;
+        this.ViewEstimateParam = {
+          HeaderName: 'اطلاعات برآورد',
           OrderNo: this.SelectedOrderNo,
           ContractOrderID: this.ContractOrderID,
           ContractID: this.selectedContractID,
@@ -1579,6 +1652,9 @@ export class ContractPageComponent implements OnInit {
   OnChIsVolumetricChange(event) {
     this.IsVolumetric = event;
   }
+  OnIsEstimateChange(event) {
+    this.IsEstimate = event;
+  }
   OnChIsCumulativeChange(event) {
     this.IsCumulative = event;
   }
@@ -1588,6 +1664,11 @@ export class ContractPageComponent implements OnInit {
   OnChIsMultiInvoiceChange(event) {
     this.IsMultiInvoice = event;
   }
+
+  OnHasExpiredSupervisionChange(event) {
+    this.HasExpiredSupervision = event;
+  }
+
   onPrintFlowClick(row) {
     if (row.ProductRequestID) {
       this.ProductRequestServices.GetProductRequest(row.ProductRequestID).subscribe(res => {
@@ -1790,5 +1871,39 @@ export class ContractPageComponent implements OnInit {
         });
       });
     }
+  }
+
+  DeleteContractOrder() {
+    this.BtnClickedName = 'BtnDelete';
+    this.ShowMessageBoxWithYesNoBtn('آیا از حذف مطمئن هستید؟');
+  }
+
+  ShowMessageBoxWithYesNoBtn(message) {
+    this.isClicked = true;
+    this.type = 'message-box';
+    this.HaveHeader = true;
+    this.HaveMaxBtn = false;
+    this.startLeftPosition = 449;
+    this.startTopPosition = 87;
+    this.alertMessageParams.message = message;
+    this.alertMessageParams.HaveOkBtn = false;
+    this.alertMessageParams.HaveYesBtn = true;
+    this.alertMessageParams.HaveNoBtn = true;
+  }
+
+  MessageBoxAction(ActionResult) {
+    if (this.BtnClickedName === 'BtnDelete' && ActionResult === 'YES') {
+      this.DoDelete();
+    } 
+    
+  }
+  
+  DoDelete(){
+    this.ContractList.DeleteContractOrder(this.SelectedOrderID).subscribe(res => {
+      this.ContractList.GetContractOrderList(this.selectedContractID).subscribe(res2 => {
+        this.ContractOrderListData = res2;
+      });
+      this.showMessageBox('حذف با موفقيت انجام شد');
+    })
   }
 }

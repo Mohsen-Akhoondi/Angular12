@@ -3,9 +3,7 @@ import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
-import { single } from 'rxjs/operators';
 import { GridOptions } from 'ag-grid-community';
-import { forkJoin, of } from 'rxjs';
 import { NgSelectConfig } from '../ng-select/public-api';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { environment } from 'src/environments/environment';
@@ -15,8 +13,7 @@ import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { NgSelectVirtualScrollComponent } from '../ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
-declare var jquery: any;
-declare var $: any;
+
 @Component({
   selector: 'app-contract-list-page',
   templateUrl: './contract-list-page.component.html',
@@ -250,6 +247,7 @@ export class ContractListPageComponent implements OnInit {
     type: 'priceListTopic'
   };
   PriceListTopicItems = [];
+  IsEstimate: any;
 
   constructor(
     private router: Router,
@@ -345,12 +343,6 @@ export class ContractListPageComponent implements OnInit {
           width: 80,
           resizable: true
         },
-        // {
-        //   headerName: 'کد واحد اجرایی',
-        //   field: 'RegionCode',
-        //   width: 100,
-        //   resizable: true
-        // },
         {
           headerName: 'واحد اجرایی',
           field: 'RegionName',
@@ -364,13 +356,6 @@ export class ContractListPageComponent implements OnInit {
           resizable: true,
           sortable: true,
         },
-        // {
-        //   headerName: ' کد قرارداد',
-        //   field: 'ContractCode',
-        //   width: 100,
-        //   resizable: true,
-        //   sortable: true,
-        // },
         {
           headerName: ' نوع قرارداد',
           field: 'ContractTypeName',
@@ -416,6 +401,13 @@ export class ContractListPageComponent implements OnInit {
           field: 'Subject',
           width: 300,
           resizable: true
+        },
+        {
+          headerName: 'پیمانکار اصلی',
+          field: 'MainContractorName',
+          width: 120,
+          resizable: true,
+          hide: this.ModuleCode === 2516 ? false : true,
         },
         {
           headerName: 'رسته',
@@ -563,11 +555,12 @@ export class ContractListPageComponent implements OnInit {
     this.rowSelection = 'single';
     switch (this.ModuleCode) {
       case 2516:
-      case 2645:
+      case 2645: // برآورد اولیه
       case 2647:
       case 2648:
-      case 2654:
+      case 2654: // گزارش نظارت (بازدید روزانه)
       case 2921: // سایر اسناد مستندات
+      case 3071: // ابزار راهبری گزارش نظارت
         this.CanViewContractCase = true;
         break;
       default:
@@ -604,6 +597,9 @@ export class ContractListPageComponent implements OnInit {
   ngOnInit() {
     if (this.ModuleCode === 2516) {
       this.ModuleName = 'درخواست پرداخت های قرارداد';
+    } else if (this.ModuleCode === 3096) {
+      this.ModuleName = 'صورتجلسه اعتباری';
+      this.IsCost = false;
     }
     this.ISIRVersion = environment.IsExternal;
     this.getNewData();
@@ -616,17 +612,17 @@ export class ContractListPageComponent implements OnInit {
     if (this.InputParam && this.InputParam.IsProviderContractList) {
       this.ActorID = this.InputParam.ActorID;
       this.gridHeight = 92.7;
-        this.BoxDevHeight = 100;
-        this.ContractList.GetProviderContractList(null, this.ModuleCode,this.IsCost, this.ActorID).subscribe(res =>
-            this.rowData = res);
-       
+      this.BoxDevHeight = 100;
+      this.ModuleCode = this.InputParam.ModuleCode; // RFC 63952
+      this.ContractList.GetProviderContractList(this.ActorID).subscribe(res =>
+        this.rowData = res);
     } else {
-
       this.Workflow.GetFinYearList().subscribe(res => {
         this.FinYearItems = res;
         this.FromFinYearParams.selectedObject = this.FinYearItems[0].UserFinYearCode;
         this.ToFinYearParams.selectedObject = this.FinYearItems[0].UserFinYearCode;
       });
+
       if (this.InputParam && this.InputParam.RegionList && this.InputParam.RegionList.length > 0) {
         this.HasRegion = true;
         this.ReigonListSet = this.InputParam.RegionList;
@@ -635,6 +631,7 @@ export class ContractListPageComponent implements OnInit {
       } else {
         this.HasRegion = false;
       }
+
       if (this.HasRegion) {
         if (!this.ISIRVersion && this.ModuleCode === 2645 || this.ModuleCode === 2516) {
           this.BoxDevHeight = 55;
@@ -698,30 +695,48 @@ export class ContractListPageComponent implements OnInit {
           RegionCode: this.selectedRow.data.RegionCode
         };
       } else {
-        this.type = (this.selectedRow.data.ContractTypeCode === 26 ||
-          this.selectedRow.data.ContractTypeCode === 29) && this.ModuleCode === 2645 ?
-          'contract_person_estimate' :
-          (this.selectedRow.data.ContractTypeCode === 27 ||
-            this.selectedRow.data.ContractTypeCode === 28) && this.ModuleCode === 2645 ?
-            'view-no-estimate' : 'PriceList_contract_estimate';
+        this.type =
+          ((this.selectedRow.data.ContractTypeCode === 26 ||
+            this.selectedRow.data.ContractTypeCode === 29) && this.ModuleCode === 2645) ?
+            'contract_person_estimate' :
+            ((this.selectedRow.data.ContractTypeCode === 27 ||
+              this.selectedRow.data.ContractTypeCode === 28) && this.ModuleCode === 2645) ?
+              'view-no-estimate' :
+              this.ModuleCode === 3096 ?
+                'contract' :
+                'PriceList_contract_estimate';
         this.HaveMaxBtn =
           this.type === 'contract_person_estimate' ||
           this.type === 'view-no-estimate' ||
+          this.type === 'contract' ||
           this.type === 'PriceList_contract_estimate' &&
-          (this.ModuleCode === 2501 || this.ModuleCode === 2645 || this.ModuleCode === 2300 || this.ModuleCode === 2755
-            || this.ModuleCode === 2516 || this.ModuleCode === 2769 || this.ModuleCode === 2875 || this.ModuleCode === 2876); // rfc 52104
-        this.PixelHeight = this.type === 'PriceList_contract_estimate' ? 630 : 530;
+          (this.ModuleCode === 2501 ||
+            this.ModuleCode === 2645 ||
+            this.ModuleCode === 2300 ||
+            this.ModuleCode === 2755 ||
+            this.ModuleCode === 2516 ||
+            this.ModuleCode === 2769 ||
+            this.ModuleCode === 2875 ||
+            this.ModuleCode === 3096 ||
+            this.ModuleCode === 2876
+          ); // rfc 52104
+        this.PixelHeight = this.type === 'PriceList_contract_estimate' ? 590 :
+                           this.type === 'contract' ? 630 : 530;
         this.HeightPercentWithMaxBtn =
-          this.type === 'PriceList_contract_estimate' && this.ModuleCode === 2501 ? 98 :
-            // tslint:disable-next-line:max-line-length
+          (this.type === 'PriceList_contract_estimate' &&
+            (this.ModuleCode === 2501 || this.ModuleCode === 3096)) ? 98 :
             this.type === 'PriceList_contract_estimate' && (this.ModuleCode === 2516 || this.ModuleCode === 2769 || this.ModuleCode === 2875 || this.ModuleCode === 2876 || this.ModuleCode === 2755) ? 90 :
               this.type === 'contract_person_estimate' ? 98 : 98;
 
-        this.PixelWidth = this.type === 'PriceList_contract_estimate' && this.ModuleCode === 2645 ? 1360 : '';
+        this.PixelWidth = 
+        (this.type === 'PriceList_contract_estimate' && this.ModuleCode === 2645) ? 1360 :
+        this.ModuleCode === 3096 ? 1300 :'';
         this.btnclicked = true;
         this.HaveHeader = true;
-        this.startLeftPosition = this.type === 'PriceList_contract_estimate' && this.ModuleCode === 2645 ? 2 : 94;
-        this.startTopPosition = this.type === 'PriceList_contract_estimate' && this.ModuleCode === 2645 ? 5 : 10;
+        this.startLeftPosition = (this.type === 'PriceList_contract_estimate' && this.ModuleCode === 2645) ? 2 : 
+        this.ModuleCode === 3096 ? 30 : 94;
+        this.startTopPosition =  (this.type === 'PriceList_contract_estimate' && this.ModuleCode === 2645) ? 2 :
+        this.ModuleCode === 3096 ? 5 : 10;
         this.MinHeightPixel = this.ModuleCode === 2648 || this.ModuleCode === 2921 ? 545 : 550; // 2648 صورت جلسات /sayer 2921 سایر اسناد
 
         this.paramObj = {
@@ -744,8 +759,9 @@ export class ContractListPageComponent implements OnInit {
           RegionName: this.selectedRow.data.RegionName,
           SeasonCode: this.selectedRow.data.SeasonCode,
           // tslint:disable-next-line:max-line-length
-          ModuleViewTypeCode: (this.ModuleCode === 2875 || this.ModuleCode === 2876 || this.ModuleCode === 2755) ? 100000 : null, // rfc 52104
-          BeforPageTypeName: 'contract-list-page'
+          ModuleViewTypeCode: (this.ModuleCode === 2875 || this.ModuleCode === 2876 || this.ModuleCode === 2755 || this.ModuleCode === 3071) ? 100000 : null, // rfc 52104
+          BeforPageTypeName: 'contract-list-page',
+          Mode: 'EditMode'
         };
       }
     }
@@ -786,7 +802,8 @@ export class ContractListPageComponent implements OnInit {
                 this.ModuleCode === 2516 ? 'درخواست پرداخت - پرونده فنی قرارداد' :
                   this.ModuleCode === 2648 ? 'صورت جلسات - پرونده فنی قرارداد' :
                     this.ModuleCode === 2921 ? ' سایر اسناد پیمان - پرونده فنی قرارداد' :
-                      this.ModuleName,
+                      this.ModuleCode === 3096 ? 'مشاهده صورتجلسه اعتباری' :
+                        this.ModuleName,
           ModuleCode: this.ModuleCode,
           selectedRow: this.selectedRow,
           GridHeightInTab: 100,
@@ -1067,7 +1084,7 @@ export class ContractListPageComponent implements OnInit {
         RegionAreaID: node.data.RegionAreaID,
         DistrictDirectionCode: node.data.DistrictDirectionCode,
         PriceListTopicID: node.data.PriceListTopicID
-      }
+      };
       Alsit.push(obj);
     });
 

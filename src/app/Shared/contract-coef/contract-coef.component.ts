@@ -1,7 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { NgSelectCellEditorComponent } from '../NgSelectCellEditor/ng-select-cell-editor.component';
-import { of } from 'rxjs';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { ActivatedRoute } from '@angular/router';
 

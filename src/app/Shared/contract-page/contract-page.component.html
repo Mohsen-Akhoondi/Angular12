@@ -68,7 +68,7 @@
                 </td>
               </tr>
               <tr>
-                <td style="width: 100%" colspan="2">
+                <td style="width: 50%" colspan="2">
                   <span class="table-cell-Lable"> محدوده انجام</span><input style="width: 80%; "
                     class="form-control input-style" type="text" name="first" value="{{ ActLocationName }}" readonly />
                 </td>
@@ -84,7 +84,7 @@
                 </td>
               </tr>
               <tr>
-                <td style="width: 100%" colspan="2">
+                <td style="width: 50%" colspan="2">
                   <span class="table-cell-Lable">موضوع</span><input style="width: 80%" class="form-control input-style"
                     type="text" name="first" value="{{ Subject }}" readonly />
                 </td>
@@ -105,7 +105,7 @@
                 </td>
               </tr>
               <tr>
-                <td style="width: 100%" colspan="2">
+                <td style="width: 50%" colspan="2">
                   <span class="table-cell-Lable">توضیحات</span>
                   <input style="width: 80%" class="form-control input-style" type="text" name="first" value="{{ Note }}"
                     readonly />
@@ -115,16 +115,33 @@
                     class="form-control input-style" type="text" name="first" value="{{ SubCostCenterName }}"
                     readonly />
                 </td>
-                <td style="width: 25%" *ngIf="ModuleCode === 3008">
+                <td style="width: 25%;">
                   <span class="table-cell-Lable">عدم کنترل تاریخ</span>
                   <app-custom-check-box style="vertical-align: sub; " [configurationInfo]="CustomCheckBoxConfig1"
-                    [isSelected]="NotControllingPayDatePeriod" (PrettyCheckBoxChange)="OnChIsNotContollingPayDatePeriodChange($event)">
+                    [isSelected]="NotControllingPayDatePeriod"
+                    (PrettyCheckBoxChange)="OnChIsNotContollingPayDatePeriodChange($event)">
                   </app-custom-check-box>
                   <span class="table-cell-Lable">نشانگر چند فاکتوری</span>
                   <app-custom-check-box style="vertical-align: sub; " [configurationInfo]="CustomCheckBoxConfig2"
                     [isSelected]="IsMultiInvoice" (PrettyCheckBoxChange)="OnChIsMultiInvoiceChange($event)">
                   </app-custom-check-box>
                 </td>
+              </tr>
+              <tr>
+                <td style="width: 50%" colspan="2">
+                </td>
+                <td style="width: 25%"></td>
+                <td style="width: 25%;">
+                  <span class="table-cell-Lable">قرارداد عمرانی</span>
+                  <app-custom-check-box style="vertical-align: sub; " [configurationInfo]="CustomCheckBoxConfig1"
+                  [isSelected]="IsEstimate" (PrettyCheckBoxChange)="OnIsEstimateChange($event)">
+                  </app-custom-check-box>
+                  <span class="table-cell-Lable1">عدم کنترل تاریخ نظارت</span>
+                  <app-custom-check-box style="vertical-align: sub; " [configurationInfo]="CustomCheckBoxConfig5"
+                  [isSelected]="HasExpiredSupervision" (PrettyCheckBoxChange)="OnHasExpiredSupervisionChange($event)">
+                  </app-custom-check-box>
+                </td>
+
               </tr>
             </table>
           </fieldset>
@@ -169,8 +186,8 @@
                 <!-- نام نقش نوع نقش  -->
                 <app-grid (RowClick)="ContractPersonRowClick($event)" (GridReady)="onGridReady($event)"
                   [columns]="adContractPersoncol" [IsEditable]="IsEditable" [rowsData]="ContractPersonListData"
-                  [gridHeight]="GridHeight"
-                  (cellEditingStarted)="onContractPersoncellEditingStarted($event)"></app-grid>
+                  [gridHeight]="GridHeight" (cellEditingStarted)="onContractPersoncellEditingStarted($event)">
+                </app-grid>
               </div>
             </div>
 
@@ -374,9 +391,14 @@
         <img width="15px" height="15px" src="assets/Icons/save.png" />
         ثبت
       </button>
-      <button (click)="btnClick('view-estimate')" class="btn btn-primary btnGreen">
+
+      <button (click)="btnClick('view-no-estimate')" class="btn btn-primary btnGreen">
         <img width="15px" height="15px" src="assets/Icons/show.png" />
         مشاهده مرحله
+      </button>
+      <button *ngIf="HaveEstimate" (click)="btnClick('view-estimate')" class="btn btn-primary btnGreen">
+        <img width="15px" height="15px" src="assets/Icons/show.png" />
+        مشاهده برآورد
       </button>
       <button (click)="onCoefClick()" class="btn btn-primary btnGreen">
         <img width="15px" height="15px" src="assets/Icons/coef1.png" />
@@ -402,6 +424,11 @@
         <img width="15px" height="15px" src="assets/Icons/show.png" />
         مشاهده درخواست قرارداد
       </button> -->
+      <button *ngIf="HaveSave && IsDisplay && ShowDelete" (click)="DeleteContractOrder()" id="btn2"
+        class="btn btn-primary btnGreen">
+        <img width="15px" height="15px" src="assets/Icons/delete.png" />
+        حذف
+      </button>
       <button (click)="onClose()" class="btn btn-primary btnGreen">
         <img width="15px" height="15px" src="assets/Icons/exit.png" />
         خروج
@@ -413,10 +440,11 @@
 
 <app-over-popup *ngIf="isClicked" [PopupType]="type" [PopupParam]="type === 'archive-details'? ArchiveParam : type === 'contract-coef' ? CoefParam : type === 'contract-person' ? selectedContractPersonRow : type ==='view-estimate' || type ==='view-no-estimate' ? ViewEstimateParam : type ==='contract-case' 
   || type ==='product-request-page' ||  type ==='product-request-page-without-flow' ? paramObj : alertMessageParams"
-  (popupclosed)="popupclosed($event)" (PopupOutPutParam)="getOutPutParam($event)"
+  (popupclosed)="popupclosed($event)" (PopupOutPutParam)="type ==='message-box' ? MessageBoxAction($event) : getOutPutParam($event)"
   [startLeftPosition]="type ==='view-estimate' || type ==='view-no-estimate' || type === 'contract-coef' || type ==='contract-case' ||  type ==='product-request-page' ||  type ==='product-request-page-without-flow' ? startLeftPosition  : 521"
   [startTopPosition]="type ==='view-estimate' || type ==='view-no-estimate' || type === 'contract-coef' || type ==='contract-case' ||  type ==='product-request-page' ||  type ==='product-request-page-without-flow'  ? startTopPosition : 207"
   [HaveHeader]="HaveHeader"
   [HaveMaxBtn]="type ==='view-estimate' || type ==='view-no-estimate' || type ==='contract-case' || type ==='product-request-page' || type ==='product-request-page-without-flow'"
   [minHeightPixel]="MinHeightPixel" [PercentWidth]="PercentWidth" [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn">
 </app-over-popup>
+

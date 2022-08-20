@@ -1,8 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { of } from 'rxjs';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
-declare var jquery: any;
-declare var $: any;
+
 @Component({
   selector: 'app-contract-order-item-deduction',
   templateUrl: './contract-order-item-deduction.component.html',
