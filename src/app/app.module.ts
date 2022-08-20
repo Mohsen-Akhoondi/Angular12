@@ -303,7 +303,7 @@ import { EvaluateTypePageComponent } from './ProductRequest/evaluate-type-page/e
 import { EvaluateMethodPageComponent } from './ProductRequest/evaluate-method-page/evaluate-method-page.component';
 import { EntityTypeComponent } from './ProductRequest/Entity-Type/entity-type.component';
 import { AssetIncomeComponent } from './Assets/asset-income/asset-income.component';
-import { AssetIncomeListComponent } from './Assets/asset-income/asset-income-list/asset-income-list.component';
+import { AssetIncomeListComponent } from './Assets/asset-income-list/asset-income-list.component';
 import { ArchiveYearDocumentComponent } from './Shared/archive-year-document/archive-year-document.component';
 import { SupplierWorkFlowComponent } from './Actors/supplier-work-flow/supplier-work-flow.component';
 import { FeePageComponent } from './Accounting/fee-page/fee-page.component';
@@ -346,6 +346,10 @@ import { LoginPageComponent } from './Shared/login-page/login-page.component';
 import { StimulsoftViewerModule } from 'stimulsoft-viewer-angular';
 import { CustomizedTreeComponent } from './Shared/customized-tree/customized-tree.component';
 import { DeadlineContractListComponent } from './Contract/deadline-contract-list/deadline-contract-list.component';
+import { NgSelectModule } from './Shared/ng-select/public-api';
+import { ActorNoteComponent } from './Actors/actor-note/actor-note.component';
+import { CorporateWithoutInquiryComponent } from './Actors/corporate-without-inquiry/corporate-without-inquiry.component';
+
 import { RichTextBoxInputPageComponent } from './Shared/rich-text-box-input-page/rich-text-box-input-page.component';
 import { RoutNavigateComponent } from './Shared/rout-navigate/rout-navigate.component';
 import { SharedOverPopupComponent } from './Shared/shared-over-popup/shared-over-popup.component';
@@ -644,6 +648,8 @@ import { CfmModule } from './CRM/CfmModule/cfm.module';
     ContractStatusSummarySearchPageComponent,
     CustomizedTreeComponent,
     DeadlineContractListComponent,
+    ActorNoteComponent,
+    CorporateWithoutInquiryComponent,
     RichTextBoxInputPageComponent,
     RoutNavigateComponent,
     SharedOverPopupComponent

@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
@@ -242,13 +242,13 @@ export class PersonComponent implements OnInit {
       }
       else {
         if (this.ActorId > 0) {
-          this.Actor.UpdateActorPerson(this.PersonObject).subscribe(res => {
+          this.Actor.UpdateActorPerson(this.PersonObject , this.ModuleCode).subscribe(res => {
             this.PersonObject = res;
             this.Validate = this.PersonObject.Validate;
             this.ShowMessageBoxWithOkBtn('ویرایش اطلاعات با موفقیت انجام شد');
           });
         } else {
-          this.Actor.SaveActorPerson(this.PersonObject).subscribe(res => {
+          this.Actor.SaveActorPerson(this.PersonObject , this.ModuleCode).subscribe(res => {
             this.PersonObject = res;
             this.Validate = this.PersonObject.Validate;
             this.ActorId = this.PersonObject.ActorId;

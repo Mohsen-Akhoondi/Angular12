@@ -61,6 +61,10 @@
           <img width="15px" height="15px" src="assets/Icons/ok.png" />
           تأیید
         </button>
+        <button (click)="onChangeMenu()" [disabled]="!UserID" id="btnSelect" class="btn btn-primary btnGreen">
+          <img width="15px" height="15px" src="assets/Icons/ok.png" />
+          تغییر منوی کاربر
+        </button>
         <button (click)="onClose()" id="btn4" class="btn btn-primary btnGreen">
           <img width="15px" height="15px" src="assets/Icons/exit.png" />
           خروج

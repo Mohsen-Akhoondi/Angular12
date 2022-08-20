@@ -1,11 +1,9 @@
-import { Component, OnInit, Input, Output } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { GridOptions } from 'ag-grid-community';
-import { of } from 'rxjs';
+
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-declare var jquery: any;
-declare var $: any;
+
 @Component({
   selector: 'app-product-request-coef-type',
   templateUrl: './product-request-coef-type.component.html',
@@ -19,7 +17,7 @@ export class ProductRequestCoefTypeComponent implements OnInit {
   type: string;
   paramObj;
   HaveHeader: boolean;
-  alertMessageParams = {HaveOkBtn: true, message: ''};
+  alertMessageParams = { HaveOkBtn: true, message: '' };
   OverstartLeftPosition: number;
   OverstartTopPosition: number;
   PRCoefTypeRow: any;
@@ -32,40 +30,40 @@ export class ProductRequestCoefTypeComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private User: UserSettingsService) {
-      this.columnDef = [
-        {
-          headerName: 'ردیف ',
-          field: 'ItemNo',
-          width: 70,
-          resizable: true,
-          suppressSizeToFit: true
-        },
-        {
-          headerName: 'کد ضرایب درخواست ',
-          field: 'ProductRequestCoefTypeCode',
-          width: 125,
-          resizable: true,
-          editable: true,
-          suppressSizeToFit: true
-        },
-        {
-          headerName: 'نام ضرایب درخواست ',
-          field: 'ProductRequestCoefTypeName',
-          width: 230,
-          resizable: true,
-          editable: true,
-          suppressSizeToFit: true
-        }
-      ];
-     this.route.params.subscribe(params => {
-        this.ModuleCode = +params['ModuleCode'];
-      });
+    this.columnDef = [
+      {
+        headerName: 'ردیف ',
+        field: 'ItemNo',
+        width: 70,
+        resizable: true,
+        suppressSizeToFit: true
+      },
+      {
+        headerName: 'کد ضرایب درخواست ',
+        field: 'ProductRequestCoefTypeCode',
+        width: 125,
+        resizable: true,
+        editable: true,
+        suppressSizeToFit: true
+      },
+      {
+        headerName: 'نام ضرایب درخواست ',
+        field: 'ProductRequestCoefTypeName',
+        width: 230,
+        resizable: true,
+        editable: true,
+        suppressSizeToFit: true
+      }
+    ];
+    this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
 
-    }
+  }
 
-    onGridReady(params) {
-      this.gridApi = params.api;
-    }
+  onGridReady(params) {
+    this.gridApi = params.api;
+  }
 
   ngOnInit() {
     this.getRowData();
@@ -100,26 +98,26 @@ export class ProductRequestCoefTypeComponent implements OnInit {
     this.gridApi.forEachNode(function (node) {
       rowData.push(node.data);
     });
-      this.ProductRequest.SaveProductRequestCoefType(rowData).subscribe(res => {
-        this.btnclicked = true;
-        this.type = 'message-box';
-        this.HaveHeader = true;
-        this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
-      },
-        // err => {
-        //   this.btnclicked = true;
-        //   this.type = 'message-box';
-        //   this.HaveHeader = true;
-        //   this.alertMessageParams.message = 'ثبت با مشکل مواجه شد!';
-        // }
-      );
+    this.ProductRequest.SaveProductRequestCoefType(rowData).subscribe(res => {
+      this.btnclicked = true;
+      this.type = 'message-box';
+      this.HaveHeader = true;
+      this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
+    },
+      // err => {
+      //   this.btnclicked = true;
+      //   this.type = 'message-box';
+      //   this.HaveHeader = true;
+      //   this.alertMessageParams.message = 'ثبت با مشکل مواجه شد!';
+      // }
+    );
   }
 
   closeModal() {
     this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
-}
-popupclosed() {
-  this.btnclicked = false;
-}
+  }
+  popupclosed() {
+    this.btnclicked = false;
+  }
 
 }

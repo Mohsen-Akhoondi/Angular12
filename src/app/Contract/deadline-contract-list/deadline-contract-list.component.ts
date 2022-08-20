@@ -2,7 +2,7 @@ import { RegionListService } from 'src/app/Services/BaseService/RegionListServic
 import { ActivatedRoute, Router } from '@angular/router';
 import { Input, Component, OnInit, EventEmitter, Output } from '@angular/core';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
-import { isNullOrUndefined, isUndefined } from 'util';
+import { isNullOrUndefined } from 'util';
 
 @Component({
   selector: 'app-deadline-contract-list',
@@ -35,6 +35,7 @@ export class DeadlineContractListComponent implements OnInit {
   columnDef;
   rowData = [];
   ModuleCode;
+  ProductRequestTypeCode;
   constructor(private router: Router,
     private Region: RegionListService,
     private route: ActivatedRoute,
@@ -87,6 +88,25 @@ export class DeadlineContractListComponent implements OnInit {
       && this.InputParam.ModuleCode) {
       this.ModuleCode = this.InputParam.ModuleCode;
     }
+    switch (this.ModuleCode) {
+      case 3031:
+        this.ProductRequestTypeCode = 1;
+        break;
+      case 3042:
+        this.ProductRequestTypeCode = 3;
+        break;
+      case 3043:
+        this.ProductRequestTypeCode = 4;
+        break;
+      case 3044:
+        this.ProductRequestTypeCode = 5;
+        break;
+      case 3052:
+        this.ProductRequestTypeCode = null;
+        break;
+      default:
+        break;
+    } // 64146
     this.Region.GetRegionList(this.ModuleCode, true).subscribe(res => {
       this.ReigonListSet = res;
       this.RegionParams.selectedObject = this.ReigonListSet[0].RegionCode;
@@ -129,7 +149,7 @@ export class DeadlineContractListComponent implements OnInit {
       this.ShowMessageBoxWithOkBtn('تاريخ انتخاب نشده است');
       return;
     }
-    this.Contract.GetDeadlineContractList(this.RegionParams.selectedObject, this.Date).subscribe(res => {
+    this.Contract.GetDeadlineContractList(this.RegionParams.selectedObject, this.Date, this.ProductRequestTypeCode).subscribe(res => {
       this.rowData = res;
     });
   }

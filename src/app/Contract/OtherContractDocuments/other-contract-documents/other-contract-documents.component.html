@@ -1,6 +1,6 @@
 <div [ngClass]="{'disable-parent': !IsDown}" id="container" class="row" style="clear: both">
   <div id="content" class="" style="height: 100%;width: 100%;">
-    <div class="main-form-body" style=" margin: 5px;min-width: 1130px; height: 79%;">
+    <div class="main-form-body" style=" margin: 5px;min-width: 1130px; height: 85%;">
       <form>
         <fieldset class="feild-set" style="display: inherit">
           <legend class="legend" style="width:8%;">اطلاعات قرارداد</legend>
@@ -69,28 +69,68 @@
             </tr>
           </table>
         </fieldset>
-        <fieldset class="feild-set" style="display: inherit">
+        <fieldset class="feild-set" style="display: inherit; min-height: 370px;">
           <legend style="width:7%;">سایر اسناد</legend>
           <table style="width: 100%;">
             <tr>
-              <td width="20%">
+              <td width="33%">
                 <span class="table-cell-Lable">شماره سند</span>
-                <input style="width: 60%; display: inline-block;" class="form-control input-style" type="text"
+                <input style="width: 75%; display: inline-block;" class="form-control input-style" type="text"
                   name="first" value="{{ ContractMinutesCode }}" readonly />
               </td>
-              <td width="20%">
-                <span class="table-cell-Lable">تاریخ</span>
-                <app-jalali-datepicker [WidthPC]="60" [Required]="true"
-                  [CurrMiladiDateValue]="ContractMinutesDate" (Change)="OnContractMinutesDateChange($event)"
-                  [Disabled]="!DisplayControlls">
-                </app-jalali-datepicker>
+              <td style="width: 33%;">
+                <span class="table-cell-Lable">نوع تنبیه</span>
+                <app-ng-select-virtual-scroll style="display: inline-block;width: 75%;" [NgSelectParams]="PunishmentTypeParams"
+                  [Items]="PunishmentTypeItems" (Open)="OnOpenPunishmentType()">
+                </app-ng-select-virtual-scroll>
               </td>
+
+              <td style="width: 33%;">
+                <span class="table-cell-Lable">مرتبه</span>
+                <app-ng-select-virtual-scroll style="display: inline-block;width: 75%;" [NgSelectParams]="RepetitionParams"
+                  [Items]="RepetitionItems" (Open)="OnOpenRepetition()">
+                </app-ng-select-virtual-scroll>
+              </td>
+
               <td width="60%"></td>
             </tr>
             <tr>
-              <td colspan="3" style="width: 100%;">
+              <td style="width: 33%;">
+                <span class="table-cell-Lable">نوع زمان جریمه</span>
+                <div class="redio-div">
+                  <div class="custom-control custom-radio custom-control-inline">
+                    <input  [checked]="IsDefined" type="radio" class="custom-control-input" 
+                     id="ISDefinedRadio" name="ChoosenISDefinedRadio" (click)="RedioClick(true)">
+                    <label style="margin: auto;" class="custom-control-label redio-label" for="ISDefinedRadio">مشخص</label>
+                  </div>
+                  <div class="custom-control custom-radio custom-control-inline">
+                    <input [checked]="!IsDefined" type="radio" class="custom-control-input" 
+                     id="ISIndeterminateRadio" name="ChoosenISDefinedRadio">
+                    <label style="margin: auto;" class="custom-control-label redio-label" for="ISIndeterminateRadio"
+                      (click)="RedioClick(false)">نامشخص</label>
+                  </div>
+                </div>
+              </td>
+               <td width="33%">
+                <span class="table-cell-Lable">تاریخ</span>
+                <app-jalali-datepicker [WidthPC]="75" [Required]="true"
+                  [CurrMiladiDateValue]="ContractMinutesDate" (Change)="OnContractMinutesDateChange($event)"
+                  [Disabled]="!DisplayControlls || DisabledContractMinutesDate ">
+                </app-jalali-datepicker>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="3" style="width: 100%; height: 146px;">
                 <span style="vertical-align: top; margin: 0;margin-left: 5px" class="table-cell-Lable">موضوع سند</span>
-                <textarea [(ngModel)]="Note" name="Note" class="form-control input-style" rows="2"
+                <textarea  [(ngModel)]="Note" name="Note" class="form-control input-style" rows="2"
+                  style="display: inline-block;height: 124px;width: 92%;font-size: small;" id="indicator-text_note"
+                  [disabled]="!DisplayControlls"></textarea>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="3" style="width: 100%;">
+                <span style="vertical-align: top; margin: 0;margin-left: 5px" class="table-cell-Lable">توضیحات</span>
+                <textarea  [(ngModel)]="ContractMinutesSubject" name="ContractMinutesSubject" class="form-control input-style" rows="2"
                   style="display: inline-block;height: 124px;width: 92%;font-size: small;" id="indicator-text_note"
                   [disabled]="!DisplayControlls"></textarea>
               </td>

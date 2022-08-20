@@ -1,14 +1,12 @@
 import { Component, OnInit, Input, Output, EventEmitter, ViewChild, TemplateRef } from '@angular/core';
-import { of, forkJoin, Observable } from 'rxjs';
-import { isUndefined } from 'util';
+import { of, forkJoin } from 'rxjs';
+import { isNullOrUndefined, isUndefined } from 'util';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-import { INVVoucherGroupService } from 'src/app/Services/InventoryService/BasemodulesService/INVVoucherGroupService';
-import { VWIncrementTypeService } from 'src/app/Services/InventoryService/BasemodulesService/VWIncrementTypeService';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { Validators, FormControl, FormGroup, FormBuilder } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
@@ -19,17 +17,17 @@ import { TemplateRendererComponent } from 'src/app/Shared/grid-component/templat
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServices';
-import * as $ from 'jquery';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { AutomationService } from 'src/app/Services/BaseService/AutomationService';
 import * as moment from 'jalali-moment';
-import { resolve } from 'q';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
 import { RadioBoxModel } from 'src/app/Shared/Radio-Box/Radio-Box-Model/RadioBoxModel';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { CommonService } from 'src/app/Services/CommonService/CommonService';
 import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
+import { ArticlePatternService } from 'src/app/Services/CRM/ArticlePatternService';
+import { ServicePatternService } from 'src/app/Services/CRM/ServicePatternService';
 
 @Component({
   selector: 'app-product-request-page',
@@ -38,6 +36,7 @@ import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/In
 })
 export class ProductRequestPageComponent implements OnInit {
   @ViewChild('IsValidity') IsValidity: TemplateRef<any>;
+  @ViewChild('IsReturn') IsReturnInquiry: TemplateRef<any>;
   @ViewChild('UploadArchive') UploadArchive: TemplateRef<any>;
   @ViewChild('DelRecDoc') DelRecDoc: TemplateRef<any>;
   @Output() Closed: EventEmitter<any> = new EventEmitter<any>();
@@ -45,6 +44,10 @@ export class ProductRequestPageComponent implements OnInit {
   @Input() PopupMaximized;
   @Input() InputParam;
   IsAdmin;
+  CallMainapi = false;
+  PopUpName = '';
+  PixelHeight;
+  PriceListTopicRasteDisable = true;
   btnshowcontractlist = false;
   IsTransferedContract = false;
   VirtualGroupModuleTypeName = '';
@@ -60,6 +63,7 @@ export class ProductRequestPageComponent implements OnInit {
   McRadioTypes: Array<RadioBoxModel> = [];
   ScRadioTypes: Array<RadioBoxModel> = [];
   IcRadioTypes: Array<RadioBoxModel> = [];
+  TDRadioTypes: Array<RadioBoxModel> = [];
   HasSecretQuestion = false;
   ISActLocation = false;
   HasMutualContractQuestion = true;
@@ -143,7 +147,7 @@ export class ProductRequestPageComponent implements OnInit {
   IsNew = true;
   WorkFlowTransitionID;
   ReadyToConfirm;
-  // AccessRevocation;
+  IsLastCommition = false;
   HaveRevocation;
   btnConfirmName;
   btnConfirmIcon;
@@ -157,6 +161,8 @@ export class ProductRequestPageComponent implements OnInit {
   ContractSignItems;
   ISDisabledConfirmAndReturnBtn = false;
   PercentageLevelOfChanges = 0;
+  HaveConfirmArchive = false;
+  HaveSaveArchive = false;
   ContractSignParams = {
     bindLabelProp: 'PersonName',
     bindValueProp: 'ActorId',
@@ -244,7 +250,10 @@ export class ProductRequestPageComponent implements OnInit {
   i;
   CurrentSubCostCenterID;
   CheckValidate = false;
+  ExpertCheckValidate = false;
   CheckValidateCostCenterParams = false;
+  CheckValidatePRType = false;
+  CheckValidateTopic = false;
   complexForm: FormGroup;
   PRCostRowData = [];
   IncrementTypeItems;
@@ -281,7 +290,7 @@ export class ProductRequestPageComponent implements OnInit {
     bindLabelProp: 'RegionName',
     bindValueProp: 'RegionCode',
     placeholder: '',
-    MinWidth: '155px',
+    MinWidth: '100px',
     selectedObject: null,
     loading: false,
     IsVirtualScroll: false,
@@ -295,6 +304,7 @@ export class ProductRequestPageComponent implements OnInit {
     MinWidth: '155px',
     selectedObject: null,
     loading: false,
+    Required: true,
     IsVirtualScroll: false,
     IsDisabled: false
   };
@@ -561,7 +571,7 @@ export class ProductRequestPageComponent implements OnInit {
     bindLabelProp: 'ActLocationName',
     bindValueProp: 'ActLocationID',
     placeholder: '',
-    MinWidth: '155px',
+    MinWidth: '100px',
     selectedObject: null,
     loading: false,
     IsVirtualScroll: false,
@@ -581,6 +591,7 @@ export class ProductRequestPageComponent implements OnInit {
   SumFinalAmount = 0;
   SumAmount = 0;
   SumFinalItemAmount = '0';
+  SumFinalItemAmountWithDuration = '0';
   PercentageOfChanges = 0;
   SumFinalAmountStr = '0';
   PercentWidth = null;
@@ -773,14 +784,56 @@ export class ProductRequestPageComponent implements OnInit {
   HasSingDate = false;
   ExistsFile = false;
   OrderCommitionID: number = null;
-  IsUpdateBefore: boolean = false;
+  IsUpdateBefore = false;
   IsUpdateBeforeAdevertising = null;
-
   gridApiReceiveDocProduct;
   ReceiveDocProductRowData = [];
   ReceiveDocProductColDef;
   HavePRReceiveDoc = true;
-
+  HavePDFSignersInfo = false;
+  HasAdequacyDoc = false;
+  IsClickedPopUp = false;
+  IsArticle18Choosen = false;
+  HasEditContractInfoBtn = false;
+  DisabledEditContractInfoBtn = true;
+  HaveUpdateTenderDoc = false;
+  IsUpdateTenderDoc = null;
+  PRTypeItems;
+  PRTypeParams = {
+    bindLabelProp: 'ProductRequestTypeName',
+    bindValueProp: 'ProductRequestTypeCode',
+    placeholder: '',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    Required: true,
+    type: 'product-request-type',
+  };
+  PriceListTopicRasteParams = {
+    bindLabelProp: 'PriceListTopicName',
+    bindValueProp: 'PriceListTopicID',
+    placeholder: '',
+    MinWidth: '90px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: this.PriceListTopicRasteDisable,
+    DropDownMinWidth: '100px',
+    type: 'price-list-topic',
+    Required: true
+  };
+  PriceListTopicRasteItems = [];
+  RoleID: number;
+  IsAdministrationManager: boolean;
+  ExistsArticle18File = false;
+  ExistsDisApprArticle18File = false;
+  IsNotGreenSpace = true;
+  oldProductRequestTypeCode = null;
+  ProductRequestPersonID = -1;
+  OldRegionCode: any;
+  CustomCheckBoxConfig1: CustomCheckBoxModel = new CustomCheckBoxModel();
+  IsChecked = false;
   constructor(
     private ContractList: ContractListService,
     private Actor: ActorService,
@@ -799,8 +852,11 @@ export class ProductRequestPageComponent implements OnInit {
     private route: ActivatedRoute,
     private FlowService: WorkflowService,
     private Automation: AutomationService,
+    private APService: ArticlePatternService,
+    private SPService: ServicePatternService,
     private Report: ReportService,
-    private ComonService: CommonService) {
+    private ComonService: CommonService,
+    private UserDetails: UserSettingsService,) {
     this.route.params.subscribe(params => {
       this.ModuleCode = +params['ModuleCode'];
       this.OrginalModuleCode = +params['ModuleCode'];
@@ -1193,7 +1249,7 @@ export class ProductRequestPageComponent implements OnInit {
       // tslint:disable-next-line: max-line-length
       CostCenterCode = this.CostCenterItems && this.CostCenterParams.selectedObject ? this.CostCenterItems.find(x => x.CostCenterId === this.CostCenterParams.selectedObject).CostCenterCode : '';
     }
-    // this.FillGrid(RegionCode, CostCenterCode);
+
     if (this.IsNew) {
       this.ReceiveDocColDef = [
         {
@@ -1237,6 +1293,36 @@ export class ProductRequestPageComponent implements OnInit {
           cellRendererParams: {
             ngTemplate: this.IsValidity
           },
+        },
+        {
+          headerName: 'اسناد فعال',
+          field: 'IsReturn',
+          width: 100,
+          resizable: true,
+          editable: (params) => {
+            return false;
+          },
+          cellStyle: function (params) {
+            return { 'text-align': 'center' };
+          },
+          cellEditorFramework: CheckboxFieldEditableComponent,
+          valueFormatter: function isValidFormer(params) {
+            if (params.value) {
+              return 'قبول شده';
+            } else {
+              return 'رد شده';
+            }
+          },
+          cellRendererFramework: TemplateRendererComponent,
+          cellRendererParams: {
+            ngTemplate: this.IsReturnInquiry
+          },
+        },
+        {
+          headerName: 'شماره استعلام',
+          field: 'InquiryNo',
+          width: 120,
+          resizable: false
         },
         {
           headerName: 'نام شخص پیشنهاد دهنده',
@@ -1495,6 +1581,36 @@ export class ProductRequestPageComponent implements OnInit {
           cellRendererParams: {
             ngTemplate: this.IsValidity
           },
+        },
+        {
+          headerName: 'اسناد فعال',
+          field: 'IsReturn',
+          width: 100,
+          resizable: true,
+          editable: (params) => {
+            return false;
+          },
+          cellStyle: function (params) {
+            return { 'text-align': 'center' };
+          },
+          cellEditorFramework: CheckboxFieldEditableComponent,
+          valueFormatter: function isValidFormer(params) {
+            if (params.value) {
+              return 'قبول شده';
+            } else {
+              return 'رد شده';
+            }
+          },
+          cellRendererFramework: TemplateRendererComponent,
+          cellRendererParams: {
+            ngTemplate: this.IsReturnInquiry
+          },
+        },
+        {
+          headerName: 'شماره استعلام',
+          field: 'InquiryNo',
+          width: 120,
+          resizable: false
         },
         {
           headerName: 'شماره ضمانت نامه',
@@ -1782,7 +1898,6 @@ export class ProductRequestPageComponent implements OnInit {
   }
 
   FillGrid(HasEstimate) {
-
     if (HasEstimate) {
       this.columnDef = [
         {
@@ -2160,8 +2275,6 @@ export class ProductRequestPageComponent implements OnInit {
             if (params.newValue && params.newValue.MDate) {
               params.data.ShortEndDate = params.newValue.MDate;
               params.data.PersianEndDate = params.newValue.SDate;
-              this.gridApi.forEachNode(node => {
-              });
               return true;
             } else {
               params.data.ShortEndDate = null;
@@ -2267,20 +2380,40 @@ export class ProductRequestPageComponent implements OnInit {
           HaveThousand: true,
           width: 200,
           resizable: true
+        },
+        {
+          headerName: 'مبلغ کل ماهانه',
+          field: 'AmountCOEFPactWithDuration',
+          HaveThousand: true,
+          hide: this.PRTypeParams.selectedObject !== 2 || (this.PRTypeParams.selectedObject === 2 && this.PriceListTopicRasteParams.selectedObject !== 402374),
+          width: 200,
+          resizable: true
         }
       ];
     }
-    // this.columnDef = this.TempcolumnDef;
   }
 
   GetRadioBoxSelectedItem(event) {
     this.MutualContractStatus = event;
   }
   ngOnInit() {
+    this.CustomCheckBoxConfig1.color = 'state p-primary';
+    this.CustomCheckBoxConfig1.icon = 'fa fa-check';
+    this.CustomCheckBoxConfig1.styleCheckBox = 'pretty p-icon p-rotate';
+    this.CustomCheckBoxConfig1.AriaWidth = 14.5;
+    this.SumFinalBeforeLastAmountRelatedContract = this.SumFinalAmountRelatedContract = 0;
 
     if (this.ModuleCode === 2895) {
       this.IsDisableResearch = true;
     }
+    forkJoin([
+      this.User.CheckAdmin(),
+      this.UserDetails.CheckAdminForConfirmArchive()
+    ]).subscribe(res => {
+      this.IsAdmin = res[0];
+      this.HaveConfirmArchive = res[1];
+    });
+
     this.RefreshCartable.ProductRequestObjectChange.subscribe(res => {
       if (res && !isUndefined(res.HaveWinner)) {
         this.ProductRequestObject.HaveWinner = res.HaveWinner;
@@ -2292,9 +2425,7 @@ export class ProductRequestPageComponent implements OnInit {
         this.ProductRequestObject.IsMaterialsDifference = res.IsMaterialsDifference;
       }
     });
-    this.User.CheckAdmin().subscribe(res => {
-      this.IsAdmin = res;
-    });
+
     this.CustomCheckBoxConfig.color = 'state p-primary';
     this.CustomCheckBoxConfig.icon = 'fa fa-check';
     this.CustomCheckBoxConfig.styleCheckBox = 'pretty p-icon p-rotate';
@@ -2315,7 +2446,9 @@ export class ProductRequestPageComponent implements OnInit {
       this.IsWFShow = this.InputParam.IsWFShow;
       this.WorkListDetailRows = this.InputParam.rows;
       this.IsContractRemainStartWF = this.InputParam.IsStartWF;
-      this.ModuleViewTypeCode = this.InputParam.ModuleViewTypeCode;
+      if (this.InputParam.ModuleViewTypeCode) {
+        this.ModuleViewTypeCode = this.InputParam.ModuleViewTypeCode;
+      }
       this.ModuleViewTypeCode_Cache = this.ModuleViewTypeCode;
       this.WorkFlowID = this.InputParam.WorkFlowID;
       this.ReadyToConfirm = this.InputParam.ReadyToConfirm;
@@ -2330,7 +2463,7 @@ export class ProductRequestPageComponent implements OnInit {
       this.MinimumPosting = this.InputParam.MinimumPosting;
       this.IsInProgressCartable = this.InputParam.IsInProgressCartable;
       // tslint:disable-next-line: max-line-length
-      this.ModuleCode = this.InputParam.ISProvisionRemain ? 2773 : this.InputParam.ISArticle48 ? 2787 : this.InputParam.ModuleCode ? this.InputParam.ModuleCode : this.ModuleCode ? this.ModuleCode : 2730;
+      this.ModuleCode = this.InputParam.ISProvisionRemain ? 2773 : this.InputParam.ISArticle48 ? 2787 : this.InputParam.ISTavafoghNameh ? 3095 : this.InputParam.ModuleCode ? this.InputParam.ModuleCode : this.ModuleCode ? this.ModuleCode : 2730;
       if (this.ModuleCode === 2895) {
         this.Subject = this.InputParam.Subject;
         this.ResearcherID = this.InputParam.ResearcherID;
@@ -2371,7 +2504,6 @@ export class ProductRequestPageComponent implements OnInit {
     if (this.IsEndFlow && (!this.ReadyToConfirm || this.ReadyToConfirm === null || this.ReadyToConfirm === 0)) {
       this.btnConfirmName = 'تایید نهایی';
       this.btnConfirmIcon = 'ok';
-      // this.HaveConfirm = true;
     }
 
     // tslint:disable-next-line:no-shadowed-variable
@@ -2386,7 +2518,6 @@ export class ProductRequestPageComponent implements OnInit {
             default:
               break;
           }
-
         });
         resolve();
       });
@@ -2394,19 +2525,15 @@ export class ProductRequestPageComponent implements OnInit {
       forkJoin([
         // this.ArchiveList.HasArchiveAccess(this.ModuleCode),
         this.ProductRequest.GetSubCostCenterPerson(),
-        this.ProductRequest.GetProductRequest(this.CostFactorID),
+        this.ProductRequest.GetProductRequestForPRPage(this.CostFactorID),
         this.ProductRequest.HasProductRequestEstimate(this.CostFactorID),
-        this.ProductRequest.HasProductRequestThreeInquiries(this.CostFactorID)
+        this.ProductRequest.HasProductRequestThreeInquiries(this.CostFactorID),
+        this.ProductRequest.getAllPRType(),
       ]).subscribe(res => {
         this.CurrentUserSubCostCenter = res[0];
         if (res[1]) {
-
-
           this.IsDisable = false;
           this.ProductRequestObject = res[1];
-          if (!this.ProductRequestObject || this.ProductRequestObject.CostFactorID === -1) {
-            this.btnshowcontractlist = true;
-          }
           this.HasProvisionContractID = this.ProductRequestObject.ProvisionContractID ? true : false;
           if (this.ProductRequestObject.RelatedContractID) {
             this.IsNew = false;
@@ -2419,6 +2546,7 @@ export class ProductRequestPageComponent implements OnInit {
           this.FillAllNgSelectByProductRequest(this.ProductRequestObject);
           if (this.ProductRequestObject && this.ProductRequestObject.ContractTypeCode) {
             this.IsInsert = true;
+            this.IsChecked = this.ProductRequestObject.ContractTypeCode == 8 ? true : false;
           }
           if (
             this.ProductRequestObject.ProductRequestStatusCode &&
@@ -2435,6 +2563,9 @@ export class ProductRequestPageComponent implements OnInit {
             this.btnRevocationIcon = 'cancel';
             // this.AccessRevocation = true;
           }
+
+          this.PriceListTopicRasteParams.selectedObject = this.ProductRequestObject.PriceListTopicID;
+          this.PRTypeParams.selectedObject = this.ProductRequestObject.ProductRequestTypeCode;
           this.IsCost = this.ProductRequestObject.IsCost;
           if (this.ModuleViewTypeCode === 89 && this.IsCost === false) {
             this.ISActLocation = true;
@@ -2475,8 +2606,37 @@ export class ProductRequestPageComponent implements OnInit {
               this.rowsData = this.ProductRequestObject.ProductRequestItemList;
             }
           } else {
-            this.rowsData = this.ProductRequestObject.ProductRequestItemList;
+            if (this.ProductRequestObject
+              && this.ProductRequestObject.ProductRequestTypeCode === 2
+              && this.ProductRequestObject.PriceListTopicID === 402374) {
+              this.ProductRequestObject.ProductRequestItemList.forEach(el => {
+                if (isNullOrUndefined(el.QTY) || el.QTY === 0) {
+                  el.FinalAmount = 0;
+                }
+              });
+              this.rowsData = this.ProductRequestObject.ProductRequestItemList;
+            } else {
+              this.rowsData = this.ProductRequestObject.ProductRequestItemList;
+            }
           }
+
+
+          if (this.ProductRequestObject.RegionCode === 220 &&
+            this.ProductRequestObject.RelatedContractID &&
+            this.ProductRequestObject.ContractObject.ContractId > 0) {
+
+            this.contractpaydetail.GetLastContractOrder(this.ProductRequestObject.ContractObject.ContractId, true).subscribe(res => {
+              const ProductRequestList = res;
+              ProductRequestList.forEach(node1 => {
+                this.rowsData.forEach(node2 => {
+                  if (node1.ProductID === node2.ProductID) {
+                    node2['_SelectedContractItem_ng'] = true;
+                  }
+                });
+              });
+            });
+          }
+
           this.SetEntityDataInDataRow(this.rowsData);
           this.AssetRowData = this.ProductRequestObject.AssetList;
           this.RedioClick(this.IsCost);
@@ -2504,15 +2664,23 @@ export class ProductRequestPageComponent implements OnInit {
             this.TimeExtensionYear = this.ProductRequestObject.ContractTimeExtension.Year ? this.ProductRequestObject.ContractTimeExtension.Year : 0;
           }
           this.ProductRequestIsOnline = this.ProductRequestObject.IsOnline ? this.ProductRequestObject.IsOnline : false;
+          if (this.ProductRequestObject && this.ProductRequestObject.RegionCode === 79 && this.btnConfirmName === 'تایید نهایی') {
+            this.HasEditContractInfoBtn = true;
+            this.CheckContractStatusForUpdate();
+          }
         } else {
           this.RedioClick(this.IsCost);
           this.OnOpenNgSelect('Region');
           this.IsDown = true;
-          this.User.GetCurrentUserDetails()
-            // tslint:disable-next-line:no-shadowed-variable
-            .subscribe(res => {
-              // this.ProductRequestDate = res.MCurrentDate;
-            });
+          // this.User.GetCurrentUserDetails()
+          //   // tslint:disable-next-line:no-shadowed-variable
+          //   .subscribe(res => {
+          //     // this.ProductRequestDate = res.MCurrentDate;
+          //   });
+        }
+        this.PRTypeItems = res[4];
+        if (!this.ProductRequestObject || this.ProductRequestObject.CostFactorID <= 0) {
+          this.btnshowcontractlist = true;
         }
         let RegionCode = -1;
         let CostCenterCode = '';
@@ -2527,7 +2695,12 @@ export class ProductRequestPageComponent implements OnInit {
           CostCenterCode = this.CostCenterItems && this.CostCenterParams.selectedObject ? this.CostCenterItems.find(x => x.CostCenterId === this.CostCenterParams.selectedObject).CostCenterCode : '';
         }
         this.HaseEstimate = res[2];
-        this.FillGrid(this.HaseEstimate);
+        if (this.ProductRequestObject &&
+          this.ProductRequestObject.ProductRequestTypeCode) {
+          this.onChangePRType(this.ProductRequestObject.ProductRequestTypeCode);
+        } else {
+          this.FillGrid(this.HaseEstimate);
+        }
         this.rowsData.forEach(element => {
           this.EntityColumnDefinition(null, null, element.EntityList, false);
         });
@@ -2535,8 +2708,7 @@ export class ProductRequestPageComponent implements OnInit {
         this.ShowModuleTypeName();
       });
     });
-    this.ProductRequest.GetCurrentDate().subscribe(res => { this.ContractPayDate = res });
-    //this.SetPRReciveDocList();
+    this.ProductRequest.GetCurrentDate().subscribe(res => { this.ContractPayDate = res; });
   }
 
   MakeMCSRadioTypes(): void {
@@ -2559,6 +2731,11 @@ export class ProductRequestPageComponent implements OnInit {
     this.IcRadioTypes = [];
     this.IcRadioTypes.push(new RadioBoxModel('بلی', true, false, 'rdoIc1'));
     this.IcRadioTypes.push(new RadioBoxModel('خیر', false, false, 'rdoIc2'));
+  }
+  MakeTDRadioTypes(): void {
+    this.TDRadioTypes = [];
+    this.TDRadioTypes.push(new RadioBoxModel('بلی', true, false, 'rdoIc1'));
+    this.TDRadioTypes.push(new RadioBoxModel('خیر', false, false, 'rdoIc2'));
   }
   FillAllNgSelectByProductRequest(ProdReqObj) {
     const ContractID = ProdReqObj && ProdReqObj.RelatedContractID ?
@@ -2648,14 +2825,16 @@ export class ProductRequestPageComponent implements OnInit {
           ProdReqObj.CustomerOrderID),
         this.ProductRequest.GetOnfilterRegion(),
         this.ProductRequest.GetActLocationByRegionCode(ProdReqObj.RegionCode),
-        this.ProductRequest.GetCostCenterByRegion(ProdReqObj.RegionCode,
+        this.ProductRequest.GetCostCenterByRegionAndRequestOwner(ProdReqObj.RegionCode,
           ProdReqObj.SubCostCenterObject ? ProdReqObj.SubCostCenterObject.CostCenterId : null, this.ModuleCode, false),
-        this.ProductRequest.GetSubCostCenter(ProdReqObj.SubCostCenterObject.CostCenterId, this.ModuleCode, true),
+        this.ProductRequest.GetListByCostCenterId(ProdReqObj.SubCostCenterObject.CostCenterId, this.ModuleCode, true,
+          ProdReqObj.SubCostCenterObject.CostCenterObject? ProdReqObj.SubCostCenterObject.CostCenterObject.RegionCode:ProdReqObj.RegionCode),
         this.ProductRequest.GetCostCenterByRegion(ProdReqObj.RegionCode,
           ProdReqObj.ContractStackHolderObject ? ProdReqObj.ContractStackHolderObject.CostCenterId : null, this.ModuleCode, false)
       ]).subscribe((res: any) => {
         this.RegionItems = res[0]; // case region
         this.RegionParams.selectedObject = ProdReqObj.RegionCode;
+        this.OldRegionCode = this.RegionParams.selectedObject;
         this.RefreshPageByRegion(this.RegionParams.selectedObject);
         this.VWExeUnitItems = res[1]; // case 'VWExeUnit':
         this.VWExeUnitParams.selectedObject = ProdReqObj.UnitPatternID;
@@ -2711,6 +2890,7 @@ export class ProductRequestPageComponent implements OnInit {
     this.ProductRequestCostColDef[3].cellEditorParams.Items = this.ProductRequest.GetUnitPatternByRegionCode(ARegionCode, false);
     this.OnOpenNgSelect('Rustee'); // RFC 51893
     this.OnOpenNgSelect('CostCenter'); // RFC 51893
+    this.OnOpenNgSelect('PriceListTopicRaste');
     new Promise((StartedWFResolve, reject) => {
       this.SetStartedWFInfo(StartedWFResolve);
     }).then(() => {
@@ -2744,6 +2924,7 @@ export class ProductRequestPageComponent implements OnInit {
       this.ShowMessageBoxWithOkBtn('نوع نمایش فعالیت شروع گردش برای این واحد اجرایی تعریف نشده است. لطفا با راهبر تماس بگیرید.');
       return;
     }
+    console.log(' /🚀 نوع نمایش فعالیت:', this.ModuleViewTypeCode);
     if (this.CheckRegionWritable) {
       this.IsEditable = true;
       this.ArchiveIsReadOnly = true;
@@ -2780,6 +2961,9 @@ export class ProductRequestPageComponent implements OnInit {
               this.NotIsNewHeaderName = 'تمدید'; // RFC 61532
             break;
           case 165:
+            if (this.RegionParams.selectedObject == 220) {
+              this.ParentDocTypeList = [38, 40];
+            }  // 65316  
             this.HaveRevocation = false; // 51753
             this.IsEditable = true;
             this.HaveSave = true;
@@ -2919,6 +3103,19 @@ export class ProductRequestPageComponent implements OnInit {
                 this.IsShowContractContentfor222 = true;
               }// RFC 56864  & 58194
             }
+            break;
+          case 189:
+            this.gridHeight = 41;
+            this.tabpanelHeight = 84;
+            this.PRIgridHeight = 83;
+            this.HaveExpertPerson = this.HaveCompleteInfo = true;
+            this.WfDetailsShowHeight = 40;
+            this.WfDetailsShow = true;
+            this.WfSaveDetailsShow = true;
+            this.onExpertOpen(1);
+            this.IsEditable = false;
+            this.ExpertPersonLabel = 'کارشناس حقوقی';
+            this.ExpertPersonRoleID = 1133;
             break;
           case 176: //RFC 63114
             this.IsUpdateBefore = true;
@@ -3072,7 +3269,6 @@ export class ProductRequestPageComponent implements OnInit {
             this.IsEditable = false;
             this.LetterTypeCodeList.push(2);
             this.HasBtnAutomationLetter = true;
-            this.SetLetterDetails();
             break;
           case 11:
           case 160:
@@ -3463,6 +3659,10 @@ export class ProductRequestPageComponent implements OnInit {
               this.tabpanelHeight = 84;
               this.PRIgridHeight = 83;
             }
+            if (this.ProductRequestObject.RegionCode === 79 || this.ProductRequestObject.RegionCode === 0) {
+              this.HasEditContractInfoBtn = true;
+              this.CheckContractStatusForUpdate();
+            }
             break;
           case 75:
             // this.gridHeight = 31;
@@ -3577,6 +3777,7 @@ export class ProductRequestPageComponent implements OnInit {
           case 70:
           case 82:
           case 164:
+          case 188:
             this.HaveInquiry = this.HaveCompleteInfo = true;
             this.WfSaveDetailsShow = this.WfDetailsShow = true;
             this.IsEditable = false;
@@ -3666,6 +3867,7 @@ export class ProductRequestPageComponent implements OnInit {
           case 26:
           case 49:
           case 113:
+          case 182:
             this.HaveCommition = this.HaveCompleteInfo = true;
             this.WfSaveDetailsShow = this.WfDetailsShow = false;
             this.IsEditable = false;
@@ -3716,6 +3918,7 @@ export class ProductRequestPageComponent implements OnInit {
           case 34:
           case 136:
           case 78:
+          case 186:
             this.gridHeight = 42;
             this.tabpanelHeight = 84;
             this.tabpanelHeight = 80;
@@ -3957,7 +4160,7 @@ export class ProductRequestPageComponent implements OnInit {
             this.HasBtnAutomationLetter = true;
             break;
           case 54:
-            this.gridHeight = 39.5;
+            this.gridHeight = 48.5;
             this.tabpanelHeight = 84;
             this.PRIgridHeight = 83;
             this.WfDetailsShowHeight = 50;
@@ -3969,11 +4172,10 @@ export class ProductRequestPageComponent implements OnInit {
             this.tabpanelWarrantyDocHeight = 87;
             this.HaveReceiveDoc = true;
             this.WfSaveDetailsShow = true;
-            this.WfDetailsShow = true;
+            this.HasBtnAutomationLetter = true; // 65470
             this.LetterTypeCodeList.push(7);
-            this.WFFieldSetLegend = 'نامه استعلام اعتبار ضمانت نامه';
             this.WFLegendWidth = 12;
-            this.SetLetterDetails();
+            this.IsLawful = this.ProductRequestObject.IsWarrantyValidity;
             break;
           case 41:
             this.MultiWfDetailsShow = this.HaveCompleteInfo = true;
@@ -4216,7 +4418,7 @@ export class ProductRequestPageComponent implements OnInit {
             this.HasCompleteInfoBtnText = 'اطلاعات تکمیلی';
             this.HasCreateContractBtn = this.HaveCompleteInfo = true;
             this.LetterTypeCodeList = [3, 21, 29, 20, 34];
-            this.SetLetterDetails();
+            //this.SetLetterDetails();
             this.ParentDocType = 59;
             // tslint:disable-next-line:no-shadowed-variable
             new Promise((resolve, reject) => {
@@ -4276,6 +4478,16 @@ export class ProductRequestPageComponent implements OnInit {
             this.ShowRequestSuggestion = true;
             break;
           case 74:
+            this.HaveArchive = true;
+            this.ArchiveIsReadOnly = false;
+            this.HaveProvision =
+              this.HaveSeenProvision =
+              this.HaveRevocation =
+              this.IsEditable =
+              this.WfSaveDetailsShow =
+              this.WfDetailsShow = false;
+            this.HaveCompleteInfo = true;
+            break;
           case 115: // RFC 51274
             this.ArchiveIsReadOnly = false;
             this.HaveProvision =
@@ -4301,8 +4513,22 @@ export class ProductRequestPageComponent implements OnInit {
             this.onExpertOpen(1);
             this.HaveInquiry = true;
             break;
+          case 184:
+            this.HaveArchive = true;
+            this.IsEditable = false;
+            this.btnProposalName = 'بارگذاری آگهی';
+            this.gridHeight = 48;
+            this.tabpanelHeight = 84;
+            this.PRIgridHeight = 83;
+            this.HaveCompleteInfo = true;
+            this.WfDetailsShowHeight = 40;
+            this.WfDetailsShow = false;
+            this.WfSaveDetailsShow = true;
+            this.HaveInquiry = true;
+            break;
           case 81:
           case 147:
+          case 187:
             this.HaveRevocation = this.HaveCompleteInfo = true;
             this.IsEditable = false;
             this.WfSaveDetailsShow = this.WfDetailsShow = true;
@@ -4316,6 +4542,14 @@ export class ProductRequestPageComponent implements OnInit {
             this.IsType147 = this.ModuleViewTypeCode === 147 ? true : false;
             break;
           case 64:
+            this.ParentDocType = 40; // 63829
+            // tslint:disable-next-line:no-shadowed-variable
+            new Promise((resolve, reject) => {
+              this.GetADocType(40, resolve);
+            }).then((DocType: any) => {
+              this.ArchiveBtnText = DocType.DocumentTypeName;
+            });
+            this.HaveAcceptArchive = true;
             this.HaveInquiry = this.HaveCompleteInfo = true;
             this.WfSaveDetailsShow = this.WfDetailsShow = false;
             this.IsEditable = false;
@@ -4355,21 +4589,30 @@ export class ProductRequestPageComponent implements OnInit {
             this.ExpertPersonLabel = 'کارشناس بازرگانی';
             this.IsEditable = false;
             this.ShowRequestSuggestion = true;
+
             this.onExpertOpen(1);
             break;
           case 89:
+            this.ContractContentView();
             this.HaveRevocation = this.ProductRequestObject ? true : false;
             this.IsEditable = true;
             this.HaveSave = true;
             this.HaveRequestPerson = true;
             this.HaveAcceptArchive = true;
-            this.WfSaveDetailsShow = this.WfDetailsShow = this.HaveCompleteInfo = false;
+            this.HaveCompleteInfo = false;
+            this.WfSaveDetailsShow = this.HaveCompleteInfo = false;
             this.ISDisabledConfirmAndReturnBtn = true;
             this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد متقابل دارد؟';
             this.IsSecretQuestion = true;
             this.MakeScRadioTypes();
             if (!this.IsCost) {
               this.HasMutualContractQuestion = false;
+              this.ExpertPersonRoleID = 1442;
+              this.HaveExpertPerson = true;
+              this.WfDetailsShowHeight = 36;
+              this.WfDetailsShow = true;
+              this.ExpertPersonLabel = ' رئیس امور';
+              this.onExpertOpen(1);
             } else {
               this.HasMutualContractQuestion = true;
               this.MakeMCRadioTypes();
@@ -4391,6 +4634,9 @@ export class ProductRequestPageComponent implements OnInit {
               this.ISActLocation = false;
             }
             this.HasSecretQuestion = true;
+            this.IsdisablebleAdmin = this.IsAdmin ? false : true; // RFC 51689 - 63989
+            this.gridHeight = 33;
+            this.PRIgridHeight = 80;
             break;
           case 106:
             this.HaveRevocation = this.ProductRequestObject ? true : false;
@@ -4468,6 +4714,39 @@ export class ProductRequestPageComponent implements OnInit {
             this.WfDetailsShow = true;
             this.WfSaveDetailsShow = true;
             this.onContractStyleOpen(1);
+            this.IsEditable = false;
+            break;
+          case 185:
+            this.HaveCommition = this.HaveCompleteInfo = true;
+            this.WfSaveDetailsShow = this.WfDetailsShow = false;
+            this.SecondWFLegendWidth = 9;
+            this.FirstWFLegendWidth = 0;
+            this.HaveInquiry = true;
+            this.btnProposalName = 'درج لیست متقاضیان';
+            this.HaveCompleteInfo = true;
+            this.IsDisable = false;
+            this.IsEditable = false;
+            this.LetterTypeCodeList.push(18);
+            this.gridHeight = 47;
+            this.tabpanelHeight = 82;
+            this.ParentDocType = 45;
+            // tslint:disable-next-line:no-shadowed-variable
+            new Promise((resolve, reject) => {
+              this.GetADocType(45, resolve);
+            }).then((DocType: any) => {
+              this.ArchiveBtnText = DocType.DocumentTypeName;
+            });
+            this.HaveAcceptArchive = true;
+            this.gridHeight = 41;
+            this.tabpanelHeight = 84;
+            this.PRIgridHeight = 83;
+            this.HaveContractStyle = this.HaveCompleteInfo = true;
+            this.WfDetailsShowHeight = 40;
+            this.WfDetailsShow = true;
+            this.WfSaveDetailsShow = true;
+            this.onContractStyleOpen(1);
+            this.HaveExpertPerson = false;
+            this.HaveCommition = true;
             this.IsEditable = false;
             break;
           case 91:
@@ -4576,8 +4855,10 @@ export class ProductRequestPageComponent implements OnInit {
             this.HaveSeenProvision = this.HaveCompleteInfo = true;
             this.IsEditable = false;
             this.WfSaveDetailsShow = this.WfDetailsShow = false;
-            this.IsShow = true;
             this.HaveRevocation = this.ProductRequestObject ? true : false;
+            this.ShowReturnBtn = true;
+            this.ShowConfermBtn = false;
+            this.ShowSendBtn = false;
             break;
           case 99:
             this.NotIsNewHeaderName = 'تمدید و الحاقیه'; // RFC 56855
@@ -4658,6 +4939,15 @@ export class ProductRequestPageComponent implements OnInit {
             this.ConfirmArchiveBtnText = 'مستندات';
             this.DisableControlles = true;
             this.IsDisable = false;
+            if (this.ProductRequestObject.RegionCode === 200 && this.ProductRequestObject.IsRenewal) {
+              this.gridHeight = 41;
+              this.tabpanelHeight = 84;
+              this.PRIgridHeight = 83;
+              this.HaveUpdateTenderDoc = true;
+              this.WfSaveDetailsShow = true;
+              this.IsUpdateTenderDoc = this.ProductRequestObject.IsUpdateTenderDoc;
+              this.MakeTDRadioTypes();
+            }
             break;
           case 114: // RFC 51209
             this.HaveRevocation = this.ProductRequestObject ? true : false;
@@ -4759,6 +5049,10 @@ export class ProductRequestPageComponent implements OnInit {
             this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد متقابل دارد؟';
             this.HasMutualContractQuestion = true;
             this.IsSecretQuestion = true;
+            this.gridHeight = 42; // RFC 57522
+            this.tabpanelHeight = 84;
+            this.tabpanelHeight = 80;
+            this.PRIgridHeight = 76;
             this.MakeScRadioTypes();
             if (!this.IsCost) {
               this.HasMutualContractQuestion = false;
@@ -4774,10 +5068,6 @@ export class ProductRequestPageComponent implements OnInit {
               this.gridHeight = 30;
               this.tabpanelHeight = 76;
             }
-            this.gridHeight = 42; // RFC 57522
-            this.tabpanelHeight = 84;
-            this.tabpanelHeight = 80;
-            this.PRIgridHeight = 76;
             this.MultiQuestionLabel = 'ایا ضمانت نامه اعتبار دارد ؟';
             this.SetPRWarrantyReciveDocList();
             this.HaveReceiveDoc = true;
@@ -5046,7 +5336,24 @@ export class ProductRequestPageComponent implements OnInit {
             break;
           case 144:
             this.WfSaveDetailsShow = this.WfDetailsShow = this.IsEditable = false;
-            this.HaveCompleteInfo = this.HaveCommition = this.HaveDigitalSign = this.HaveArticle18DigitalSign = true;
+            this.HaveCompleteInfo =
+              this.HaveCommition =
+              this.HaveDigitalSign =
+              this.HaveArticle18DigitalSign = true;
+            break;
+          case 179:
+            this.WfSaveDetailsShow = this.WfDetailsShow = this.IsEditable = false;
+            this.HaveCompleteInfo =
+              this.HaveCommition =
+              this.HaveDigitalSign = true;
+            if (this.ProductRequestObject.RegionCode >= 1 && this.ProductRequestObject.RegionCode <= 22 &&
+                (this.ProductRequestObject.SubCostCenterObject.CostCenterObject.CostCenterCode !== '09' ||
+                (this.ProductRequestObject.SubCostCenterObject.CostCenterObject.CostCenterCode == '09'
+                   && this.ProductRequestObject.ContractTypeCode && this.ProductRequestObject.ContractTypeCode == 4))
+            ) { // خدمات شهری نباشد
+              this.HaveArticle18DigitalSign = true;
+            }
+            this.CheckPDFSignersInfo();
             break;
           case 150: // RFC 58866
           case 154: // RFC 59115
@@ -5126,10 +5433,6 @@ export class ProductRequestPageComponent implements OnInit {
             this.IsEditable = this.WfSaveDetailsShow = false;
             this.WfDetailsShow = true;
             break;
-          case 161: // امضا الکترونیک ابلاغ ماده 18
-            this.WfSaveDetailsShow = this.WfDetailsShow = this.IsEditable = false;
-            this.HaveCompleteInfo = this.HaveCommition = this.HaveArticle18DigitalSign = this.HaveDigitalSign = true;
-            break;
           case 168: // RFC 61821
             this.IsEditable = false;
             this.ArchiveIsReadOnly = true;
@@ -5154,6 +5457,86 @@ export class ProductRequestPageComponent implements OnInit {
             });
             this.HaveAcceptArchive = true;
             this.ArchiveIsReadOnly = false;
+            break;
+          case 177: // like case 3
+            this.HasAdequacyDoc = true; // 63153
+            this.IsEditable = false;
+            this.ArchiveIsReadOnly = true;
+            this.WfSaveDetailsShow = this.WfDetailsShow = false;
+            this.HaveCompleteInfo = true;
+            this.DisableControlles = true;
+            this.IsDisable = false;
+            if (this.RegionParams.selectedObject === 222) {
+              if (!this.IsNew) {
+                this.gridHeight = 41;
+                this.tabpanelHeight = 85;
+                this.PRIgridHeight = 83;
+                this.IsShowContractContentfor222 = true;
+              } // RFC 56864 & 58194
+            }
+            break;
+          case 190:
+            this.HasCreateContractBtn = true;
+            this.ParentDocType = 46;
+            // tslint:disable-next-line:no-shadowed-variable
+            new Promise((resolve, reject) => {
+              this.GetADocType(46, resolve);
+            }).then((DocType: any) => {
+              this.ArchiveBtnText = DocType.DocumentTypeName;
+            });
+            this.LetterTypeCodeList.push(20);
+            this.LetterTypeCodeList.push(34);
+            this.HaveAcceptArchive = true;
+            this.HaveCommition = false;
+            this.LetterTypeCodeList.push(3);
+            this.HasBtnAutomationLetter = true;
+            this.HasCompleteInfoBtnText = 'اطلاعات تکمیلی';
+            this.IsEditable = false;
+            // RFC 52153
+            if (this.ProductRequestObject.RegionCode === 200 && this.ProductRequestObject.IsCost) {
+              this.ShowRequestSuggestion = true;
+              this.HaveCompleteInfo = false;
+            } else {
+              this.ShowRequestSuggestion = false;
+              this.HaveCompleteInfo = true;
+            }
+            this.WorkflowButtonsWidth = 40.8;
+            this.ButtonsPlaceWidthPercent = 59;
+            this.MutualContractQuestion = 'آیا نیاز به عقد قرارداد متقابل دارد؟';
+            this.MakeScRadioTypes();
+            if (!this.IsCost) {
+              this.HasMutualContractQuestion = false;
+            } else {
+              this.HasSecretQuestion = true;
+              this.ShowSave106 = true;
+              this.HasMutualContractQuestion = true;
+              this.MakeMCRadioTypes();
+            }
+            if (this.HaveMutualContract && this.HasMutualContractQuestion) {
+              this.ShowMCSPanel = true;
+              this.MakeMCSRadioTypes();
+              this.PRIgridHeight = 76;
+              this.gridHeight = 30;
+              this.tabpanelHeight = 76;
+            } else {
+              this.ShowMCSPanel = false;
+              this.gridHeight = 48;
+              this.tabpanelHeight = 84;
+              this.PRIgridHeight = 83;
+            }
+            if (this.ProductRequestObject.RegionCode === 220) {
+              this.HasSecretQuestion = false; // RFC 54420
+              this.ShowMCSPanel = false;
+              this.gridHeight = 48;
+              this.tabpanelHeight = 84;
+              this.PRIgridHeight = 83;
+            }
+            if (this.ProductRequestObject.RegionCode === 79 || this.ProductRequestObject.RegionCode === 0) {
+              this.HasEditContractInfoBtn = true;
+              this.CheckContractStatusForUpdate();
+            }
+            this.InsertSupplierIntoPropsalExtension();
+
             break;
           default:
             this.IsEditable = false;
@@ -5883,6 +6266,18 @@ export class ProductRequestPageComponent implements OnInit {
           default:
             break;
         }
+      } else if (this.ModuleCode === 3090) { // امضای الکترونیک
+        switch (this.ModuleViewTypeCode) {
+          case 900009:
+            this.HaveCompleteInfo = true;
+            this.IsEditable = false;
+            this.WfSaveDetailsShow = this.WfDetailsShow = this.ShowWorkflowButtons = false;
+            this.ButtonsPlaceWidthPercent = 100;
+            this.HaveDigitalSign = true;
+            break;
+          default:
+            break;
+        }
       }
     }
     this.ShowModuleTypeName();
@@ -5893,7 +6288,8 @@ export class ProductRequestPageComponent implements OnInit {
           if (this.ProductRequestObject.OrdersObject && this.ProductRequestObject.OrdersObject.CostFactorID > 0 &&
             this.ProductRequestObject.OrdersObject.LastInquiryObject && this.ProductRequestObject.OrdersObject.LastInquiryObject.InquiryID > 0 &&
             this.ProductRequestObject.OrdersObject.LastInquiryObject.OrderCommitionObject && this.ProductRequestObject.OrdersObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID > 0 &&
-            this.ProductRequestObject.OrdersObject.LastInquiryObject.OrderCommitionObject.OrderCommitionMemberList && this.ProductRequestObject.OrdersObject.LastInquiryObject.OrderCommitionObject.OrderCommitionMemberList.length > 0) {
+            this.ProductRequestObject.OrdersObject.LastInquiryObject.OrderCommitionObject.OrderCommitionMemberList && this.ProductRequestObject.OrdersObject.LastInquiryObject.OrderCommitionObject.OrderCommitionMemberList.length > 0 &&
+            !this.ProductRequestObject.OrdersObject.LastInquiryObject.IsReturn) {
             this.ProductRequestObject.OrdersObject.LastInquiryObject.OrderCommitionObject.OrderCommitionMemberList.forEach(element => {
               if (element.FinalSignDate) { // RFC 62551
                 this.HasSingDate = true;
@@ -5910,17 +6306,35 @@ export class ProductRequestPageComponent implements OnInit {
   SetPRWarrantyReciveDocList() {
     this.DisplayColDef();
     if (this.IsNew) {
-      this.ProductRequest.GetPRCostWarrantyList(this.CostFactorID, null, this.ModuleViewTypeCode).subscribe(res => // RFC 57620
+      this.ProductRequest.GetPRCostWarrantyList(
+        this.CostFactorID,
+        null,
+        this.ModuleViewTypeCode
+      ).subscribe(res => // RFC 57620
         this.ReceiveDocRowData = res
       );
     } else {
       this.ProductRequest.GetContractWarrantyList(
-        this.ProductRequestObject.ContractObject.CostFactorId ? 
-        this.ProductRequestObject.ContractObject.CostFactorId : 
-        this.ProductRequestObject.ContractObject.ReceiveFactorID,
+        this.ProductRequestObject.ContractObject.CostFactorId ?
+          this.ProductRequestObject.ContractObject.CostFactorId :
+          this.ProductRequestObject.ContractObject.ReceiveFactorID,
         this.ProductRequestObject.ContractObject.CostFactorId ? true : false).subscribe(res =>
-        this.ReceiveDocRowData = res
-      );
+          this.ReceiveDocRowData = res
+        );
+    }
+  }
+  CheckPDFSignersInfo() {
+    if (this.ProductRequestObject.LastInquiryObject &&
+      this.ProductRequestObject.LastInquiryObject.OrderCommitionObject &&
+      this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID > 0) {
+      this.OrderCommitionID = this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID;
+      this.ProductRequest.CheckPDFSignersInfo(this.OrderCommitionID, this.ModuleViewTypeCode).subscribe(res => {
+        this.HavePDFSignersInfo = res;
+        if (this.HavePDFSignersInfo) {
+          this.gridHeight = 40;
+          this.tabpanelHeight = 82;
+        }
+      });
     }
   }
   SetPRArticle48List() {
@@ -5986,7 +6400,8 @@ export class ProductRequestPageComponent implements OnInit {
   }
   popupclosed(Param) {
     this.HaveMaxBtn = false;
-    this.isClicked = false;
+    this.isClicked = this.IsClickedPopUp;
+    this.IsClickedPopUp = false;
     this.PercentWidth = null;
     this.MainMaxwidthPixel = null;
     this.MinHeightPixel = null;
@@ -6001,10 +6416,17 @@ export class ProductRequestPageComponent implements OnInit {
       this.ngOnInit();
     }
     if (this.PopUpType === 'product-request-suggestion') {
+      this.ngOnInit();
       this.ProductRequest.HasProductRequestEstimate(this.ProductRequestObject.CostFactorID).subscribe(
         HaseEstimate => {
           this.HaseEstimate = HaseEstimate;
           this.FillGrid(this.HaseEstimate);
+          if (this.ProductRequestObject &&
+            this.ProductRequestObject.ProductRequestTypeCode &&
+            this.ProductRequestObject.ProductRequestTypeCode === 2) {
+            this.PriceListTopicRasteParams.IsDisabled = false;
+            this.FillGreenSpacePRItemGrid(this.HaseEstimate);
+          }
           if (this.HaseEstimate) {
             this.ProductRequest.GetProductRequestItemListVW(this.ProductRequestObject.CostFactorID, true).subscribe(
               res => {
@@ -6022,12 +6444,25 @@ export class ProductRequestPageComponent implements OnInit {
     if (this.PopUpType === 'general-tender' && Param && Param.CostFactorID) {
       this.ProductRequestObject = Param;
     }
-    if (Param && this.PopUpType === 'global-choose-page') {
-      this.OpenSelectedForm(Param);
+    if (Param && this.PopUpType === 'global-choose-page' && this.PopUpName === '') {
+      if (this.IsArticle18Choosen) {
+        this.OpenSelectedArticle18(Param);
+      } else {
+        this.OpenSelectedForm(Param);
+      }
+    }
+    if (Param && this.PopUpType === 'global-choose-page' && this.PopUpName === 'global-choose-page') {
+      if (Param === 2) {
+        this.PrintPR();
+      } else if (Param === 3) {
+        this.PrintPRAndProvision();
+      }
     }
     if (this.PopUpType === 'product-receive-doc') {
       this.SetPRReciveDocList();
     }
+    this.PopUpName = '';
+    this.IsArticle18Choosen = false;
   }
   onGridReady(params: { api: any; }) {
     this.gridApi = params.api;
@@ -6066,7 +6501,22 @@ export class ProductRequestPageComponent implements OnInit {
     let CostCenterCode = '';
     // tslint:disable-next-line: max-line-length
     CostCenterCode = this.CostCenterItems && this.CostCenterParams.selectedObject ? this.CostCenterItems.find(x => x.CostCenterId === this.CostCenterParams.selectedObject).CostCenterCode : '';
-    // this.FillGrid(ARegionCode, CostCenterCode);
+    if (this.OldRegionCode === 201 &&
+      this.OldRegionCode !== this.RegionParams.selectedObject &&
+      this.PRTypeParams.selectedObject === 2 &&
+      !isNullOrUndefined(this.PriceListTopicRasteParams.selectedObject)) {
+      this.rowsData = [];
+      this.PRTypeParams.selectedObject = null;
+      this.PriceListTopicRasteParams.selectedObject = null;
+    }
+    this.OldRegionCode = this.RegionParams.selectedObject;
+    if (this.PRTypeParams.selectedObject === 2) {
+      this.PriceListTopicRasteDisable = false;
+      this.PriceListTopicRasteParams.IsDisabled = false;
+    } else {
+      this.PriceListTopicRasteDisable = true;
+      this.PriceListTopicRasteParams.IsDisabled = true;
+    }
   }
   onChangeFilterRegion(ARegionCode) {
     this.RegionAreaParams.selectedObject = null;
@@ -6315,7 +6765,7 @@ export class ProductRequestPageComponent implements OnInit {
     // tslint:disable-next-line:max-line-length
     let CheckExceptions = (this.OrginalModuleCode === 2793 || this.OrginalModuleCode === 2939 || this.OrginalModuleCode === 2824) && this.IsAdmin && !IsCheckException;
     let StrExceptions = '';
-    if (this.ModuleViewTypeCode === 114 && !this.ContractContentNote && !this.IsNew && this.IsContractContent) {
+    if ((this.ModuleViewTypeCode === 114 || this.ModuleViewTypeCode === 89) && !this.ContractContentNote && !this.IsNew && this.IsContractContent) {
       this.ShowMessageBoxWithOkBtn('عنوان مفاد قرارداد نمی تواند خالی باشد');
       return;
     }
@@ -6332,6 +6782,9 @@ export class ProductRequestPageComponent implements OnInit {
       return;
     }
     this.CheckValidate = true;
+    if (this.ModuleViewTypeCode === 89 && !this.IsCost) {
+      this.ExpertCheckValidate = true;
+    }
     let ValidateForm = true;
     if (this.currentModuleCode && (this.currentModuleCode === 2824 || this.currentModuleCode === 2793 || this.OrginalModuleCode === 2939)) {
       this.RequiredComponents = [this.RegionParams, this.VWExeUnitParams, this.ContractParams,
@@ -6342,6 +6795,17 @@ export class ProductRequestPageComponent implements OnInit {
       this.SubRusteeParams, this.RequestedPersonParams, this.RusteeParams,
       this.CostCenterParams, this.SubCostCenterParams];
       this.CheckValidateCostCenterParams = true;
+    }
+    if (this.CostCenterParams.selectedObject === 1243) {
+      this.CheckValidatePRType = true;
+    } else {
+      this.CheckValidatePRType = false;
+    }
+
+    if (this.PRTypeParams.selectedObject === 2 && this.IsNew) {
+      this.CheckValidateTopic = true;
+    } else {
+      this.CheckValidateTopic = false;
     }
     // tslint:disable-next-line:no-shadowed-variable
     const promise = new Promise<void>((resolve, reject) => {
@@ -6358,6 +6822,9 @@ export class ProductRequestPageComponent implements OnInit {
         ValidateForm =
           ValidateForm &&
           this.Subject &&
+          (this.CostCenterParams.selectedObject === 1243 ? (this.PRTypeParams.selectedObject !== null && this.PRTypeParams.selectedObject !== undefined) ? true : false : true) &&
+          (this.IsNew && this.PRTypeParams.selectedObject === 2 ? (this.PriceListTopicRasteParams.selectedObject !== null && this.PriceListTopicRasteParams.selectedObject !== undefined) ? true : false : true) &&
+          // (this.ModuleViewTypeCode === 89 && this.ExpertParams.selectedObject) &&
           (this.ModuleViewTypeCode !== 89 || this.BriefingReport) && // RFC 52217
           // tslint:disable-next-line: max-line-length
           (this.currentModuleCode && (this.currentModuleCode === 2824 || this.currentModuleCode === 2793 || this.currentModuleCode === 2939) ? true :
@@ -6377,6 +6844,9 @@ export class ProductRequestPageComponent implements OnInit {
         ValidateForm =
           ValidateForm &&
           this.Subject &&
+          (this.CostCenterParams.selectedObject === 1243 ? (this.PRTypeParams.selectedObject !== null && this.PRTypeParams.selectedObject !== undefined) ? true : false : true) &&
+          (this.PRTypeParams.selectedObject === 2 ? (this.PriceListTopicRasteParams.selectedObject !== null && this.PriceListTopicRasteParams.selectedObject !== undefined) ? true : false : true) &&
+          (this.ModuleViewTypeCode === 89 ? ((this.ExpertParams.selectedObject === null || this.ExpertParams.selectedObject === undefined) ? false : true) : true) &&
           (this.ModuleViewTypeCode !== 89 || this.BriefingReport) && // RFC 52217
           // tslint:disable-next-line: max-line-length
           (this.currentModuleCode && (this.currentModuleCode === 2824 || this.currentModuleCode === 2793 || this.currentModuleCode === 2939) ? true :
@@ -6423,6 +6893,21 @@ export class ProductRequestPageComponent implements OnInit {
             ReceiveDocList.push(ReceiveDocObj);
           });
         }
+        let ContractId;
+        const ProductRequestRelationList = [];
+        if (this.IsTransferedContract === true) {
+          ContractId = this.ProductRequestObject.ContractObject.ContractId;
+          const ProdReqRelationObj = {
+            ProductRequestRelationID: -1,
+            RelatedContractID: this.ProductRequestObject.ContractObject.ContractId,
+            ContractRelationTypeCode: 2,
+            CostFactorID: this.ProductRequestObject.CostFactorID,
+            Note: '',
+            IsIncreament: 0
+          };
+          ProductRequestRelationList.push(ProdReqRelationObj);
+        }
+
         let ItemNo = 0;
         const ProductRequestList = [];
         const ProductRequestEstateList = [];
@@ -6431,29 +6916,30 @@ export class ProductRequestPageComponent implements OnInit {
         const ProductRequestObj = {
           // tslint:disable-next-line:max-line-length
           IsUpdateBeforeAdevertising: this.IsUpdateBeforeAdevertising,//RFC: 63114
-          ContractTypeCode: this.ProductRequestObject && this.ProductRequestObject.ContractTypeCode ? this.ProductRequestObject.ContractTypeCode : null,
-          CostFactorID: this.ProductRequestObject && this.ProductRequestObject.CostFactorID ? this.ProductRequestObject.CostFactorID : -1,
+          ContractTypeCode: (this.ProductRequestObject && this.ProductRequestObject.ContractTypeCode) ? this.ProductRequestObject.ContractTypeCode : this.IsChecked === true ? 8 : null,
+          CostFactorID: (this.ProductRequestObject && this.ProductRequestObject.CostFactorID) ? this.ProductRequestObject.CostFactorID : -1,
           RegionCode: this.RegionParams.selectedObject,
           IsCost: this.IsCost,
-          ProductRequestTypeCode: this.ProductRequestObject && this.ProductRequestObject.ProductRequestTypeCode,
           ProductRequestCode: -1,
           ProductRequestDate: this.ProductRequestDate,
           DeadlineDate: this.DeadLineDate,
           UnitPatternID: this.VWExeUnitParams.selectedObject,
           CustomerOrderID: this.CustomerOrderParams.selectedObject,
           ActorID: this.RequestedPersonParams.selectedObject,
-          RegionAreaID: this.RegionAreaParams.selectedObject, // ناحیه
-          RegionAreaDistrictID: this.RegionAreaDistrictParams.selectedObject, // محله
-          DistrictDirectionCode: this.DistrictDirectionParams.selectedObject, // محله
-          WorkPlaceCode: this.OnFilterRegionParams.selectedObject, // واحد اجرایی محل انجام کار
-          Subject: this.Subject,
-          Address: this.Address,
+          RegionAreaID: (this.IsTransferedContract && this.ProductRequestObject) ? this.ProductRequestObject.RegionAreaID : this.RegionAreaParams.selectedObject, // ناحیه
+          RegionAreaDistrictID: (this.IsTransferedContract && this.ProductRequestObject) ? this.ProductRequestObject.RegionAreaDistrictID : this.RegionAreaDistrictParams.selectedObject, // محله
+          DistrictDirectionCode: (this.IsTransferedContract && this.ProductRequestObject) ? this.ProductRequestObject.DistrictDirectionCode : this.DistrictDirectionParams.selectedObject, // محله
+          WorkPlaceCode: (this.IsTransferedContract && this.ProductRequestObject) ? this.ProductRequestObject.WorkPlaceCode : this.OnFilterRegionParams.selectedObject, // واحد اجرایی محل انجام کار
+          Subject: (this.IsTransferedContract && this.ProductRequestObject) ? this.ProductRequestObject.Subject : this.Subject,
+          Address: (this.IsTransferedContract && this.ProductRequestObject) ? this.ProductRequestObject.Address : this.Address,
           ResearcherID: this.ResearcherID,
           ProductRequestStatusCode: 1,
-          InvVoucherGroupCode: 1,
+          InvVoucherGroupCode: this.RegionParams.selectedObject === 200 && !this.IsCost && this.ModuleViewTypeCode == 89 ? 10 : 1,  // 65085
           HasLicence: 0,
           RelatedContractID: null,
           ProvisionContractID: null,
+          ProductRequestTypeCode: (this.IsTransferedContract && this.ProductRequestObject) ? this.ProductRequestObject.ProductRequestTypeCode : this.PRTypeParams.selectedObject,
+          PriceListTopicID: this.PriceListTopicRasteParams.selectedObject,
           // tslint:disable-next-line:max-line-length
           PersonUnitPatternID: this.UnitPatternParams.selectedObject && this.UnitPatternParams.selectedObject.UnitPatternID ? this.UnitPatternParams.selectedObject.UnitPatternID : null,
           SubCostCenterID: this.SubCostCenterParams.selectedObject,
@@ -6465,26 +6951,28 @@ export class ProductRequestPageComponent implements OnInit {
           HaveMutualContract: this.IsCost ? this.HaveMutualContract : false,
           MutualContractStatus: this.HaveMutualContract ? this.MutualContractStatus : null,
           IsSecret: this.IsSecret,
+          DealTypeCode: (this.ProductRequestObject && this.ProductRequestObject.DealTypeCode) ? this.ProductRequestObject.DealTypeCode : null,
           HaveHsePlan: this.HaveHsePlan,
           PriceListPatternID: this.ContractParams.selectedObject &&
             this.ProductRequestObject === null &&
             this.ProductRequestObject.PriceListPatternID === null ? this.PriceListPatternID : null,
 
-          ContractContentNote: this.ModuleViewTypeCode === 114 && this.ContractParams.selectedObject ?
+          ContractContentNote: (this.ModuleViewTypeCode === 114 || this.ModuleViewTypeCode === 89) && this.ContractParams.selectedObject ?
             this.ContractContentNote : null,
-          IsContractContent: this.ModuleViewTypeCode === 114 && this.ContractParams.selectedObject ?
+          IsContractContent: (this.ModuleViewTypeCode === 114 || this.ModuleViewTypeCode === 89) && this.ContractParams.selectedObject ?
             this.IsContractContent : false,
-          IsTaxValue: this.ProductRequestObject && this.ProductRequestObject.CostFactorID > 0 ? this.ProductRequestObject.IsTaxValue : true,
-          PriceListTopicID: this.ProductRequestObject &&
-            this.ProductRequestObject.CostFactorID > 0 ? this.ProductRequestObject.PriceListTopicID : null,
-          GradeID: this.ProductRequestObject && this.ProductRequestObject.CostFactorID > 0 ? this.ProductRequestObject.GradeID : null,
+          IsTaxValue: (this.ProductRequestObject && this.ProductRequestObject.CostFactorID > 0) ? this.ProductRequestObject.IsTaxValue : true,
+          GradeID: (this.ProductRequestObject && this.ProductRequestObject.CostFactorID > 0) ? this.ProductRequestObject.GradeID : null,
           IsConfirm: 0,
+          ProductRequestRelationList: this.IsTransferedContract ? ProductRequestRelationList : (this.ProductRequestObject ? this.ProductRequestObject.ProductRequestRelationList : null),
+          DealMethodCode: this.ProductRequestObject ? this.ProductRequestObject.DealMethodCode : null,
           RequestObjectTypeCode:
             this.OrginalModuleCode === 2730 ? 1 : // درخواست معامله
               this.OrginalModuleCode === 2773 ? 3 : // تامین مانده اعتبار
                 this.OrginalModuleCode === 2895 ? 8 : // درخواست مهامله پژوهشی
                   this.OrginalModuleCode === 2910 ? 10 : // درخواست معامله با گردش
-                    null
+                    this.OrginalModuleCode === 3095 ? 14 : // توافق نامه
+                      null
         };
         if (this.ModuleCode && this.ModuleCode === 2773) {
           ProductRequestObj.ProvisionContractID = this.ContractParams.selectedObject;
@@ -6592,10 +7080,18 @@ export class ProductRequestPageComponent implements OnInit {
           };
           RelatedProductList.push(RelatedProductObj);
         });
-        if (this.ProductRequestObject && this.ProductRequestObject.CostFactorID === -1 && this.IsTransferedContract === true) {
-          this.ShowMessageBoxWithOkBtn('جهت ذخیره اطلاعات لطفا از بخش تکمیل اطلاعات استفاده نمایید');
-          return;
+        // if (this.ProductRequestObject && this.ProductRequestObject.CostFactorID === -1 && this.IsTransferedContract === true) {
+        //   this.ShowMessageBoxWithOkBtn('جهت ذخیره اطلاعات لطفا از بخش تکمیل اطلاعات استفاده نمایید');
+        //   return;
+        // }
+
+        const ProductRequestPerson = {
+          ProductRequestPersonID: this.ProductRequestPersonID,
+          ActorID: this.ExpertParams.selectedObject,
+          RoleID: this.ExpertPersonRoleID,
+          CostFactorID: this.ProductRequestObject && this.ProductRequestObject.CostFactorID ? this.ProductRequestObject.CostFactorID : -1,
         }
+
         if (CheckExceptions) {
           this.ProductRequest.GetSaveExceptions(1,
             this.ModuleCode,
@@ -6621,11 +7117,25 @@ export class ProductRequestPageComponent implements OnInit {
                 AssetPRList,
                 ReceiveDocList,
                 this.ModuleViewTypeCode, // RFC 52370
-                RelatedProductList
+                RelatedProductList,
+                this.ExpertParams.selectedObject,
+                null,
+                ContractId
               ).subscribe((res: any) => {
                 this.ProductRequestCode = res.ProductRequestCode;
                 this.ProductRequestNo = res.ProductRequestNo;
-                this.rowsData = res.ProductRequestItemList;
+                if (res
+                  && res.ProductRequestTypeCode === 2
+                  && res.PriceListTopicID === 402374) {
+                  res.ProductRequestItemList.forEach(el => {
+                    if (isNullOrUndefined(el.QTY) || el.QTY === 0) {
+                      el.FinalAmount = 0;
+                    }
+                  });
+                  this.rowsData = res.ProductRequestItemList;
+                } else {
+                  this.rowsData = res.ProductRequestItemList;
+                }
                 this.SetEntityDataInDataRow(this.rowsData);
                 this.CostFactorID = res.CostFactorID;
                 this.ProductRequestObject = res;
@@ -6658,11 +7168,24 @@ export class ProductRequestPageComponent implements OnInit {
             ReceiveDocList,
             this.ModuleViewTypeCode, // RFC 52370
             RelatedProductList,
-            this.Is3InquiriesMode ? this.IsReturn : null
+            this.Is3InquiriesMode ? this.IsReturn : null,
+            ProductRequestPerson,
+            ContractId
           ).subscribe((res: any) => {
             this.ProductRequestCode = res.ProductRequestCode;
             this.ProductRequestNo = res.ProductRequestNo;
-            this.rowsData = res.ProductRequestItemList;
+            if (res
+              && res.ProductRequestTypeCode === 2
+              && res.PriceListTopicID === 402374) {
+              res.ProductRequestItemList.forEach(el => {
+                if (isNullOrUndefined(el.QTY) || el.QTY === 0) {
+                  el.FinalAmount = 0;
+                }
+              });
+              this.rowsData = res.ProductRequestItemList;
+            } else {
+              this.rowsData = res.ProductRequestItemList;
+            }
             this.SetEntityDataInDataRow(this.rowsData);
             this.CostFactorID = res.CostFactorID;
             this.ProductRequestObject = res;
@@ -6672,6 +7195,11 @@ export class ProductRequestPageComponent implements OnInit {
             this.IsDisable = false;
             this.Output.emit(true);
             this.IsDown = true;
+
+            const SelectedExpertPerson = this.ProductRequestObject.RequestPersonList.filter(x => x.RoleID === this.ExpertPersonRoleID);
+            if (SelectedExpertPerson.length > 0) {
+              this.ProductRequestPersonID = SelectedExpertPerson[0].ProductRequestPersonID;
+            }
             this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
           },
             err => {
@@ -6708,7 +7236,7 @@ export class ProductRequestPageComponent implements OnInit {
   }
   onPRPersonCellValueChanged(event) {
     if (event.newValue && event.colDef && event.colDef.field === 'RoleName') {
-      this.ProductRequestPersoncolDef[2].cellEditorParams.Items = this.Actor.GetPersonList(event.newValue.RoleID, null, false);
+      this.ProductRequestPersoncolDef[2].cellEditorParams.Items = this.Actor.GetPersonList(event.newValue.RoleID, null, null, false);
       const itemsToUpdate = [];
       this.gridApi.forEachNode(node => {
         if (node.rowIndex === event.rowIndex) {
@@ -6787,12 +7315,20 @@ export class ProductRequestPageComponent implements OnInit {
       this.IsCost = IsCost;
       if (this.ModuleViewTypeCode === 89) {
         if (!this.IsCost) {
+          this.ExpertPersonRoleID = 1442;
+          this.HaveExpertPerson = true;
+          this.WfDetailsShowHeight = 36;
+          this.WfDetailsShow = true;
+          this.ExpertPersonLabel = ' رئیس امور';
+          this.onExpertOpen(1);
           this.ISActLocation = true;
           this.HasMutualContractQuestion = false;
           this.ShowMCSPanel = false;
-          this.gridHeight = 40;
+          this.gridHeight = 33;
           this.tabpanelHeight = 76;
         } else {
+          this.WfDetailsShow = false;
+          this.HaveExpertPerson = false;
           this.ISActLocation = false;
           this.HasMutualContractQuestion = true;
           this.MakeMCRadioTypes();
@@ -6856,7 +7392,7 @@ export class ProductRequestPageComponent implements OnInit {
     this.HaveMutualContract = HaveMutualContract;
     if (!HaveMutualContract) {
       this.ShowMCSPanel = false;
-      this.gridHeight = 40;
+      this.gridHeight = (this.ModuleViewTypeCode === 89 && (!this.IsNew)) ? 33 : 40;
       this.tabpanelHeight = 76;
     } else {
       this.ShowMCSPanel = true;
@@ -6959,99 +7495,234 @@ export class ProductRequestPageComponent implements OnInit {
       this.ShowMessageBoxWithOkBtn('جمع مبلغ اقلام درخواستی در حد متوسط نیست');
       return;
     }
-    this.PopUpType = 'product-request-suggestion';
-    this.isClicked = true;
-    this.PercentWidth = 98;
-    this.MainMaxwidthPixel = 2000;
-    this.MinHeightPixel = 600;
-    this.HaveHeader = true;
-    this.startLeftPosition = 65;
-    this.startTopPosition = 10;
-    this.HaveMaxBtn = true;
-    this.PopupParam = {
-      ProductRequestObject: this.ProductRequestObject,
-      SumFinalAmount: this.SumFinalAmountStr,
-      SumAmount: this.SumFinalItemAmount,
-      DealTypeCode: DealTypeCode,
-      DealTypeName: this.ProductRequestObject.DealTypeName,
-      IsCost: this.IsCost,
-      ModuleViewTypeCode: this.ModuleViewTypeCode,
-      CheckRegionWritable: this.CheckRegionWritable,
-      ModuleCode: this.ModuleCode,
-      OrginalModuleCode: this.OrginalModuleCode,
-      Amount: this.ProductRequestObject.Amount,
-      IsNew: this.IsNew,
-      IsAdmin: this.IsAdmin,
-      IsTransferedContract: this.IsTransferedContract
-    };
+    if (this.CallMainapi === false && this.CostFactorID !== -1 && this.CostFactorID !== null) {
+      const promise = new Promise((resolve, reject) => {
+        this.ProductRequest.GetProductRequest(this.CostFactorID).subscribe(res => {
+          if (res) {
+            this.CallMainapi = true;
+            this.ProductRequestObject = res;
+            resolve(true);
+          }
+        })
+      }).then(() => {
+        this.PopUpType = 'product-request-suggestion';
+        this.isClicked = true;
+        this.PercentWidth = 98;
+        this.MainMaxwidthPixel = 2000;
+        this.MinHeightPixel = 600;
+        this.HaveHeader = true;
+        this.startLeftPosition = 15;
+        this.startTopPosition = 10;
+        this.HaveMaxBtn = true;
+        this.PopupParam = {
+          ProductRequestObject: this.ProductRequestObject,
+          SumFinalAmount: this.SumFinalAmountStr,
+          SumAmount: this.SumFinalItemAmount,
+          DealTypeCode: DealTypeCode,
+          DealTypeName: this.ProductRequestObject.DealTypeName,
+          IsCost: this.IsCost,
+          ModuleViewTypeCode: this.ModuleViewTypeCode,
+          CheckRegionWritable: this.CheckRegionWritable,
+          ModuleCode: this.ModuleCode,
+          OrginalModuleCode: this.OrginalModuleCode,
+          Amount: this.ProductRequestObject.Amount,
+          IsNew: this.IsNew,
+          IsAdmin: this.IsAdmin,
+          IsTransferedContract: this.IsTransferedContract,
+          IsAgreement: this.IsChecked,
+        };
+      });
+    } else {
+      this.PopUpType = 'product-request-suggestion';
+      this.isClicked = true;
+      this.PercentWidth = 98;
+      this.MainMaxwidthPixel = 2000;
+      this.MinHeightPixel = 600;
+      this.HaveHeader = true;
+      this.startLeftPosition = 15;
+      this.startTopPosition = 10;
+      this.HaveMaxBtn = true;
+      this.PopupParam = {
+        ProductRequestObject: this.ProductRequestObject,
+        SumFinalAmount: this.SumFinalAmountStr,
+        SumAmount: this.SumFinalItemAmount,
+        DealTypeCode: DealTypeCode,
+        DealTypeName: this.ProductRequestObject.DealTypeName,
+        IsCost: this.IsCost,
+        ModuleViewTypeCode: this.ModuleViewTypeCode,
+        CheckRegionWritable: this.CheckRegionWritable,
+        ModuleCode: this.ModuleCode,
+        OrginalModuleCode: this.OrginalModuleCode,
+        Amount: this.ProductRequestObject.Amount,
+        IsNew: this.IsNew,
+        IsAdmin: this.IsAdmin,
+        IsTransferedContract: this.IsTransferedContract,
+        IsAgreement: this.IsChecked,
+      };
+    }
   }
   btnShowReqDetailsClick() {
     this.ShowRequestDetailsDialog(this.ProductRequestObject.DealTypeCode);
   }
   ShowRequestDetailsDialog(DealTypeCode) {
-    this.PopUpType = 'product-request-show-details-page';
-    this.isClicked = true;
-    this.PercentWidth = 90;
-    this.MainMaxwidthPixel = 2000;
-    this.HaveHeader = true;
-    this.startLeftPosition = 65;
-    this.MinHeightPixel = 652;
-    this.startTopPosition = 10;
-    this.OverMainMinwidthPixel = null;
-    this.HaveMaxBtn = true;
-    this.PopupParam = {
-      HeaderName: 'اطلاعات تکمیلی',
-      ProductRequestObject: this.ProductRequestObject,
-      SumFinalAmount: this.SumFinalAmountStr,
-      DealTypeCode: DealTypeCode,
-      DealTypeName: this.ProductRequestObject.DealTypeName,
-      IsCost: this.IsCost,
-      ModuleViewTypeCode: this.ModuleViewTypeCode,
-      IsRequestProvision: this.IsRequestProvision,
-      CurrentRegionObject: this.currentRegionObject,
-      ModuleCode: this.ModuleCode,
-      OrginalModuleCode: this.OrginalModuleCode,
-      IsInProgressCartable: this.IsInProgressCartable // 59699
-    };
+    if (this.CallMainapi === false) {
+      const promise = new Promise((resolve, reject) => {
+        this.ProductRequest.GetProductRequest(this.CostFactorID).subscribe(res => {
+          if (res) {
+            this.ProductRequestObject = res;
+            resolve(true);
+          }
+        })
+      }).then(() => {
+        this.PopUpType = 'product-request-show-details-page';
+        this.isClicked = true;
+        this.PercentWidth = 90;
+        this.MainMaxwidthPixel = 2000;
+        this.HaveHeader = true;
+        this.startLeftPosition = 65;
+        this.MinHeightPixel = 652;
+        this.startTopPosition = 10;
+        this.OverMainMinwidthPixel = null;
+        this.HaveMaxBtn = true;
+        this.PopupParam = {
+          HeaderName: 'اطلاعات تکمیلی',
+          ProductRequestObject: this.ProductRequestObject,
+          SumFinalAmount: this.SumFinalAmountStr,
+          DealTypeCode: DealTypeCode,
+          DealTypeName: this.ProductRequestObject.DealTypeName,
+          IsCost: this.IsCost,
+          ModuleViewTypeCode: this.ModuleViewTypeCode,
+          IsRequestProvision: this.IsRequestProvision,
+          CurrentRegionObject: this.currentRegionObject,
+          ModuleCode: this.ModuleCode,
+          OrginalModuleCode: this.OrginalModuleCode,
+          IsInProgressCartable: this.IsInProgressCartable // 59699
+        };
+      });
+    } else {
+      this.PopUpType = 'product-request-show-details-page';
+      this.isClicked = true;
+      this.PercentWidth = 90;
+      this.MainMaxwidthPixel = 2000;
+      this.HaveHeader = true;
+      this.startLeftPosition = 65;
+      this.MinHeightPixel = 652;
+      this.startTopPosition = 10;
+      this.OverMainMinwidthPixel = null;
+      this.HaveMaxBtn = true;
+      this.PopupParam = {
+        HeaderName: 'اطلاعات تکمیلی',
+        ProductRequestObject: this.ProductRequestObject,
+        SumFinalAmount: this.SumFinalAmountStr,
+        DealTypeCode: DealTypeCode,
+        DealTypeName: this.ProductRequestObject.DealTypeName,
+        IsCost: this.IsCost,
+        ModuleViewTypeCode: this.ModuleViewTypeCode,
+        IsRequestProvision: this.IsRequestProvision,
+        CurrentRegionObject: this.currentRegionObject,
+        ModuleCode: this.ModuleCode,
+        OrginalModuleCode: this.OrginalModuleCode,
+        IsInProgressCartable: this.IsInProgressCartable // 59699
+      };
+    }
   }
   RequestCost() {
-    this.PopUpType = 'product-request-cost';
-    this.isClicked = true;
-    this.HaveHeader = true;
-    this.startLeftPosition = 110;
-    this.startTopPosition = 20;
-    this.HaveMaxBtn = false;
-    this.PopupParam = {
-      ProductRequestObject: this.ProductRequestObject,
-      Subject: this.Subject,
-      RegionCode: this.RegionParams.selectedObject,
-      ProductRequestCode: this.ProductRequestNo,
-      ProductRequestDate: this.ProductRequestDate,
-      CostFactorID: this.CostFactorID
-
-    };
+    if (this.CallMainapi === false) {
+      const promise = new Promise((resolve, reject) => {
+        this.ProductRequest.GetProductRequest(this.CostFactorID).subscribe(res => {
+          if (res) {
+            this.CallMainapi = true;
+            this.ProductRequestObject = res;
+            resolve(true);
+          }
+        })
+      }).then(() => {
+        this.PopUpType = 'product-request-cost';
+        this.isClicked = true;
+        this.HaveHeader = true;
+        this.startLeftPosition = 110;
+        this.startTopPosition = 20;
+        this.HaveMaxBtn = false;
+        this.PopupParam = {
+          ProductRequestObject: this.ProductRequestObject,
+          Subject: this.Subject,
+          RegionCode: this.RegionParams.selectedObject,
+          ProductRequestCode: this.ProductRequestNo,
+          ProductRequestDate: this.ProductRequestDate,
+          CostFactorID: this.CostFactorID
+        };
+      });
+    } else {
+      this.PopUpType = 'product-request-cost';
+      this.isClicked = true;
+      this.HaveHeader = true;
+      this.startLeftPosition = 110;
+      this.startTopPosition = 20;
+      this.HaveMaxBtn = false;
+      this.PopupParam = {
+        ProductRequestObject: this.ProductRequestObject,
+        Subject: this.Subject,
+        RegionCode: this.RegionParams.selectedObject,
+        ProductRequestCode: this.ProductRequestNo,
+        ProductRequestDate: this.ProductRequestDate,
+        CostFactorID: this.CostFactorID
+      };
+    }
   }
   RequestPersonItem() {
-    this.PopUpType = 'product-request-person-item';
-    this.isClicked = true;
-    this.HaveHeader = true;
-    this.PercentWidth = 70;
-    this.startLeftPosition = 210;
-    this.startTopPosition = 20;
-    this.HaveMaxBtn = false;
-    this.PopupParam = {
-      ProductRequestObject: this.ProductRequestObject,
-      Subject: this.Subject,
-      RegionCode: this.RegionParams.selectedObject,
-      ProductRequestCode: this.ProductRequestNo,
-      ProductRequestDate: this.ProductRequestDate,
-      CostFactorID: this.CostFactorID,
-      ModuleViewTypeCode: this.ModuleViewTypeCode,
-      ModuleCode: this.ModuleCode,
-      CheckRegionWritable: this.CheckRegionWritable,
-      RequestedPersonItems: this.RequestedPersonItems,
-      OrginalModuleCode: this.OrginalModuleCode
-    };
+    if (this.CallMainapi === false) {
+      const promise = new Promise((resolve, reject) => {
+        this.ProductRequest.GetProductRequest(this.CostFactorID).subscribe(res => {
+          if (res) {
+            this.CallMainapi = true;
+            this.ProductRequestObject = res;
+            resolve(true);
+          }
+        })
+      }).then(() => {
+        this.PopUpType = 'product-request-person-item';
+        this.isClicked = true;
+        this.HaveHeader = true;
+        this.PercentWidth = 70;
+        this.startLeftPosition = 210;
+        this.startTopPosition = 20;
+        this.HaveMaxBtn = false;
+        this.PopupParam = {
+          ProductRequestObject: this.ProductRequestObject,
+          Subject: this.Subject,
+          RegionCode: this.RegionParams.selectedObject,
+          ProductRequestCode: this.ProductRequestNo,
+          ProductRequestDate: this.ProductRequestDate,
+          CostFactorID: this.CostFactorID,
+          ModuleViewTypeCode: this.ModuleViewTypeCode,
+          ModuleCode: this.ModuleCode,
+          CheckRegionWritable: this.CheckRegionWritable,
+          RequestedPersonItems: this.RequestedPersonItems,
+          OrginalModuleCode: this.OrginalModuleCode
+        };
+      });
+    } else {
+      this.PopUpType = 'product-request-person-item';
+      this.isClicked = true;
+      this.HaveHeader = true;
+      this.PercentWidth = 70;
+      this.startLeftPosition = 210;
+      this.startTopPosition = 20;
+      this.HaveMaxBtn = false;
+      this.PopupParam = {
+        ProductRequestObject: this.ProductRequestObject,
+        Subject: this.Subject,
+        RegionCode: this.RegionParams.selectedObject,
+        ProductRequestCode: this.ProductRequestNo,
+        ProductRequestDate: this.ProductRequestDate,
+        CostFactorID: this.CostFactorID,
+        ModuleViewTypeCode: this.ModuleViewTypeCode,
+        ModuleCode: this.ModuleCode,
+        CheckRegionWritable: this.CheckRegionWritable,
+        RequestedPersonItems: this.RequestedPersonItems,
+        OrginalModuleCode: this.OrginalModuleCode
+      };
+    }
   }
   BtnArchiveClick() {
     let DealMethodCode = -1;
@@ -7096,33 +7767,77 @@ export class ProductRequestPageComponent implements OnInit {
   BtnArchiveClick2() {
     this.PopUpType = 'product-request-archive-detail';
     this.HaveHeader = true;
-    this.isClicked = true;
     this.HaveMaxBtn = false;
     this.startLeftPosition = 277;
     this.startTopPosition = 10;
     this.MainMaxwidthPixel = null;
     this.MinHeightPixel = null;
     this.OverMainMinwidthPixel = null;
-    this.PopupParam = {
-      RegionCode: this.ProductRequestObject.RegionCode,
-      IsOnline: this.ProductRequestObject.IsOnline,
-      CostFactorID: this.CostFactorID,
-      ProductRequestObject: this.ProductRequestObject,
-      currentRegionObject: this.currentRegionObject,
-      LastInquiryID: (this.ProductRequestObject && this.ProductRequestObject.LastInquiryObject)
-        ? this.ProductRequestObject.LastInquiryObject.InquiryID : null,
-      OrderCommitionID: (this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.OrderCommitionObject)
-        ? this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID : null,
-      HaveSaveArchive: this.ModuleViewTypeCode !== 400000 && this.ModuleViewTypeCode !== 500000 && this.ModuleViewTypeCode !== 800000,
-      HasDeleteAccess: this.ModuleViewTypeCode !== 400000 && this.ModuleViewTypeCode !== 500000 && this.ModuleViewTypeCode !== 800000,
-      OrginalModuleCode: this.OrginalModuleCode,
-      RealOnlyPage: this.ModuleViewTypeCode === 400000 || this.ModuleViewTypeCode === 500000 || this.ModuleViewTypeCode === 800000,
-      PRArchiveWithOutAdvertising: this.ModuleViewTypeCode === 111 ||
-        this.ModuleViewTypeCode === 400000 ||
-        this.ModuleViewTypeCode === 500000 ||
-        this.ModuleViewTypeCode === 800000,
-      ModuleViewTypeCode: this.ModuleViewTypeCode,
-    };
+
+    // tslint:disable-next-line: max-line-length
+    let HaveSaveArchive = (this.ModuleViewTypeCode !== 400000 && this.ModuleViewTypeCode !== 500000 && this.ModuleViewTypeCode !== 74 && this.ModuleViewTypeCode !== 800000);
+    HaveSaveArchive = (this.OrginalModuleCode && this.OrginalModuleCode === 2756 && this.ModuleViewTypeCode === 500000) ? this.HaveConfirmArchive : HaveSaveArchive;
+    let RealOnlyPage = (this.ModuleViewTypeCode === 400000 || this.ModuleViewTypeCode === 500000 || this.ModuleViewTypeCode === 800000);
+    RealOnlyPage = (this.OrginalModuleCode && this.OrginalModuleCode === 2756 && this.ModuleViewTypeCode === 500000) ? !this.HaveConfirmArchive : RealOnlyPage;
+    if (this.CallMainapi === false) {
+      const promise = new Promise((resolve, reject) => {
+        this.ProductRequest.GetProductRequest(this.CostFactorID).subscribe(res => {
+          if (res) {
+            this.CallMainapi = true;
+            this.ProductRequestObject = res;
+            resolve(true);
+          }
+        })
+      }).then(() => {
+        this.PopupParam = {
+          RegionCode: this.ProductRequestObject.RegionCode,
+          IsOnline: this.ProductRequestObject.IsOnline,
+          CostFactorID: this.CostFactorID,
+          ProductRequestObject: this.ProductRequestObject,
+          currentRegionObject: this.currentRegionObject,
+          LastInquiryID: (this.ProductRequestObject && this.ProductRequestObject.LastInquiryObject)
+            ? this.ProductRequestObject.LastInquiryObject.InquiryID : null,
+          OrderCommitionID: (this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.OrderCommitionObject)
+            ? this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID : null,
+          ContractID: (this.ProductRequestObject && this.ProductRequestObject.ContractObject && this.ProductRequestObject.ContractObject.ContractId)
+            ? this.ProductRequestObject.ContractObject.ContractId : null,
+          HaveSaveArchive: HaveSaveArchive,
+          HasDeleteAccess: this.ModuleViewTypeCode !== 400000 && this.ModuleViewTypeCode !== 500000 && this.ModuleViewTypeCode !== 800000,
+          OrginalModuleCode: this.OrginalModuleCode,
+          RealOnlyPage: RealOnlyPage,
+          PRArchiveWithOutAdvertising: this.ModuleViewTypeCode === 111 ||
+            this.ModuleViewTypeCode === 400000 ||
+            this.ModuleViewTypeCode === 500000 ||
+            this.ModuleViewTypeCode === 800000,
+          ModuleViewTypeCode: this.ModuleViewTypeCode,
+        };
+        this.isClicked = true;
+      });
+    } else {
+      this.PopupParam = {
+        RegionCode: this.ProductRequestObject.RegionCode,
+        IsOnline: this.ProductRequestObject.IsOnline,
+        CostFactorID: this.CostFactorID,
+        ProductRequestObject: this.ProductRequestObject,
+        currentRegionObject: this.currentRegionObject,
+        LastInquiryID: (this.ProductRequestObject && this.ProductRequestObject.LastInquiryObject)
+          ? this.ProductRequestObject.LastInquiryObject.InquiryID : null,
+        OrderCommitionID: (this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.OrderCommitionObject)
+          ? this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID : null,
+        ContractID: (this.ProductRequestObject && this.ProductRequestObject.ContractObject && this.ProductRequestObject.ContractObject.ContractId)
+          ? this.ProductRequestObject.ContractObject.ContractId : null,
+        HaveSaveArchive: HaveSaveArchive,
+        HasDeleteAccess: this.ModuleViewTypeCode !== 400000 && this.ModuleViewTypeCode !== 500000 && this.ModuleViewTypeCode !== 800000,
+        OrginalModuleCode: this.OrginalModuleCode,
+        RealOnlyPage: RealOnlyPage,
+        PRArchiveWithOutAdvertising: this.ModuleViewTypeCode === 111 ||
+          this.ModuleViewTypeCode === 400000 ||
+          this.ModuleViewTypeCode === 500000 ||
+          this.ModuleViewTypeCode === 800000,
+        ModuleViewTypeCode: this.ModuleViewTypeCode,
+      };
+      this.isClicked = true;
+    }
   }
   ShowArchiveDialog(MandatoryDocTypeList, FilterDocumentTypeCodeList) {
     this.PopUpType = 'archive-details';
@@ -7189,6 +7904,8 @@ export class ProductRequestPageComponent implements OnInit {
               SignByFile: false,
               IsArticle18: true,
               HasDelBtn: true,
+              IsAdequacy: false,
+              IsDisArticle18: false
             };
           });
           return;
@@ -7225,6 +7942,8 @@ export class ProductRequestPageComponent implements OnInit {
                   IsFinal: false,
                   IsArticle18: true,
                   HasDelBtn: true,
+                  IsAdequacy: false,
+                  IsDisArticle18: false
                 };
               } else {
                 this.IsDown = true;
@@ -7260,6 +7979,8 @@ export class ProductRequestPageComponent implements OnInit {
               IsArticle18: false,
               HasDelBtn: false,
               IsTrafficRep: true,
+              IsAdequacy: false,
+              IsDisArticle18: false
             };
           });
           return;
@@ -7298,6 +8019,8 @@ export class ProductRequestPageComponent implements OnInit {
                   IsArticle18: false,
                   HasDelBtn: false,
                   IsTrafficRep: true,
+                  IsAdequacy: false,
+                  IsDisArticle18: false
                 };
               } else {
                 this.IsDown = true;
@@ -7305,11 +8028,135 @@ export class ProductRequestPageComponent implements OnInit {
               }
             });
         }
+      } else if (this.BtnClickedName === 'AdecuacyDoc') {
+        if (event === 'YES') {
+          this.ComonService.GetAllArchiveDetailList(this.CostFactorID, 1167, true).subscribe(res => {
+            this.PopUpType = 'pdf-viewer';
+            this.HaveHeader = true;
+            this.isClicked = true;
+            this.startLeftPosition = 40;
+            this.startTopPosition = 0;
+            this.HaveMaxBtn = false;
+            this.OverMainMinwidthPixel = 1295;
+            this.MainMaxwidthPixel = 1300;
+            this.PopupParam = {
+              HeaderName: 'نامه کفایت اسناد',
+              PDFSrc: res ? res.FileBase64 : undefined,
+              FileName: res ? res.FileName : null,
+              OrderCommitionID: null,
+              HaveEstimate: false,
+              HaveSign: true,
+              CostFactorID: this.ProductRequestObject.CostFactorID,
+              RegionCode: this.ProductRequestObject.RegionCode,
+              PDFSignersInfo: res ? res.PDFSignersInfo : null,
+              HasTripleReport: false,
+              IsFinal: false,
+              HaveUpload: !res || !res.PDFSignersInfo || res.PDFSignersInfo.length <= 0,
+              SignByFile: false,
+              IsArticle18: false,
+              HasDelBtn: this.IsAdmin,
+              IsAdequacy: true,
+              IsDisArticle18: false
+            };
+          });
+          return;
+        } else if (event === 'NO') {
+          this.ProductRequest.GetMinutesReportPDFContent(
+            this.ProductRequestObject.CostFactorID,
+            this.ProductRequestObject.CostFactorID,
+            this.ProductRequestObject.RegionCode,
+            1167,
+            false,
+            true,
+            this.ModuleViewTypeCode).subscribe(PDFRes => {
+              if (PDFRes) {
+                this.IsDown = true;
+                this.PopUpType = 'pdf-viewer';
+                this.HaveHeader = true;
+                this.isClicked = true;
+                this.startLeftPosition = 40;
+                this.startTopPosition = 0;
+                this.HaveMaxBtn = false;
+                this.OverMainMinwidthPixel = 1295;
+                this.MainMaxwidthPixel = 1300;
+                this.PopupParam = {
+                  HeaderName: 'نامه کفایت اسناد',
+                  PDFSrc: PDFRes.FileBase64,
+                  FileName: PDFRes.FileName,
+                  OrderCommitionID: null,
+                  HaveEstimate: false,
+                  HaveSign: true,
+                  CostFactorID: this.ProductRequestObject.CostFactorID,
+                  RegionCode: this.ProductRequestObject.RegionCode,
+                  PDFSignersInfo: PDFRes.PDFSignersInfo,
+                  HasTripleReport: false,
+                  IsFinal: false,
+                  IsArticle18: false,
+                  HasDelBtn: this.IsAdmin,
+                  IsAdequacy: true,
+                  IsDisArticle18: false
+                };
+              } else {
+                this.IsDown = true;
+                this.ShowMessageBoxWithOkBtn('فایل صورتجلسه بارگزاری نشده است.');
+              }
+            });
+        }
+      } else if (this.BtnClickedName === 'DisArticle18') {
+        if (event === 'YES') {
+          this.isClicked = true;
+          this.PopUpType = 'rich-text-box-input';
+          this.startLeftPosition = 70;
+          this.startTopPosition = 100;
+          this.HaveMaxBtn = false;
+          this.PixelHeight = 290;
+          this.OverMainMinwidthPixel = 950;
+          this.MainMaxwidthPixel = 1000;
+          this.HaveHeader = true;
+          this.MinHeightPixel = 270;
+          this.PopupParam = {
+            HeaderName: 'دلایل عدم تصویب',
+            OrderCommitionID: this.OrderCommitionID,
+            CostFactorID: this.ProductRequestObject.CostFactorID,
+            RegionCode: this.ProductRequestObject.RegionCode,
+            IsDisableInput: true,
+            IsAdmin: this.IsAdmin
+          };
+          this.IsClickedPopUp = true;
+          return;
+        } else if (event === 'NO') {
+          this.isClicked = true;
+          this.PopUpType = 'rich-text-box-input';
+          this.startLeftPosition = 70;
+          this.startTopPosition = 100;
+          this.HaveMaxBtn = false;
+          this.PixelHeight = 290;
+          this.OverMainMinwidthPixel = 950;
+          this.MainMaxwidthPixel = 1000;
+          this.HaveHeader = true;
+          this.MinHeightPixel = 270;
+          this.PopupParam = {
+            HeaderName: 'دلایل عدم تصویب',
+            OrderCommitionID: this.OrderCommitionID,
+            CostFactorID: this.ProductRequestObject.CostFactorID,
+            RegionCode: this.ProductRequestObject.RegionCode,
+            IsDisableInput: false,
+            IsAdmin: this.IsAdmin
+          };
+          this.IsClickedPopUp = true;
+          return;
+        }
+      } else {
+        return;
       }
     }
     this.isClicked = false;
     this.PopUpType = '';
     this.BtnClickedName = '';
+    this.ExistsFile = false;
+    this.ExistsArticle18File = false;
+    this.ExistsDisApprArticle18File = false;
+    this.PixelHeight = null;
   }
   getOutPutParam(event) {
     if (this.PopUpType === 'product-request-suggestion' ||
@@ -7358,17 +8205,16 @@ export class ProductRequestPageComponent implements OnInit {
       // return;
     }
     if (this.PopUpType === 'product-request-suggestion') {
-      if (this.IsTransferedContract) {
-        this.ProductRequestCode = event.ProductRequestCode;
-        this.ProductRequestNo = event.ProductRequestNo;
-      }
-      if (this.ProductRequestObject.ProductRequestItemList) {
+      if (this.ProductRequestObject.ProductRequestItemList && !this.IsTransferedContract) { // 65605
         this.rowsData = this.ProductRequestObject.ProductRequestItemList;
         this.SetEntityDataInDataRow(this.rowsData);
       }
     }
     if (this.PopUpType === 'show-contract-list') {
       this.SetLastContractData(event);
+    }
+    if (this.PopUpType === 'create-contract-on-flow') {
+      this.rowsData = this.ProductRequestObject.ProductRequestItemList;
     }
   }
   ConfirmAndSend() {
@@ -7506,6 +8352,7 @@ export class ProductRequestPageComponent implements OnInit {
   SetSumFinalAmount() {
     let SumFinalAmount = 0;
     let SumAmount = 0;
+    let SumFinalItemAmountWithDurations = 0;
     let SumEstimateAmount = 0;
     let SumEstimateAmountCoef = 0;
     let RegionCode = -1;
@@ -7528,6 +8375,9 @@ export class ProductRequestPageComponent implements OnInit {
             SumFinalAmount = SumFinalAmount + parseFloat(node.data.AmountCOEFPact);
             SumAmount = SumAmount + parseFloat(node.data.AmountCOEFPact);
           }
+          if (node.data.AmountCOEFPactWithDuration) {
+            SumFinalItemAmountWithDurations = SumFinalItemAmountWithDurations + parseFloat(node.data.AmountCOEFPactWithDuration);
+          }
           if (node.data.VWAmount) {
             // tslint:disable-next-line:radix
             SumEstimateAmount = SumEstimateAmount + parseFloat(node.data.VWAmount);
@@ -7540,6 +8390,7 @@ export class ProductRequestPageComponent implements OnInit {
         this.SumFinalAmount = SumFinalAmount;
         this.SumAmount = SumAmount;
         this.SumFinalItemAmount = SumAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        this.SumFinalItemAmountWithDuration = SumFinalItemAmountWithDurations.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         this.SumFinalAmountStr = SumFinalAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         this.SumEstimateAmountStr = SumEstimateAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         this.SumEstimateAmountCoefStr = SumEstimateAmountCoef.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -7556,10 +8407,14 @@ export class ProductRequestPageComponent implements OnInit {
             SumAmount = SumAmount + parseFloat(node.data.AmountCOEFPact);
             SumFinalAmount = SumFinalAmount + parseFloat(node.data.AmountCOEFPact); // 62186
           }
+          if (node.data.AmountCOEFPactWithDuration) {
+            SumFinalItemAmountWithDurations = SumFinalItemAmountWithDurations + parseFloat(node.data.AmountCOEFPactWithDuration);
+          }
         });
         this.SumFinalAmount = SumFinalAmount;
         this.SumAmount = SumAmount;
         this.SumFinalItemAmount = SumAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        this.SumFinalItemAmountWithDuration = SumFinalItemAmountWithDurations.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         this.SumFinalAmountStr = SumFinalAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       }
     }
@@ -7750,6 +8605,11 @@ export class ProductRequestPageComponent implements OnInit {
       this.TimeExtensionDay = 0; // RFC 51373
       this.TimeExtensionMonth = 0; // RFC 51373
       this.TimeExtensionYear = 0; // RFC 51373
+
+      // this.ContractList.HasContractOrderEstimate(ContractId).subscribe(HasCOE => {
+      //   this.FillGrid(HasCOE);
+      // });
+
     }
   }
   onChangeRustee(ACostCenterID) {
@@ -7767,11 +8627,10 @@ export class ProductRequestPageComponent implements OnInit {
     // tslint:disable-next-line: max-line-length
     CostCenterCode = this.CostCenterItems ? this.CostCenterItems.find(x => x.CostCenterId === ACostCenterID).CostCenterCode : '';
 
-    // this.FillGrid(RegionCode, CostCenterCode);
-
   }
   onSubCostCenterSelectedChange(SubCostCenterID) {
     this.RequestedPersonParams.selectedObject = null;
+    this.OnOpenNgSelect('RequestedPerson');
   }
   onRequestedPersonSelectedchanged(RequestedPersonID) {
     if (this.RequestedPersonItems && this.RequestedPersonItems.length > 0 && !this.SubCostCenterParams.selectedObject) {
@@ -8075,6 +8934,10 @@ export class ProductRequestPageComponent implements OnInit {
           this.ReadyToConfirm = 0;
           this.btnConfirmName = 'تایید نهایی';
           this.btnConfirmIcon = 'ok';
+          if (this.ProductRequestObject.RegionCode === 79) {
+            this.HasEditContractInfoBtn = true;
+            this.CheckContractStatusForUpdate();
+          }
 
         } else {
           messageStr = 'تایید نهایی درخواست انجام معامله با موفقیت انجام شد';
@@ -8086,35 +8949,6 @@ export class ProductRequestPageComponent implements OnInit {
           }
         }
         this.ShowMessageBoxWithOkBtn(messageStr);
-
-        // if (this.ConfirmStatus.includes(27) || this.ConfirmStatus.includes(28)) {
-        //   if (this.ReadyToConfirm && this.ReadyToConfirm === 1) {
-        //     messageStr = 'بازگشت از تایید نهایی درخواست معامله با موفقیت انجام شد';
-        //     this.ReadyToConfirm = 0;
-        //     this.btnConfirmName = 'تایید نهایی';
-        //     this.btnConfirmIcon = 'ok';
-        //   } else {
-        //     messageStr = 'تایید نهایی درخواست معامله با موفقیت انجام شد';
-        //     this.ReadyToConfirm = 1;
-        //     this.btnConfirmName = 'بازگشت از تایید نهایی';
-        //     this.btnConfirmIcon = 'cancel';
-        //   }
-        // } else {
-        //    this.HaveConfirm = false;
-        // }
-
-        // if (this.ProductRequestObject.RegionCode !== 0) {
-        //   this.ProductRequest.IsSendToProject(this.ProductRequestObject.ContractObject.ContractId).subscribe(res => {
-        //     if (!res) {
-        //       // tslint:disable-next-line:max-line-length
-        //       this.ShowMessageBoxWithOkBtn(messageStr + '  ' +
-        // ' اما درج قرارداد در سامانه کنترل پروژه با مشکل مواجه گردید .خواهشمند است با راهبر سیستم تماس بگیرید.');
-        //     } else {
-        //       this.ShowMessageBoxWithOkBtn(messageStr);
-        //     }
-
-        //   });
-        // }
       },
         err => {
           if (!err.error.Message.includes('|')) {
@@ -8135,80 +8969,171 @@ export class ProductRequestPageComponent implements OnInit {
     this.alertMessageParams.HaveNoBtn = true;
   }
   OpengeneraltenderPage() {
-    if (this.OrginalModuleCode === 2793 || this.OrginalModuleCode === 2939
-      || this.ModuleViewTypeCode === 38 || this.ModuleViewTypeCode === 64
-      || this.ModuleViewTypeCode === 57 || this.ModuleViewTypeCode === 23
-      || this.ModuleViewTypeCode === 27 || this.ModuleViewTypeCode === 104
-      || this.ModuleViewTypeCode === 128 || this.ModuleViewTypeCode === 131
-      || this.ModuleViewTypeCode === 132 || this.ModuleViewTypeCode === 133
-      || this.ModuleViewTypeCode === 134 || this.ModuleViewTypeCode === 139
-      || this.ModuleViewTypeCode === 157 || this.ModuleViewTypeCode === 158) { // RFC 49473 akharin taghirat && RFC 54244
-      this.PercentWidth = 55;
-      this.MinHeightPixel = null;
-      this.MainMaxwidthPixel = null;
-      this.PopUpType = 'app-inquiry-list';
-      this.isClicked = true;
-      this.HaveHeader = true;
-      this.startLeftPosition = 315;
-      this.startTopPosition = 130;
-      this.HaveMaxBtn = false;
-      this.PopupParam = {
-        ProductRequestObject: this.ProductRequestObject,
-        Subject: this.Subject,
-        RegionCode: this.RegionParams.selectedObject,
-        ProductRequestCode: this.ProductRequestNo,
-        ProductRequestDate: this.ProductRequestDate,
-        CostFactorID: this.CostFactorID,
-        IsReadOnly: false,
-        ModuleViewTypeCode: this.ModuleViewTypeCode,
-        PRRegionObject: this.currentRegionObject,
-        SumFinalAmount: this.SumFinalAmountStr,
-        CheckRegionWritable: this.CheckRegionWritable,
-        ModuleCode: this.ModuleCode,
-        FirstModuleCode: this.InputParam.FirstModuleCode,
-        OrginalModuleCode: this.OrginalModuleCode,
-        UserRegionCode: this.UserRegionCode,
-        IsAdmin: this.IsAdmin,
-        OriginModuleViewTypeCode: this.ModuleViewTypeCode
-      };
+    if (this.CallMainapi === false) {
+      const promise = new Promise((resolve, reject) => {
+        this.ProductRequest.GetProductRequest(this.CostFactorID).subscribe(res => {
+          if (res) {
+            this.CallMainapi = true;
+            this.ProductRequestObject = res;
+            resolve(true);
+          }
+        })
+      }).then(() => {
+        if (this.OrginalModuleCode === 2793 || this.OrginalModuleCode === 2939
+          || this.ModuleViewTypeCode === 38 || this.ModuleViewTypeCode === 64
+          || this.ModuleViewTypeCode === 57 || this.ModuleViewTypeCode === 23
+          || this.ModuleViewTypeCode === 27 || this.ModuleViewTypeCode === 104
+          || this.ModuleViewTypeCode === 128 || this.ModuleViewTypeCode === 131
+          || this.ModuleViewTypeCode === 132 || this.ModuleViewTypeCode === 133
+          || this.ModuleViewTypeCode === 134 || this.ModuleViewTypeCode === 139
+          || this.ModuleViewTypeCode === 157 || this.ModuleViewTypeCode === 158) { // RFC 49473 akharin taghirat && RFC 54244
+          this.PercentWidth = 55;
+          this.MinHeightPixel = null;
+          this.MainMaxwidthPixel = null;
+          this.PopUpType = 'app-inquiry-list';
+          this.isClicked = true;
+          this.HaveHeader = true;
+          this.startLeftPosition = 315;
+          this.startTopPosition = 130;
+          this.HaveMaxBtn = false;
+          this.PopupParam = {
+            ProductRequestObject: this.ProductRequestObject,
+            Subject: this.Subject,
+            RegionCode: this.RegionParams.selectedObject,
+            ProductRequestCode: this.ProductRequestNo,
+            ProductRequestDate: this.ProductRequestDate,
+            CostFactorID: this.CostFactorID,
+            IsReadOnly: false,
+            ModuleViewTypeCode: this.ModuleViewTypeCode,
+            PRRegionObject: this.currentRegionObject,
+            SumFinalAmount: this.SumFinalAmountStr,
+            CheckRegionWritable: this.CheckRegionWritable,
+            ModuleCode: this.ModuleCode,
+            FirstModuleCode: this.InputParam.FirstModuleCode,
+            OrginalModuleCode: this.OrginalModuleCode,
+            UserRegionCode: this.UserRegionCode,
+            IsAdmin: this.IsAdmin,
+            OriginModuleViewTypeCode: this.ModuleViewTypeCode
+          };
+        } else {
+          // tslint:disable-next-line: max-line-length
+          this.LastInquiryObject = this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.InquiryID > 0 ? this.ProductRequestObject.LastInquiryObject : null;
+          if ((!this.LastInquiryObject ||
+            (this.LastInquiryObject && !this.LastInquiryObject.IsWin && !this.LastInquiryObject.IsReturn)) ||
+            this.ModuleViewTypeCode === 129 ||// 58382
+            this.ModuleViewTypeCode === 185
+          ) {
+            this.PercentWidth = 81;
+            this.PopUpType = 'general-tender';
+            this.isClicked = true;
+            this.HaveHeader = true;
+            this.OverMainMinwidthPixel = null;
+            this.startLeftPosition = 140;
+            this.startTopPosition = 14;
+            this.HaveMaxBtn = false;
+            //  this.MainMaxwidthPixel = 1500;
+            // this.OverMainMinwidthPixel = 1085;
+            this.PopupParam = {
+              ProductRequestObject: this.ProductRequestObject,
+              ModuleViewTypeCode: this.ModuleViewTypeCode,
+              InquiryObject: this.LastInquiryObject,
+              Subject: this.Subject,
+              RegionCode: this.RegionParams.selectedObject,
+              ProductRequestCode: this.ProductRequestNo,
+              ProductRequestDate: this.ProductRequestDate,
+              CostFactorID: this.CostFactorID,
+              IsReadOnly: false,
+              PRRegionObject: this.currentRegionObject,
+              SumFinalAmount: this.SumFinalAmountStr,
+              CheckRegionWritable: this.CheckRegionWritable,
+              OrginalModuleCode: this.OrginalModuleCode,
+              ModuleCode: this.ModuleCode,
+              UserRegionCode: this.UserRegionCode,
+              IsAdmin: this.IsAdmin,
+              OriginModuleViewTypeCode: this.ModuleViewTypeCode
+            };
+          } else {
+            this.ShowMessageBoxWithOkBtn('مناقصه یا مزایده مورد نظر تعیین تکلیف شده است .');
+          }
+        }
+      });
     } else {
-      // tslint:disable-next-line: max-line-length
-      this.LastInquiryObject = this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.InquiryID > 0 ? this.ProductRequestObject.LastInquiryObject : null;
-      if ((!this.LastInquiryObject ||
-        (this.LastInquiryObject && !this.LastInquiryObject.IsWin && !this.LastInquiryObject.IsReturn)) ||
-        this.ModuleViewTypeCode === 129 // 58382
-      ) {
-        this.PercentWidth = 81;
-        this.PopUpType = 'general-tender';
+      if (this.OrginalModuleCode === 2793 || this.OrginalModuleCode === 2939
+        || this.ModuleViewTypeCode === 38 || this.ModuleViewTypeCode === 64
+        || this.ModuleViewTypeCode === 57 || this.ModuleViewTypeCode === 23
+        || this.ModuleViewTypeCode === 27 || this.ModuleViewTypeCode === 104
+        || this.ModuleViewTypeCode === 128 || this.ModuleViewTypeCode === 131
+        || this.ModuleViewTypeCode === 132 || this.ModuleViewTypeCode === 133
+        || this.ModuleViewTypeCode === 134 || this.ModuleViewTypeCode === 139
+        || this.ModuleViewTypeCode === 157 || this.ModuleViewTypeCode === 158) { // RFC 49473 akharin taghirat && RFC 54244
+        this.PercentWidth = 55;
+        this.MinHeightPixel = null;
+        this.MainMaxwidthPixel = null;
+        this.PopUpType = 'app-inquiry-list';
         this.isClicked = true;
         this.HaveHeader = true;
-        this.OverMainMinwidthPixel = null;
-        this.startLeftPosition = 140;
-        this.startTopPosition = 14;
+        this.startLeftPosition = 315;
+        this.startTopPosition = 130;
         this.HaveMaxBtn = false;
-        //  this.MainMaxwidthPixel = 1500;
-        // this.OverMainMinwidthPixel = 1085;
         this.PopupParam = {
           ProductRequestObject: this.ProductRequestObject,
-          ModuleViewTypeCode: this.ModuleViewTypeCode,
-          InquiryObject: this.LastInquiryObject,
           Subject: this.Subject,
           RegionCode: this.RegionParams.selectedObject,
           ProductRequestCode: this.ProductRequestNo,
           ProductRequestDate: this.ProductRequestDate,
           CostFactorID: this.CostFactorID,
           IsReadOnly: false,
+          ModuleViewTypeCode: this.ModuleViewTypeCode,
           PRRegionObject: this.currentRegionObject,
           SumFinalAmount: this.SumFinalAmountStr,
           CheckRegionWritable: this.CheckRegionWritable,
-          OrginalModuleCode: this.OrginalModuleCode,
           ModuleCode: this.ModuleCode,
+          FirstModuleCode: this.InputParam.FirstModuleCode,
+          OrginalModuleCode: this.OrginalModuleCode,
           UserRegionCode: this.UserRegionCode,
           IsAdmin: this.IsAdmin,
           OriginModuleViewTypeCode: this.ModuleViewTypeCode
         };
       } else {
-        this.ShowMessageBoxWithOkBtn('مناقصه یا مزایده مورد نظر تعیین تکلیف شده است .');
+        // tslint:disable-next-line: max-line-length
+        this.LastInquiryObject = this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.InquiryID > 0 ? this.ProductRequestObject.LastInquiryObject : null;
+        if ((!this.LastInquiryObject ||
+          (this.LastInquiryObject && !this.LastInquiryObject.IsWin && !this.LastInquiryObject.IsReturn)) ||
+          this.ModuleViewTypeCode === 129 ||// 58382
+          this.ModuleViewTypeCode === 185
+        ) {
+          this.PercentWidth = 81;
+          this.PopUpType = 'general-tender';
+          this.isClicked = true;
+          this.HaveHeader = true;
+          this.OverMainMinwidthPixel = null;
+          this.startLeftPosition = 140;
+          this.startTopPosition = 14;
+          this.HaveMaxBtn = false;
+          //  this.MainMaxwidthPixel = 1500;
+          // this.OverMainMinwidthPixel = 1085;
+          this.PopupParam = {
+            ProductRequestObject: this.ProductRequestObject,
+            ModuleViewTypeCode: this.ModuleViewTypeCode,
+            InquiryObject: this.LastInquiryObject,
+            Subject: this.Subject,
+            RegionCode: this.RegionParams.selectedObject,
+            ProductRequestCode: this.ProductRequestNo,
+            ProductRequestDate: this.ProductRequestDate,
+            CostFactorID: this.CostFactorID,
+            IsReadOnly: false,
+            PRRegionObject: this.currentRegionObject,
+            SumFinalAmount: this.SumFinalAmountStr,
+            CheckRegionWritable: this.CheckRegionWritable,
+            OrginalModuleCode: this.OrginalModuleCode,
+            ModuleCode: this.ModuleCode,
+            UserRegionCode: this.UserRegionCode,
+            IsAdmin: this.IsAdmin,
+            OriginModuleViewTypeCode: this.ModuleViewTypeCode
+          };
+        } else {
+          this.ShowMessageBoxWithOkBtn('مناقصه یا مزایده مورد نظر تعیین تکلیف شده است .');
+        }
       }
     }
   }
@@ -8238,6 +9163,7 @@ export class ProductRequestPageComponent implements OnInit {
       case 122: // RFC 53422
       case 157:
       case 164:
+      case 188:
         HeaderName = 'مناقصه عمومی';
         break;
       case 57:
@@ -8310,73 +9236,149 @@ export class ProductRequestPageComponent implements OnInit {
     );
   }
   onProvisionClick(Str) {
-    if (Str === 'Suggestion') {
-      this.gridApi.forEachNode(node => {
-        if (!node.data.ProductRequestItemID
-          || node.data.ProductRequestItemID <= 0) {
-          this.ShowMessageBoxWithOkBtn('با توجه به تغییر اقلام درخواست قرارداد اصلی، ابتدا نسبت به ثبت درخواست اقدام کنید.');
-          return;
-        } else {
-          if (this.ModuleViewTypeCode === 6) {
-            this.HeightPercentWithMaxBtn = 50;
-            this.MinHeightPixel = 323;
-          } else {
-            this.HeightPercentWithMaxBtn = 97;
-            this.MinHeightPixel = 645;
+    if (this.CallMainapi === false) {
+      const promise = new Promise((resolve, reject) => {
+        this.ProductRequest.GetProductRequest(this.CostFactorID).subscribe(res => {
+          if (res) {
+            this.CallMainapi = true;
+            this.ProductRequestObject = res;
+            resolve(true);
           }
+        })
+      }).then(() => {
+        if (Str === 'Suggestion') {
+          this.gridApi.forEachNode(node => {
+            if (!node.data.ProductRequestItemID
+              || node.data.ProductRequestItemID <= 0) {
+              this.ShowMessageBoxWithOkBtn('با توجه به تغییر اقلام درخواست قرارداد اصلی، ابتدا نسبت به ثبت درخواست اقدام کنید.');
+              return;
+            } else {
+              if (this.ModuleViewTypeCode === 6) {
+                this.HeightPercentWithMaxBtn = 50;
+                this.MinHeightPixel = 323;
+              } else {
+                this.HeightPercentWithMaxBtn = 97;
+                this.MinHeightPixel = 645;
+              }
 
-          this.PopUpType = 'product-request-provision';
-          this.HaveHeader = true;
-          this.isClicked = true;
-          this.startLeftPosition = 34;
-          this.startTopPosition = 5;
-          this.HaveMaxBtn = true;
-          this.PercentWidth = 95;
-          this.MainMaxwidthPixel = 2000;
-          this.PopupParam = {
-            ProductRequestObject: this.ProductRequestObject,
-            Subject: this.Subject,
-            RegionCode: this.RegionParams.selectedObject,
-            ProductRequestCode: this.ProductRequestNo,
-            ProductRequestDate: this.ProductRequestDate,
-            ModuleCode: this.ModuleCode,
-            ModuleViewTypeCode: this.ModuleViewTypeCode,
-            IsRequestProvision: this.IsRequestProvision,
-            IsEditable: this.IsEditConfirm,
-            OrginalModuleCode: this.OrginalModuleCode,
-          };
+              this.PopUpType = 'product-request-provision';
+              this.HaveHeader = true;
+              this.isClicked = true;
+              this.startLeftPosition = 34;
+              this.startTopPosition = 5;
+              this.HaveMaxBtn = true;
+              this.PercentWidth = 95;
+              this.MainMaxwidthPixel = 2000;
+              this.PopupParam = {
+                ProductRequestObject: this.ProductRequestObject,
+                Subject: this.Subject,
+                RegionCode: this.RegionParams.selectedObject,
+                ProductRequestCode: this.ProductRequestNo,
+                ProductRequestDate: this.ProductRequestDate,
+                ModuleCode: this.ModuleCode,
+                ModuleViewTypeCode: this.ModuleViewTypeCode,
+                IsRequestProvision: this.IsRequestProvision,
+                IsEditable: this.IsEditConfirm,
+                OrginalModuleCode: this.OrginalModuleCode,
+              };
+            }
+          });
+        }
+        if (Str === 'Show') {
+          this.gridApi.forEachNode(node => { // RFC 53404
+            if (!node.data.ProductRequestItemID
+              || node.data.ProductRequestItemID <= 0) {
+              this.ShowMessageBoxWithOkBtn('با توجه به تغییر اقلام درخواست قرارداد اصلی، ابتدا نسبت به ثبت درخواست اقدام کنید.');
+              return;
+            } else {
+              this.PopUpType = 'app-provision';
+              this.HaveHeader = true;
+              this.isClicked = true;
+              this.startLeftPosition = 78;
+              this.startTopPosition = 5;
+              this.HaveMaxBtn = true;
+              this.HeightPercentWithMaxBtn = 97;
+              this.PercentWidth = 90;
+              this.MainMaxwidthPixel = 2000;
+              this.MinHeightPixel = 645;
+              this.PopupParam = {
+                ProductRequestObject: this.ProductRequestObject,
+                Subject: this.Subject,
+                RegionCode: this.RegionParams.selectedObject,
+                ProductRequestCode: this.ProductRequestNo,
+                ProductRequestDate: this.ProductRequestDate,
+              };
+            }
+          });
         }
       });
-    }
+    } else {
+      if (Str === 'Suggestion') {
+        this.gridApi.forEachNode(node => {
+          if (!node.data.ProductRequestItemID
+            || node.data.ProductRequestItemID <= 0) {
+            this.ShowMessageBoxWithOkBtn('با توجه به تغییر اقلام درخواست قرارداد اصلی، ابتدا نسبت به ثبت درخواست اقدام کنید.');
+            return;
+          } else {
+            if (this.ModuleViewTypeCode === 6) {
+              this.HeightPercentWithMaxBtn = 50;
+              this.MinHeightPixel = 323;
+            } else {
+              this.HeightPercentWithMaxBtn = 97;
+              this.MinHeightPixel = 645;
+            }
 
-    if (Str === 'Show') {
-      this.gridApi.forEachNode(node => { // RFC 53404
-        if (!node.data.ProductRequestItemID
-          || node.data.ProductRequestItemID <= 0) {
-          this.ShowMessageBoxWithOkBtn('با توجه به تغییر اقلام درخواست قرارداد اصلی، ابتدا نسبت به ثبت درخواست اقدام کنید.');
-          return;
-        } else {
-          this.PopUpType = 'app-provision';
-          this.HaveHeader = true;
-          this.isClicked = true;
-          this.startLeftPosition = 78;
-          this.startTopPosition = 5;
-          this.HaveMaxBtn = true;
-          this.HeightPercentWithMaxBtn = 97;
-          this.PercentWidth = 90;
-          this.MainMaxwidthPixel = 2000;
-          this.MinHeightPixel = 645;
-          this.PopupParam = {
-            ProductRequestObject: this.ProductRequestObject,
-            Subject: this.Subject,
-            RegionCode: this.RegionParams.selectedObject,
-            ProductRequestCode: this.ProductRequestNo,
-            ProductRequestDate: this.ProductRequestDate,
-          };
-        }
-      });
+            this.PopUpType = 'product-request-provision';
+            this.HaveHeader = true;
+            this.isClicked = true;
+            this.startLeftPosition = 34;
+            this.startTopPosition = 5;
+            this.HaveMaxBtn = true;
+            this.PercentWidth = 95;
+            this.MainMaxwidthPixel = 2000;
+            this.PopupParam = {
+              ProductRequestObject: this.ProductRequestObject,
+              Subject: this.Subject,
+              RegionCode: this.RegionParams.selectedObject,
+              ProductRequestCode: this.ProductRequestNo,
+              ProductRequestDate: this.ProductRequestDate,
+              ModuleCode: this.ModuleCode,
+              ModuleViewTypeCode: this.ModuleViewTypeCode,
+              IsRequestProvision: this.IsRequestProvision,
+              IsEditable: this.IsEditConfirm,
+              OrginalModuleCode: this.OrginalModuleCode,
+            };
+          }
+        });
+      }
+      if (Str === 'Show') {
+        this.gridApi.forEachNode(node => { // RFC 53404
+          if (!node.data.ProductRequestItemID
+            || node.data.ProductRequestItemID <= 0) {
+            this.ShowMessageBoxWithOkBtn('با توجه به تغییر اقلام درخواست قرارداد اصلی، ابتدا نسبت به ثبت درخواست اقدام کنید.');
+            return;
+          } else {
+            this.PopUpType = 'app-provision';
+            this.HaveHeader = true;
+            this.isClicked = true;
+            this.startLeftPosition = 78;
+            this.startTopPosition = 5;
+            this.HaveMaxBtn = true;
+            this.HeightPercentWithMaxBtn = 97;
+            this.PercentWidth = 90;
+            this.MainMaxwidthPixel = 2000;
+            this.MinHeightPixel = 645;
+            this.PopupParam = {
+              ProductRequestObject: this.ProductRequestObject,
+              Subject: this.Subject,
+              RegionCode: this.RegionParams.selectedObject,
+              ProductRequestCode: this.ProductRequestNo,
+              ProductRequestDate: this.ProductRequestDate,
+            };
+          }
+        });
+      }
     }
-
   }
   FetchMoreContract(event) {
     this.ContractParams.loading = true;
@@ -8536,6 +9538,11 @@ export class ProductRequestPageComponent implements OnInit {
       this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
     });
   }
+  UpdateTenderDoc() {
+    this.ProductRequest.UpdateTenderDoc(this.CostFactorID, this.IsUpdateTenderDoc).subscribe(x => {
+      this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
+    });
+  }
   SetPRIsNeedCreditModification() {
     this.ProductRequest.SetPRIsNeedCreditModification(this.CostFactorID, this.IsLawful).subscribe(x => {
       this.ShowMessageBoxWithOkBtn('ثبت نیاز به اصلاح اعتبار با موفقیت انجام شد');
@@ -8588,13 +9595,20 @@ export class ProductRequestPageComponent implements OnInit {
   onExpertOpen(type = 0) {
     // tslint:disable-next-line:max-line-length
     // tslint:disable-next-line:max-line-length
-    this.UserRegionCode = (this.InputParam && this.InputParam.UserRegionCode) ? this.InputParam.UserRegionCode : this.ProductRequestObject.RegionCode;
-    this.Actor.GetPersonList(this.ExpertPersonRoleID, this.UserRegionCode, true).subscribe(res => {
+    if (this.ProductRequestObject) {
+      this.UserRegionCode = (this.InputParam && this.InputParam.UserRegionCode) ? this.InputParam.UserRegionCode : this.ProductRequestObject.RegionCode;
+    }
+    else {
+      this.UserRegionCode = (this.InputParam && this.InputParam.UserRegionCode) ? this.InputParam.UserRegionCode : this.RegionParams.selectedObject;
+    }
+
+    this.Actor.GetPersonList(this.ExpertPersonRoleID, this.SubCostCenterParams.selectedObject, this.UserRegionCode, true).subscribe(res => {
       this.ExpertItems = res;
       if (type === 1 && this.ProductRequestObject && this.ProductRequestObject.RequestPersonList) {
         const SelectedExpertPerson = this.ProductRequestObject.RequestPersonList.filter(x => x.RoleID === this.ExpertPersonRoleID);
         if (SelectedExpertPerson.length > 0) {
           this.ExpertParams.selectedObject = SelectedExpertPerson[0].ActorID;
+          this.ProductRequestPersonID = SelectedExpertPerson[0].ProductRequestPersonID;
         }
       }
     });
@@ -8731,6 +9745,9 @@ export class ProductRequestPageComponent implements OnInit {
         case 170:
           this.onSaveExpertPerson(this.ExpertPersonRoleID, 'کارپرداز تدارکات');
           break;
+        case 189:
+          this.onSaveExpertPerson(this.ExpertPersonRoleID, 'کارشناس حقوقی');
+          break;
         case 85:
           this.onSaveExpertPerson(this.ExpertPersonRoleID, 'کارشناس سفارشات');
           break;
@@ -8749,6 +9766,9 @@ export class ProductRequestPageComponent implements OnInit {
         case 124:
           this.onSaveExpertPerson(this.ExpertPersonRoleID, 'کارشناس بازرگاني');
           break;
+        case 89:
+          this.onSaveExpertPerson(this.ExpertPersonRoleID, 'رئیس امور');
+          break;
         case 88: // RFC 52350
           if (this.ProductRequestObject.DealMethodCode === 3 && this.ProductRequestObject.RegionCode === 217) {
             this.onSaveExpertPerson(this.ExpertPersonRoleID, 'مدير بازرگاني');
@@ -8764,10 +9784,12 @@ export class ProductRequestPageComponent implements OnInit {
         case 12:
         case 127:
         case 129:
+        case 185:
         case 148:
           break;
         case 20:
         case 34:
+        case 186:
         case 54:
         case 136:
         case 78: // RFC 49672
@@ -8825,12 +9847,16 @@ export class ProductRequestPageComponent implements OnInit {
         case 147:
           this.SetProductRequestRenewal();
           break;
+        case 187: //RFC 65068
+          this.SetProductRequestRenewal187();
+          break;
         case 43:
         case 58:
         case 70:
         case 142:
         case 82:
         case 164:
+        case 188:
           this.SetInquiryIsReturn();
           break;
         case 91:
@@ -8847,6 +9873,9 @@ export class ProductRequestPageComponent implements OnInit {
           break;
         case 119: // RFC 51374
           this.onSaveProdReqIsOnline();
+          break;
+        case 111:
+          this.UpdateTenderDoc();
           break;
         default:
           break;
@@ -8876,30 +9905,131 @@ export class ProductRequestPageComponent implements OnInit {
     }
   }
   onCommitionClick() {
-    this.PopUpType = 'app-commition';
-    this.isClicked = true;
-    this.HaveHeader = true;
-    this.startLeftPosition = 9;
-    this.startTopPosition = 10;
-    this.OverMainMinwidthPixel = 1340;
-    this.HaveMaxBtn = false;
-    this.PopupParam = {
-      ProductRequestObject: this.ProductRequestObject,
-      Subject: this.Subject,
-      RegionCode: this.RegionParams.selectedObject,
-      ProductRequestNo: this.ProductRequestNo,
-      ProductRequestDate: this.ProductRequestDate,
-      CostFactorID: this.CostFactorID,
-      IsReadOnly: false,
-      HeaderName: 'کمیسیون',
-      ModuleViewTypeCode: this.ModuleViewTypeCode,
-      CheckRegionWritable: this.CheckRegionWritable,
-      currentRegionObject: this.currentRegionObject,
-      IsMultiContract: this.ProductRequestObject.IsMultiContract ? true : false,
-      OrginalModuleCode: this.OrginalModuleCode,
-      ModuleCode: this.ModuleCode,
-      IsAdmin: this.IsAdmin,
-    };
+    if (this.CallMainapi === false) {
+      const promise = new Promise((resolve, reject) => {
+        this.ProductRequest.GetProductRequest(this.CostFactorID).subscribe(res => {
+          if (res) {
+            this.CallMainapi = true;
+            this.ProductRequestObject = res;
+            resolve(true);
+          }
+        })
+      }).then(() => {
+        if (this.ModuleViewTypeCode === 185) {
+          if (this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.ProposalList
+            && this.ProductRequestObject.LastInquiryObject.ProposalList.length > 0) {
+            this.PopUpType = 'app-commition';
+            this.isClicked = true;
+            this.HaveHeader = true;
+            this.startLeftPosition = 9;
+            this.startTopPosition = 10;
+            this.OverMainMinwidthPixel = 1340;
+            this.HaveMaxBtn = false;
+            this.PopupParam = {
+              ProductRequestObject: this.ProductRequestObject,
+              Subject: this.Subject,
+              RegionCode: this.RegionParams.selectedObject,
+              ProductRequestNo: this.ProductRequestNo,
+              ProductRequestDate: this.ProductRequestDate,
+              CostFactorID: this.CostFactorID,
+              IsReadOnly: false,
+              HeaderName: 'کمیسیون',
+              ModuleViewTypeCode: this.ModuleViewTypeCode,
+              CheckRegionWritable: this.CheckRegionWritable,
+              currentRegionObject: this.currentRegionObject,
+              IsMultiContract: this.ProductRequestObject.IsMultiContract ? true : false,
+              OrginalModuleCode: this.OrginalModuleCode,
+              ModuleCode: this.ModuleCode,
+              IsAdmin: this.IsAdmin,
+            };
+          } else {
+            this.ShowMessageBoxWithOkBtn('لطفا به درج متقاضیان اقدام نمایید.');
+          }
+        } else {
+          this.PopUpType = 'app-commition';
+          this.isClicked = true;
+          this.HaveHeader = true;
+          this.startLeftPosition = 9;
+          this.startTopPosition = 10;
+          this.OverMainMinwidthPixel = 1340;
+          this.HaveMaxBtn = false;
+          this.PopupParam = {
+            ProductRequestObject: this.ProductRequestObject,
+            Subject: this.Subject,
+            RegionCode: this.RegionParams.selectedObject,
+            ProductRequestNo: this.ProductRequestNo,
+            ProductRequestDate: this.ProductRequestDate,
+            CostFactorID: this.CostFactorID,
+            IsReadOnly: false,
+            HeaderName: 'کمیسیون',
+            ModuleViewTypeCode: this.ModuleViewTypeCode,
+            CheckRegionWritable: this.CheckRegionWritable,
+            currentRegionObject: this.currentRegionObject,
+            IsMultiContract: this.ProductRequestObject.IsMultiContract ? true : false,
+            OrginalModuleCode: this.OrginalModuleCode,
+            ModuleCode: this.ModuleCode,
+            IsAdmin: this.IsAdmin,
+          };
+        }
+      });
+    } else {
+      if (this.ModuleViewTypeCode === 185) {
+        if (this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.ProposalList
+          && this.ProductRequestObject.LastInquiryObject.ProposalList.length > 0) {
+          this.PopUpType = 'app-commition';
+          this.isClicked = true;
+          this.HaveHeader = true;
+          this.startLeftPosition = 9;
+          this.startTopPosition = 10;
+          this.OverMainMinwidthPixel = 1340;
+          this.HaveMaxBtn = false;
+          this.PopupParam = {
+            ProductRequestObject: this.ProductRequestObject,
+            Subject: this.Subject,
+            RegionCode: this.RegionParams.selectedObject,
+            ProductRequestNo: this.ProductRequestNo,
+            ProductRequestDate: this.ProductRequestDate,
+            CostFactorID: this.CostFactorID,
+            IsReadOnly: false,
+            HeaderName: 'کمیسیون',
+            ModuleViewTypeCode: this.ModuleViewTypeCode,
+            CheckRegionWritable: this.CheckRegionWritable,
+            currentRegionObject: this.currentRegionObject,
+            IsMultiContract: this.ProductRequestObject.IsMultiContract ? true : false,
+            OrginalModuleCode: this.OrginalModuleCode,
+            ModuleCode: this.ModuleCode,
+            IsAdmin: this.IsAdmin,
+          };
+        } else {
+          this.ShowMessageBoxWithOkBtn('لطفا به درج متقاضیان اقدام نمایید.');
+        }
+      } else {
+        this.PopUpType = 'app-commition';
+        this.isClicked = true;
+        this.HaveHeader = true;
+        this.startLeftPosition = 9;
+        this.startTopPosition = 10;
+        this.OverMainMinwidthPixel = 1340;
+        this.HaveMaxBtn = false;
+        this.PopupParam = {
+          ProductRequestObject: this.ProductRequestObject,
+          Subject: this.Subject,
+          RegionCode: this.RegionParams.selectedObject,
+          ProductRequestNo: this.ProductRequestNo,
+          ProductRequestDate: this.ProductRequestDate,
+          CostFactorID: this.CostFactorID,
+          IsReadOnly: false,
+          HeaderName: 'کمیسیون',
+          ModuleViewTypeCode: this.ModuleViewTypeCode,
+          CheckRegionWritable: this.CheckRegionWritable,
+          currentRegionObject: this.currentRegionObject,
+          IsMultiContract: this.ProductRequestObject.IsMultiContract ? true : false,
+          OrginalModuleCode: this.OrginalModuleCode,
+          ModuleCode: this.ModuleCode,
+          IsAdmin: this.IsAdmin,
+        };
+      }
+    }
   }
   onShowLetterClick(InputLetterTypeCode = null) {
     if (this.CostFactorID && (this.LetterTypeCodeList[0] || InputLetterTypeCode)) {
@@ -8996,7 +10126,7 @@ export class ProductRequestPageComponent implements OnInit {
         ReadOnlyMode: (this.ModuleViewTypeCode === 100000 ? true : false),
         SaveMode: (this.ModuleViewTypeCode === 100000 ? false : true),
         ModuleViewTypeCode: this.ModuleViewTypeCode,
-        ProductRequestNo: this.ProductRequestNo
+        ProductRequestDate: this.ProductRequestDate
       };
     }
   }
@@ -9081,29 +10211,29 @@ export class ProductRequestPageComponent implements OnInit {
             FinalAmount: ExcelObj && ExcelObj.QTY && ExcelObj.Amount ? parseFloat(ExcelObj.QTY) * parseInt(ExcelObj.Amount) : '',
             EntityList: element.EntityList,
           };
-          this.EntityColumnDefinition(null, null, element.EntityList, false);
-          let keys = Object.keys(ExcelObj);
+          // this.EntityColumnDefinition(null, null, element.EntityList, false);
+          // let keys = Object.keys(ExcelObj);
 
-          if (element.EntityTypeItemList) {
-            element.EntityTypeItemList.forEach(Entity => {
-              let Name = 'Subject' + Entity.EntityTypeID.toString();
-              let ID = 'EntityTypeItemID' + Entity.EntityTypeID.toString();
-              let key = keys.find(x => x === Name);
-              if (key) {
-                // var Name = 'Subject' + EntityItem.EntityTypeID.toString();
-                newItem[Name] = ExcelObj[Name];
-                // newItem[ID] = ExcelObj[key] === Entity.Subject ? ;
-                //  element[ID] = EntityItem.EntityTypeItemID;
+          // if (element.EntityTypeItemList) {
+          //   element.EntityTypeItemList.forEach(Entity => {
+          //     let Name = 'Subject' + Entity.EntityTypeID.toString();
+          //     let ID = 'EntityTypeItemID' + Entity.EntityTypeID.toString();
+          //     let key = keys.find(x => x === Name);
+          //     if (key) {
+          //       // var Name = 'Subject' + EntityItem.EntityTypeID.toString();
+          //       newItem[Name] = ExcelObj[Name];
+          //       // newItem[ID] = ExcelObj[key] === Entity.Subject ? ;
+          //       //  element[ID] = EntityItem.EntityTypeItemID;
 
-                if (Entity.EISubject === ExcelObj[Name]) {
-                  newItem[ID] = Entity.EntityTypeItemID;
-                }
-              }
-            });
+          //       if (Entity.EISubject === ExcelObj[Name]) {
+          //         newItem[ID] = Entity.EntityTypeItemID;
+          //       }
+          //     }
+          //   });
 
-          }
-          data.splice(data.indexOf(ExcelObj), 1);
-          itemsToUpdate.push(newItem);
+          // }
+          // data.splice(data.indexOf(ExcelObj), 1);
+          // itemsToUpdate.push(newItem);
         });
         data.forEach(element => {
           MaxProp = MaxProp + 1;
@@ -9210,7 +10340,6 @@ export class ProductRequestPageComponent implements OnInit {
         });
         break;
       case 'SubRustee':
-
         this.ProductRequest.GetSubCostCenter(this.RusteeParams.selectedObject, this.ModuleCode, true).subscribe(res => {
           this.SubRusteeItems = res;
           if (IsFill &&
@@ -9250,7 +10379,7 @@ export class ProductRequestPageComponent implements OnInit {
                   }
                 }
                 this.CurentUser = this.CurrentUserSubCostCenter.ActorID;
-                this.CurrentUserSubCostCenter = null;
+                //this.CurrentUserSubCostCenter = null; // RFC 63989 - باعث پر نشدن متولی می شد
               }
             });
         }
@@ -9290,7 +10419,7 @@ export class ProductRequestPageComponent implements OnInit {
           this.ProductRequestObject.SubCostCenterObject.CostCenterId ?
           this.ProductRequestObject.SubCostCenterObject.CostCenterId : null;
         // tslint:disable-next-line: max-line-length
-        this.ProductRequest.GetCostCenterByRegion(this.RegionParams.selectedObject, CurrCostCenterID, this.ModuleCode, false).subscribe(res => {
+        this.ProductRequest.GetCostCenterByRegionAndRequestOwner(this.RegionParams.selectedObject, CurrCostCenterID, this.ModuleCode, false).subscribe(res => {
           this.CostCenterItems = res;
           if (IsFill &&
             this.ProductRequestObject &&
@@ -9320,7 +10449,7 @@ export class ProductRequestPageComponent implements OnInit {
         break;
       case 'SubCostCenter':
         if (this.CostCenterParams.selectedObject) {
-          this.ProductRequest.GetSubCostCenter(this.CostCenterParams.selectedObject, this.ModuleCode, true).subscribe(res => {
+          this.ProductRequest.GetListByCostCenterId(this.CostCenterParams.selectedObject, this.ModuleCode, true, this.RegionParams.selectedObject).subscribe(res => {
             this.SubCostCenterItems = res;
             if (IsFill &&
               this.ProductRequestObject &&
@@ -9414,33 +10543,82 @@ export class ProductRequestPageComponent implements OnInit {
           );
         }
         break;
+      case 'PriceListTopicRaste':
+        {
+          if (this.PRTypeParams && this.PRTypeParams.selectedObject > 0) {
+            if (this.PRTypeParams.selectedObject === 2) {
+              this.Actor.GetPriceListTopicByBusinesPatternID(5183, false).subscribe(res => {
+                this.PriceListTopicRasteItems = res;
+                if (IsFill) {
+                  this.PriceListTopicRasteParams.selectedObject = this.ProductRequestObject.PriceListTopicID;
+                }
+              });
+            }
+          }
+        }
+        break;
       default:
         break;
     }
   }
   onCreateContract() {
-    this.PopUpType = 'create-contract-on-flow';
-    this.isClicked = true;
-    this.PercentWidth = 90;
-    this.MainMaxwidthPixel = 2000;
-    this.HaveHeader = true;
-    this.startLeftPosition = 65;
-    this.startTopPosition = 210;
-    this.HaveMaxBtn = false;
-    this.PopupParam = {
-      ProductRequestObject: this.ProductRequestObject,
-      SumFinalAmount: this.SumFinalAmount,
-      Subject: this.Subject,
-      RequestPerson: this.RequestedPersonParams.selectedObject,
-      ProductRequestCode: this.ProductRequestNo,
-      IsCost: this.IsCost,
-      ModuleViewTypeCode: this.ModuleViewTypeCode,
-      OrginalModuleCode: this.OrginalModuleCode,
-      IsAdmin: this.IsAdmin,
-      RegionCode: this.RegionParams.selectedObject,
-      IsNew: this.IsNew,
-      SumFinalAmountStr: this.SumFinalAmountStr
-    };
+    if (this.CallMainapi === false) {
+      const promise = new Promise((resolve, reject) => {
+        this.ProductRequest.GetProductRequest(this.CostFactorID).subscribe(res => {
+          if (res) {
+            this.CallMainapi = true;
+            this.ProductRequestObject = res;
+            resolve(true);
+          }
+        })
+      }).then(() => {
+        this.PopUpType = 'create-contract-on-flow';
+        this.isClicked = true;
+        this.PercentWidth = 90;
+        this.MainMaxwidthPixel = 2000;
+        this.HaveHeader = true;
+        this.startLeftPosition = 65;
+        this.startTopPosition = 210;
+        this.HaveMaxBtn = false;
+        this.PopupParam = {
+          ProductRequestObject: this.ProductRequestObject,
+          SumFinalAmount: this.SumFinalAmount,
+          Subject: this.Subject,
+          RequestPerson: this.RequestedPersonParams.selectedObject,
+          ProductRequestCode: this.ProductRequestNo,
+          IsCost: this.IsCost,
+          ModuleViewTypeCode: this.ModuleViewTypeCode,
+          OrginalModuleCode: this.OrginalModuleCode,
+          IsAdmin: this.IsAdmin,
+          RegionCode: this.RegionParams.selectedObject,
+          IsNew: this.IsNew,
+          SumFinalAmountStr: this.SumFinalAmountStr
+        };
+      });
+    } else {
+      this.PopUpType = 'create-contract-on-flow';
+      this.isClicked = true;
+      this.PercentWidth = 90;
+      this.MainMaxwidthPixel = 2000;
+      this.HaveHeader = true;
+      this.startLeftPosition = 65;
+      this.startTopPosition = 210;
+      this.HaveMaxBtn = false;
+      this.PopupParam = {
+        ProductRequestObject: this.ProductRequestObject,
+        SumFinalAmount: this.SumFinalAmount,
+        Subject: this.Subject,
+        RequestPerson: this.RequestedPersonParams.selectedObject,
+        ProductRequestCode: this.ProductRequestNo,
+        IsCost: this.IsCost,
+        ModuleViewTypeCode: this.ModuleViewTypeCode,
+        OrginalModuleCode: this.OrginalModuleCode,
+        IsAdmin: this.IsAdmin,
+        RegionCode: this.RegionParams.selectedObject,
+        IsNew: this.IsNew,
+        SumFinalAmountStr: this.SumFinalAmountStr
+      };
+    }
   }
   onReceiveDocEditingStarted(event) {
     if (event.colDef && event.colDef.field === 'ActorName') {
@@ -9467,12 +10645,23 @@ export class ProductRequestPageComponent implements OnInit {
     this.IsRenewal = IsRenewal;
   }
   SetProductRequestRenewal() {
-    this.ProductRequest.SetProductRequestRenewal(this.CostFactorID, this.IsRenewal).subscribe(res => {
+    this.ProductRequest.SetProductRequestRenewal(this.CostFactorID, this.IsRenewal,).subscribe(res => {
       this.ShowMessageBoxWithOkBtn('ثبت وضعیت تجدید درخواست با موفقیت انجام شد');
       // RFC  52790
       // if (this.IsRenewal) {
       //  // this.onUnConfirmAndReturn(); // به درخواست خانم قربانزاده
       // }
+    },
+      err => {
+        if (!err.error.Message.includes('|')) {
+          this.ShowMessageBoxWithOkBtn('ثبت وضعیت تجدید درخواست با خطا مواجه شد');
+        }
+      });
+  }
+  SetProductRequestRenewal187() {
+    this.ProductRequest.SetProductRequestRenewal187(this.CostFactorID, this.IsRenewal).subscribe(res => {
+      this.ShowMessageBoxWithOkBtn('ثبت وضعیت تجدید درخواست با موفقیت انجام شد');
+
     },
       err => {
         if (!err.error.Message.includes('|')) {
@@ -9804,6 +10993,34 @@ export class ProductRequestPageComponent implements OnInit {
     this.ngOnInit();
   }
   PRProvisionRepShow() {
+    this.PopUpType = 'global-choose-page';
+    this.PopUpName = 'global-choose-page';
+    this.HaveHeader = true;
+    this.HaveMaxBtn = false;
+    this.MainMaxwidthPixel = null;
+    this.startLeftPosition = 520;
+    this.startTopPosition = 220;
+    this.OverMainMinwidthPixel = null;
+    this.HeightPercentWithMaxBtn = null;
+    this.MinHeightPixel = null;
+    this.isClicked = true;
+    this.PopupParam = {
+      HeaderName: 'انتخاب نوع فایل',
+      ModuleViewTypeCode: this.ModuleViewTypeCode,
+      ModuleCode: this.ModuleCode,
+      RadioItems: [
+        {
+          title: 'چاپ درخواست معامله',
+          type: 2
+        },
+        {
+          title: 'چاپ درخواست معامله - تامین اعتبار',
+          type: 3
+        },
+      ]
+    };
+  }
+  PrintPR() {
     if ((this.ModuleCode === 2730 && (this.ModuleViewTypeCode === 38 || this.ModuleViewTypeCode === 300000))
       || (this.ModuleCode === 2996 && this.ModuleViewTypeCode === 88888)) { // RFC 61879
       this.ComonService.GetAllArchiveDetailList(this.CostFactorID, 1107, true, false).subscribe(res => {
@@ -9848,6 +11065,8 @@ export class ProductRequestPageComponent implements OnInit {
                   IsArticle18: false,
                   HasDelBtn: false,
                   IsTrafficRep: true,
+                  IsAdequacy: false,
+                  IsDisArticle18: false
                 };
               } else {
                 this.IsDown = true;
@@ -9863,6 +11082,48 @@ export class ProductRequestPageComponent implements OnInit {
       );
     }
   }
+  PrintPRAndProvision() {
+    this.ComonService.GetAllArchiveDetailList(this.CostFactorID, 1249, true, false).subscribe(res => {
+      if (res) {
+        this.IsDown = true;
+        this.PopUpType = 'pdf-viewer';
+        this.HaveHeader = true;
+        this.isClicked = true;
+        this.startLeftPosition = 40;
+        this.startTopPosition = 0;
+        this.HaveMaxBtn = false;
+        this.OverMainMinwidthPixel = 1295;
+        this.MainMaxwidthPixel = 1300;
+        this.PopupParam = {
+          HeaderName: 'چاپ درخواست معامله',
+          PDFSrc: res.FileBase64,
+          FileName: res.FileName,
+          OrderCommitionID: -1,
+          HaveEstimate: false,
+          HaveSign: false,
+          CostFactorID: this.ProductRequestObject.CostFactorID,
+          RegionCode: this.ProductRequestObject.RegionCode,
+          PDFSignersInfo: res.PDFSignersInfo,
+          HasTripleReport: this.HaseEstimate,
+          IsFinal: false,
+          IsArticle18: false,
+          HasDelBtn: false,
+          IsTrafficRep: true,
+          IsAdequacy: false
+        };
+      } else {
+        this.Report.ProductRequestProvisionReport(
+          this.CostFactorID,
+          this.ModuleViewTypeCode,
+          this.ModuleCode,
+          (this.btnConfirmIcon === 'cancel' ? 0 : 1),
+          this.ProductRequestObject.RegionCode,
+          'چاپ درخواست معامله - تامین اعتبار',
+        );
+      }
+    });
+  }
+
   HoldOnlineClick(param) {
     this.ProductRequestIsOnline = param;
   }
@@ -9880,21 +11141,29 @@ export class ProductRequestPageComponent implements OnInit {
     this.IsContractContent = event;
   }
   ContractContentView() {
-    if (this.ModuleViewTypeCode === 114 && !this.CheckRegionWritable) {
+    if ((this.ModuleViewTypeCode === 114 || this.ModuleViewTypeCode === 89) && !this.CheckRegionWritable) {
       if (!this.IsNew) {
-        this.gridHeight = 41;
+        this.gridHeight = (this.ModuleViewTypeCode === 89) ? 33 : 41;
         this.tabpanelHeight = 84;
         this.PRIgridHeight = 83;
         this.WfDetailsShowHeight = 40;
-        this.WfDetailsShow = true;
+        this.WfDetailsShow = (this.ModuleViewTypeCode === 114) ? false : true;
         this.IsShowContractContent = true;
       } else {
-        this.gridHeight = 49;
-        this.tabpanelHeight = 87;
-        this.PRIgridHeight = 85;
+        if (this.ModuleViewTypeCode === 114) {
+          this.gridHeight = 41;
+          this.tabpanelHeight = 87;
+          this.PRIgridHeight = 85;
+        } else {
+          this.gridHeight = 33;
+        }
         this.WfDetailsShowHeight = 60;
         this.WfDetailsShow = false;
         this.IsShowContractContent = false;
+        this.IsContractContent = null;
+        this.ContractContentNote = null;
+
+
       }
     }
   }
@@ -9955,89 +11224,83 @@ export class ProductRequestPageComponent implements OnInit {
     }
   }
   EntityColumnDefinition(ProductID, node, EntityList, hasApiCall) {
+    // if (ProductID && hasApiCall) {
+    //   this.ProductRequest.GetProductRequestEntityList(null, ProductID, null).subscribe(
+    //     res => {
+    //       var columnDef22 = [];
+    //       this.columnDef.forEach(element => {
+    //         columnDef22.push(element);
+    //       });
+    //       this.columnDef = [];
+    //       node.data.EntityList = res;
+    //       res.forEach(i => {
+    //         const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
+    //         if (!obItem) {
+    //           const obj = {
+    //             index: i.EntityTypeID,
+    //             headerName: i.Subject,
+    //             field: 'Subject' + i.EntityTypeID.toString(),
+    //             width: 200,
+    //             editable: true,
+    //             resizable: true,
+    //             cellEditorFramework: NgSelectVirtualScrollComponent,
+    //             cellEditorParams: {
+    //               Params: this.NgSelectContractEntityItemParams,
+    //               Items: [],
+    //               Owner: this
+    //             },
+    //             cellRenderer: 'SeRender',
+    //             valueFormatter: function currencyFormatter(params) {
+    //               if (params.value) {
+    //                 return params.value.Subject;
+    //               } else {
+    //                 return '';
+    //               }
+    //             },
+    //           };
+    //           columnDef22.push(obj);
+    //         }
+    //       });
+    //       this.columnDef = columnDef22;
+    //     });
+    // }
 
-    if (ProductID && hasApiCall) {
-
-      this.ProductRequest.GetProductRequestEntityList(null, ProductID, null).subscribe(
-        res => {
-
-          var columnDef22 = [];
-          this.columnDef.forEach(element => {
-            columnDef22.push(element);
-          });
-          this.columnDef = [];
-
-          node.data.EntityList = res;
-          res.forEach(i => {
-            const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
-            if (!obItem) {
-              const obj = {
-                index: i.EntityTypeID,
-                headerName: i.Subject,
-                field: 'Subject' + i.EntityTypeID.toString(),
-                width: 200,
-                editable: true,
-                resizable: true,
-                cellEditorFramework: NgSelectVirtualScrollComponent,
-                cellEditorParams: {
-                  Params: this.NgSelectContractEntityItemParams,
-                  Items: [],
-                  Owner: this
-                },
-                cellRenderer: 'SeRender',
-                valueFormatter: function currencyFormatter(params) {
-                  if (params.value) {
-                    return params.value.Subject;
-                  } else {
-                    return '';
-                  }
-                },
-              };
-              columnDef22.push(obj);
-            }
-          });
-          this.columnDef = columnDef22;
-        });
-    }
-
-    if (!hasApiCall && EntityList) {
-
-      var columnDef22 = [];
-      this.columnDef.forEach(element => {
-        columnDef22.push(element);
-      });
-      this.columnDef = [];
-
-      EntityList.forEach(i => {
-        const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
-        if (!obItem) {
-          const obj = {
-            index: i.EntityTypeID,
-            headerName: i.Subject,
-            field: 'Subject' + i.EntityTypeID.toString(),
-            width: 200,
-            editable: true,
-            resizable: true,
-            cellEditorFramework: NgSelectVirtualScrollComponent,
-            cellEditorParams: {
-              Params: this.NgSelectContractEntityItemParams,
-              Items: [],
-              Owner: this
-            },
-            cellRenderer: 'SeRender',
-            valueFormatter: function currencyFormatter(params) {
-              if (params.value) {
-                return params.value.Subject;
-              } else {
-                return '';
-              }
-            },
-          };
-          columnDef22.push(obj);
-        }
-      });
-      this.columnDef = columnDef22;
-    }
+    // if (!hasApiCall && EntityList) {
+    //   var columnDef22 = [];
+    //   this.columnDef.forEach(element => {
+    //     columnDef22.push(element);
+    //   });
+    //   this.columnDef = [];
+    //   EntityList.forEach(i => {
+    //     const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
+    //     if (!obItem) {
+    //       const obj = {
+    //         index: i.EntityTypeID,
+    //         headerName: i.Subject,
+    //         field: 'Subject' + i.EntityTypeID.toString(),
+    //         width: 200,
+    //         editable: true,
+    //         resizable: true,
+    //         cellEditorFramework: NgSelectVirtualScrollComponent,
+    //         cellEditorParams: {
+    //           Params: this.NgSelectContractEntityItemParams,
+    //           Items: [],
+    //           Owner: this
+    //         },
+    //         cellRenderer: 'SeRender',
+    //         valueFormatter: function currencyFormatter(params) {
+    //           if (params.value) {
+    //             return params.value.Subject;
+    //           } else {
+    //             return '';
+    //           }
+    //         },
+    //       };
+    //       columnDef22.push(obj);
+    //     }
+    //   });
+    //   this.columnDef = columnDef22;
+    // }
   }
   RowClick(event) {
     this.selectedrow = event;
@@ -10124,6 +11387,15 @@ export class ProductRequestPageComponent implements OnInit {
           {
             if (this.IsNew) {
               this.VirtualGroupModuleTypeName = 'بدون تشریفات';
+              this.VirtualGroupModuleTypeDisplay = true;
+              this.HaveCommition = false;
+            }
+          }
+          break;
+        case 18:
+          {
+            if (this.IsNew) {
+              this.VirtualGroupModuleTypeName = 'متمم';
               this.VirtualGroupModuleTypeDisplay = true;
               this.HaveCommition = false;
             }
@@ -10267,6 +11539,7 @@ export class ProductRequestPageComponent implements OnInit {
             break;
           case 4:
           case 7:
+          case 18:
             {
               this.PopUpType = 'global-choose-page';
               this.HaveHeader = true;
@@ -10278,7 +11551,7 @@ export class ProductRequestPageComponent implements OnInit {
               this.MinHeightPixel = null;
               this.isClicked = true;
               this.PopupParam = {
-                HeaderName: DealMethodCode === 4 ? 'بدون تشربفات' : 'ترک تشریفات',
+                HeaderName: DealMethodCode === 4 ? 'ترک تشریفات' : (DealMethodCode === 7 ? 'بدون تشریفات' : 'متمم'),
                 RadioItems: [
                   {
                     title: 'برگزاري کميسيون و تنظيم پيش نويس صورتجلسه و انتخاب کارشناس قرارداد ها',
@@ -10380,58 +11653,316 @@ export class ProductRequestPageComponent implements OnInit {
     }
   }
   OpenSelectedForm(VirtualModuleViewType) {
-    switch (VirtualModuleViewType) {
-      // کمیسیون
-      case 11:
-      case 155:
-      case 47:
-      case 68:
-      case 107:
-      case 113:
-      case 149:
-      case 160:
-      case 162:
-      case 166:
-      case 169:
-        this.PopUpType = 'app-commition';
-        this.isClicked = true;
-        this.HaveHeader = true;
-        this.startLeftPosition = 9;
-        this.startTopPosition = 10;
-        this.OverMainMinwidthPixel = 1340;
-        this.HaveMaxBtn = false;
-        this.PopupParam = {
-          ProductRequestObject: this.ProductRequestObject,
-          Subject: this.Subject,
-          RegionCode: this.RegionParams.selectedObject,
-          ProductRequestNo: this.ProductRequestNo,
-          ProductRequestDate: this.ProductRequestDate,
-          CostFactorID: this.CostFactorID,
-          IsReadOnly: !this.IsEditable,
-          HeaderName: 'کمیسیون',
-          ModuleViewTypeCode: VirtualModuleViewType,
-          CheckRegionWritable: this.CheckRegionWritable,
-          currentRegionObject: this.currentRegionObject,
-          IsMultiContract: this.ProductRequestObject.IsMultiContract ? true : false,
-          OrginalModuleCode: this.OrginalModuleCode,
-          ModuleCode: this.ModuleCode,
-          IsAdmin: this.IsAdmin,
-          OriginModuleViewTypeCode: this.ModuleViewTypeCode
-        };
-        break;
-      // لیست متقاضیان
-      case 24:
-      case 35:
-      case 84:
-      case 42:
-      case 43:
-      case 58:
-      case 70:
-      case 142:
-      case 82:
-      case 164:
-        if ((this.OrginalModuleCode == 2793 || this.OrginalModuleCode == 2824 || this.OrginalModuleCode == 2838 || this.OrginalModuleCode == 2756) &&
-          (VirtualModuleViewType == 70 || VirtualModuleViewType == 42)) {
+    if (this.CallMainapi === false) {
+      const promise = new Promise((resolve, reject) => {
+        this.ProductRequest.GetProductRequest(this.CostFactorID).subscribe(res => {
+          if (res) {
+            this.CallMainapi = true;
+            this.ProductRequestObject = res;
+            resolve(true);
+          }
+        })
+      }).then(() => {
+        switch (VirtualModuleViewType) {
+          // کمیسیون
+          case 11:
+          case 155:
+          case 47:
+          case 68:
+          case 107:
+          case 113:
+          case 185:
+          case 149:
+          case 160:
+          case 162:
+          case 166:
+          case 169:
+          case 182:
+            this.PopUpType = 'app-commition';
+            this.isClicked = true;
+            this.HaveHeader = true;
+            this.startLeftPosition = 9;
+            this.startTopPosition = 10;
+            this.OverMainMinwidthPixel = 1340;
+            this.HaveMaxBtn = false;
+            this.PopupParam = {
+              ProductRequestObject: this.ProductRequestObject,
+              Subject: this.Subject,
+              RegionCode: this.RegionParams.selectedObject,
+              ProductRequestNo: this.ProductRequestNo,
+              ProductRequestDate: this.ProductRequestDate,
+              CostFactorID: this.CostFactorID,
+              IsReadOnly: !this.IsEditable,
+              HeaderName: 'کمیسیون',
+              ModuleViewTypeCode: VirtualModuleViewType,
+              CheckRegionWritable: this.CheckRegionWritable,
+              currentRegionObject: this.currentRegionObject,
+              IsMultiContract: this.ProductRequestObject.IsMultiContract ? true : false,
+              OrginalModuleCode: this.OrginalModuleCode,
+              ModuleCode: this.ModuleCode,
+              IsAdmin: this.IsAdmin,
+              OriginModuleViewTypeCode: this.ModuleViewTypeCode
+            };
+            break;
+          // لیست متقاضیان
+          case 24:
+          case 35:
+          case 84:
+          case 42:
+          case 43:
+          case 58:
+          case 70:
+          case 142:
+          case 82:
+          case 164:
+          case 188:
+            if ((this.OrginalModuleCode == 2793 || this.OrginalModuleCode == 2824 || this.OrginalModuleCode == 2838 || this.OrginalModuleCode == 2756) &&
+              (VirtualModuleViewType == 70 || VirtualModuleViewType == 42)) {
+              this.PopUpType = 'app-inquiry-list';
+              this.isClicked = true;
+              this.HaveHeader = true;
+              this.PercentWidth = 55;
+              this.MinHeightPixel = null;
+              this.MainMaxwidthPixel = null;
+              this.startLeftPosition = 315;
+              this.startTopPosition = 130;
+              this.HaveMaxBtn = false;
+              this.PopupParam = {
+                ProductRequestObject: this.ProductRequestObject,
+                Subject: this.Subject,
+                RegionCode: this.RegionParams.selectedObject,
+                ProductRequestCode: this.ProductRequestNo,
+                ProductRequestDate: this.ProductRequestDate,
+                CostFactorID: this.CostFactorID,
+                IsReadOnly: !this.IsEditable,
+                ModuleViewTypeCode: VirtualModuleViewType,
+                PRRegionObject: this.currentRegionObject,
+                SumFinalAmount: this.SumFinalAmountStr,
+                CheckRegionWritable: this.CheckRegionWritable,
+                ModuleCode: this.ModuleCode,
+                FirstModuleCode: this.InputParam.FirstModuleCode,
+                OrginalModuleCode: this.OrginalModuleCode,
+                UserRegionCode: this.UserRegionCode,
+                IsAdmin: this.IsAdmin,
+                OriginModuleViewTypeCode: this.ModuleViewTypeCode
+              };
+            } else {
+              this.ProductRequest.GetProductRequest(this.CostFactorID).subscribe(res => { // RFC 55833
+                this.ProductRequestObject = res;
+                // tslint:disable-next-line: max-line-length
+                const LastInquiryObject = this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.InquiryID > 0 ?
+                  this.ProductRequestObject.LastInquiryObject : null;
+                if ((!LastInquiryObject || (LastInquiryObject && !LastInquiryObject.IsWin && !LastInquiryObject.IsReturn)) ||
+                  (this.OrginalModuleCode === 2793 || this.OrginalModuleCode === 2756 ||
+                    this.OrginalModuleCode === 2838 || this.OrginalModuleCode === 2824)) {
+                  this.PopUpType = 'general-tender';
+                  this.isClicked = true;
+                  this.OverMainMinwidthPixel = null;
+                  this.HaveHeader = true;
+                  this.PercentWidth = 81;
+                  this.startLeftPosition = 140;
+                  this.startTopPosition = 14;
+                  this.HaveMaxBtn = false;
+                  this.PopupParam = {
+                    ProductRequestObject: this.ProductRequestObject,
+                    ModuleViewTypeCode: VirtualModuleViewType,
+                    InquiryObject: this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.InquiryID > 0 ?
+                      this.ProductRequestObject.LastInquiryObject : null,
+                    Subject: this.Subject,
+                    RegionCode: this.RegionParams.selectedObject,
+                    ProductRequestCode: this.ProductRequestNo,
+                    ProductRequestDate: this.ProductRequestDate,
+                    CostFactorID: this.CostFactorID,
+                    IsReadOnly: !this.IsEditable,
+                    PRRegionObject: this.currentRegionObject,
+                    SumFinalAmount: this.SumFinalAmountStr,
+                    CheckRegionWritable: this.CheckRegionWritable,
+                    OrginalModuleCode: this.OrginalModuleCode,
+                    ModuleCode: this.ModuleCode,
+                    UserRegionCode: this.UserRegionCode,
+                    IsAdmin: this.IsAdmin,
+                    OriginModuleViewTypeCode: this.ModuleViewTypeCode
+                  };
+                } else {
+                  this.ShowMessageBoxWithOkBtn('مناقصه یا مزایده مورد نظر تعیین تکلبف شده است .');
+                }
+              });
+            }
+            break;
+          case 23:
+          case 27:
+          case 38:
+          case 57:
+          case 158: // RFC 59100
+          case 64:
+          case 139:
+            this.PopUpType = 'app-inquiry-list';
+            this.isClicked = true;
+            this.HaveHeader = true;
+            this.PercentWidth = 55;
+            this.MinHeightPixel = null;
+            this.MainMaxwidthPixel = null;
+            this.startLeftPosition = 315;
+            this.startTopPosition = 130;
+            this.HaveMaxBtn = false;
+            this.PopupParam = {
+              ProductRequestObject: this.ProductRequestObject,
+              Subject: this.Subject,
+              RegionCode: this.RegionParams.selectedObject,
+              ProductRequestCode: this.ProductRequestNo,
+              ProductRequestDate: this.ProductRequestDate,
+              CostFactorID: this.CostFactorID,
+              IsReadOnly: !this.IsEditable,
+              ModuleViewTypeCode: VirtualModuleViewType,
+              PRRegionObject: this.currentRegionObject,
+              SumFinalAmount: this.SumFinalAmountStr,
+              CheckRegionWritable: this.CheckRegionWritable,
+              ModuleCode: this.ModuleCode,
+              FirstModuleCode: this.InputParam.FirstModuleCode,
+              OrginalModuleCode: this.OrginalModuleCode,
+              UserRegionCode: this.UserRegionCode,
+              IsAdmin: this.IsAdmin,
+              OriginModuleViewTypeCode: this.ModuleViewTypeCode
+            };
+            break;
+          default:
+            break;
+        }
+      });
+    } else {
+      switch (VirtualModuleViewType) {
+        // کمیسیون
+        case 11:
+        case 155:
+        case 47:
+        case 68:
+        case 107:
+        case 113:
+        case 185:
+        case 149:
+        case 160:
+        case 162:
+        case 166:
+        case 169:
+        case 182:
+          this.PopUpType = 'app-commition';
+          this.isClicked = true;
+          this.HaveHeader = true;
+          this.startLeftPosition = 9;
+          this.startTopPosition = 10;
+          this.OverMainMinwidthPixel = 1340;
+          this.HaveMaxBtn = false;
+          this.PopupParam = {
+            ProductRequestObject: this.ProductRequestObject,
+            Subject: this.Subject,
+            RegionCode: this.RegionParams.selectedObject,
+            ProductRequestNo: this.ProductRequestNo,
+            ProductRequestDate: this.ProductRequestDate,
+            CostFactorID: this.CostFactorID,
+            IsReadOnly: !this.IsEditable,
+            HeaderName: 'کمیسیون',
+            ModuleViewTypeCode: VirtualModuleViewType,
+            CheckRegionWritable: this.CheckRegionWritable,
+            currentRegionObject: this.currentRegionObject,
+            IsMultiContract: this.ProductRequestObject.IsMultiContract ? true : false,
+            OrginalModuleCode: this.OrginalModuleCode,
+            ModuleCode: this.ModuleCode,
+            IsAdmin: this.IsAdmin,
+            OriginModuleViewTypeCode: this.ModuleViewTypeCode
+          };
+          break;
+        // لیست متقاضیان
+        case 24:
+        case 35:
+        case 84:
+        case 42:
+        case 43:
+        case 58:
+        case 70:
+        case 142:
+        case 82:
+        case 164:
+        case 188:
+          if ((this.OrginalModuleCode == 2793 || this.OrginalModuleCode == 2824 || this.OrginalModuleCode == 2838 || this.OrginalModuleCode == 2756) &&
+            (VirtualModuleViewType == 70 || VirtualModuleViewType == 42)) {
+            this.PopUpType = 'app-inquiry-list';
+            this.isClicked = true;
+            this.HaveHeader = true;
+            this.PercentWidth = 55;
+            this.MinHeightPixel = null;
+            this.MainMaxwidthPixel = null;
+            this.startLeftPosition = 315;
+            this.startTopPosition = 130;
+            this.HaveMaxBtn = false;
+            this.PopupParam = {
+              ProductRequestObject: this.ProductRequestObject,
+              Subject: this.Subject,
+              RegionCode: this.RegionParams.selectedObject,
+              ProductRequestCode: this.ProductRequestNo,
+              ProductRequestDate: this.ProductRequestDate,
+              CostFactorID: this.CostFactorID,
+              IsReadOnly: !this.IsEditable,
+              ModuleViewTypeCode: VirtualModuleViewType,
+              PRRegionObject: this.currentRegionObject,
+              SumFinalAmount: this.SumFinalAmountStr,
+              CheckRegionWritable: this.CheckRegionWritable,
+              ModuleCode: this.ModuleCode,
+              FirstModuleCode: this.InputParam.FirstModuleCode,
+              OrginalModuleCode: this.OrginalModuleCode,
+              UserRegionCode: this.UserRegionCode,
+              IsAdmin: this.IsAdmin,
+              OriginModuleViewTypeCode: this.ModuleViewTypeCode
+            };
+          } else {
+            this.ProductRequest.GetProductRequest(this.CostFactorID).subscribe(res => { // RFC 55833
+              this.ProductRequestObject = res;
+              // tslint:disable-next-line: max-line-length
+              const LastInquiryObject = this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.InquiryID > 0 ?
+                this.ProductRequestObject.LastInquiryObject : null;
+              if ((!LastInquiryObject || (LastInquiryObject && !LastInquiryObject.IsWin && !LastInquiryObject.IsReturn)) ||
+                (this.OrginalModuleCode === 2793 || this.OrginalModuleCode === 2756 ||
+                  this.OrginalModuleCode === 2838 || this.OrginalModuleCode === 2824)) {
+                this.PopUpType = 'general-tender';
+                this.isClicked = true;
+                this.OverMainMinwidthPixel = null;
+                this.HaveHeader = true;
+                this.PercentWidth = 81;
+                this.startLeftPosition = 140;
+                this.startTopPosition = 14;
+                this.HaveMaxBtn = false;
+                this.PopupParam = {
+                  ProductRequestObject: this.ProductRequestObject,
+                  ModuleViewTypeCode: VirtualModuleViewType,
+                  InquiryObject: this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.InquiryID > 0 ?
+                    this.ProductRequestObject.LastInquiryObject : null,
+                  Subject: this.Subject,
+                  RegionCode: this.RegionParams.selectedObject,
+                  ProductRequestCode: this.ProductRequestNo,
+                  ProductRequestDate: this.ProductRequestDate,
+                  CostFactorID: this.CostFactorID,
+                  IsReadOnly: !this.IsEditable,
+                  PRRegionObject: this.currentRegionObject,
+                  SumFinalAmount: this.SumFinalAmountStr,
+                  CheckRegionWritable: this.CheckRegionWritable,
+                  OrginalModuleCode: this.OrginalModuleCode,
+                  ModuleCode: this.ModuleCode,
+                  UserRegionCode: this.UserRegionCode,
+                  IsAdmin: this.IsAdmin,
+                  OriginModuleViewTypeCode: this.ModuleViewTypeCode
+                };
+              } else {
+                this.ShowMessageBoxWithOkBtn('مناقصه یا مزایده مورد نظر تعیین تکلبف شده است .');
+              }
+            });
+          }
+          break;
+        case 23:
+        case 27:
+        case 38:
+        case 57:
+        case 158: // RFC 59100
+        case 64:
+        case 139:
           this.PopUpType = 'app-inquiry-list';
           this.isClicked = true;
           this.HaveHeader = true;
@@ -10460,87 +11991,10 @@ export class ProductRequestPageComponent implements OnInit {
             IsAdmin: this.IsAdmin,
             OriginModuleViewTypeCode: this.ModuleViewTypeCode
           };
-        } else {
-          this.ProductRequest.GetProductRequest(this.CostFactorID).subscribe(res => { // RFC 55833
-            this.ProductRequestObject = res;
-            // tslint:disable-next-line: max-line-length
-            const LastInquiryObject = this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.InquiryID > 0 ?
-              this.ProductRequestObject.LastInquiryObject : null;
-            if ((!LastInquiryObject || (LastInquiryObject && !LastInquiryObject.IsWin && !LastInquiryObject.IsReturn)) ||
-              (this.OrginalModuleCode === 2793 || this.OrginalModuleCode === 2756 ||
-                this.OrginalModuleCode === 2838 || this.OrginalModuleCode === 2824)) {
-              this.PopUpType = 'general-tender';
-              this.isClicked = true;
-              this.OverMainMinwidthPixel = null;
-              this.HaveHeader = true;
-              this.PercentWidth = 81;
-              this.startLeftPosition = 140;
-              this.startTopPosition = 14;
-              this.HaveMaxBtn = false;
-              this.PopupParam = {
-                ProductRequestObject: this.ProductRequestObject,
-                ModuleViewTypeCode: VirtualModuleViewType,
-                InquiryObject: this.ProductRequestObject.LastInquiryObject && this.ProductRequestObject.LastInquiryObject.InquiryID > 0 ?
-                  this.ProductRequestObject.LastInquiryObject : null,
-                Subject: this.Subject,
-                RegionCode: this.RegionParams.selectedObject,
-                ProductRequestCode: this.ProductRequestNo,
-                ProductRequestDate: this.ProductRequestDate,
-                CostFactorID: this.CostFactorID,
-                IsReadOnly: !this.IsEditable,
-                PRRegionObject: this.currentRegionObject,
-                SumFinalAmount: this.SumFinalAmountStr,
-                CheckRegionWritable: this.CheckRegionWritable,
-                OrginalModuleCode: this.OrginalModuleCode,
-                ModuleCode: this.ModuleCode,
-                UserRegionCode: this.UserRegionCode,
-                IsAdmin: this.IsAdmin,
-                OriginModuleViewTypeCode: this.ModuleViewTypeCode
-              };
-            } else {
-              this.ShowMessageBoxWithOkBtn('مناقصه یا مزایده مورد نظر تعیین تکلبف شده است .');
-            }
-          });
-        }
-        break;
-      case 23:
-      case 27:
-      case 38:
-      case 57:
-      case 158: // RFC 59100
-      case 64:
-      case 139:
-        this.PopUpType = 'app-inquiry-list';
-        this.isClicked = true;
-        this.HaveHeader = true;
-        this.PercentWidth = 55;
-        this.MinHeightPixel = null;
-        this.MainMaxwidthPixel = null;
-        this.startLeftPosition = 315;
-        this.startTopPosition = 130;
-        this.HaveMaxBtn = false;
-        this.PopupParam = {
-          ProductRequestObject: this.ProductRequestObject,
-          Subject: this.Subject,
-          RegionCode: this.RegionParams.selectedObject,
-          ProductRequestCode: this.ProductRequestNo,
-          ProductRequestDate: this.ProductRequestDate,
-          CostFactorID: this.CostFactorID,
-          IsReadOnly: !this.IsEditable,
-          ModuleViewTypeCode: VirtualModuleViewType,
-          PRRegionObject: this.currentRegionObject,
-          SumFinalAmount: this.SumFinalAmountStr,
-          CheckRegionWritable: this.CheckRegionWritable,
-          ModuleCode: this.ModuleCode,
-          FirstModuleCode: this.InputParam.FirstModuleCode,
-          OrginalModuleCode: this.OrginalModuleCode,
-          UserRegionCode: this.UserRegionCode,
-          IsAdmin: this.IsAdmin,
-          OriginModuleViewTypeCode: this.ModuleViewTypeCode
-        };
-        break;
-      default:
-        break;
+          break;
+        default:
+          break;
+      }
     }
   }
   onSendLetter() {
@@ -10566,7 +12020,7 @@ export class ProductRequestPageComponent implements OnInit {
         this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID,
         this.ProductRequestObject.CostFactorID,
         this.ProductRequestObject.RegionCode,
-        (this.ModuleViewTypeCode === 144 || this.ModuleViewTypeCode === 161) ? 661 : 601,
+        661,
         this.HaseEstimate,
         false,
         this.ModuleViewTypeCode).subscribe(PDFRes => {
@@ -10580,9 +12034,9 @@ export class ProductRequestPageComponent implements OnInit {
             this.HaveMaxBtn = false;
             this.OverMainMinwidthPixel = 1295;
             this.MainMaxwidthPixel = 1300;
+            this.MinHeightPixel = 650;
             this.PopupParam = {
-              HeaderName: (this.ModuleViewTypeCode === 144 || this.ModuleViewTypeCode === 161) ? 'چاپ نهایی صورتجلسه کمیسیون'
-                : 'چاپ پیش نویس صورتجلسه کمیسیون',
+              HeaderName: 'فایل صورتجلسه کمیسیون',
               PDFSrc: PDFRes.FileBase64,
               FileName: PDFRes.FileName,
               OrderCommitionID: this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID,
@@ -10592,9 +12046,11 @@ export class ProductRequestPageComponent implements OnInit {
               RegionCode: this.ProductRequestObject.RegionCode,
               PDFSignersInfo: PDFRes.PDFSignersInfo,
               HasTripleReport: this.HaseEstimate,
-              IsFinal: this.ModuleViewTypeCode === 144 || this.ModuleViewTypeCode === 161, // نهایی
+              IsFinal: true, // نهایی
               HasDelBtn: false,
               IsArticle18: false,
+              IsAdequacy: false,
+              IsDisArticle18: false
             };
           } else {
             this.IsDown = true;
@@ -10714,54 +12170,55 @@ export class ProductRequestPageComponent implements OnInit {
       this.ProductRequestObject.LastInquiryObject &&
       this.ProductRequestObject.LastInquiryObject.OrderCommitionObject) {
       this.OrderCommitionID = this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID;
-      this.ComonService.GetAllArchiveDetailList(this.OrderCommitionID, 1047, true, false).subscribe(res => {
-        if (res) {
-          this.ExistsFile = true;
-          this.BtnClickedName = 'Article18';
-          this.ShowMessageBoxWithYesNoBtn('فایل قبلا ذخیره شده است. آیا مایل به مشاهده آن هستید؟');
-        } else {
-          this.ExistsFile = false;
-          this.IsDown = false;
-          this.ProductRequest.GetMinutesReportPDFContent(
-            this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID,
-            this.ProductRequestObject.CostFactorID,
-            this.ProductRequestObject.RegionCode,
-            1047,
-            this.HaseEstimate,
-            false,
-            this.ModuleViewTypeCode).subscribe(PDFRes => {
-              if (PDFRes) {
-                this.IsDown = true;
-                this.PopUpType = 'pdf-viewer';
-                this.HaveHeader = true;
-                this.isClicked = true;
-                this.startLeftPosition = 40;
-                this.startTopPosition = 0;
-                this.HaveMaxBtn = false;
-                this.OverMainMinwidthPixel = 1295;
-                this.MainMaxwidthPixel = 1300;
-                this.PopupParam = {
-                  HeaderName: 'ابلاغ ماده 18',
-                  PDFSrc: PDFRes.FileBase64,
-                  FileName: PDFRes.FileName,
-                  OrderCommitionID: this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID,
-                  HaveEstimate: false,
-                  HaveSign: true,
-                  CostFactorID: this.ProductRequestObject.CostFactorID,
-                  RegionCode: this.ProductRequestObject.RegionCode,
-                  PDFSignersInfo: PDFRes.PDFSignersInfo,
-                  HasTripleReport: this.HaseEstimate,
-                  IsFinal: false,
-                  IsArticle18: true,
-                  HasDelBtn: true,
-                };
-              } else {
-                this.IsDown = true;
-                this.ShowMessageBoxWithOkBtn('فایل صورتجلسه بارگزاری نشده است.');
-              }
-            });
-        }
-      });
+      if (this.ExistsArticle18File) {
+        this.ExistsFile = true;
+        this.BtnClickedName = 'Article18';
+        this.ShowMessageBoxWithYesNoBtn('فایل قبلا ذخیره شده است. آیا مایل به مشاهده آن هستید؟');
+      } else {
+        this.ExistsFile = false;
+        this.IsDown = false;
+        this.ProductRequest.GetMinutesReportPDFContent(
+          this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID,
+          this.ProductRequestObject.CostFactorID,
+          this.ProductRequestObject.RegionCode,
+          1047,
+          this.HaseEstimate,
+          false,
+          this.ModuleViewTypeCode).subscribe(PDFRes => {
+            if (PDFRes) {
+              this.IsDown = true;
+              this.PopUpType = 'pdf-viewer';
+              this.HaveHeader = true;
+              this.isClicked = true;
+              this.startLeftPosition = 40;
+              this.startTopPosition = 0;
+              this.HaveMaxBtn = false;
+              this.OverMainMinwidthPixel = 1295;
+              this.MainMaxwidthPixel = 1300;
+              this.PopupParam = {
+                HeaderName: 'ابلاغ ماده 18',
+                PDFSrc: PDFRes.FileBase64,
+                FileName: PDFRes.FileName,
+                OrderCommitionID: this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID,
+                HaveEstimate: false,
+                HaveSign: true,
+                CostFactorID: this.ProductRequestObject.CostFactorID,
+                RegionCode: this.ProductRequestObject.RegionCode,
+                PDFSignersInfo: PDFRes.PDFSignersInfo,
+                HasTripleReport: this.HaseEstimate,
+                IsFinal: false,
+                IsArticle18: true,
+                HasDelBtn: true,
+                IsAdequacy: false,
+                IsDisArticle18: false
+              };
+            } else {
+              this.IsDown = true;
+              this.ShowMessageBoxWithOkBtn('فایل صورتجلسه بارگزاری نشده است.');
+            }
+          });
+      }
+
     } else {
       this.ShowMessageBoxWithOkBtn('این درخواست فاقد کمیسیون می باشد');
     }
@@ -10777,12 +12234,18 @@ export class ProductRequestPageComponent implements OnInit {
     this.startTopPosition = 10;
     this.HaveMaxBtn = true;
     this.PopupParam = {
-      RegionCode: this.RegionParams.selectedObject
+      RegionCode: this.RegionParams.selectedObject,
+      IsCost: this.IsCost
+
     };
   }
 
   IsUpdateBeforeAdevertisingRedioClick(IsUpdateBeforeAdevertising) {
     this.IsUpdateBeforeAdevertising = IsUpdateBeforeAdevertising;
+  }
+
+  IsUpdateTenderDocRedioClick(IsUpdateTenderDoc) {
+    this.IsUpdateTenderDoc = IsUpdateTenderDoc;
   }
 
   ReceiveDocProductRowClick(event) {
@@ -10794,41 +12257,98 @@ export class ProductRequestPageComponent implements OnInit {
   onReceiveDocProductcellEditingStarted(event) {
   }
   onAddReceiveDocClick() {
-    this.PopUpType = 'product-receive-doc';
-    this.HaveHeader = true;
-    this.isClicked = true;
-    this.startLeftPosition = 278;
-    this.startTopPosition = 70;
-    this.PercentWidth = 60;
-    this.OverMainMinwidthPixel = null;
-    this.PopupParam = {
-      ProductRequestObject: this.ProductRequestObject,
-      Subject: this.Subject,
-      RegionCode: this.RegionParams.selectedObject,
-      ModuleCode: this.ModuleCode,
-      ModuleViewTypeCode: this.ModuleViewTypeCode,
-      OrginalModuleCode: this.OrginalModuleCode,
-      ReceiveDocID: -1,
-    };
+    if (this.CallMainapi === false) {
+      const promise = new Promise((resolve, reject) => {
+        this.ProductRequest.GetProductRequest(this.CostFactorID).subscribe(res => {
+          if (res) {
+            this.CallMainapi = true;
+            this.ProductRequestObject = res;
+            resolve(true);
+          }
+        })
+      }).then(() => {
+        this.PopUpType = 'product-receive-doc';
+        this.HaveHeader = true;
+        this.isClicked = true;
+        this.startLeftPosition = 278;
+        this.startTopPosition = 70;
+        this.PercentWidth = 60;
+        this.OverMainMinwidthPixel = null;
+        this.PopupParam = {
+          ProductRequestObject: this.ProductRequestObject,
+          Subject: this.Subject,
+          RegionCode: this.RegionParams.selectedObject,
+          ModuleCode: this.ModuleCode,
+          ModuleViewTypeCode: this.ModuleViewTypeCode,
+          OrginalModuleCode: this.OrginalModuleCode,
+          ReceiveDocID: -1,
+        };
+      });
+    } else {
+      this.PopUpType = 'product-receive-doc';
+      this.HaveHeader = true;
+      this.isClicked = true;
+      this.startLeftPosition = 278;
+      this.startTopPosition = 70;
+      this.PercentWidth = 60;
+      this.OverMainMinwidthPixel = null;
+      this.PopupParam = {
+        ProductRequestObject: this.ProductRequestObject,
+        Subject: this.Subject,
+        RegionCode: this.RegionParams.selectedObject,
+        ModuleCode: this.ModuleCode,
+        ModuleViewTypeCode: this.ModuleViewTypeCode,
+        OrginalModuleCode: this.OrginalModuleCode,
+        ReceiveDocID: -1,
+      };
+    }
   }
   onEditReceiveDocClick() {
-    this.PopUpType = 'product-receive-doc';
-    this.HaveHeader = true;
-    this.isClicked = true;
-    this.startLeftPosition = 278;
-    this.startTopPosition = 70;
-    this.PercentWidth = 60;
-    this.OverMainMinwidthPixel = null;
-    this.PopupParam = {
-      ProductRequestObject: this.ProductRequestObject,
-      Subject: this.Subject,
-      RegionCode: this.RegionParams.selectedObject,
-      ModuleCode: this.ModuleCode,
-      ModuleViewTypeCode: this.ModuleViewTypeCode,
-      OrginalModuleCode: this.OrginalModuleCode,
-      ReceiveDocID: this.SelectedReceiveDocID
-    };
-
+    if (this.CallMainapi === false) {
+      const promise = new Promise((resolve, reject) => {
+        this.ProductRequest.GetProductRequest(this.CostFactorID).subscribe(res => {
+          if (res) {
+            this.CallMainapi = true;
+            this.ProductRequestObject = res;
+            resolve(true);
+          }
+        })
+      }).then(() => {
+        this.PopUpType = 'product-receive-doc';
+        this.HaveHeader = true;
+        this.isClicked = true;
+        this.startLeftPosition = 278;
+        this.startTopPosition = 70;
+        this.PercentWidth = 60;
+        this.OverMainMinwidthPixel = null;
+        this.PopupParam = {
+          ProductRequestObject: this.ProductRequestObject,
+          Subject: this.Subject,
+          RegionCode: this.RegionParams.selectedObject,
+          ModuleCode: this.ModuleCode,
+          ModuleViewTypeCode: this.ModuleViewTypeCode,
+          OrginalModuleCode: this.OrginalModuleCode,
+          ReceiveDocID: this.SelectedReceiveDocID
+        };
+      });
+    } else {
+      this.PopUpType = 'product-receive-doc';
+      this.HaveHeader = true;
+      this.isClicked = true;
+      this.startLeftPosition = 278;
+      this.startTopPosition = 70;
+      this.PercentWidth = 60;
+      this.OverMainMinwidthPixel = null;
+      this.PopupParam = {
+        ProductRequestObject: this.ProductRequestObject,
+        Subject: this.Subject,
+        RegionCode: this.RegionParams.selectedObject,
+        ModuleCode: this.ModuleCode,
+        ModuleViewTypeCode: this.ModuleViewTypeCode,
+        OrginalModuleCode: this.OrginalModuleCode,
+        ReceiveDocID: this.SelectedReceiveDocID
+      };
+    }
   }
   onDeleteReceiveDocclick() {
     this.ProductRequest.DeletePRReceiveDoc(this.SelectedReceiveDocID).subscribe(res => {
@@ -10849,7 +12369,7 @@ export class ProductRequestPageComponent implements OnInit {
     this.IsTransferedContract = true;
     this.ProductRequest.getProductRequestByContractId(ContractId).subscribe(res => {
       if (res) {
-        this.IsDisable = false;
+        // this.IsDisable = false;
         this.ProductRequestObject = res;
         this.HasProvisionContractID = this.ProductRequestObject.ProvisionContractID ? true : false;
         if (this.ProductRequestObject.RelatedContractID) {
@@ -10946,6 +12466,65 @@ export class ProductRequestPageComponent implements OnInit {
     });
 
   }
+  AdequacyDocDigitalSign() {
+    if (this.ProductRequestObject &&
+      this.ProductRequestObject.CostFactorID &&
+      this.ProductRequestObject.CostFactorID > 0) {
+      const CostFactorID = this.ProductRequestObject.CostFactorID;
+      this.ComonService.GetAllArchiveDetailList(CostFactorID, 1167, true, false).subscribe(res => {
+        if (res) {
+          this.ExistsFile = true;
+          this.BtnClickedName = 'AdecuacyDoc';
+          this.ShowMessageBoxWithYesNoBtn('فایل قبلا ذخیره شده است. آیا مایل به مشاهده آن هستید؟');
+        } else {
+          this.ExistsFile = false;
+          this.IsDown = false;
+          this.ProductRequest.GetMinutesReportPDFContent(
+            this.ProductRequestObject.CostFactorID,
+            this.ProductRequestObject.CostFactorID,
+            this.ProductRequestObject.RegionCode,
+            1167,
+            false,
+            false,
+            this.ModuleViewTypeCode).subscribe(PDFRes => {
+              if (PDFRes) {
+                this.IsDown = true;
+                this.PopUpType = 'pdf-viewer';
+                this.HaveHeader = true;
+                this.isClicked = true;
+                this.startLeftPosition = 40;
+                this.startTopPosition = 0;
+                this.HaveMaxBtn = false;
+                this.OverMainMinwidthPixel = 1295;
+                this.MainMaxwidthPixel = 1300;
+                this.PopupParam = {
+                  HeaderName: 'نامه کفایت اسناد',
+                  PDFSrc: PDFRes.FileBase64,
+                  FileName: PDFRes.FileName,
+                  OrderCommitionID: null,
+                  HaveEstimate: false,
+                  HaveSign: true,
+                  CostFactorID: this.ProductRequestObject.CostFactorID,
+                  RegionCode: this.ProductRequestObject.RegionCode,
+                  PDFSignersInfo: PDFRes.PDFSignersInfo,
+                  HasTripleReport: false,
+                  IsFinal: false,
+                  IsArticle18: false,
+                  HasDelBtn: this.IsAdmin,
+                  IsAdequacy: true,
+                  IsDisArticle18: false
+                };
+              } else {
+                this.IsDown = true;
+                this.ShowMessageBoxWithOkBtn('فایل نامه بارگزاری نشده است.');
+              }
+            });
+        }
+      });
+    } else {
+      this.ShowMessageBoxWithOkBtn('این یک درخواست صحیح نمی باشد');
+    }
+  }
   SetColumnDef() {
 
   }
@@ -11004,6 +12583,36 @@ export class ProductRequestPageComponent implements OnInit {
           cellRendererParams: {
             ngTemplate: this.IsValidity
           },
+        },
+        {
+          headerName: 'اسناد فعال',
+          field: 'IsReturn',
+          width: 100,
+          resizable: true,
+          editable: (params) => {
+            return false;
+          },
+          cellStyle: function (params) {
+            return { 'text-align': 'center' };
+          },
+          cellEditorFramework: CheckboxFieldEditableComponent,
+          valueFormatter: function isValidFormer(params) {
+            if (params.value) {
+              return 'قبول شده';
+            } else {
+              return 'رد شده';
+            }
+          },
+          cellRendererFramework: TemplateRendererComponent,
+          cellRendererParams: {
+            ngTemplate: this.IsReturnInquiry
+          },
+        },
+        {
+          headerName: 'شماره استعلام',
+          field: 'InquiryNo',
+          width: 120,
+          resizable: false
         },
         {
           headerName: 'نام شخص پیشنهاد دهنده',
@@ -11264,6 +12873,36 @@ export class ProductRequestPageComponent implements OnInit {
           },
         },
         {
+          headerName: 'اسناد فعال',
+          field: 'IsReturn',
+          width: 100,
+          resizable: true,
+          editable: (params) => {
+            return false;
+          },
+          cellStyle: function (params) {
+            return { 'text-align': 'center' };
+          },
+          cellEditorFramework: CheckboxFieldEditableComponent,
+          valueFormatter: function isValidFormer(params) {
+            if (params.value) {
+              return 'قبول شده';
+            } else {
+              return 'رد شده';
+            }
+          },
+          cellRendererFramework: TemplateRendererComponent,
+          cellRendererParams: {
+            ngTemplate: this.IsReturnInquiry
+          },
+        },
+        {
+          headerName: 'شماره استعلام',
+          field: 'InquiryNo',
+          width: 120,
+          resizable: false
+        },
+        {
           headerName: 'نوع سند',
           field: 'ReceiveDocTypeName',
           cellEditorFramework: NgSelectCellEditorComponent,
@@ -11509,6 +13148,803 @@ export class ProductRequestPageComponent implements OnInit {
           }
         }
       ];
+    }
+  }
+  DisAppArticle18DigitalSign() {
+    if (this.ProductRequestObject &&
+      this.ProductRequestObject.LastInquiryObject &&
+      this.ProductRequestObject.LastInquiryObject.OrderCommitionObject) {
+      this.OrderCommitionID = this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID;
+      this.ComonService.CheckPDFHasSigned(this.OrderCommitionID, 1228).subscribe(result => {
+        if (result) { // امضای الکترونیکی شده
+          this.ComonService.GetAllArchiveDetailList(this.OrderCommitionID, 1228, true).subscribe(res => {
+            this.PopUpType = 'pdf-viewer';
+            this.HaveHeader = true;
+            this.isClicked = true;
+            this.startLeftPosition = 40;
+            this.startTopPosition = 0;
+            this.HaveMaxBtn = false;
+            this.OverMainMinwidthPixel = 1295;
+            this.MainMaxwidthPixel = 1300;
+            this.PopupParam = {
+              HeaderName: 'عدم تصویب ماده 18',
+              PDFSrc: res ? res.FileBase64 : undefined,
+              FileName: res ? res.FileName : null,
+              OrderCommitionID: this.OrderCommitionID,
+              HaveEstimate: false,
+              HaveSign: true,
+              CostFactorID: this.ProductRequestObject.CostFactorID,
+              RegionCode: this.ProductRequestObject.RegionCode,
+              PDFSignersInfo: res ? res.PDFSignersInfo : null,
+              HasTripleReport: this.HaseEstimate,
+              IsFinal: false,
+              HaveUpload: !res || !res.PDFSignersInfo || res.PDFSignersInfo.length <= 0,
+              SignByFile: false,
+              IsArticle18: false,
+              HasDelBtn: this.IsAdmin,
+              IsAdequacy: false,
+              IsDisArticle18: true,
+            };
+          });
+          return;
+        } else { // امضای الکترونیکی نشده
+          if (this.ExistsDisApprArticle18File) {
+            this.ExistsFile = true;
+            this.BtnClickedName = 'DisArticle18';
+            this.ShowMessageBoxWithYesNoBtn('فایل قبلا ذخیره شده است. آیا مایل به مشاهده آن هستید؟');
+          } else {
+            this.ExistsFile = false;
+            this.IsDown = true;
+            this.isClicked = true;
+            this.PopUpType = 'rich-text-box-input';
+            this.startLeftPosition = 70;
+            this.startTopPosition = 100;
+            this.PixelHeight = 290;
+            this.HaveMaxBtn = false;
+            this.OverMainMinwidthPixel = 950;
+            this.MainMaxwidthPixel = 1000;
+            this.HaveHeader = true;
+            this.MinHeightPixel = 290;
+            this.PopupParam = {
+              HeaderName: 'دلایل عدم تصویب',
+              OrderCommitionID: this.OrderCommitionID,
+              CostFactorID: this.ProductRequestObject.CostFactorID,
+              RegionCode: this.ProductRequestObject.RegionCode,
+              IsDisableInput: false,
+              IsAdmin: this.IsAdmin
+            };
+          }
+        }
+      });
+    } else {
+      this.ShowMessageBoxWithOkBtn('این درخواست فاقد کمیسیون می باشد');
+    }
+  }
+  ChooseArticle18Type() {
+    if (this.ProductRequestObject &&
+      this.ProductRequestObject.LastInquiryObject &&
+      this.ProductRequestObject.LastInquiryObject.OrderCommitionObject) {
+
+      this.OrderCommitionID = this.ProductRequestObject.LastInquiryObject.OrderCommitionObject.OrderCommitionID;
+
+      // tslint:disable-next-line: no-shadowed-variable
+      const promise = new Promise<void>((resolve) => {
+        forkJoin([this.ComonService.GetAllArchiveDetailList(this.OrderCommitionID, 1047, true, false),
+        this.ComonService.GetAllArchiveDetailList(this.OrderCommitionID, 1228, true, false)
+        ]).subscribe(res => {
+          if (res[0] && res[0] !== false) {
+            this.ExistsArticle18File = true;
+          }
+          if (res[1] && res[1] !== false) {
+            this.ExistsDisApprArticle18File = true;
+          }
+          resolve();
+        });
+      }).then(() => {
+        this.PopUpType = 'global-choose-page';
+        this.HaveHeader = true;
+        this.HaveMaxBtn = false;
+        this.startLeftPosition = 520;
+        this.startTopPosition = 220;
+        this.OverMainMinwidthPixel = null;
+        this.HeightPercentWithMaxBtn = null;
+        this.MinHeightPixel = null;
+        this.isClicked = true;
+        this.IsArticle18Choosen = true;
+        this.PopupParam = {
+          HeaderName: 'ماده 18',
+          RadioItems: [
+            {
+              title: 'ابلاغ ماده 18',
+              type: 1,
+              IsDisable: this.ExistsDisApprArticle18File,
+            },
+            {
+              title: 'عدم تصویب ماده 18',
+              type: 2,
+              IsDisable: this.ExistsArticle18File
+            }
+          ]
+        };
+      });
+    } else {
+      this.ShowMessageBoxWithOkBtn('این درخواست فاقد کمیسیون می باشد');
+      return;
+    }
+  }
+  OpenSelectedArticle18(Type) {
+    switch (Type) {
+      case 1:
+        this.Article18DigitalSign();
+        break;
+      case 2:
+        this.DisAppArticle18DigitalSign();
+        break;
+      default:
+        break;
+    }
+  }
+
+  onOpenUpdateContractLimited() {
+    this.PopUpType = 'contract-info-limited-change-page';
+    this.HaveHeader = true;
+    this.HaveMaxBtn = true;
+    this.startLeftPosition = 30;
+    this.startTopPosition = 30;
+    this.OverMainMinwidthPixel = 1200;
+    this.HeightPercentWithMaxBtn = 85;
+    this.PercentWidth = 95;
+    this.MainMaxwidthPixel = 1350;
+    this.MinHeightPixel = 600;
+    this.isClicked = true;
+    this.PopupParam = {
+      HeaderName: 'اصلاح محدود اطلاعات قرارداد',
+      ProductrequestID: this.ProductRequestObject.CostFactorID
+    };
+  }
+  CheckContractStatusForUpdate() {
+    this.ContractList.CheckContractStatusForUpdate(this.ProductRequestObject.CostFactorID).subscribe(res => {
+      this.DisabledEditContractInfoBtn = !res;
+    });
+  }
+  onChangePRType(TypeCode) {
+    if (this.oldProductRequestTypeCode &&
+      this.oldProductRequestTypeCode === 2 &&
+      this.oldProductRequestTypeCode !== TypeCode &&
+      !isNullOrUndefined(this.PriceListTopicRasteParams.selectedObject)) {
+      this.rowsData = [];
+      this.PriceListTopicRasteParams.selectedObject = null;
+    }
+    if (TypeCode === 2) {
+      this.PriceListTopicRasteDisable = false;
+      this.PriceListTopicRasteParams.IsDisabled = false;
+      if (this.PriceListTopicRasteParams.selectedObject && this.PriceListTopicRasteParams.selectedObject === 402374) {
+        this.IsNotGreenSpace = false;
+      }
+    } else {
+      this.PriceListTopicRasteDisable = true;
+      this.PriceListTopicRasteParams.IsDisabled = true;
+      this.PriceListTopicRasteParams.selectedObject = null;
+      this.FillGrid(this.HaseEstimate);
+      this.IsNotGreenSpace = true;
+    }
+    this.FillGreenSpacePRItemGrid(this.HaseEstimate);
+    this.oldProductRequestTypeCode = TypeCode;
+  }
+  onChangePriceListTopicRaste(event) {
+    this.FillGreenSpacePRItemGrid(this.HaseEstimate);
+    if (event === 402374) {
+      this.IsNotGreenSpace = false;
+      this.rowsData = [];
+      let datList = [];
+      this.gridApi.forEachNode(element => {
+        this.EntityColumnDefinition(element.data.ProductID, null, element.data.ProductRequestEntityList, false);
+        datList.push(element.data);
+      });
+      this.SPService.GetServicePatternItemList(482, null).subscribe(res => {
+        if (res) {
+          res.forEach(element => {
+            let anyy = null;
+            anyy = datList.filter(x => x.ProductID === element.ProductID);
+            if (anyy === null || anyy.length === 0) {
+              this.EntityColumnDefinition(element.ProductID, null, element.ProductRequestEntityList, false);
+              datList.push(element);
+            }
+          });
+          this.rowsData = datList;
+        }
+      });
+    }
+  }
+  OnshowhistorydetailClick() {
+    if (this.ProductRequestObject && this.ProductRequestObject.CostFactorID) {
+      this.PopUpType = 'show-history-detail';
+      this.HaveHeader = true;
+      this.isClicked = true;
+      this.HaveMaxBtn = false;
+      this.startLeftPosition = 80;
+      this.startTopPosition = 20;
+
+      this.OverMainMinwidthPixel = 1200;
+      this.MainMaxwidthPixel = 1200;
+
+      this.PixelHeight = 600;
+      this.MinHeightPixel = 600;
+      let ObjectIDList = [];
+
+      this.PopupParam = {
+        ActorId: this.ProductRequestObject.CostFactorID,
+        HeaderName: 'مشاهده ریز اصلاحات',
+        ModuleCode: 2730
+      };
+    }
+  }
+  FillGreenSpacePRItemGrid(HasEstimate) { // RFC 64631 - 64632
+    if (HasEstimate) {
+      this.columnDef = [
+        {
+          headerName: 'ردیف',
+          field: 'ItemNo',
+          width: 70,
+          resizable: true
+        },
+        {
+          headerName: 'نوع درخواستی',
+          field: 'ProductTypeName',
+          cellEditorFramework: NgSelectCellEditorComponent,
+          cellEditorParams: {
+            HardCodeItems: this.ProductTypeList,
+            bindLabelProp: 'ProductTypeName',
+            bindValueProp: 'ProductTypeCode'
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.ProductTypeName;
+
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue) {
+              if (params.newValue.ProductTypeName !== params.oldValue) {
+                params.data.ProductTypeName = params.newValue.ProductTypeName;
+                params.data.ProductTypeCode = params.newValue.ProductTypeCode;
+                params.data.ScaleName = null;
+                params.data.ProductID = null;
+                params.data.ProductCodeName = null;
+                return true;
+              }
+            } else {
+              params.data.ProductTypeName = null;
+              params.data.ProductTypeCode = null;
+              params.data.ScaleName = null;
+              params.data.ProductID = null;
+              params.data.ProductCodeName = null;
+              return false;
+            }
+          },
+          editable: () => {
+            return this.IsEditable;
+          },
+          width: 120,
+          resizable: true,
+        },
+        {
+          headerName: 'کالا/خدمت',
+          field: 'ProductCodeName',
+          cellEditorFramework: NgSelectVirtualScrollComponent,
+          cellEditorParams: {
+            Params: this.NgSelectVSParams,
+            Items: [],
+            MoreFunc: this.FetchMoreProduct,
+            FetchByTerm: this.FetchProductByTerm,
+            RedioChangeFunc: this.RedioSelectedChange,
+            Owner: this
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.ProductCodeName;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.ProductCodeName) {
+              params.data.ProductCodeName = params.newValue.ProductCodeName;
+              params.data.ProductID = params.newValue.ProductID;
+              this.ProductRequest.GetProductScaleName(params.newValue.ProductID).subscribe(res => {
+                params.data.ScaleName = res;
+              });
+              this.BeforeSelectedProductID = this.selectedProductID = params.data.ProductID;
+              this.EntityColumnDefinition(params.data.ProductID, this.selectedrow, null, true);
+              return true;
+            } else {
+              params.data.ProductCodeName = '';
+              params.data.ProductID = null;
+              params.data.ScaleName = '';
+              return false;
+            }
+          },
+          editable: () => {
+            return this.IsEditable;
+          },
+          width: 350,
+          resizable: true
+        },
+        {
+          headerName: 'توضیحات',
+          field: 'Subject',
+          editable: () => {
+            return this.IsEditable;
+          },
+          width: 250,
+          resizable: true
+        },
+        {
+          headerName: 'واحد',
+          field: 'ScaleName',
+          width: 120,
+          resizable: true
+        },
+        {
+          headerName: 'تاریخ شروع پیشنهادی',
+          field: 'PersianStartDate',
+          width: 130,
+          resizable: true,
+          editable: (Params) => {
+            return (!(this.IsNew) && this.ContractParams.selectedObject && Params.data._SelectedContractItem_ng) ? false :
+              this.StartAndEndDateIsEditable ? true : this.IsEditable;
+          },
+          cellEditorFramework: JalaliDatepickerComponent,
+          cellEditorParams: {
+            CurrShamsiDateValue: 'PersianStartDate',
+            DateFormat: 'YYYY/MM/DD',
+            WidthPC: 100,
+            AppendTo: '.for-append-date'
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.SDate;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.MDate) {
+              params.data.ShortStartDate = params.newValue.MDate;
+              params.data.PersianStartDate = params.newValue.SDate;
+              if (this.gridApi &&
+                this.PRTypeParams.selectedObject === 2 &&
+                this.PriceListTopicRasteParams.selectedObject === 402374) {
+                const itemsToUpdate = [];
+                this.gridApi.forEachNode(node => {
+                  if (isNullOrUndefined(node.data.ShortStartDate)) {
+                    node.data.ShortStartDate = params.data.ShortStartDate;
+                    node.data.PersianStartDate = params.newValue.SDate;
+                  }
+                  itemsToUpdate.push(node.data);
+                });
+                this.gridApi.updateRowData({ update: itemsToUpdate });
+              }
+              return true;
+            } else {
+              params.data.ShortStartDate = null;
+              params.data.PersianStartDate = '';
+              return false;
+            }
+          }
+        },
+        {
+          headerName: 'تاریخ پایان پیشنهادی',
+          field: 'PersianEndDate',
+          width: 130,
+          resizable: true,
+          editable: () => {
+            return this.StartAndEndDateIsEditable ? true : this.IsEditable;
+          },
+          cellEditorFramework: JalaliDatepickerComponent,
+          cellEditorParams: {
+            CurrShamsiDateValue: 'PersianEndDate',
+            DateFormat: 'YYYY/MM/DD',
+            WidthPC: 100,
+            AppendTo: '.for-append-date'
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.SDate;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.MDate) {
+              params.data.ShortEndDate = params.newValue.MDate;
+              params.data.PersianEndDate = params.newValue.SDate;
+              if (this.gridApi &&
+                this.PRTypeParams.selectedObject === 2 &&
+                this.PriceListTopicRasteParams.selectedObject === 402374) {
+                const itemsToUpdate = [];
+                this.gridApi.forEachNode(node => {
+                  if (isNullOrUndefined(node.data.ShortEndDate)) {
+                    node.data.ShortEndDate = params.data.ShortEndDate;
+                    node.data.PersianEndDate = params.data.PersianEndDate;
+                  }
+                  itemsToUpdate.push(node.data);
+                });
+                this.gridApi.updateRowData({ update: itemsToUpdate });
+              }
+              return true;
+            } else {
+              params.data.ShortEndDate = null;
+              params.data.PersianEndDate = '';
+              return false;
+            }
+          }
+        },
+        {
+          headerName: 'مبلغ متره',
+          field: 'VWAmount',
+          width: 150,
+          HaveThousand: true,
+          resizable: true
+        },
+        {
+          headerName: 'مبلغ متره با ضرایب ردیف',
+          field: 'AmountCOEF',
+          HaveThousand: true,
+          width: 150,
+          resizable: true
+        },
+        {
+          headerName: 'مبلغ کل',
+          field: 'AmountCOEFPact',
+          HaveThousand: true,
+          width: 150,
+          resizable: true
+        }
+      ];
+    } else {
+      this.columnDef = [
+        {
+          headerName: 'ردیف',
+          field: 'ItemNo',
+          width: 70,
+          resizable: true
+        },
+        {
+          headerName: 'نوع درخواستی',
+          field: 'ProductTypeName',
+          cellEditorFramework: NgSelectCellEditorComponent,
+          cellEditorParams: {
+            HardCodeItems: this.ProductTypeList,
+            bindLabelProp: 'ProductTypeName',
+            bindValueProp: 'ProductTypeCode'
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.ProductTypeName;
+
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue) {
+              if (params.newValue.ProductTypeName !== params.oldValue) {
+                params.data.ProductTypeName = params.newValue.ProductTypeName;
+                params.data.ProductTypeCode = params.newValue.ProductTypeCode;
+                params.data.ScaleName = null;
+                params.data.ProductID = null;
+                params.data.ProductCodeName = null;
+                return true;
+              }
+            } else {
+              params.data.ProductTypeName = null;
+              params.data.ProductTypeCode = null;
+              params.data.ScaleName = null;
+              params.data.ProductID = null;
+              params.data.ProductCodeName = null;
+              return false;
+            }
+          },
+          editable: () => {
+            return this.IsEditable;
+          },
+          width: 120,
+          resizable: true,
+        },
+        {
+          headerName: 'کالا/خدمت',
+          field: 'ProductCodeName',
+          cellEditorFramework: NgSelectVirtualScrollComponent,
+          cellEditorParams: {
+            Params: this.NgSelectVSParams,
+            Items: [],
+            MoreFunc: this.FetchMoreProduct,
+            FetchByTerm: this.FetchProductByTerm,
+            RedioChangeFunc: this.RedioSelectedChange,
+            Owner: this
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.ProductCodeName;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.ProductCodeName) {
+              params.data.ProductCodeName = params.newValue.ProductCodeName;
+              params.data.ProductID = params.newValue.ProductID;
+              this.ProductRequest.GetProductScaleName(params.newValue.ProductID).subscribe(res => {
+                params.data.ScaleName = res;
+              });
+              this.BeforeSelectedProductID = this.selectedProductID = params.data.ProductID;
+              this.EntityColumnDefinition(params.data.ProductID, this.selectedrow, null, true);
+
+              return true;
+            } else {
+              params.data.ProductCodeName = '';
+              params.data.ProductID = null;
+              params.data.ScaleName = '';
+              return false;
+            }
+          },
+          editable: () => {
+            return this.IsEditable;
+          },
+          width: 350,
+          resizable: true
+        },
+        {
+          headerName: 'توضیحات',
+          field: 'Subject',
+          editable: () => {
+            return this.IsEditable;
+          },
+          width: 250,
+          resizable: true
+        },
+        {
+          headerName: 'واحد',
+          field: 'ScaleName',
+          width: 120,
+          resizable: true
+        },
+        {
+          headerName: 'تاریخ شروع پیشنهادی',
+          field: 'PersianStartDate',
+          width: 130,
+          resizable: true,
+          editable: (Params) => {
+            return (!(this.IsNew) && this.ContractParams.selectedObject && Params.data._SelectedContractItem_ng) ? false :
+              this.StartAndEndDateIsEditable ? true : this.IsEditable;
+          },
+          cellEditorFramework: JalaliDatepickerComponent,
+          cellEditorParams: {
+            CurrShamsiDateValue: 'PersianStartDate',
+            DateFormat: 'YYYY/MM/DD',
+            WidthPC: 100,
+            AppendTo: '.for-append-date'
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.SDate;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.MDate) {
+              params.data.ShortStartDate = params.newValue.MDate;
+              params.data.PersianStartDate = params.newValue.SDate;
+              if (this.gridApi &&
+                this.PRTypeParams.selectedObject === 2 &&
+                this.PriceListTopicRasteParams.selectedObject === 402374) {
+                const itemsToUpdate = [];
+                this.gridApi.forEachNode(node => {
+                  if (isNullOrUndefined(node.data.ShortStartDate)) {
+                    node.data.ShortStartDate = params.data.ShortStartDate;
+                    node.data.PersianStartDate = params.newValue.SDate;
+                  }
+                  itemsToUpdate.push(node.data);
+                });
+                this.gridApi.updateRowData({ update: itemsToUpdate });
+              }
+              return true;
+            } else {
+              params.data.ShortStartDate = null;
+              params.data.PersianStartDate = '';
+              return false;
+            }
+          }
+        },
+        {
+          headerName: 'تاریخ پایان پیشنهادی',
+          field: 'PersianEndDate',
+          width: 130,
+          resizable: true,
+          editable: () => {
+            return this.StartAndEndDateIsEditable ? true : this.IsEditable;
+          },
+          cellEditorFramework: JalaliDatepickerComponent,
+          cellEditorParams: {
+            CurrShamsiDateValue: 'PersianEndDate',
+            DateFormat: 'YYYY/MM/DD',
+            WidthPC: 100,
+            AppendTo: '.for-append-date'
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.SDate;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.MDate) {
+              params.data.ShortEndDate = params.newValue.MDate;
+              params.data.PersianEndDate = params.newValue.SDate;
+              if (this.gridApi &&
+                this.PRTypeParams.selectedObject === 2 &&
+                this.PriceListTopicRasteParams.selectedObject === 402374) {
+                const itemsToUpdate = [];
+                this.gridApi.forEachNode(node => {
+                  if (isNullOrUndefined(node.data.ShortEndDate)) {
+                    node.data.ShortEndDate = params.data.ShortEndDate;
+                    node.data.PersianEndDate = params.data.PersianEndDate;
+                  }
+                  itemsToUpdate.push(node.data);
+                });
+                this.gridApi.updateRowData({ update: itemsToUpdate });
+              }
+              this.gridApi.forEachNode(node => {
+              });
+              return true;
+            } else {
+              params.data.ShortEndDate = null;
+              params.data.PersianEndDate = '';
+              return false;
+            }
+          }
+        },
+        {
+          headerName: 'تعداد',
+          field: 'QTY',
+          editable: (params) => {
+            return (params.data.ProductTypeCode === 2 && this.currentRegionObject.RegionGroupCode === 3 &&
+              this.OrginalModuleCode !== 2939 && this.OrginalModuleCode !== 2793) // RFC 52896 && برداشتن در ابزار rfc 55993
+              || (params.data.ProductTypeCode === 2 && this.currentRegionObject.RegionGroupCode === 20
+                && this.OrginalModuleCode !== 2939 && this.OrginalModuleCode !== 2793 && this.OrginalModuleCode !== 2824)
+              || (params.data.ProductTypeCode === 2 && this.ModuleViewTypeCode === 165) ? false :
+              this.IsSumEditableType107 ? true : this.IsEditable;
+          },
+          valueSetter: (params) => {
+            if (params.newValue) {
+              // tslint:disable-next-line: radix
+              params.data.QTY = params.newValue;
+              // tslint:disable-next-line: radix
+              params.data.FinalAmount = Math.round(parseFloat((!params.newValue || params.newValue == 0) ? 1 : params.newValue) * (params.data.Amount)); // RFC 54950
+            }
+          },
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value && !isUndefined(params.value) && params.value != null) {
+              return params.value;
+            } else {
+              return '';
+            }
+          },
+          HaveThousand: true,
+          width: 90,
+          resizable: true
+        },
+        {
+          headerName: 'مبلغ واحد پیشنهادی',
+          field: 'Amount',
+          HaveThousand: true,
+          width: 120,
+          resizable: true,
+          cellEditorFramework: NumberInputComponentComponent,
+          cellEditorParams: { IsFloat: true, FloatMaxLength: 4 },
+          editable: (params) => {
+            if (this.IsSumEditableType107) {
+              return true;
+            } else {
+              return (this.ModuleViewTypeCode === 100000 && this.IsAdmin) || (this.IsEditable &&
+                ((this.PRTypeParams.selectedObject !== 2 && // فضای سبز نباشد
+                  this.PriceListTopicRasteParams.selectedObject !== 402374) // نگهداشت نباشد
+                  ||
+                  (this.PRTypeParams.selectedObject === 2 && // فضای سبز است
+                    this.PriceListTopicRasteParams.selectedObject === 402374 // نگهداشت است
+                    && isNullOrUndefined(params.data.Amount)) // مبلغ دریافتی از احجام توسعه و نگهداشت خالی است
+                ));
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue) {
+              params.data.Amount = params.newValue;
+              if (parseFloat(params.data.QTY) === null || parseFloat(params.data.QTY) === 0 || isUndefined(params.data.QTY)) {
+                params.data.FinalAmount = params.data.Amount;
+              } else {
+                params.data.FinalAmount = Math.round(parseFloat(params.data.QTY) * params.newValue);
+              }
+            }
+          },
+        },
+        {
+          headerName: 'مبلغ پیشنهادی',
+          field: 'FinalAmount',
+          HaveThousand: true,
+          width: 120,
+          resizable: true,
+          editable: () => {
+            if (this.IsSumEditableType107) {
+              return true;
+            } else {
+              return this.IsEditable || (this.ModuleViewTypeCode === 100000 && this.IsAdmin);
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue) {
+              params.data.FinalAmount = params.newValue;
+              if (params.data.Amount) {
+                params.data.QTY = (parseInt(params.data.FinalAmount) / parseFloat(params.data.Amount)).toFixed(4);
+              } else {
+                if (params.data.QTY){
+                  params.data.Amount = (parseInt(params.data.FinalAmount) / parseInt(params.data.QTY));
+                } else {
+                  params.data.Amount = parseInt(params.data.FinalAmount);
+                }
+              }
+            }
+          },
+          cellEditorFramework: NumberInputComponentComponent,
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value;
+            } else {
+              return '';
+            }
+          },
+        },
+        {
+          headerName: 'مبلغ پیشنهادی با اعمال ضرایب',
+          field: 'AmountCOEFPact',
+          HaveThousand: true,
+          width: 200,
+          resizable: true
+        },
+        {
+          headerName: 'مبلغ کل ماهانه',
+          field: 'AmountCOEFPactWithDuration',
+          HaveThousand: true,
+          hide: this.PRTypeParams.selectedObject !== 2 || (this.PRTypeParams.selectedObject === 2 && this.PriceListTopicRasteParams.selectedObject !== 402374),
+          width: 200,
+          resizable: true
+        }
+      ];
+    }
+  }
+
+  InsertSupplierIntoPropsalExtension() {
+    if ((!this.ProductRequestObject.OrdersObject || this.ProductRequestObject.OrdersObject.CostFactorID <= 0)) {
+      this.ProductRequest.InsertSupplierIntoPropsalExtension(this.ProductRequestObject.CostFactorID).subscribe();
+    }
+  }
+  OnCheckBoxChanged(event) {
+    this.IsChecked = event;
+    if (!this.IsChecked) {
+      this.ProductRequestObject.ContractTypeCode = null;
     }
   }
 }

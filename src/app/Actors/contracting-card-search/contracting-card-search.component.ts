@@ -455,18 +455,6 @@ export class ContractingCardSearchComponent implements OnInit {
         width: 220,
         resizable: true
       },
-      // {
-      //   headerName: 'ظرفیت مازاد ریالی  کل در تمام رشته ها',
-      //   field: 'TotalExtraAmount',
-      //   width: 220,
-      //   resizable: true
-      // },
-      // {
-      //   headerName: 'ظرفیت مازاد تعدادی  کل در تمام رشته ها',
-      //   field: 'TotalExtraCount',
-      //   width: 220,
-      //   resizable: true
-      // },
       {
         headerName: 'آدرس',
         field: 'Address',

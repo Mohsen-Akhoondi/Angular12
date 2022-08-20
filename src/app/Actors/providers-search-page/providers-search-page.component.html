@@ -113,6 +113,32 @@
         </td>
       </tr>
     </table>
+    <table *ngIf="IsCorporate" style="width: 100%; margin-bottom: 3px;">
+      <tr>
+        <td style="width: 25%;">
+          <span class="table-cell-Lable">از رتبه</span>
+          <input name="FromRank" style="display: inline-block;width: 70%;" class="form-control input-style"
+            [(ngModel)]="FromRank" type="text" />
+        </td>
+        <td style="width: 25%;">
+          <span class="table-cell-Lable">تا رتبه</span>
+          <input name="ToRank" style="display: inline-block;width: 70%;" class="form-control input-style"
+            [(ngModel)]="ToRank" type="text" />
+        </td>
+        <td style="width: 25%;">
+          <span class="table-cell-Lable">رشته</span>
+          <app-ng-select-virtual-scroll style="display: inline-block;width: 70%;"
+            [NgSelectParams]="CourseParams" (selectedChange)="onChangeCourse($event)"
+            [Items]="CourseItems" (Open)="OnOpenNgSelect('price-list-topic')">
+          </app-ng-select-virtual-scroll>
+        </td>
+        <td style="width: 25%; padding-left: 5px;">
+          <span class="table-cell-Lable">شماره ثبت</span>
+          <input name="RegisterNo" style="display: inline-block;width: 70%;" class="form-control input-style"
+            [(ngModel)]="RegisterNo" type="text" />
+        </td>
+      </tr>
+    </table>
   </div>
   <!--دکمه جستجو-->
   <table style="width: 100%; margin: 3px;">
@@ -129,16 +155,20 @@
   <!--گرید-->
   <div style="clear: both;padding-bottom: 5px; height: 76%;">
     <!--گرید حقوقی-->
-    <div *ngIf="IsCorporate" class="box-dev" style=" width: 100%;" [style.height.%]="100">
+    <div *ngIf="IsCorporate" class="box-dev" style=" width: 100%;" [style.height.%]="82">
       <app-grid (GridReady)="onCorporateGridReady($event)" [columns]="CorporatecolumnDef" [rowsData]="CorporaterowData"
-        [gridHeight]="92" (RowClick)="CorporateRowClick($event)">
+        [gridHeight]="90" (RowClick)="CorporateRowClick($event)">
       </app-grid>
     </div>
     <!--گرید حقیقی-->
-    <div *ngIf="!IsCorporate" class="box-dev" style=" width: 100%;" [style.height.%]="100">
+    <div *ngIf="!IsCorporate" class="box-dev" style=" width: 100%;" [style.height.%]="90">
       <app-grid (GridReady)="onPersonGridReady($event)" [columns]="PersoncolumnDef" [rowsData]="PersonrowData"
-        [gridHeight]="92" (RowClick)="PersonRowClick($event)">
+        [gridHeight]="90" (RowClick)="PersonRowClick($event)">
       </app-grid>
+    </div>
+    <div class="box-dev" style=" width: 100%; height: 9%; margin:5px 0px;text-align: left;color:blue; padding: 4px;">
+      <span id="sum-final">مجموع کل رکوردهای یافت شده </span>
+      <label for="sum-final" style="margin:2px"> {{TotalCount}} </label>
     </div>
   </div>
 

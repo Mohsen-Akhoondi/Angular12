@@ -4,9 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-
-
-
+import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
 
 @Component({
   selector: 'app-applicant-out-cost-center-rep',
@@ -107,7 +105,7 @@ export class ApplicantOutCostCenterRepComponent implements OnInit {
   FromSubCostCenterItems;
   FromSubCostCenterParams = {
     bindLabelProp: 'SubCostCenterTitle',
-    bindValueProp: 'SubCostCenterId',
+    bindValueProp: 'SubCostCenterCode',
     placeholder: '',
     MinWidth: '155px',
     selectedObject: null,
@@ -120,7 +118,7 @@ export class ApplicantOutCostCenterRepComponent implements OnInit {
   ToSubCostCenterItems;
   ToSubCostCenterParams = {
     bindLabelProp: 'SubCostCenterTitle',
-    bindValueProp: 'SubCostCenterId',
+    bindValueProp: 'SubCostCenterCode',
     placeholder: '',
     MinWidth: '155px',
     selectedObject: null,
@@ -129,7 +127,9 @@ export class ApplicantOutCostCenterRepComponent implements OnInit {
     IsDisabled: false,
     Required: true
   };
- 
+  CustomCheckBoxConfig1: CustomCheckBoxModel = new CustomCheckBoxModel();
+  IsChecked = false;
+
 
   constructor(private RegionList: RegionListService,
     private route: ActivatedRoute,
@@ -144,9 +144,15 @@ export class ApplicantOutCostCenterRepComponent implements OnInit {
 
     this.columnDef = [
       {
+        headerName: 'ردیف',
+        field: 'ItemNo',
+        width: 70,
+        resizable: true
+      },
+      {
         headerName: 'نام شخص',
         field: 'ActorName',
-        width: 100,
+        width: 200,
         resizable: true
       },
 
@@ -187,7 +193,7 @@ export class ApplicantOutCostCenterRepComponent implements OnInit {
       {
         headerName: ' نام مرکز هزینه فرعی ',
         field: 'SubCostCenterName',
-        width: 200,
+        width: 250,
         resizable: true
       },
 
@@ -195,7 +201,10 @@ export class ApplicantOutCostCenterRepComponent implements OnInit {
   }
 
   ngOnInit() {
-
+    this.CustomCheckBoxConfig1.color = 'state p-primary';
+    this.CustomCheckBoxConfig1.icon = 'fa fa-check';
+    this.CustomCheckBoxConfig1.styleCheckBox = 'pretty p-icon p-rotate';
+    this.CustomCheckBoxConfig1.AriaWidth = 14.5;
     this.RegionList.GetRegionList(this.ModuleCode, false).subscribe(res => {
       this.RegionItems = res;
       this.RegionParams.selectedObject = res[0].RegionCode;
@@ -357,20 +366,21 @@ export class ApplicantOutCostCenterRepComponent implements OnInit {
 
   Search() {
 
-    if(this.RoleParams.selectedObject == null){
+    if (this.RoleParams.selectedObject == null) {
       this.ShowMessageBoxWithOkBtn('لطفا نقش را وارد کنید');
       return;
     }
-    if(this.FromCostCenterParams.selectedObject == null){
+    if (this.FromCostCenterParams.selectedObject == null) {
       this.ShowMessageBoxWithOkBtn('لطفا مرکز هزینه را وارد کنید');
       return;
     }
     this.ProductRequest.GetApplicantOutCost(this.RegionParams.selectedObject, this.RoleParams.selectedObject,
       this.FromCostCenterParams.selectedObject, this.ToCostCenterParams.selectedObject,
-      this.FromSubCostCenterParams.selectedObject, this.ToSubCostCenterParams.selectedObject).subscribe(res => {
+      this.FromSubCostCenterParams.selectedObject, this.ToSubCostCenterParams.selectedObject,this.IsChecked).subscribe(res => {
         if (res && res.length > 0) {
           this.rowData = res;
         } else {
+          this.rowData = [];
           this.type = 'message-box';
           this.HaveHeader = true;
           this.btnclicked = true;
@@ -378,10 +388,15 @@ export class ApplicantOutCostCenterRepComponent implements OnInit {
           this.startLeftPosition = 500;
           this.startTopPosition = 100;
         }
-      }); 
-     
-       
+      });
+
+
   }
+
+  OnCheckBoxChanged(event) {
+    this.IsChecked = event;
+  } 
+
   popupclosed() {
     this.btnclicked = false;
     this.HaveMaxBtn = false;

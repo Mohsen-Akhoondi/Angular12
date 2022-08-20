@@ -3,7 +3,6 @@ import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-ed
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
-import { Observable, of } from 'rxjs';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';

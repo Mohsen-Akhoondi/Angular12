@@ -1,30 +1,27 @@
 <div class="main-form-body" style="margin-top: 5px; height: 85%;">
   <fieldset class="feild-set" style="display: inherit">
-    <table style="margin-bottom: 10px">
+    <table style="margin-bottom: 10px; width: 100%;">
       <tr>
-        <td width="25%">
-
+        <td width="33%">
           <span class="table-cell-Lable">رشته</span>
           <app-ng-select-virtual-scroll style="display: inline-block;width: 80%;" class=""
             [NgSelectParams]="PriceListTopicParam" (selectedChange)="onChangePriceListTopic($event)"
             [Items]="PriceListTopicItems">
           </app-ng-select-virtual-scroll>
         </td>
-
-        <td width="25%">
+        <td width="33%">
           <span class="table-cell-Lable">مشخصه رتبه بندی</span>
           <app-ng-select-virtual-scroll style="display: inline-block;width: 70%;" class=""
             [NgSelectParams]="RankParameterParams" (selectedChange)="onChangeRank($event)" [Items]="RankParameterItems">
           </app-ng-select-virtual-scroll>
         </td>
-
-        <td *ngIf="IsShowRegion" width="25%">
+        <td *ngIf="!IsShowRegion" width="34%"></td>
+        <td *ngIf="IsShowRegion" width="34%">
           <span class="table-cell-Lable">واحد اجرایی</span>
           <app-ng-select-virtual-scroll style="display: inline-block;width: 70%;" class=""
             [NgSelectParams]="RegionParams" (selectedChange)="onChangeRegion($event)" [Items]="RegionItems">
           </app-ng-select-virtual-scroll>
         </td>
-
       </tr>
     </table>
   </fieldset>

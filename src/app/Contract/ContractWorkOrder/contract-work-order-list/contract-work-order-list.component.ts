@@ -1,5 +1,4 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { of } from 'rxjs';
 import { isUndefined } from 'util';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { ContractWorkOrderService } from 'src/app/Services/ContractService/ContractWorkOrder/ContractWorkOrderService';

@@ -82,6 +82,10 @@
         <img width="15px" height="15px" src="assets/Icons/show.png" />
         مشاهده پرونده قرارداد
       </button>
+      <button (click)="OnClickWorkFlowDetail()" id="btnWorkFlowDetail" class="btn btn-primary btnGreen">
+        <img width="15px" height="15px" src="assets/Icons/show.png" />
+        جزئیات گردش
+      </button>
 
       <button (click)="onClose()" id="btnClose" class="btn btn-primary btnGreen">
         <img width="15px" height="15px" src="assets/Icons/exit.png" />
@@ -91,8 +95,9 @@
     </div>
   </div>
 </div>
-<app-over-popup *ngIf="isClicked" [PopupType]="PopUpType" [HaveMaxBtn]="HaveMaxBtn" [HeightPercentWithMaxBtn]="95"
+<app-over-popup *ngIf="isClicked" [PopupType]="PopUpType" [HaveMaxBtn]="HaveMaxBtn" [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn"
   (popupclosed)="popupclosed($event)" [startLeftPosition]="startLeftPosition" [startTopPosition]="startTopPosition"
-  [PopupParam]="ContractMinutesPopupParam" (PopupOutPutParam)="ReturendContractOperation($event)"
+  (PopupOutPutParam)="ReturendContractOperation($event)"
+  [PopupParam]="PopUpType === 'message-box' ? alertMessageParams : PopUpType === 'user-work-log-details' ? ContractSupervisionPopupParam : ContractMinutesPopupParam"
   [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn">
 </app-over-popup>

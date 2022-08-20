@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter, ViewChild, TemplateRef } from '@angular/core';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
-import { of, from, forkJoin } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
@@ -17,12 +17,11 @@ import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_a
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServices';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
-import { CarTagComponent } from 'src/app/Shared/car-tag/car-tag.component';
 import { isUndefined } from 'util';
-import { BrowserStack } from 'protractor/built/driverProviders';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { GridOptions } from 'ag-grid-community';
 import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
+import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 
 declare var jquery: any;
 declare var $: any;
@@ -64,6 +63,8 @@ export class Corporate2Component implements OnInit {
   @ViewChild('ShowHistoryList') ShowHistoryList: TemplateRef<any>;
   @ViewChild('RevokeProcess') RevokeProcess: TemplateRef<any>;
   @ViewChild('EquipmentDocuments') EquipmentDocuments: TemplateRef<any>;
+  IsCheckException = false;
+  VirtualModuleTypeCode: number;
   RegionCode;
   IsPerson = true;
   btnConfirmName;
@@ -972,17 +973,79 @@ export class Corporate2Component implements OnInit {
   CanEdite = false;
   CanSave = false;
 
+  DisableSelectFileWindow = true; // RFC 56709
+  ARankrowsDataList;
+  HasAlert = false;
+  EditableRank = true;
+  ChangeRowsData = [];
+
+  CpGridOptionsRowStyle: GridOptions = {
+    getRowStyle: function (params) {
+      if (params.data.IsChanged === true && this.needShowColor === true) {
+        return { 'background-color': '#ffe600' };
+      }
+    }
+  };
+  OGGridOptionsRowStyle: GridOptions = {
+    getRowStyle: function (params) {
+      if (params.data.IsChanged === true && this.needShowColor === true) {
+        return { 'background-color': '#ffe600' };
+      }
+    }
+  };
   GridOptionsRowStyle: GridOptions = {
     getRowStyle: function (params) {
+      if (params.data.IsChanged === true && this.needShowColor === true) {
+        return { 'background-color': '#ffe600' };
+      }
       if (params.data.AllowStateCode === 7) {
         return { 'background-color': '#d1f0d1', };
       }
     }
   };
-  DisableSelectFileWindow = true; // RFC 56709
-  ARankrowsDataList;
-  HasAlert = false;
-  EditableRank = true;
+  needShowColor = false;
+  BackGroundColor: any = '#ffe600';
+  CorporateNameChangeFlag = false;
+  IdentityNoChangeFlag = false;
+  RegisterReferenceIdChangeFlag = false;
+  RegisterNoChangeFlag = false;
+  EconomicCodeChangeFlag = false;
+  ActivityStartDateChangeFlag = false;
+  EmployeCountChangeFlag = false;
+  NoteChangeFlag = false;
+  AddressChangeFlag = false;
+  PostCodeChangeFlag = false;
+  FaxChangeFlag = false;
+  GradeRequestChangeFlag = false;
+  WebChangeFlag = false;
+  EmailChangeFlag = false;
+  OldNameChangeFlag = false;
+  ActivityFieldChangeFlag = false;
+  CorporateCityIDChangeFlag = false;
+  RequestDateChangeFlag = false;
+  IsLimitedRisponsibilityChangeFlag = false;
+  IsContractorChangeFlag = false;
+  IsConsultChangeFlag = false;
+  IsProducerChangeFlag = false;
+  IsSupplierChangeFlag = false;
+  IsInternalBuildersChangeFlag = false;
+  IsExternalBuildersChangeFlag = false;
+  CompanyAgentNameChangeFlag = false;
+  CompanyAgentTelChangeFlag = false;
+  ManagersCountChangeFlag = false;
+  SignedRightHoldersChangeFlag = false;
+  ManagersMinutesDateChangeFlag = false;
+  IsLimitedManagersEndDateChangeFlag = false;
+  ManagersEndDateChangeFlag = false;
+  CompanyAgentEmailChangeFlag = false;
+  CompanyAgentActorIDChangeFlag = false;
+  SubjectChangeFlag = false;
+  HaveHSEChangeFlag = false;
+  HaveBailChangeFlag = false;
+  HaveCertificateChangeFlag = false;
+  CellNoChangeFlag = false;
+  ActorNoteChangeFlag = false;
+
   constructor(private Actor: ActorService,
     private ProductRequest: ProductRequestService,
     private router: Router,
@@ -996,13 +1059,15 @@ export class Corporate2Component implements OnInit {
     private RefreshCartable: RefreshServices,
     private FlowService: WorkflowService,
     private RefreshPersonItems: RefreshServices,
+    private ContractPayDetails: ContractPayDetailsService,
     private Common: CommonService,
     private Report: ReportService,
     private route: ActivatedRoute) {
     this.EvaluatorList = [
       { EvaluatorID: '734', EvaluatorName: 'شهرداری تهران' },
       { EvaluatorID: '6978079', EvaluatorName: 'سازمان مدیریت' },
-      { EvaluatorID: '7060739', EvaluatorName: 'شورای عالی انفورماتیک' }];
+      { EvaluatorID: '7060739', EvaluatorName: 'شورای عالی انفورماتیک' },
+      { EvaluatorID: '7056530', EvaluatorName: 'وزارت تعاون، کار و رفاه اجتماعی' }];
     this.PersonTypeList = [{ PersonTypeName: 'حقیقی', PersonTypeCode: 1 },
     { PersonTypeName: 'حقوقی', PersonTypeCode: 2 }];
     this.IsLimitedEndDateListParams = [{ IsLimitedEndDate: 1, IsLimitedEndDateName: 'محدود' },
@@ -1011,6 +1076,7 @@ export class Corporate2Component implements OnInit {
       { CertificationEvaluatorID: 734, CertificationEvaluatorName: 'شهرداری تهران' },
       { CertificationEvaluatorID: 6978079, CertificationEvaluatorName: 'سازمان مدیریت' },
       { CertificationEvaluatorID: 7060739, CertificationEvaluatorName: 'شورای عالی انفورماتیک' },
+      { CertificationEvaluatorID: 7056530, CertificationEvaluatorName: 'وزارت تعاون، کار و رفاه اجتماعی' },
       { CertificationEvaluatorID: 6476300, CertificationEvaluatorName: 'سایر' }
     ];
 
@@ -1083,7 +1149,6 @@ export class Corporate2Component implements OnInit {
       });
     });
   }
-
   onTechnicalPersonnelcellEditingStarted(event) {
     if (event.colDef && event.colDef.field === 'ActorName') {
       this.TechnicalPersonnelPropertyColDef[1].cellEditorParams.Params.loading = true;
@@ -1230,10 +1295,6 @@ export class Corporate2Component implements OnInit {
       });
     }
 
-
-    // this.Common.GetAllCity().subscribe(res => {
-    //   this.LocationItems = res;
-    // });
     this.Actor.GetRegisterRefrence().subscribe(ress => {
       if (ress) {
         this.RegisterReferenceNameItems = ress;
@@ -1245,10 +1306,7 @@ export class Corporate2Component implements OnInit {
     this.Common.GetAllCorporateActivity().subscribe(resss => {
       this.ActivityFieldItems = resss;
     });
-    // this.Region.GetRegionListforBusinessPattern().subscribe(res => {
-    //   this.RankColumnDef[2].cellEditorParams.Items = res;
-    // this.MovableColumnDef[1].cellEditorParams.Items = res;
-    // });
+
     this.CustomCheckBoxConfig.color = 'state p-primary';
     this.CustomCheckBoxConfig.icon = 'fa fa-check';
     this.CustomCheckBoxConfig.styleCheckBox = 'pretty p-icon p-rotate';
@@ -1277,6 +1335,7 @@ export class Corporate2Component implements OnInit {
       this.btnConfirmIcon = 'ok';
       // this.HaveConfirm = true;
     }
+
   }
   // tslint:disable-next-line:use-life-cycle-interface
   ngAfterViewInit(): void {
@@ -2438,45 +2497,6 @@ export class Corporate2Component implements OnInit {
           }
         },
       },
-      // {
-      //   headerName: 'نوع کاربری',
-      //   field: 'AcountTypeName',
-      //   width: 120,
-      //   cellEditorFramework: NgSelectVirtualScrollComponent,
-      //   cellEditorParams: {
-      //     Params: this.NgSelectUserTypeParams,
-      //     Items: [],
-      //     Owner: this
-      //   },
-      //   cellRenderer: 'SeRender',
-      //   valueFormatter: function currencyFormatter(params) {
-      //     if (params.value) {
-      //       return params.value.AcountTypeName;
-      //     } else {
-      //       return '';
-      //     }
-      //   },
-      //   valueSetter: (params) => {
-      //     if (params.newValue && params.newValue.AcountTypeName) {
-      //       params.data.AcountTypeName = params.newValue.AcountTypeName;
-      //       params.data.AcountTypeID = params.newValue.AcountTypeID;
-      //       return true;
-      //     } else {
-      //       params.data.AcountTypeName = '';
-      //       params.data.AcountTypeID = null;
-      //       return false;
-      //     }
-      //   },
-      //   resizable: true,
-      //   sortable: true,
-      //   editable: () => {
-      //     if (this.IsEditable) {
-      //       return true;
-      //     } else {
-      //       return false;
-      //     }
-      //   },
-      // },
       {
         headerName: 'نوع کاربری',
         field: 'GoodsName',
@@ -3668,6 +3688,7 @@ export class Corporate2Component implements OnInit {
         resizable: true,
         sortable: true,
         HaveThousand: true,
+        cellEditorFramework: NumberInputComponentComponent,
         editable: () => {
           if (this.IsEditable) {
             return true;
@@ -4430,7 +4451,7 @@ export class Corporate2Component implements OnInit {
             ((isUndefined(params.data.ActorBusinessID) ||
               params.data.ActorBusinessID === null ||
               params.data.ActorBusinessID <= 0) || !params.data.IsOlder)
-              && this.ModuleViewTypeCode !== 6) {
+            && this.ModuleViewTypeCode !== 6) {
             return false;
           } else if (this.ModuleViewTypeCode === 2) {
             return false;
@@ -4482,9 +4503,9 @@ export class Corporate2Component implements OnInit {
               params.data.ActorBusinessID <= 0) || !params.data.IsOlder)
             && this.ModuleViewTypeCode !== 6) {
             return false;
-          } else if (this.ModuleViewTypeCode === 2  || this.ModuleViewTypeCode === 6) {
+          } else if (this.ModuleViewTypeCode === 2 || this.ModuleViewTypeCode === 6) {
             return true;
-          }  else {
+          } else {
             if (this.IsEditable) {
               if (this.HaveNotAllowEditFirstInf) {
                 return true;
@@ -4742,7 +4763,7 @@ export class Corporate2Component implements OnInit {
         this.RegisterDate = res.ShortRegisterDate;
         this.RegisterNo = res.RegisterNo;
         this.Address = res.Address ? res.Address : '';
-        this.ActorNote= res.ActorNote ? res.ActorNote : '';
+        this.ActorNote = res.ActorNote ? res.ActorNote : '';
         this.Tel = res.Tel ? res.Tel : '';
         this.Email = res.Email ? res.Email : '';
         this.Web = res.Web ? res.Web : '';
@@ -4818,6 +4839,7 @@ export class Corporate2Component implements OnInit {
             }
           }
         }
+        this.SetChangeFlag();
       } else {
         this.ShowMessageBoxWithOkBtn('اطلاعات شخص در سيستم يافت نشد لطفا استعلام بگيريد');
       }
@@ -4971,6 +4993,7 @@ export class Corporate2Component implements OnInit {
           }
         }
       }
+      this.SetChangeFlag();
     }
   }
   onSearchInquiry() {
@@ -5082,32 +5105,100 @@ export class Corporate2Component implements OnInit {
     this.Corporate2Closed.emit(true);
   }
   popupclosed(event) {
-    if (this.PopUpType === 'person2') { // RFC 55889
-      this.CorporateID = this.CorporateObject.ActorId;
-      this.ngOnInit();
-    }
-    if (this.BtnClickedName === 'BtnDelete') {
-      this.ngOnInit();
-    }
-    if (this.PopUpType === 'supplier-work-flow') {
-      this.Actor.GetActorBussinessList(this.CorporateObject.ActorId,
-        (this.CurrWorkFlow && this.CurrWorkFlow.RegionCode ? this.CurrWorkFlow.RegionCode : null)
-      ).subscribe(res => {
-        this.RankrowsData = res;
-      });
+    if (event && this.PopUpType === 'global-choose-page') {
+      this.VirtualModuleTypeCode = event;
+      this.OpenSelectedForm(this.VirtualModuleTypeCode);
+    } else {
+      if (this.PopUpType === 'person2') { // RFC 55889
+        this.CorporateID = this.CorporateObject.ActorId;
+        this.ngOnInit();
+      }
+      if (this.BtnClickedName === 'BtnDelete') {
+        this.ngOnInit();
+      }
+      if (this.PopUpType === 'supplier-work-flow') {
+        this.Actor.GetActorBussinessList(this.CorporateObject.ActorId,
+          (this.CurrWorkFlow && this.CurrWorkFlow.RegionCode ? this.CurrWorkFlow.RegionCode : null)
+        ).subscribe(res => {
+          this.RankrowsData = res;
+        });
+      }
+
+      this.isClicked = false;
+      this.PopUpType = '';
+      this.HaveMaxBtn = false;
+      this.PixelHeight = null;
+      this.MainMaxwidthPixel = null;
+      this.PercentWidth = null;
+      this.MinHeightPixel = null;
+      this.OverMainMinwidthPixel = null;
+      this.PixelWidth = null;
+      this.BtnClickedName = '';
     }
 
-    this.isClicked = false;
-    this.PopUpType = '';
-    this.HaveMaxBtn = false;
-    this.PixelHeight = null;
-    this.MainMaxwidthPixel = null;
-    this.PercentWidth = null;
-    this.MinHeightPixel = null;
-    this.OverMainMinwidthPixel = null;
-    this.PixelWidth = null;
-    this.BtnClickedName = '';
   }
+
+  OpenSelectedForm(VirtualModuleViewType) {
+    switch (VirtualModuleViewType) {
+      // کمیسیون
+      case 1:
+        this.OnshowhistorydetailClick();
+        break;
+      case 2:
+        this.btnWorkFlowClick();
+        break;
+      case 3:
+        this.onShowRunningContractsClick();
+        break;
+      case 4:
+        this.isClicked = false;
+        this.PopUpType = '';
+        this.HaveMaxBtn = false;
+        this.PixelHeight = null;
+        this.MainMaxwidthPixel = null;
+        this.PercentWidth = null;
+        this.MinHeightPixel = null;
+        this.OverMainMinwidthPixel = null;
+        this.PixelWidth = null;
+        this.BtnClickedName = '';
+        this.Report.CorporateRep(
+          this.ModuleCode,
+          this.ActorId,
+          'چاپ اطلاعات تامین کننده حقوقی'
+        );
+        break;
+      case 5:
+        this.isClicked = false;
+        this.PopUpType = '';
+        this.HaveMaxBtn = false;
+        this.PixelHeight = null;
+        this.MainMaxwidthPixel = null;
+        this.PercentWidth = null;
+        this.MinHeightPixel = null;
+        this.OverMainMinwidthPixel = null;
+        this.PixelWidth = null;
+        this.BtnClickedName = '';
+        if (this.ActorId) {
+          this.Report.CorporateRep(
+            this.ModuleCode,
+            this.ActorId,
+            'چاپ کارت پیمانکاری'
+          );
+        } else {
+          this.ShowMessageBoxWithOkBtn('ابتدا شخص را انتخاب نمایید');
+          return;
+        }
+        break;
+      default:
+        this.PopUpType = '';
+        this.isClicked = false;
+        break;
+    }
+  }
+
+
+
+
   ShowMessageBoxWithOkBtn(message) {
     this.isClicked = true;
     this.PopUpType = 'message-box';
@@ -6119,6 +6210,7 @@ export class Corporate2Component implements OnInit {
     if (this.btnConfirmName === 'عدم تایید') {
       this.ModuleViewTypeCode = 2;
     }
+    console.log('🚀 نوع نمایش فعالیت: ' , this.ModuleViewTypeCode);
     switch (this.ModuleViewTypeCode) {
       case 1:
         this.IsEditable = true;
@@ -6188,6 +6280,7 @@ export class Corporate2Component implements OnInit {
         this.HaveBankInfo = true;
         this.ShowWorkflowButtons = false;
         this.ButtonsBoxWidth = 100;
+        this.ModuleCode = 2785;
         break;
       case 400000:
         this.CanEdite = true;
@@ -6215,6 +6308,13 @@ export class Corporate2Component implements OnInit {
     if (this.PopUpType === 'message-box' && this.IsEndFlow === 1 && this.BtnClickedName === 'ConfirmAndSend') {
       this.OnFinalConfirm();
     }
+
+    if (this.PopUpType == 'actor-note') {
+      this.ActorNote = event.ActorNote;
+      this.Note = event.Note;
+
+    }
+
   }
   OnFinalConfirm() {
     this.Cartable.UserConfirmWorkFlow(
@@ -6312,6 +6412,12 @@ export class Corporate2Component implements OnInit {
           this.ShowMessageBoxWithOkBtn('ابطال فرآیند با موفقیت انجام شد');
         }
       });
+    }
+    if (this.BtnClickedName === 'BtnSavecheckException' && event === 'YES') {
+      this.IsCheckException = true;
+      this.onSave();
+    } else if (this.BtnClickedName === 'BtnSavecheckException' && event === 'NO') {
+      this.IsCheckException = false;
     }
 
     this.isClicked = false;
@@ -6673,11 +6779,28 @@ export class Corporate2Component implements OnInit {
     }
   }
   btnPrintClick() {
-    this.Report.CorporateRep(
-      this.ModuleCode,
-      this.ActorId,
-      'چاپ اطلاعات تامین کننده حقوقی'
-    );
+    this.PopUpType = 'global-choose-page';
+    this.HaveHeader = true;
+    this.HaveMaxBtn = false;
+    this.startLeftPosition = 520;
+    this.startTopPosition = 220;
+    this.HeightPercentWithMaxBtn = null;
+    this.MinHeightPixel = null;
+    this.isClicked = true;
+    this.PopupParam = {
+      HeaderName: 'چاپ',
+      RadioItems: [
+        {
+          title: 'چاپ اطلاعات تامین کننده',
+          type: 4,
+        },
+        {
+          title: 'چاپ کارت پیمانکاری',
+          type: 5,
+        },
+
+      ]
+    };
   }
   onDocArchiveClick2(row) {
     if (row.ActorBusinessID && row.ActorBusinessID > 0) {
@@ -6946,6 +7069,7 @@ export class Corporate2Component implements OnInit {
       this.CorporateObject.Web = this.Web;
       this.CorporateObject.PostCode = this.PostCode;
       this.CorporateObject.Tel = this.Tel;
+      this.CorporateObject.RegisterReferenceId = this.NgSelectRegisterReferenceNameParams.selectedObject;
       this.CorporateObject.Email = this.Email;
       this.CorporateObject.Address = this.Address;
       this.CorporateObject.ActorNote = this.ActorNote;
@@ -6999,35 +7123,80 @@ export class Corporate2Component implements OnInit {
         this.CanSave = false;
         return;
       }
-      this.Actor.UpdateActorCorporatee(
-        this.ExecutionHistoryList,
-        // MovableAssetList,
-        this.ImmovablePropertyList,
-        this.CorporateSharesList,
-        this.ManagerCorporatePositionList,
-        ActorBusinessList,
-        this.OfficialGazetteList,
-        this.TechnicalPersonnelCorporatePositionList,
-        this.CorporateObject,
-        this.UserLocalImage,
-        equipmentandmachineryList,
-        affordabilityList,
-        this.BankrowData,
-        this.NgSelectActivityFieldParams.selectedObject,
-        //   ActorPropertyList,
-        this.FromWorkListCartable
-      ).subscribe(res => {
-        this.CorporateObject = res;
-        this.DisplaySearchBox = false;
-        this.TabsContentHeight = 72;
-        this.RolefielsetMarginTop = this.RolefielsetMarginBottom = 2;
-        this.ShowMessageBoxWithOkBtn('ثبت اطلاعات با موفقيت انجام شد');
-        this.FindActor(this.CorporateObject);
-        this.CanSave = false;
-      },
-        err => {
-          this.CanSave = false;
+      if (!this.IsCheckException) {
+        let StrExceptions = '';
+        this.Actor.CheckExceptionActorBusiness(ActorBusinessList, this.ActorId).subscribe((res: any) => {
+          if (res !== '') {
+            this.IsCheckException = true;
+            this.BtnClickedName = 'BtnSavecheckException';
+            StrExceptions = res;
+            StrExceptions = StrExceptions + ' ' + 'آیا می خواهید ادامه دهید؟';
+            this.ShowMessageBoxWithYesNoBtn(StrExceptions);
+          } else {
+            this.IsCheckException = false;
+            this.Actor.UpdateActorCorporatee(
+              this.ExecutionHistoryList,
+              // MovableAssetList,
+              this.ImmovablePropertyList,
+              this.CorporateSharesList,
+              this.ManagerCorporatePositionList,
+              ActorBusinessList,
+              this.OfficialGazetteList,
+              this.TechnicalPersonnelCorporatePositionList,
+              this.CorporateObject,
+              this.UserLocalImage,
+              equipmentandmachineryList,
+              affordabilityList,
+              this.BankrowData,
+              this.NgSelectActivityFieldParams.selectedObject,
+              //   ActorPropertyList,
+              this.FromWorkListCartable
+            ).subscribe(res => {
+              this.CorporateObject = res;
+              this.DisplaySearchBox = false;
+              this.TabsContentHeight = 72;
+              this.RolefielsetMarginTop = this.RolefielsetMarginBottom = 2;
+              this.ShowMessageBoxWithOkBtn('ثبت اطلاعات با موفقيت انجام شد');
+              this.FindActor(this.CorporateObject);
+              this.CanSave = false;
+            },
+              err => {
+                this.CanSave = false;
+              });
+          }
         });
+      } else {
+        this.IsCheckException = false;
+        this.Actor.UpdateActorCorporatee(
+          this.ExecutionHistoryList,
+          // MovableAssetList,
+          this.ImmovablePropertyList,
+          this.CorporateSharesList,
+          this.ManagerCorporatePositionList,
+          ActorBusinessList,
+          this.OfficialGazetteList,
+          this.TechnicalPersonnelCorporatePositionList,
+          this.CorporateObject,
+          this.UserLocalImage,
+          equipmentandmachineryList,
+          affordabilityList,
+          this.BankrowData,
+          this.NgSelectActivityFieldParams.selectedObject,
+          //   ActorPropertyList,
+          this.FromWorkListCartable
+        ).subscribe(res => {
+          this.CorporateObject = res;
+          this.DisplaySearchBox = false;
+          this.TabsContentHeight = 72;
+          this.RolefielsetMarginTop = this.RolefielsetMarginBottom = 2;
+          this.ShowMessageBoxWithOkBtn('ثبت اطلاعات با موفقيت انجام شد');
+          this.FindActor(this.CorporateObject);
+          this.CanSave = false;
+        },
+          err => {
+            this.CanSave = false;
+          });
+      }
     } else {
       this.CheckValidate = true;
       this.CanSave = false;
@@ -7143,8 +7312,8 @@ export class Corporate2Component implements OnInit {
       this.startTopPosition = 50;
       this.MinHeightPixel = 550;
       this.PixelHeight = 550;
-      this.PopupParam = {      
-        IsProviderContractList : true,
+      this.PopupParam = {
+        IsProviderContractList: true,
         ActorID: this.CorporateObject.ActorId,
         IdentityNo: this.IdentityNo,
         FirstName: this.ActorName,
@@ -7374,13 +7543,295 @@ export class Corporate2Component implements OnInit {
       this.startTopPosition = 10;
       this.PopupParam = {
         EntityID: row.CompanyAffordabilityID,
-        TypeCodeStr: '1187-', 
-        DocTypeCode: 1187, 
+        TypeCodeStr: '1187-',
+        DocTypeCode: 1187,
         ModuleCode: 2785,
         IsReadOnly: !this.IsEditable
-      }; 
+      };
       return;
     }
+  }
+  OnshowhistorydetailClick() {
+    if (this.CorporateObject && this.CorporateObject.ActorId) {
+      this.PopUpType = 'show-history-detail';
+      this.HaveHeader = true;
+      this.isClicked = true;
+      this.HaveMaxBtn = false;
+      this.startLeftPosition = 80;
+      this.startTopPosition = 20;
+
+      this.OverMainMinwidthPixel = 1200;
+      this.MainMaxwidthPixel = 1200;
+
+      this.PixelHeight = 600;
+      this.MinHeightPixel = 600;
+      let ObjectIDList = [];
+
+      this.PopupParam = {
+        ActorId: this.CorporateObject.ActorId,
+        HeaderName: 'مشاهده ریز اصلاحات',
+        ModuleCode: 2785
+      };
+    }
+  }
+  SetChangeFlag() {
+    this.CorporateNameChangeFlag = false;
+    this.IdentityNoChangeFlag = false;
+    this.RegisterReferenceIdChangeFlag = false;
+    this.RegisterNoChangeFlag = false;
+    this.EconomicCodeChangeFlag = false;
+    this.ActivityStartDateChangeFlag = false;
+    this.EmployeCountChangeFlag = false;
+    this.NoteChangeFlag = false;
+    this.AddressChangeFlag = false;
+    this.PostCodeChangeFlag = false;
+    this.FaxChangeFlag = false;
+    this.GradeRequestChangeFlag = false;
+    this.WebChangeFlag = false;
+    this.EmailChangeFlag = false;
+    this.OldNameChangeFlag = false;
+    this.ActivityFieldChangeFlag = false;
+    this.CorporateCityIDChangeFlag = false;
+    this.RequestDateChangeFlag = false;
+    this.IsLimitedRisponsibilityChangeFlag = false;
+    this.IsContractorChangeFlag = false;
+    this.IsConsultChangeFlag = false;
+    this.IsProducerChangeFlag = false;
+    this.IsSupplierChangeFlag = false;
+    this.IsInternalBuildersChangeFlag = false;
+    this.IsExternalBuildersChangeFlag = false;
+    this.CompanyAgentNameChangeFlag = false;
+    this.CompanyAgentTelChangeFlag = false;
+    this.ManagersCountChangeFlag = false;
+    this.SignedRightHoldersChangeFlag = false;
+    this.ManagersMinutesDateChangeFlag = false;
+    this.IsLimitedManagersEndDateChangeFlag = false;
+    this.ManagersEndDateChangeFlag = false;
+    this.CompanyAgentEmailChangeFlag = false;
+    this.CompanyAgentActorIDChangeFlag = false;
+    this.SubjectChangeFlag = false;
+    this.HaveHSEChangeFlag = false;
+    this.HaveBailChangeFlag = false;
+    this.HaveCertificateChangeFlag = false;
+    this.CellNoChangeFlag = false;
+    this.ActorNoteChangeFlag = false;
+    forkJoin([
+      this.Common.GetLastAuditByObjectID(this.ActorId),
+      this.Common.CheckAllowState(this.ActorId),
+    ]).subscribe(res => {
+      if (res[1] === true) {
+        this.needShowColor = true;
+        let ChangeActoBusinessObj = res[0].filter(x => x.TableName === 'ACTOR_BUSINESS');
+        let ActoBusinessObjList = [];
+        ChangeActoBusinessObj.forEach(element => {
+          this.RankrowsData.forEach(element2 => {
+            if (element.ObjectID === element2.data.ActorBusinessID) {
+              element2.data.IsChanged = true;
+            }
+            ActoBusinessObjList.push(element2.data);
+          });
+          this.RankrowsData = ActoBusinessObjList;
+        });
+
+        let OfficialGazettObjList = [];
+        let ChangeOfficialGazettObj = res[0].filter(x => x.TableName === 'OFFICIAL_GAZETTE');
+        ChangeOfficialGazettObj.forEach(element => {
+          this.OfficialGazetteRows.forEach(element2 => {
+            if (element.ObjectID === element2.data.OfficialGazetteID) {
+              element2.data.IsChanged = true;
+            }
+            OfficialGazettObjList.push(element2.data);
+          });
+          this.OfficialGazetteRows = OfficialGazettObjList;
+        });
+
+        let CorporatePositionObjList = [];
+        let ChangeCorporatePositionObj = res[0].filter(x => x.TableName === 'CORPORATE_POSITION');
+        ChangeCorporatePositionObj.forEach(element => {
+          this.ManagerCorporatePositionRows.forEach(element2 => {
+            if (element.ObjectID === element2.data.CorporatePositionID) {
+              element2.data.IsChanged = true;
+            }
+            CorporatePositionObjList.push(element2.data);
+          });
+          this.ManagerCorporatePositionRows = CorporatePositionObjList;
+        });
+        let ChangeCorporateObj = res[0].filter(x => x.TableName === 'CORPORATE');
+        ChangeCorporateObj.forEach(element => {
+          if (element.ColumnName == 'CORPORATE_NAME') {
+            this.CorporateNameChangeFlag = true;
+          } else if (element.ColumnName == 'IDENTITY_NO') {
+            this.IdentityNoChangeFlag = true;
+          } else if (element.ColumnName == 'REGISTER_REFERENCE_ID') {
+            this.RegisterReferenceIdChangeFlag = true;
+          } else if (element.ColumnName == 'REGISTER_NO') {
+            this.RegisterNoChangeFlag = true;
+          } else if (element.ColumnName == 'ACTIVITY_START_DATE') {
+            this.ActivityStartDateChangeFlag = true;
+          } else if (element.ColumnName == 'EMPLOYE_COUNT') {
+            this.EmployeCountChangeFlag = true;
+          } else if (element.ColumnName == 'NOTE') {
+            this.NoteChangeFlag = true;
+          } else if (element.ColumnName == 'GRADE_REQUEST') {
+            this.GradeRequestChangeFlag = true;
+          } else if (element.ColumnName == 'OLD_NAME') {
+            this.OldNameChangeFlag = true;
+          } else if (element.ColumnName == 'ACTIVITY_FIELD') {
+            this.ActivityFieldChangeFlag = true;
+          } else if (element.ColumnName == 'CITY_ID') {
+            this.CorporateCityIDChangeFlag = true;
+          } else if (element.ColumnName == 'REQUEST_DATE') {
+            this.RequestDateChangeFlag = true;
+          } else if (element.ColumnName == 'IS_LIMITED_RISPONSIBILITY') {
+            this.IsLimitedRisponsibilityChangeFlag = true;
+          } else if (element.ColumnName == 'COMPANY_AGENT_NAME') {
+            this.CompanyAgentNameChangeFlag = true;
+          } else if (element.ColumnName == 'COMPANY_AGENT_TEL') {
+            this.CompanyAgentTelChangeFlag = true;
+          } else if (element.ColumnName == 'MANAGERS_COUNT') {
+            this.ManagersCountChangeFlag = true;
+          } else if (element.ColumnName == 'SIGNED_RIGHT_HOLDERS') {
+            this.SignedRightHoldersChangeFlag = true;
+          } else if (element.ColumnName == 'MANAGERS_MINUTES_DATE') {
+            this.ManagersMinutesDateChangeFlag = true;
+          } else if (element.ColumnName == 'IS_LIMITED_MANAGERS_END_DATE') {
+            this.IsLimitedManagersEndDateChangeFlag = true;
+          } else if (element.ColumnName == 'MANAGERS_END_DATE') {
+            this.ManagersEndDateChangeFlag = true;
+          } else if (element.ColumnName == 'COMPANY_AGENT_EMAIL') {
+            this.CompanyAgentEmailChangeFlag = true;
+          } else if (element.ColumnName == 'COMPANY_AGENT_ACTOR_ID') {
+            this.CompanyAgentActorIDChangeFlag = true;
+          }
+        });
+        let ChangeActorObj = res[0].filter(x => x.TableName === 'ACTOR');
+        ChangeActorObj.forEach(element => {
+          if (element.ColumnName == 'ECONOMIC_CODE') {
+            this.EconomicCodeChangeFlag = true;
+          } else if (element.ColumnName == 'ADDRESS') {
+            this.AddressChangeFlag = true;
+          } else if (element.ColumnName == 'POST_CODE') {
+            this.PostCodeChangeFlag = true;
+          } else if (element.ColumnName == 'FAX') {
+            this.FaxChangeFlag = true;
+          } else if (element.ColumnName == 'WEB') {
+            this.WebChangeFlag = true;
+          } else if (element.ColumnName == 'EMAIL') {
+            this.EmailChangeFlag = true;
+          } else if (element.ColumnName == 'CELL') {
+            this.CellNoChangeFlag = true;
+          } else if (element.ColumnName == 'NOTE') {
+            this.ActorNoteChangeFlag = true;
+          }
+        });
+        let ChangeActorRoleObj = res[0].filter(x => x.TableName === 'ACTOR_ROLE');
+        ChangeActorRoleObj.forEach(element => {
+          if (element.ColumnName == 'IS_CONTRACTOR') {
+            this.IsContractorChangeFlag = true;
+          } else if (element.ColumnName == 'IS_CONSULT') {
+            this.IsConsultChangeFlag = true;
+          } else if (element.ColumnName == 'IS_PRODUCER') {
+            this.IsProducerChangeFlag = true;
+          } else if (element.ColumnName == 'IS_SUPPLIER') {
+            this.IsSupplierChangeFlag = true;
+          } else if (element.ColumnName == 'IS_INTERNAL_BUILDERS') {
+            this.IsInternalBuildersChangeFlag = true;
+          } else if (element.ColumnName == 'IS_EXTERNAL_BUILDERS') {
+            this.IsExternalBuildersChangeFlag = true;
+          }
+        });
+        let ChangeActorPropertyObj = res[0].filter(x => x.TableName === 'ACTOR_PROPERTY');
+        ChangeActorPropertyObj.forEach(element => {
+          if (element.ColumnName == 'SUBJECT') {
+            this.SubjectChangeFlag = true;
+          } else if (element.ColumnName == 'HAVE_HSE') {
+            this.HaveHSEChangeFlag = true;
+          } else if (element.ColumnName == 'HAVE_BAIL') {
+            this.HaveBailChangeFlag = true;
+          } else if (element.ColumnName == 'HAVE_CERTIFICATE') {
+            this.HaveCertificateChangeFlag = true;
+          }
+        });
+      } else {
+        this.needShowColor = false;
+      }
+    });
+  }
+
+  ShowActor() {
+    this.isClicked = true;
+    this.PopUpType = 'actor-note';
+    this.HaveHeader = true;
+    this.HaveMaxBtn = true;
+    this.PercentWidth = 72;
+    this.MinHeightPixel = 500;
+    this.MainMaxwidthPixel = 2000;
+    this.HeightPercentWithMaxBtn = 72;
+    this.startLeftPosition = 210;
+    this.startTopPosition = 10;
+    this.PopupParam =
+    {
+      ActorNote: this.ActorNote,
+      Note: this.Note,
+      IsEditable: this.IsEditable,
+      IsDisplay: this.IsDisplay,
+      IsEditableForType3: this.IsEditableForType3
+
+
+    }
+
+  }
+
+  OnshowClick() {
+    this.PopUpType = 'global-choose-page';
+    this.HaveHeader = true;
+    this.HaveMaxBtn = false;
+    this.startLeftPosition = 520;
+    this.startTopPosition = 220;
+    this.HeightPercentWithMaxBtn = null;
+    this.MinHeightPixel = null;
+    this.isClicked = true;
+    if (this.ActorId) {
+      this.PopupParam = {
+        HeaderName: 'مشاهده',
+        RadioItems: [
+          {
+            title: 'مشاهده ریز اصطلاحات',
+            type: 1,
+            checked: true,
+          },
+          {
+            title: 'تاریخچه گردش',
+            type: 2,
+          },
+          {
+            title: 'موارد موثر در کسر ظرفیت کل',
+            type: 3,
+          }
+        ]
+      };
+    }
+    if (!this.ActorId) {
+      this.PopupParam = {
+        HeaderName: 'مشاهده',
+        RadioItems: [
+          {
+            title: 'مشاهده ریز اصطلاحات',
+            type: 1,
+            checked: true,
+          },
+          {
+            title: 'موارد موثر در کسر ظرفیت کل',
+            type: 3,
+          }
+        ]
+      };
+    }
+
+
+  }
+
+  onCellClickedd(event) {
   }
 }
 

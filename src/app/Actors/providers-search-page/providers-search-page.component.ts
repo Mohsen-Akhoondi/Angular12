@@ -4,7 +4,6 @@ import { RegionListService } from 'src/app/Services/BaseService/RegionListServic
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
-import { isNumber, isNullOrUndefined } from 'util';
 
 @Component({
   selector: 'app-providers-search-page',
@@ -101,6 +100,24 @@ export class ProvidersSearchPageComponent implements OnInit {
     Required: true,
     type: 'ExeUnit'
   };
+  FromRank;
+  ToRank;
+  CourseItems;
+  PriceListTopicID;
+  CourseParams =
+    {
+      bindLabelProp: 'PriceListTopicName',
+      bindValueProp: 'PriceListTopicID',
+      selectedObject: null,
+      IsDisabled: false,
+      loading: false,
+      MinWidth: '100px',
+      DropDownMinWidth: '200px',
+      IsVirtualScroll: false,
+      type: 'price-list-topic'
+    };
+  RegisterNo;
+  TotalCount;
 
   constructor(private router: Router,
     private RegionList: RegionListService,
@@ -125,6 +142,14 @@ export class ProvidersSearchPageComponent implements OnInit {
     this.ProviderDate = ADate.MDate;
   }
   Search() {
+    if (this.IsCorporate) {
+      if (this.FromRank != null && this.ToRank == null) {
+        this.ToRank = this.FromRank;
+      }
+      if (this.ToRank != null && this.FromRank == null) {
+        this.FromRank = this.ToRank;
+      }
+    }
     // const IsCorporate = this.IsCorporate;
     this.Actor.ProvidersSearch(
       this.IsCorporate,
@@ -132,15 +157,21 @@ export class ProvidersSearchPageComponent implements OnInit {
       this.IdentityNo,
       this.ProviderDate,
       this.Cell,
-      this.BusinessPatternCode,
+      this.BusinessPatternParams.selectedObject,
       this.VWExeUnitParams.selectedObject,
       this.RoleID,
-      this.LoginName
+      this.LoginName,
+      parseInt(this.FromRank),
+      parseInt(this.ToRank),
+      this.CourseParams.selectedObject,
+      this.RegisterNo
     ).subscribe(res => {
       if (this.IsCorporate) {
         this.CorporaterowData = res;
+        this.TotalCount = res.length;
       } else {
         this.PersonrowData = res;
+        this.TotalCount = res.length;
       }
     });
   }
@@ -153,6 +184,10 @@ export class ProvidersSearchPageComponent implements OnInit {
     this.ProviderDate = '';
     this.Cell = '';
     this.LoginName = '';
+    this.FromRank = '';
+    this.ToRank = '';
+    this.RegisterNo = '';
+    this.TotalCount = '';
   }
   onCorporateGridReady(params: { api: any; }) {
     this.CgridApi = params.api;
@@ -215,7 +250,7 @@ export class ProvidersSearchPageComponent implements OnInit {
       {
         headerName: 'رديف ',
         field: 'ItemNo',
-        width: 100,
+        width: 60,
         resizable: true,
       },
       {
@@ -242,6 +277,7 @@ export class ProvidersSearchPageComponent implements OnInit {
         field: 'LoginName',
         width: 200,
         resizable: true,
+        hide: (this.ModuleCode === 3092) ? true : false,
       },
       {
         headerName: 'شناسه ملی ',
@@ -259,13 +295,15 @@ export class ProvidersSearchPageComponent implements OnInit {
         headerName: 'محل هزینه',
         field: 'UnitTopicName',
         width: 160,
-        resizable: true
+        resizable: true,
+        hide: (this.ModuleCode === 3092) ? true : false,
       },
       {
         headerName: 'کسب و کار',
         field: 'BusinessPatternName',
         width: 160,
         resizable: true,
+        hide: (this.ModuleCode === 3092) ? true : false,
       },
       {
         headerName: 'شماره همراه',
@@ -341,12 +379,19 @@ export class ProvidersSearchPageComponent implements OnInit {
           ngTemplate: this.ShowRunningContracts,
         }
       },
+      {
+        headerName: 'آدرس',
+        field: 'Address',
+        width: 400,
+        resizable: true,
+        hide: (this.ModuleCode === 3092) ? false : true,
+      },
     ];
     this.PersoncolumnDef = [
       {
         headerName: 'رديف ',
         field: 'ItemNo',
-        width: 100,
+        width: 60,
         resizable: true,
       },
       {
@@ -373,6 +418,7 @@ export class ProvidersSearchPageComponent implements OnInit {
         field: 'LoginName',
         width: 200,
         resizable: true,
+        hide: (this.ModuleCode === 3092) ? true : false,
       },
       {
         headerName: 'کد ملی ',
@@ -411,6 +457,19 @@ export class ProvidersSearchPageComponent implements OnInit {
       //   resizable: true,
       // }
     ];
+    this.OnOpenNgSelect('ExeUnit');
+
+    if (this.ModuleCode == 3092) {
+      this.OnOpenNgSelect('BusinessPattern');
+
+    }
+
+    if (this.ModuleCode == 3092) {
+      this.Actor.GetPriceListTopicByBusinesPatternID(4114, false).subscribe(res => {
+        this.CourseItems = res;
+        this.CourseParams.selectedObject = res[0].PriceListTopicID;
+      });
+    }
   }
   ShowMessageBoxWithOkBtn(message) {
     this.isClicked = true;
@@ -432,21 +491,46 @@ export class ProvidersSearchPageComponent implements OnInit {
         });
         break;
       case 'BusinessPattern':
-        this.Actor.GetBusinessPatternListByUnitPatternID(this.UnitPatternID, false).subscribe(res => {
-          this.BusinessPatternItems = res;
+        if (this.ModuleCode == 3092) {
+          this.Actor.GetBusinessPatternListByUnitPatternID(190, false).subscribe(res => {
+            this.BusinessPatternItems = res;
+            this.BusinessPatternParams.selectedObject = res[3].BusinessPatternID;
+            // this.BusinessPatternCode = res[3].BusinessPatternID;
+          });
+        } else {
+          this.Actor.GetBusinessPatternListByUnitPatternID(this.UnitPatternID, false).subscribe(res => {
+            this.BusinessPatternItems = res;
+          });
+        }
+        break;
+      case 'ExeUnit':
+        this.ProductRequest.GetVWExeUnit().subscribe(res => {
+          this.ExeUnitItems = res;
+          if (this.ModuleCode == 3092) {
+            this.VWExeUnitParams.selectedObject = res[5].UnitPatternID;
+          }
         });
         break;
-        case 'ExeUnit':
-          this.ProductRequest.GetVWExeUnit().subscribe(res => {
-            this.ExeUnitItems = res;
-          });
-          break;
+      case 'price-list-topic':
+        if (this.BusinessPatternParams.selectedObject == null) {
+          this.PopUpType = 'message-box';
+          this.HaveHeader = true;
+          this.alertMessageParams.message = 'ابتدا کسب و کار را انتخاب نمایید';
+          this.isClicked = true;
+          this.startLeftPosition = 500;
+          this.startTopPosition = 250;
+          return;
+        }
+        this.Actor.GetPriceListTopicByBusinesPatternID(this.BusinessPatternParams.selectedObject, false).subscribe(res => {
+          this.CourseItems = res;
+        });
+        break;
       default:
         break;
     }
   }
   onChangeBusinessPattern(event) {
-    this.BusinessPatternCode = event;
+    // this.BusinessPatternCode = event;
   }
   onChangeExeUnit(event) {
     this.UnitPatternID = event;
@@ -454,6 +538,9 @@ export class ProvidersSearchPageComponent implements OnInit {
   }
   onChangeRole(event) {
     this.RoleID = event;
+  }
+  onChangeCourse(event) {
+    this.PriceListTopicID = event;
   }
   onShowRunningContractsClick(row) {
     if (row) {

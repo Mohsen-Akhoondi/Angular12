@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, TemplateRef, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';

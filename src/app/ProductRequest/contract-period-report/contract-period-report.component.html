@@ -2,11 +2,11 @@
   <table style="width: 100%;">
     <tr>
       <td width="25%">
-        <span class="table-cell-Lable">گروه واحد اجرايي</span>
-        <app-ng-select-virtual-scroll style="display: inline-block;width: 74%;" class="select-general-for-lable"
-          [NgSelectParams]="NgSelectRegionParams" (selectedChange)="onChangeReigonObj($event)"
-          [Items]="ReigonListSet">
-        </app-ng-select-virtual-scroll>
+        <span class="table-cell-Lable">واحد اجرایی</span>
+            <app-ng-select-virtual-scroll style="display: inline-block;width: 74%;" [NgSelectParams]="RegionParams"
+              (selectedChange)="onChangeRegionObj($event)" [Items]="ReigonListSet">
+            </app-ng-select-virtual-scroll>
+      
       </td>
       <td width="25%">
         <span class="table-cell-Lable"> دفعات تجديد </span>

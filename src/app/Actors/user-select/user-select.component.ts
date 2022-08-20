@@ -3,13 +3,8 @@ import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsSe
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { Router } from '@angular/router';
-import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
-import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-import { of } from 'rxjs';
-import { log } from 'util';
-import { resolve } from 'path';
 import { RadioBoxModel } from 'src/app/Shared/Radio-Box/Radio-Box-Model/RadioBoxModel';
 declare var jquery: any;
 declare var $: any;
@@ -415,6 +410,7 @@ export class UserSelectComponent implements OnInit {
           UserID: userid,
           Roles: this.SelectedUserRoles,
           ActorName: this.ActorName,
+          SelectType: 1
         };
         this.SearchResult.emit(UserInfo);
         this.Closed.emit(true);
@@ -432,6 +428,27 @@ export class UserSelectComponent implements OnInit {
     this.NgSelectPersonParams.selectedObject = null;
     this.NgSelectCorporateParams.selectedObject = null;
     this.TypeContractor = Type;
+  }
+  onChangeMenu() {
+    if (this.UserID && ((!this.TypeContractor && this.NgSelectPersonParams.selectedObject) || (this.TypeContractor && this.NgSelectCorporateParams.selectedObject))) {
+      // tslint:disable-next-line: no-shadowed-variable
+      const promise = new Promise((resolve) => {
+        this.Actor.SetSelectedUserSessionForMenu(this.UserID).subscribe(res => {
+          resolve(res);
+        });
+      }).then((userid) => {
+        const UserInfo = {
+          UserID: userid,
+          Roles: this.SelectedUserRoles,
+          ActorName: this.ActorName,
+          SelectType: 2
+        };
+        this.SearchResult.emit(UserInfo);
+        this.Closed.emit(true);
+      });
+    } else {
+      this.ShowMessageBoxWithOkBtn('کاربری انتخاب نشده است.');
+    }
   }
 }
 

@@ -1,14 +1,14 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
 import { CommonService } from 'src/app/Services/CommonService/CommonService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
-import { ThrowStmt } from '@angular/compiler';
 import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { FinYearService } from 'src/app/Services/BaseService/FinYearService';
+import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 
 @Component({
   selector: 'app-rank-calc',
@@ -18,6 +18,7 @@ import { FinYearService } from 'src/app/Services/BaseService/FinYearService';
 export class RankCalcComponent implements OnInit {
   ModuleCode: number;
   IsHideProduct: boolean;
+  IsHideRelatedGoods = true;
 
   constructor(
     private PriceList: PriceListService,
@@ -178,7 +179,27 @@ export class RankCalcComponent implements OnInit {
     DropDownMinWidth: '100px',
     type: 'to-fin-year'
   };
+  OwnerShipParams = {
+    bindLabelProp: 'OwnerShipName',
+    bindValueProp: 'OwnershipTypeID',
+    placeholder: '',
+    MinWidth: '90px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    DropDownMinWidth: '100px',
+    type: 'Related'
+  };
   IsShowRegion;
+  IsRelatedItems = [
+    { IsRelated: 1, RelatedName: 'مرتبط' },
+    { IsRelated: 2, RelatedName: 'غیر مرتبط' }
+  ];
+  IsOwnerShipItems = [
+    { OwnershipTypeID: 4, OwnerShipName: 'تملیکی' },
+    { OwnershipTypeID: 1, OwnerShipName: 'استیجاری' }
+  ];
 
   ngOnInit() {
     this.rowData = [];
@@ -214,6 +235,7 @@ export class RankCalcComponent implements OnInit {
 
   ColumnDefinition() {
     this.IsHideProduct = true;
+    this.IsHideRelatedGoods = true;
 
     if (this.ModuleCode === 2938) {
 
@@ -229,11 +251,35 @@ export class RankCalcComponent implements OnInit {
       let IsHideToScore = true;
       let IsHideFromScore = true;
       let IsHidePrivilege = true;
+      let IsHideRelated = true;
+      let IsHideOwnerShip = true;
+      if ((this.PriceListTopicParam.selectedObject === 400418 ||
+        this.PriceListTopicParam.selectedObject === 402032) &&
+        (this.RankParameterParams.selectedObject === 14 ||
+          this.RankParameterParams.selectedObject === 15 ||
+          this.RankParameterParams.selectedObject === 18)) {
+        IsHideRelated = false;
+        RankHeaderName = 'امتیاز مدرک تحصیلی';
+        ValueHeaderName = 'امتیاز سابقه کار';
+        this.IsHideProduct = true;
+        this.IsHideRelatedGoods = true;
+        IsHideEdu = false;
+      }
+      if (this.RankParameterParams.selectedObject === 3 &&
+        (this.PriceListTopicParam.selectedObject === 400418 ||
+          this.PriceListTopicParam.selectedObject === 402032)) {
+        this.IsHideProduct = false;
+        this.IsHideRelatedGoods = true;
+        IsHideOwnerShip = false;
+        IsHideEdu = true;
+        IsHideValue = true;
+      }
 
       if (this.RankParameterParams.selectedObject === 1) {
         RankHeaderName = 'امتیاز مدرک تحصیلی';
         ValueHeaderName = 'امتیاز سابقه کار';
         this.IsHideProduct = true;
+        this.IsHideRelatedGoods = true;
         IsHideEdu = false;
       }
 
@@ -241,17 +287,22 @@ export class RankCalcComponent implements OnInit {
         ValueHeaderName = 'میانگین حساب';
         PrivilegeHeaderName = 'مانده موجودی حساب';
         this.IsHideProduct = true;
+        this.IsHideRelatedGoods = true;
         IsHideScore = IsHideEdu = true;
         IsHidePrivilege = false;
       }
 
-      if (this.RankParameterParams.selectedObject === 3) {
+      if (this.RankParameterParams.selectedObject === 3 &&
+        this.PriceListTopicParam.selectedObject !== 400418 &&
+        this.PriceListTopicParam.selectedObject !== 402032) {
         this.IsHideProduct = false;
+        this.IsHideRelatedGoods = false;
         IsHideEdu = true;
       }
 
       if (this.RankParameterParams.selectedObject === 10) {
         this.IsHideProduct = IsHideScore = IsHideFinYear = false;
+        this.IsHideRelatedGoods = false;
         IsHideEdu = true;
         IsHideValue = IsHideRank = !IsHideFinYear;
         ScoreHeaderName = 'امتیاز';
@@ -259,6 +310,7 @@ export class RankCalcComponent implements OnInit {
 
       if (this.RankParameterParams.selectedObject === 11) {
         this.IsHideProduct = IsHideValue = IsHideFinYear = true;
+        this.IsHideRelatedGoods = true;
         IsHideEdu = IsHideRank = true;
         IsHideScore = IsHideFromScore = IsHideToScore = false;
         ScoreHeaderName = 'ضریب';
@@ -266,12 +318,12 @@ export class RankCalcComponent implements OnInit {
 
       if (this.RankParameterParams.selectedObject === 12) {
         this.IsHideProduct = IsHideFinYear = true;
+        this.IsHideRelatedGoods = true;
         IsHideFromScore = IsHideToScore = IsHideEdu = IsHideRank = true;
         IsHideScore = IsHideValue = false;
         ValueHeaderName = 'تعداد اخطار';
         ScoreHeaderName = 'امتیاز';
       }
-
       this.SelectedColumnDef = [
         {
           headerName: 'ردیف ',
@@ -314,9 +366,43 @@ export class RankCalcComponent implements OnInit {
           sortable: true
         },
         {
+          headerName: 'مرتبط/غیر مرتبط',
+          field: 'RelatedName',
+          cellEditorFramework: NgSelectCellEditorComponent,
+          hide: IsHideRelated,
+          cellEditorParams: {
+            HardCodeItems: this.IsRelatedItems,
+            bindLabelProp: 'RelatedName',
+            bindValueProp: 'IsRelated'
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.RelatedName;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.RelatedName) {
+              params.data.RelatedName = params.newValue.RelatedName;
+              params.data.IsRelated = params.newValue.IsRelated;
+              return true;
+            } else {
+              params.data.RelatedName = '';
+              params.data.IsRelated = null;
+              return false;
+            }
+          },
+          editable: true,
+          width: 150,
+          resizable: true,
+          sortable: true
+        },
+        {
           headerName: 'نوع خودرو',
           field: 'GoodsName',
-          width: 200,
+          width: 300,
           hide: this.IsHideProduct,
           cellEditorFramework: NgSelectVirtualScrollComponent,
           cellEditorParams: {
@@ -422,6 +508,40 @@ export class RankCalcComponent implements OnInit {
           editable: true
         },
         {
+          headerName: 'نوع مالکیت',
+          field: 'OwnerShipName',
+          width: 100,
+          hide: IsHideOwnerShip,
+          cellEditorFramework: NgSelectVirtualScrollComponent,
+          cellEditorParams: {
+            Params: this.OwnerShipParams,
+            Items: this.IsOwnerShipItems,
+            Owner: this
+          },
+          cellRenderer: 'SeRender',
+          valueFormatter: function currencyFormatter(params) {
+            if (params.value) {
+              return params.value.OwnerShipName;
+            } else {
+              return '';
+            }
+          },
+          valueSetter: (params) => {
+            if (params.newValue && params.newValue.OwnerShipName) {
+              params.data.OwnerShipName = params.newValue.OwnerShipName;
+              params.data.OwnershipTypeID = params.newValue.OwnershipTypeID;
+              return true;
+            } else {
+              params.data.OwnerShipName = '';
+              params.data.OwnershipTypeID = null;
+              return false;
+            }
+          },
+          resizable: true,
+          sortable: true,
+          editable: true
+        },
+        {
           headerName: 'تا امتیاز',
           field: 'ToScore',
           width: 350,
@@ -451,7 +571,7 @@ export class RankCalcComponent implements OnInit {
           headerName: 'خودرو جایگزین',
           field: 'RelatedGoodsName',
           width: 200,
-          hide: this.IsHideProduct,
+          hide: this.IsHideRelatedGoods,
           cellEditorFramework: NgSelectVirtualScrollComponent,
           cellEditorParams: {
             Params: this.NgSelectRelatedGoodsParams,
@@ -720,9 +840,9 @@ export class RankCalcComponent implements OnInit {
 
   onChangePriceListTopic(event) {
     this.PriceListTopicParam.selectedObject = event;
-    if (this.ModuleCode === 2946) {
-      this.ColumnDefinition();
-    }
+    // if (this.ModuleCode === 2946) {
+    this.ColumnDefinition();
+    // }
     this.FillData();
   }
 
@@ -752,7 +872,7 @@ export class RankCalcComponent implements OnInit {
         RankParameterCode: this.RankParameterParams.selectedObject,
         ProductID: node.ProductID ? node.ProductID : null,
         Value: node.Value ? node.Value : 0,
-        FromScore: node.FromScore ? node.FromScore : null,
+        FromScore: (node.FromScore || node.FromScore === 0) ? node.FromScore : null,
         ToScore: node.ToScore ? node.ToScore : null,
         RegionCode: node.RegionCode,
         Score: node.Score ? node.Score : null,
@@ -760,16 +880,18 @@ export class RankCalcComponent implements OnInit {
         ToYear: node.ToYear,
         DistrictDirectionCode: node.DistrictDirectionCode,
         Privilege: node.Privilege,
-        RelatedProductID: node.RelatedProductID
+        RelatedProductID: node.RelatedProductID,
+        IsRelated: (node.IsRelated !== null && node.IsRelated !== undefined) ? ((node.IsRelated === 1 || node.IsRelated === true) ? 1 : 0) : null,
+        OwnershipTypeID: node.OwnershipTypeID
       };
       RankList.push(RankCalcListObj);
     });
 
     this.Common.SaveRankCalc(this.PriceListTopicParam.selectedObject, this.RankParameterParams.selectedObject,
-                             this.RegionParams.selectedObject, RankList).subscribe((res: any) => {
-      this.FillData();
-      this.ShowMessageBoxWithOkBtn('ثبت اطلاعات با موفقيت انجام شد');
-    });
+      this.RegionParams.selectedObject, RankList).subscribe((res: any) => {
+        this.FillData();
+        this.ShowMessageBoxWithOkBtn('ثبت اطلاعات با موفقيت انجام شد');
+      });
 
   }
 
@@ -810,7 +932,7 @@ export class RankCalcComponent implements OnInit {
         });
       });
     } else if (this.ModuleCode === 2946 && this.RankParameterParams.selectedObject === 5 && event.colDef && event.colDef.field === 'Value') {
-        this.ProductRequest.GetRegionAreaList(this.RegionParams.selectedObject).subscribe(res => {   
+      this.ProductRequest.GetRegionAreaList(this.RegionParams.selectedObject).subscribe(res => {
         this.RefreshEquipmentTypeItems.RefreshItemsVirtualNgSelect({
           List: res,
           type: 'district'
@@ -830,7 +952,7 @@ export class RankCalcComponent implements OnInit {
           type: 'from-fin-year'
         });
       });
-    }  else if (event.colDef && event.colDef.field === 'ToYear') {
+    } else if (event.colDef && event.colDef.field === 'ToYear') {
       this.Finyearserv.GetFinYearList().subscribe(res => {
         this.RefreshEquipmentTypeItems.RefreshItemsVirtualNgSelect({
           List: res,
@@ -844,7 +966,7 @@ export class RankCalcComponent implements OnInit {
           type: 'region'
         });
       });
-    } else  if (event.colDef && event.colDef.field === 'RelatedGoodsName') {
+    } else if (event.colDef && event.colDef.field === 'RelatedGoodsName') {
       this.Common.GetGoodsListRankCalc(this.PriceListTopicParam.selectedObject).subscribe(res => {
         this.RefreshEquipmentTypeItems.RefreshItemsVirtualNgSelect({
           List: res,
@@ -874,7 +996,7 @@ export class RankCalcComponent implements OnInit {
     this.HaveMaxBtn = false;
     this.startLeftPosition = 530;
     this.startTopPosition = 95;
-    this.paramObj = { PriceListTopicID : this.PriceListTopicParam.selectedObject};
+    this.paramObj = { PriceListTopicID: this.PriceListTopicParam.selectedObject };
   }
 
 }

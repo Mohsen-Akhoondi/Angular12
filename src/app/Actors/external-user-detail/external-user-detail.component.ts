@@ -24,58 +24,58 @@ export class ExternalUserDetailComponent implements OnInit {
   NationalCode = '';
 
   constructor(private router: Router,
-              private Actor: ActorService,
-              private route: ActivatedRoute,
-              ) {
-                this.route.params.subscribe(params => {
-                  this.ModuleCode = +params['ModuleCode'];
-                });
+    private Actor: ActorService,
+    private route: ActivatedRoute,
+  ) {
+    this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
 
-                this.MaincolumnDef = [
-                  {
-                    headerName: 'ردیف',
-                    field: 'ItemNo',
-                    width: 50,
-                    resizable: true,
-                  },
-                  {
-                    headerName: 'نام کاربری',
-                    field: 'username',
-                    width: 100,
-                    resizable: true,
-                  },
-                  {
-                    headerName: 'کد / شناسه ملی',
-                    field: 'nationalCode',
-                    width: 110,
-                    resizable: true,
-                  },
-                  {
-                    headerName: 'نام',
-                    field: 'firstName',
-                    width: 120,
-                    resizable: true,
-                  },
-                  {
-                    headerName: 'نام خانوادگی',
-                    field: 'lastName',
-                    width: 120,
-                    resizable: true,
-                  },
-                  {
-                    headerName: 'تلفن همراه',
-                    field: 'mobile',
-                    width: 120,
-                    resizable: true,
-                  },
-                  {
-                    headerName: 'پست الکترونیک',
-                    field: 'email',
-                    width: 150,
-                    resizable: true,
-                  },
-                ];
-               }
+    this.MaincolumnDef = [
+      {
+        headerName: 'ردیف',
+        field: 'ItemNo',
+        width: 50,
+        resizable: true,
+      },
+      {
+        headerName: 'نام کاربری',
+        field: 'username',
+        width: 100,
+        resizable: true,
+      },
+      {
+        headerName: 'کد / شناسه ملی',
+        field: 'nationalCode',
+        width: 110,
+        resizable: true,
+      },
+      {
+        headerName: 'نام',
+        field: 'firstName',
+        width: 120,
+        resizable: true,
+      },
+      {
+        headerName: 'نام خانوادگی',
+        field: 'lastName',
+        width: 120,
+        resizable: true,
+      },
+      {
+        headerName: 'تلفن همراه',
+        field: 'mobile',
+        width: 120,
+        resizable: true,
+      },
+      {
+        headerName: 'پست الکترونیک',
+        field: 'email',
+        width: 150,
+        resizable: true,
+      },
+    ];
+  }
 
   ngOnInit() {
   }
@@ -90,7 +90,7 @@ export class ExternalUserDetailComponent implements OnInit {
 
   onSearchUserDeails() {
     if ((!this.UserName || isUndefined(this.UserName) || this.UserName === '' || this.UserName === ' ')
-    && (!this.NationalCode || isUndefined(this.NationalCode) || this.NationalCode === '' || this.NationalCode === ' ')) {
+      && (!this.NationalCode || isUndefined(this.NationalCode) || this.NationalCode === '' || this.NationalCode === ' ')) {
       this.ShowMessageBoxWithOkBtn('برای جستجو، یکی از فیلدها باید پر باشد.');
       return;
     } else if (this.UserName && this.NationalCode) {

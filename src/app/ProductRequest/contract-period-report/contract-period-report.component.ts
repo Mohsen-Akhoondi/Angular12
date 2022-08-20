@@ -1,15 +1,6 @@
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
-import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
-import { ModuleService } from 'src/app/Services/BaseService/ModuleService';
-import { GridOptions } from 'ag-grid-community';
-import { of, Observable } from 'rxjs';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Input, Component, OnInit } from '@angular/core';
-import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
-import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { resolve } from 'url';
-import { reject } from 'q';
+import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 
@@ -19,19 +10,19 @@ import { ReportService } from 'src/app/Services/ReportService/ReportService';
   styleUrls: ['./contract-period-report.component.css']
 })
 export class ContractPeriodReportComponent implements OnInit {
-  NgSelectRegionParams = { // ok
-    Items: [],
-    bindLabelProp: 'RegionGroupName',
-    bindValueProp: 'RegionGroupCode',
+
+  RegionParams = {
+    bindLabelProp: 'RegionName',
+    bindValueProp: 'RegionCode',
     placeholder: '',
     MinWidth: '150px',
     selectedObject: null,
     loading: false,
     IsVirtualScroll: false,
-    Required: true,
-    clearable: false,
     IsDisabled: false,
-  }
+    Required: true
+  };
+
   ReigonListSet = [];
 
   FromContractDate: any;
@@ -77,7 +68,7 @@ export class ContractPeriodReportComponent implements OnInit {
     this.ColumnsDefinition();
   }
   getNewData(): void {
-    this.RegionGroup.GetRegionGroupList().subscribe(res => {
+    this.RegionGroup.GetAllRegion().subscribe(res => {
       this.ReigonListSet = res;
 
     });
@@ -122,7 +113,7 @@ export class ContractPeriodReportComponent implements OnInit {
   }
 
   onPrint(Type) {
-    if (this.NgSelectRegionParams.selectedObject === null) {
+    if (this.RegionParams.selectedObject === null) {
       this.ShowMessageBoxWithOkBtn('واحد اجرايي انتخاب نشده است');
     } else {
       let StrType = 'گزارش ميانگين زمان قرارداد به ريز';
@@ -134,14 +125,13 @@ export class ContractPeriodReportComponent implements OnInit {
         StrType = 'گزارش ميانگين زمان انتظار در هر مرحله';
       }
       this.Report.ContractPeriodReport(
-        this.NgSelectRegionParams.selectedObject,
+        this.RegionParams.selectedObject,
         this.FromProductRequestDate,
         this.ToProductRequestDate,
         this.FromContractDate,
         this.ToContractDate,
         this.NgSelectTimesParams.selectedObject,
         2864,
-        0,
         StrType);
     }
   }
@@ -290,12 +280,12 @@ export class ContractPeriodReportComponent implements OnInit {
     }
   }
   TotalySearch() {
-    if (this.NgSelectRegionParams.selectedObject === null) {
+    if (this.RegionParams.selectedObject === null) {
       this.ShowMessageBoxWithOkBtn('واحد اجرايي انتخاب نشده است');
       return;
     }
     this.ProductRequest.GetContractPeriodTotaly(
-      this.NgSelectRegionParams.selectedObject,
+      this.RegionParams.selectedObject,
       this.FromProductRequestDate,
       this.ToProductRequestDate,
       this.FromContractDate,
@@ -311,12 +301,12 @@ export class ContractPeriodReportComponent implements OnInit {
     this.ColumnsDefinition('Totaly');
   }
   DetailSearch() {
-    if (this.NgSelectRegionParams.selectedObject === null) {
+    if (this.RegionParams.selectedObject === null) {
       this.ShowMessageBoxWithOkBtn('واحد اجرايي انتخاب نشده است');
       return;
     }
     this.ProductRequest.GetContractPeriodDetail(
-      this.NgSelectRegionParams.selectedObject,
+      this.RegionParams.selectedObject,
       this.FromProductRequestDate,
       this.ToProductRequestDate,
       this.FromContractDate,
@@ -331,25 +321,26 @@ export class ContractPeriodReportComponent implements OnInit {
     this.ColumnsDefinition('Detail');
   }
   WFAverageSearch() {
-    if (this.NgSelectRegionParams.selectedObject === null) {
+    if (this.RegionParams.selectedObject === null) {
       this.ShowMessageBoxWithOkBtn('واحد اجرايي انتخاب نشده است');
       return;
     }
     this.ProductRequest.GetContractWorkFlowAverageWaiting(
-      this.NgSelectRegionParams.selectedObject,
+      this.RegionParams.selectedObject,
       this.FromContractDate,
       this.ToContractDate,
       this.FromProductRequestDate,
       this.ToProductRequestDate,
       this.NgSelectTimesParams.selectedObject
-       ).subscribe(res => {
-        // res.forEach(element => {
-        //   element.TotalDay = parseFloat(element.TotalDay).toFixed(2);
-        // });
-        this.rowData = res;
-      });
+    ).subscribe(res => {
+      // res.forEach(element => {
+      //   element.TotalDay = parseFloat(element.TotalDay).toFixed(2);
+      // });
+      this.rowData = res;
+    });
 
     this.ColumnsDefinition('WFA');
   }
   onChangeTimesObj(event) { }
+  onChangeRegionObj(event) { }
 }

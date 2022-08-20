@@ -104,7 +104,7 @@
   </div>
 </div>
 <app-over-popup *ngIf="btnclicked" [PopupType]="type" [HaveMaxBtn]="HaveMaxBtn" [startLeftPosition]="startLeftPosition"
-  [startTopPosition]="startTopPosition" [PopupParam]="type ==='message-box' ?alertMessageParams  : ParamObj"
+  [startTopPosition]="startTopPosition" [PopupParam]="type ==='message-box' ? alertMessageParams  : ParamObj"
   (popupclosed)="popupclosed($event)" [MainMinwidthPixel]="type === 'editor-select-price-list'? 1240:''"
   [MainMaxwidthPixel]="type === 'editor-select-price-list'? 1240:''"
   (PopupOutPutParam)="type ==='message-box' ? MessageBoxAction($event) : getOutPutParam($event)"></app-over-popup>

@@ -1,5 +1,4 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { Router } from '@angular/router';
 import { PriceListPatternGoodsService } from 'src/app/Services/BaseService/PriceListPatternGoodsService';
 declare var jquery: any;
 declare var $: any;
