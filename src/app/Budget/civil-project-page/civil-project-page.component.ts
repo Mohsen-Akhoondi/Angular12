@@ -152,7 +152,7 @@ export class CivilProjectPageComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.RegionList.GetRegionList(this.ModuleCode, true).subscribe(res => {
+    this.RegionList.GetRegionList(this.ModuleCode, false).subscribe(res => { // 62686
       this.RegionItems = res;
       this.RegionParams.selectedObject = 200;
     });

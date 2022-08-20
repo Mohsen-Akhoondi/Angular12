@@ -1,17 +1,15 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import * as moment from 'jalali-moment';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { FinYearService } from 'src/app/Services/BaseService/FinYearService';
-import { forkJoin, of } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
-import { isUndefined } from 'util';
+import { isNullOrUndefined, isUndefined } from 'util';
 import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServices';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { ContractEstimateService } from 'src/app/Services/ContractService/ContractEstimates/ContractEstimateService';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
 import { CommonService } from 'src/app/Services/CommonService/CommonService';
@@ -21,7 +19,9 @@ import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/lib/custom-checkbox.model';
 import { environment } from 'src/environments/environment';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
+// tslint:disable-next-line: max-line-length
 import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
+import { Promise } from 'ag-grid-community';
 
 @Component({
   selector: 'app-contract-pay-details',
@@ -81,8 +81,6 @@ export class ContractPayDetailsComponent implements OnInit {
   HaveLoadExcel = true;
   IsEditable = true;
   dgCPHeight = 90;
-  // btnConfirmName;
-  // btnConfirmIcon;
   ReadyToConfirm;
   HaveConfirm = false;
   ConfirmStatus = [];
@@ -107,6 +105,7 @@ export class ContractPayDetailsComponent implements OnInit {
   ISSendAndConfirm = true;
   ISDisabledConfirmAndReturnBtn = true;
   CheckRegionWritable = true;
+  HaveAlertToContractPayDate = false;
 
   IsEditConfirm = true;
   ModuleViewTypeCode;
@@ -123,6 +122,23 @@ export class ContractPayDetailsComponent implements OnInit {
   btnConfirmName = 'تایید';
   btnConfirmIcon = 'ok';
   ModuleCode;
+  colspan = 2;
+  Adjustment = false;
+  AdjustmentTypeItems;
+  ContractTotalSize = 50;
+  ContractSize = 87;
+  AdjustmentTypeParams = {
+    bindLabelProp: 'AdjustmentTypeName',
+    bindValueProp: 'AdjustmentTypeCode',
+    placeholder: '',
+    MinWidth: '155px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    Required: true,
+    type: 'order-type',
+  };
   NgSelectContractEntityItemParams = {
     bindLabelProp: 'Subject',
     bindValueProp: 'EntityTypeItemID',
@@ -310,7 +326,7 @@ export class ContractPayDetailsComponent implements OnInit {
   ActorBankAccID;
   ContractorID: number;
   IsCumulative = false;
-  IsContractorAgent: boolean = false;
+  IsContractorAgent = false;
   IsAdminToolsModule: boolean;
   IsEditableContractPayItemAmountCol = true;
   IsEditableProductNameCol = true;
@@ -318,6 +334,34 @@ export class ContractPayDetailsComponent implements OnInit {
   HaveModuleViewTypeSave = false;
   EditItemAmount = true;
   DisableForMultiInvoice = true; // 62513
+  /////////////////////////////
+  CanEditPenalty = false; // اصلاح مبلغ جریمه
+  hidePenalty = false;
+  SumPenaltyAmount = 0; // مجموع مبلغ جریمه
+  SumPenaltyAmountStr = '';
+  Coeforvalue;
+  DurationPenaltyDay;
+  PenaltyTextLableStr = 'مبلغ کل جریمه:';
+  PenaltyTextLable = 'روز مبلغ : ';
+  CoefValue;
+  ValValue;
+  ShowPenaltyDiv = false;
+  PenaltyDuration;
+  NoteSize = 50;
+  NoteColspan = 2;
+  HasMainContractor = false;
+  MainContractorName = '';
+  NoteInputWidth = 87;
+  IsGreenSpace = false;
+  IsProgressPercentColEditable = false;
+  oldContractPayStartDate = null;
+  oldContractPayEndDate = null;
+  DifferenceAmountStr = '';
+  DifferenceAmount: number = null;
+  DifferenceNote = '';
+  EditableItemQty = false;
+  ShowSaveBtn = false;
+  SumDeductionAmount: number = 0;
 
   constructor(private router: Router,
     private contractpaydetail: ContractPayDetailsService,
@@ -325,9 +369,7 @@ export class ContractPayDetailsComponent implements OnInit {
     private User: UserSettingsService,
     private ArchiveList: ArchiveDetailService,
     private Cartable: CartableServices,
-    private p: JalaliDatepickerComponent,
     private RefreshCartable: RefreshServices,
-    private ContractStima: ContractEstimateService,
     private FlowService: WorkflowService,
     private route: ActivatedRoute,
     private RefreshBankItems: RefreshServices,
@@ -363,6 +405,10 @@ export class ContractPayDetailsComponent implements OnInit {
         this.ShowWfButton = false;
       }
       this.DisableForMultiInvoice = this.PopupParam.ModuleViewTypeCode === 100000 ? false : true;
+      if (this.PopupParam.RegionCode == 200 && this.PopupParam.Mode === 'InsertMode') {
+        this.HaveAlertToContractPayDate = true;
+        this.GridBoxHeight = 53;
+      }
     }
     forkJoin([
       this.User.CheckAdmin(),
@@ -411,11 +457,12 @@ export class ContractPayDetailsComponent implements OnInit {
       this.MinStartDate = res.PersianStartDate;
       this.MiladiMaxEndDate = res.ShortEndDate;
       this.MiladiMinStartDate = res.ShortStartDate;
-      this.sumFinalAmountt = res.FinalAmount;
+      this.sumFinalAmountt = res.FinalAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     });
 
-    const promise = new Promise<void>((resolve, reject) => {
-      this.contractpaydetail.GetIsVolumetric(this.PopupParam.SelectedContractID).subscribe(
+    // tslint:disable-next-line: no-shadowed-variable
+    const promise = new Promise((resolve) => {
+      this.contractpaydetail.GetContractCondition(this.PopupParam.SelectedContractID, 2516).subscribe(
         res => {
           this.IsVolumetric = res.IsVolumetric;
           this.IsTaxValue = res.IsTaxValue;
@@ -423,6 +470,7 @@ export class ContractPayDetailsComponent implements OnInit {
           this.ColumnDefinition(res.IsMultiInvoice, res.IsCumulative);
           this.IsMultiInvoice = res.IsMultiInvoice;
           this.ContractorID = res.ContractorID;
+          this.IsGreenSpace = res.IsGreenSpace;
           this.Common.GetActorBankAccList(this.ContractorID).subscribe((ress: any[]) => {
             if (ress && ress.length > 0) {
               this.OpenBank();
@@ -442,8 +490,7 @@ export class ContractPayDetailsComponent implements OnInit {
               this.ShebaNo = null;
             }
           });
-
-          resolve();
+          resolve(true);
         }
       );
     }).then(() => {
@@ -459,8 +506,6 @@ export class ContractPayDetailsComponent implements OnInit {
   }
 
   ColumnDefinition(IsMultiInvoice, IsCumulative) {
-    //  if (this.ContractTypeCode !== 27 && this.ContractTypeCode !== 28) {
-
     this.columnDef1 = [
       {
         headerName: 'ردیف',
@@ -538,48 +583,7 @@ export class ContractPayDetailsComponent implements OnInit {
             params.data.PersianEndDate = params.newValue.PersianEndDate;
             params.data.ShortStartDate = params.newValue.ShortStartDate;
             params.data.ShortEndDate = params.newValue.ShortEndDate;
-            if (params.newValue.IsVolumetric || this.IsVolumetric) {
-              params.data.IsTaxValue = this.IsTaxValue && params.newValue.IsTaxValue;
-              params.data.PriceID = params.newValue.PriceID;
-              // tslint:disable-next-line: max-line-length
-              params.data.ShortStartDate = this.ContractDetails.ShortStartDate ? this.ContractDetails.ShortStartDate : this.ContractDetails.FromContractDateString;
-              // tslint:disable-next-line: max-line-length
-              params.data.ShortEndDate = this.ContractDetails.ShortEndDate ? this.ContractDetails.ShortEndDate : this.ContractDetails.ToContractDateString;
-              // tslint:disable-next-line: max-line-length
-              params.data.PersianStartDate = this.ContractDetails.ShortStartDate ? this.ContractDetails.PersianStartDate : this.ContractDetails.PersianFromContractDateString;
-              // tslint:disable-next-line: max-line-length
-              params.data.PersianEndDate = this.ContractDetails.ShortEndDate ? this.ContractDetails.PersianEndDate : this.ContractDetails.PersianToContractDateString;
-              params.data.ContractPayItemUnitAmount = params.newValue.Price;
-            } else { // RFC 60706
-              params.data.Amount = params.newValue.Amount;
-              params.data.IsTaxValue = params.newValue.IsTaxValue;
-              params.data.Qty = params.newValue.Qty;
-              params.data.ContractPayItemUnitAmount = params.data.Amount;
-              params.data.FinalAmount = params.newValue.FinalAmount;
-              params.data.AmountCOEFPact = params.newValue.AmountCOEFPact;
-              params.data.BeforeAmount = params.newValue.BeforeAmount;
-              params.data.BeforeAmountCOEF = params.newValue.BeforeAmountCOEF;
-              params.data.BeforeQty = params.newValue.BeforeQty;
-              const ProgressPercent = params.newValue.ProgressPercent ? params.newValue.ProgressPercent : 0;
-              const PenaltyPercentage = params.newValue.PenaltyPercentage ? params.newValue.PenaltyPercentage : 0;
-              // tslint:disable-next-line:radix
-              params.data.DeductionAmount = (1 - parseInt(ProgressPercent)) * params.newValue.ContractPayItemAmountCOEF;
-              // tslint:disable-next-line:radix
-              params.data.PenaltyAmount = parseInt(PenaltyPercentage) * (params.newValue.ContractPayItemAmountCOEF - params.data.DeductionAmount);
-              // tslint:disable-next-line: radix
-              params.data.CumultiveAmount = parseInt(params.data.BeforeAmount) - parseInt(params.data.PenaltyAmount);
-              // tslint:disable-next-line: radix
-              params.data.CumultiveAmountCOEF = parseInt(params.data.DeductionAmount) - parseInt(params.data.PenaltyAmount);
-            }
-
-            if (params.data.IsTaxValue) {
-              // tslint:disable-next-line: radix
-              params.data.ContractPayItemAmountFinal = parseInt(params.data.ContractPayItemAmount) + parseInt(params.data.TaxValue);
-            } else {
-              // tslint:disable-next-line: radix
-              params.data.ContractPayItemAmountFinal = parseInt(params.data.ContractPayItemAmount);
-            }
-
+            params.data.Price = params.newValue.Price;
             this.EntityColumnDefinition(params.data.ProductID, params, null, true);
             return true;
           } else {
@@ -736,7 +740,10 @@ export class ContractPayDetailsComponent implements OnInit {
         field: 'Qty',
         width: 100,
         HaveThousand: true,
-        resizable: true
+        resizable: true,
+        editable: (event) => {
+          return false;
+        }
       },
       {
         headerName: 'مبلغ واحد برآورد',
@@ -752,13 +759,6 @@ export class ContractPayDetailsComponent implements OnInit {
         HaveThousand: true,
         resizable: true
       },
-      // {
-      //   headerName: 'مبلغ برآورد با ضرایب',
-      //   field: 'AmountCOEFPact',
-      //   width: 150,
-      //   HaveThousand: true,
-      //   resizable: true
-      // },
       {
         headerName: 'تعداد قبلی',
         field: 'BeforeQty',
@@ -796,9 +796,12 @@ export class ContractPayDetailsComponent implements OnInit {
             if (params.newValue !== params.oldValue) {
               params.data.RequestedAmount = params.newValue;
               params.data.ContractPayItemAmount = params.newValue;
+              if (this.PopupParam.Mode === 'InsertMode') {
+                params.data.ContractPayItemAmountCOEF = params.newValue;
+              }  // 65355
               if (params.data.IsTaxValue) {
                 // tslint:disable-next-line: radix
-                params.data.TaxValue = Math.round(0.09 * parseInt(params.data.RequestedAmount));
+                params.data.TaxValue = Math.round(0.09 * (parseInt(params.data.RequestedAmount) - (params.data.Discount ? parseInt(params.data.Discount) : 0)));
               } else {
                 params.data.TaxValue = 0;
               }
@@ -817,7 +820,18 @@ export class ContractPayDetailsComponent implements OnInit {
         field: 'ContractPayItemQty',
         width: 150,
         resizable: true,
-        editable: this.DisplayControlls && !this.IsContractorAgent && this.EditItemAmount,
+        editable: (event) => {
+          if (this.ModuleCode === 2875) {
+            return true; // 65074
+          } else if (this.EditableItemQty) {
+            return true;
+          }
+          else if ((this.IsVolumetric ? true : event.data.Qty > 1) && this.DisplayControlls && !this.IsContractorAgent && this.EditItemAmount) {
+            return true; // 64585
+          } else {
+            return false;
+          }
+        },
         cellEditorParams: { IsFloat: true, },
         HaveThousand: true,
         cellEditorFramework: NumberInputComponentComponent,
@@ -852,7 +866,40 @@ export class ContractPayDetailsComponent implements OnInit {
         field: 'ContractPayItemAmount',
         width: 150,
         resizable: true,
-        editable: this.IsEditableContractPayItemAmountCol && !this.IsContractorAgent,
+        editable: (event) => {
+          if (event.data.Qty <= 1) {
+            return true;
+          } else {
+            return false;
+          }
+        },
+        HaveThousand: true,
+        cellEditorFramework: NumberInputComponentComponent,
+        cellEditorParams: {
+          HaveNegative: true,
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value;
+          } else {
+            return '';
+          }
+        },
+      },
+      {
+        headerName: 'مبلغ تخفیف',
+        field: 'Discount',
+        width: 150,
+        resizable: true,
+        editable: (event) => {
+          if (this.CanEditPenalty || (this.IsAdminToolsModule && this.PopupParam.Mode === 'EditMode')) {
+            return true;
+          } else {
+            return false;
+          }
+        },
+
         HaveThousand: true,
         cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: {
@@ -952,7 +999,7 @@ export class ContractPayDetailsComponent implements OnInit {
         field: 'ProgressPercent',
         width: 100,
         resizable: true,
-        editable: this.DisplayControlls,
+        editable: this.IsProgressPercentColEditable,
         HaveThousand: false,
         cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { IsFloat: true, MaxLength: 4, FloatMaxLength: 2 },
@@ -976,8 +1023,9 @@ export class ContractPayDetailsComponent implements OnInit {
         headerName: 'درصد جریمه',
         field: 'PenaltyPercentage',
         width: 90,
+        hide: this.hidePenalty,
         resizable: true,
-        editable: this.DisplayControlls,
+        editable: this.CanEditPenalty || (this.IsAdminToolsModule && this.PopupParam.Mode === 'EditMode'),
         HaveThousand: false,
         cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { IsFloat: true, MaxLength: 4, FloatMaxLength: 2 },
@@ -994,8 +1042,9 @@ export class ContractPayDetailsComponent implements OnInit {
         headerName: 'مبلغ جریمه',
         field: 'PenaltyAmount',
         width: 150,
+        hide: this.hidePenalty,
         resizable: true,
-        editable: this.DisplayControlls,
+        editable: this.CanEditPenalty || (this.IsAdminToolsModule && this.PopupParam.Mode === 'EditMode'),
         HaveThousand: true,
         cellEditorFramework: NumberInputComponentComponent,
         cellRenderer: 'SeRender',
@@ -1004,6 +1053,33 @@ export class ContractPayDetailsComponent implements OnInit {
             return params.value;
           } else {
             return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue) {
+            params.data.PenaltyAmount = params.newValue;
+            if (params.data.ContractPayItemAmountCOEF && params.data.DeductionAmount) {
+              // tslint:disable-next-line: radix
+              params.data.PenaltyPercentage = !isNullOrUndefined(params.data.PenaltyAmount) && parseInt(params.data.PenaltyAmount) > 0
+                && !isNaN(params.data.PenaltyAmount) && params.data.PenaltyAmount !== 'NaN'
+                // tslint:disable-next-line: radix
+                ? (this.IsGreenSpace ?
+                  // tslint:disable-next-line: radix
+                  parseInt(params.data.DeductionAmount) / parseInt(params.data.PenaltyAmount)
+                  // tslint:disable-next-line: radix
+                  : (params.data.ContractPayItemAmountCOEF - parseInt(params.data.DeductionAmount)))
+                // tslint:disable-next-line: radix
+                : null;
+              // tslint:disable-next-line: radix
+              params.data.CumultiveAmount = (parseInt(params.data.BeforeAmount) + parseInt(params.data.ContractPayItemAmount))
+                // tslint:disable-next-line: radix
+                - parseInt(params.data.PenaltyAmount);
+            }
+            return true;
+
+          } else {
+            params.data.PenaltyAmount = null;
+            return false;
           }
         },
       },
@@ -1027,237 +1103,21 @@ export class ContractPayDetailsComponent implements OnInit {
     }
 
     this.columnDef1.splice(Index, 0, Item);
-    // }
-
-    // if (this.ContractTypeCode === 27 || this.ContractTypeCode === 28) {
-    //   this.columnDef1 = [
-    //     {
-    //       headerName: 'ردیف',
-    //       field: 'ItemNo',
-    //       width: 70,
-    //       resizable: true
-    //     },
-    //     {
-    //       headerName: 'نوع درخواستی',
-    //       field: 'ProductTypeName',
-    //       cellEditorFramework: NgSelectCellEditorComponent,
-    //       cellEditorParams: {
-    //         HardCodeItems: this.ProductTypeList,
-    //         bindLabelProp: 'ProductTypeName',
-    //         bindValueProp: 'ProductTypeCode'
-    //       },
-    //       cellRenderer: 'SeRender',
-    //       valueFormatter: function currencyFormatter(params) {
-    //         if (params.value) {
-    //           return params.value.ProductTypeName;
-    //         } else {
-    //           return '';
-    //         }
-    //       },
-    //       valueSetter: (params) => {
-    //         if (params.newValue) {
-    //           if (params.newValue.ProductTypeName !== params.oldValue) {
-    //             params.data.ProductTypeName = params.newValue.ProductTypeName;
-    //             params.data.ProductTypeCode = params.newValue.ProductTypeCode;
-    //             params.data.ScaleName = null;
-    //             params.data.ProductID = null;
-    //             params.data.ProductCodeName = null;
-    //             return true;
-    //           }
-    //         } else {
-    //           params.data.ProductTypeName = null;
-    //           params.data.ProductTypeCode = null;
-    //           params.data.ScaleName = null;
-    //           params.data.ProductID = null;
-    //           params.data.ProductCodeName = null;
-    //           return false;
-    //         }
-    //       },
-    //       editable: true,
-    //       width: 120,
-    //       resizable: true
-    //     },
-    //     {
-    //       headerName: 'کالا/خدمت',
-    //       field: 'ProductCodeName',
-    //       cellEditorFramework: NgSelectVirtualScrollComponent,
-    //       cellEditorParams: {
-    //         Params: this.NgSelectVSParams,
-    //         Items: [],
-    //         MoreFunc: this.FetchMoreProduct,
-    //         FetchByTerm: this.FetchProductByTerm,
-    //         RedioChangeFunc: this.RedioSelectedChange,
-    //         Owner: this
-    //       },
-    //       cellRenderer: 'SeRender',
-    //       valueFormatter: function currencyFormatter(params) {
-    //         if (params.value) {
-    //           return params.value.ProductCodeName;
-
-    //         } else {
-    //           return '';
-    //         }
-    //       },
-    //       valueSetter: (params) => {
-    //         if (params.newValue && params.newValue.ProductCodeName) {
-    //           params.data.ProductCodeName = params.newValue.ProductCodeName;
-    //           params.data.ProductID = params.newValue.ProductID;
-    //           params.data.ScaleName = params.newValue.ScaleName;
-    //           params.data.PersianStartDate = params.newValue.PersianStartDate;
-    //           params.data.PersianEndDate = params.newValue.PersianEndDate;
-    //           params.data.ShortStartDate = params.newValue.ShortStartDate;
-    //           params.data.ShortEndDate = params.newValue.ShortEndDate;
-    //           params.data.Qty = params.newValue.Qty;
-    //           params.data.BeforeQty = params.newValue.BeforeQty;
-    //           if (params.newValue.IsVolumetric) {
-    //             params.data.Amount = params.newValue.Price;
-    //           } else {
-    //             params.data.Amount = params.newValue.Amount;
-    //           }
-
-    //           params.data.ContractPayItemUnitAmount = params.data.Amount;
-    //           if (params.newValue.IsTaxValue) {
-    //             // tslint:disable-next-line: radix
-    //             params.data.ContractPayItemAmountFinal = parseInt(params.data.ContractPayItemAmount) + parseInt(params.data.TaxValue);
-    //           } else {
-    //             params.data.ContractPayItemAmountFinal = parseInt(params.data.ContractPayItemAmount);
-    //           }
-    //           params.data.FinalAmount = params.newValue.FinalAmount;
-    //           params.data.AmountCOEFPact = params.newValue.AmountCOEFPact;
-    //           params.data.BeforeAmount = params.newValue.BeforeAmount;
-    //           params.data.BeforeAmountCOEF = params.newValue.BeforeAmountCOEF;
-    //           params.data.IsTaxValue = params.newValue.IsTaxValue;
-    //           const ProgressPercent = params.newValue.ProgressPercent ? params.newValue.ProgressPercent : 0;
-    //           const PenaltyPercentage = params.newValue.PenaltyPercentage ? params.newValue.PenaltyPercentage : 0;
-    //           // tslint:disable-next-line:radix
-    //           params.data.DeductionAmount = (1 - parseInt(ProgressPercent)) * params.newValue.ContractPayItemAmountCOEF;
-    //           // tslint:disable-next-line:radix
-    //           params.data.PenaltyAmount = parseInt(PenaltyPercentage) * (parseInt(params.newValue.ContractPayItemAmountCOEF) - parseInt(params.data.DeductionAmount));
-    //           params.data.CumultiveAmount = parseInt(params.data.ContractPayItemAmount) + parseInt(params.data.BeforeAmount) - params.data.PenaltyAmount;
-    //           params.data.CumultiveAmountCOEF = parseInt(params.newValue.BeforeAmountCOEF);
-    //           this.EntityColumnDefinition(params.data.ProductID, params, null, true);
-    //           return true;
-    //         } else {
-    //           params.data.ProductCodeName = '';
-    //           params.data.ProductID = null;
-    //           params.data.ScaleName = '';
-    //           return false;
-    //         }
-    //       },
-    //       editable: true,
-    //       resizable: true,
-    //       width: 370,
-    //     },
-    //     {
-    //       headerName: 'تاریخ شروع',
-    //       field: 'PersianStartDate',
-    //       width: 100,
-    //       resizable: true,
-    //       editable: this.DisplayControlls,
-    //       cellEditorFramework: JalaliDatepickerComponent,
-    //       cellEditorParams: {
-    //         CurrShamsiDateValue: 'PersianEndDate',
-    //         DateFormat: 'YYYY/MM/DD',
-    //         WidthPC: 100,
-    //         AppendTo: '.for-append-date'
-    //       },
-    //       cellRenderer: 'SeRender',
-    //       valueFormatter: function currencyFormatter(params) {
-    //         if (params.value) {
-    //           return params.value.SDate;
-    //         } else {
-    //           return '';
-    //         }
-    //       },
-    //       valueSetter: (params) => {
-    //         if (params.newValue && params.newValue.MDate) {
-    //           params.data.ShortStartDate = params.newValue.MDate;
-    //           params.data.PersianStartDate = params.newValue.SDate;
-    //           return true;
-    //         } else {
-    //           params.data.ShortStartDate = null;
-    //           params.data.PersianStartDate = '';
-    //           return false;
-    //         }
-    //       }
-    //     },
-    //     {
-    //       headerName: 'تاریخ پایان',
-    //       field: 'PersianEndDate',
-    //       width: 100,
-    //       resizable: true,
-    //       editable: this.DisplayControlls,
-    //       cellEditorFramework: JalaliDatepickerComponent,
-    //       cellEditorParams: {
-    //         CurrShamsiDateValue: 'PersianEndDate',
-    //         DateFormat: 'YYYY/MM/DD',
-    //         WidthPC: 100,
-    //         AppendTo: '.for-append-date'
-    //       },
-    //       cellRenderer: 'SeRender',
-    //       valueFormatter: function currencyFormatter(params) {
-    //         if (params.value) {
-    //           return params.value.SDate;
-    //         } else {
-    //           return '';
-    //         }
-    //       },
-    //       valueSetter: (params) => {
-    //         if (params.newValue && params.newValue.MDate) {
-    //           params.data.ShortEndDate = params.newValue.MDate;
-    //           params.data.PersianEndDate = params.newValue.SDate;
-    //           return true;
-    //         } else {
-    //           params.data.ShortEndDate = null;
-    //           params.data.PersianEndDate = '';
-    //           return false;
-    //         }
-    //       }
-    //     },
-    //     {
-    //       headerName: 'واحد',
-    //       field: 'ScaleName',
-    //       width: 100,
-    //       HaveThousand: true,
-    //       resizable: true
-    //     },
-    //     {
-    //       headerName: 'وزن',
-    //       field: 'Weight',
-    //       width: 100,
-    //       HaveThousand: true,
-    //       resizable: true
-    //     },
-    //     {
-    //       headerName: 'مبلغ برآورد',
-    //       field: 'FinalAmount',
-    //       width: 150,
-    //       HaveThousand: true,
-    //       resizable: true
-    //     },
-    //     {
-    //       headerName: 'درصد پیشرفت',
-    //       field: 'ProgressPercent',
-    //       width: 150,
-    //       resizable: true,
-    //       editable: this.DisplayControlls,
-    //       HaveThousand: true,
-    //       cellEditorFramework: NumberFieldEditableComponent,
-    //       cellRenderer: 'SeRender',
-    //       valueFormatter: function currencyFormatter(params) {
-    //         if (params.value) {
-    //           return params.value;
-    //         } else {
-    //           return '';
-    //         }
-    //       },
-    //     },
-    //   ];
-    // }
 
   }
 
   InsertModeNgInit() {
+    if (this.PopupParam.ContractOperationID === 4) {
+      this.Adjustment = true;
+      this.colspan = 1;
+      this.ContractTotalSize = 25;
+      this.ContractSize = 74;
+      this.contractpaydetail.GetAdjustmentType().subscribe(res => {
+        this.AdjustmentTypeItems = res;
+
+      });
+    }
+
     this.HaveConfirm = false;
     if (this.PopupParam) {
       this.RegionCode = this.PopupParam.RegionCode;
@@ -1289,10 +1149,19 @@ export class ContractPayDetailsComponent implements OnInit {
       this.ContractDetails = res[0];
       this.ContractSubLetter = this.ContractDetails.LetterNo + ' - ' + this.ContractDetails.Subject;
       this.Note = this.ContractSubLetter;
+      if (!isNullOrUndefined(this.ContractDetails.MainContractorName)) {
+        this.HasMainContractor = true;
+        this.NoteColspan = 1;
+        this.MainContractorName = this.ContractDetails.MainContractorName;
+        this.NoteInputWidth = 74;
+        this.NoteSize = 25;
+      }
       this.ContractPayNo = res[1];
       //  this.ContractPayTechnicalCode = this.ContractDetails.ContractCode * 10000 + res[1];
       this.ContractPayStartDate = this.ContractDetails.FromContractDateString;
       this.ContractPayEndDate = this.ContractDetails.ToContractDateString;
+      this.oldContractPayStartDate = this.ContractDetails.FromContractDateString;
+      this.oldContractPayEndDate = this.ContractDetails.ToContractDateString;
       this.CanDateChange = false;
       this.ContractPayDate = res[2];
       this.IsDown = true;
@@ -1317,6 +1186,9 @@ export class ContractPayDetailsComponent implements OnInit {
   }
 
   EditModeNgInit() {
+    this.contractpaydetail.GetSumOfDeductionAmount(this.CostFactorID).subscribe(res => {
+      this.SumDeductionAmount =res;
+     });
     this.EditModeInit = true;
     this.IsFinYearDisable = true;
     this.IsDisableWorkflow = !this.PopupParam.IsViewable ? false : true; // RFC 52262
@@ -1416,50 +1288,97 @@ export class ContractPayDetailsComponent implements OnInit {
     let sumFinalAmount = 0;
     let sumContractPayItemAmount = 0;
     this.contractpaydetail.GetContractPay(this.CostFactorID, -1).subscribe(res => {
+      if (res.ContractOperationId === 4) {
+        this.Adjustment = true;
+        this.colspan = 1;
+        this.ContractTotalSize = 25;
+        this.ContractSize = 74;
+        this.contractpaydetail.GetAdjustmentType().subscribe(ress => {
+          this.AdjustmentTypeItems = ress;
+
+        });
+        this.AdjustmentTypeParams.selectedObject = res.AdjustmentTypeCode ? res.AdjustmentTypeCode : null;
+      }
+
+
       this.ContractDetails = res;
       this.ContractPayID = this.ContractDetails.ContractPayId;
       this.CostContractID = this.ContractDetails.CostContractId;
       this.ContractSubLetter = this.ContractDetails.ParentObjectStr;
       this.Note = this.ContractDetails.Note;
+      if (!isNullOrUndefined(this.ContractDetails.MainContractorName)) {
+        this.HasMainContractor = true;
+        this.NoteColspan = 1;
+        this.MainContractorName = this.ContractDetails.MainContractorName;
+        this.NoteInputWidth = 74;
+        this.NoteSize = 25;
+      }
       this.ContractPayNo = this.ContractDetails.ContractPayNo;
       this.ContractPayTechnicalCode = this.ContractDetails.ContractPayTechnicalCode;
       this.ContractPayStartDate = this.ContractDetails.ShortStartDate;
       this.ContractPayEndDate = this.ContractDetails.ShortEndDate;
+      this.oldContractPayStartDate = this.ContractDetails.ShortStartDate;
+      this.oldContractPayEndDate = this.ContractDetails.ShortEndDate;
       this.ContractPayDate = this.ContractDetails.ShortContractPayDate;
       this.selectedFinYearObj = this.ContractDetails.FinYearCode;
       this.selectedContractPayTypeObj = this.ContractDetails.ContractPayTypeCode;
       this.ContractOperationID = this.ContractDetails.ContractOperationId;
       this.IsConfirm = this.ContractDetails.IsConfirm;
-      this.ContractPayItemList = res.ContractPayItemViewList;
+      this.ContractPayItemList = this.ContractDetails.ContractPayItemViewList;
+      this.DurationPenaltyDay = this.ContractDetails.DurationPenaltyDay;
+      let SumPenaltyAmount = 0;
       this.ContractPayItemList.forEach(item => {
         item.ProgressPercent = item.ProgressPercent ? item.ProgressPercent : 0;
         item.PenaltyPercentage = item.PenaltyPercentage ? item.PenaltyPercentage : 0;
-        item.ContractPayItemAmountFinal = item.TaxValue ? parseInt(item.ContractPayItemAmount) + parseInt(item.TaxValue) : parseInt(item.ContractPayItemAmount);
+        // tslint:disable-next-line: radix
+        item.ContractPayItemAmountFinal = item.TaxValue ? parseInt(item.ContractPayItemAmountCOEF) + parseInt(item.TaxValue)
+          // tslint:disable-next-line: radix
+          : parseInt(item.ContractPayItemAmountCOEF);
         sumFinalAmount = sumFinalAmount + item.ContractPayItemAmountFinal;
         sumContractPayItemAmount = sumContractPayItemAmount + item.ContractPayItemAmount;
-        //item.ContractPayItemAmount = item.Amount * item.Qty;
-        item.ContractPayItemAmountCOEF = item.Qty ?
-          Math.round((parseInt(item.AmountCOEFPact) / parseInt(item.Qty)) * parseFloat(item.ContractPayItemQty)) :
-          Math.round(parseInt(item.AmountCOEFPact) * parseFloat(item.ContractPayItemQty));
 
+        if (!this.IsVolumetric && item.Qty < 1) {
+          item.ContractPayItemQty = null;
+          item.Qty = null;
+        } // 64644
         // tslint:disable-next-line:radix
-        item.DeductionAmount = (1 - (item.ProgressPercent)) * item.ContractPayItemAmountCOEF;
+        item.DeductionAmount = (item.ProgressPercent && item.ProgressPercent > 0 ?
+          ((100 - (item.ProgressPercent)) / 100) * item.ContractPayItemAmountCOEF : 0).toFixed(2);
         // tslint:disable-next-line:radix
         item.CumultiveAmount = parseInt(item.BeforeAmount) + parseInt(item.ContractPayItemAmount) - parseInt(item.PenaltyPercentage);
-        // tslint:disable-next-line:max-line-length
-        item.CumultiveAmountCOEF = parseInt(item.BeforeAmountCOEF) + parseInt(item.ContractPayItemAmountCOEF); //- item.DeductionAmount - item.PenaltyAmount;
-        // tslint:disable-next-line:radix
-        // item.UnitAmount = parseInt(item.ContractPayItemAmount) / parseInt(item.ContractPayItemQty);
+        // tslint:disable-next-line: radix
+        item.CumultiveAmountCOEF = parseInt(item.BeforeAmountCOEF) + parseInt(item.ContractPayItemAmountCOEF);
+        // tslint:disable-next-line: radix
+        item.PenaltyAmount = this.IsGreenSpace ? ((parseInt(item.PenaltyPercentage) / 100) * (parseInt(item.DeductionAmount))).toFixed(2)
+          : ((item.PenaltyPercentage / 100) * (item.ContractPayItemAmountCOEF - item.DeductionAmount)).toFixed(2);
+        if (item.PenaltyAmount && !isNaN(item.PenaltyAmount) && item.PenaltyAmount !== 'NaN'
+          // tslint:disable-next-line: radix
+          && !isNullOrUndefined(item.PenaltyAmount) && parseInt(item.PenaltyAmount) > 0) {
+          // tslint:disable-next-line: radix
+          SumPenaltyAmount = SumPenaltyAmount + parseInt(item.PenaltyAmount);
+        }
         if (item.IsTaxValue) { // 62898
-          if (item.TaxValue) { // 63220
-            item.TaxValue = item.TaxValue
+          if (item.TaxValue || item.TaxValue === 0) { // 63220
+            item.TaxValue = item.TaxValue;
           } else {
-            item.TaxValue = Math.round(parseInt(item.ContractPayItemAmount) * 0.09);
+            // tslint:disable-next-line: radix
+            item.TaxValue = Math.round((item.ContractPayItemAmountCOEF && (parseInt(item.ContractPayItemAmountCOEF)) > 0
+              // tslint:disable-next-line: radix
+              ? (parseInt(item.ContractPayItemAmountCOEF) - (item.Discount ? parseInt(item.Discount) : 0))
+              // tslint:disable-next-line: radix
+              : (parseInt(item.ContractPayItemAmount) - (item.Discount ? parseInt(item.Discount) : 0))
+            ) * 0.09);
+
           }
         }
         this.EntityColumnDefinition(null, null, item.EntityList, false);
         this.SetEntityDataInDataRow(item);
       });
+      this.SumPenaltyAmountStr = this.ContractDetails.PenaltyAmount &&
+        !isUndefined(this.ContractDetails.PenaltyAmount) &&
+        this.ContractDetails.PenaltyAmount !== 0 ?
+        res.PenaltyAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+        : (SumPenaltyAmount > 0 ? SumPenaltyAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '0');
       this.contractpaydetail.GetContractPayType().subscribe(ress => {
         this.ContractPayTypeSet = ress;
       });
@@ -1471,17 +1390,115 @@ export class ContractPayDetailsComponent implements OnInit {
       this.FinYear.GetFinYearList().subscribe(res2 => {
         this.FinYearSet = res2;
       });
-      this.sumFinalAmountStr = sumFinalAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+      this.sumFinalAmountStr =(sumFinalAmount - this.SumDeductionAmount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') ;
       this.sumContractPayItemAmountStr = sumContractPayItemAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       this.IsDown = true;
     });
+    
     new Promise((StartedWFResolve, reject) => { // RFC 52262
       this.SetStartedWFInfo(StartedWFResolve);
     }).then(() => {
       this.ViewTypeChange();
     });
+    this.ShowPenaltyDiv = true;
+    this.contractpaydetail.GetPenaltyContractCoef(this.PopupParam.SelectedContractID).subscribe(res => {
+      if (res && res.ContractCoefTypeCode !== null && res.ContractCoefTypeCode > 0) {
+        this.PenaltyDuration = true;
+        if (res.ContractCoefTypeCode === 24) {
+          if ((res.Coef && !isNullOrUndefined(res.Coef))
+            && (res.Value && !isNullOrUndefined(res.Value)) && this.CanEditPenalty) {
+            this.PenaltyTextLableStr = res.ContractCoefTypeName.toString() + ' '
+              + 'با ضریب' + ' ' + (res.Coef).toString() + ' '
+              + ' به ازای ';
+            this.Coeforvalue = true;
+            this.hidePenalty = true;
+          } else if ((res.Coef && !isNullOrUndefined(res.Coef))
+            && (!res.Value || isNullOrUndefined(res.Value)) && this.CanEditPenalty) {
+            this.PenaltyTextLableStr = res.ContractCoefTypeName.toString() + ' '
+              + 'با ضریب' + ' ' + (res.Coef).toString() + ' '
+              + ' به ازای ';
+            this.Coeforvalue = true;
+            this.hidePenalty = true;
+          } else if ((res.Value && !isNullOrUndefined(res.Value))
+            && (!res.Coef || isNullOrUndefined(res.Coef)) && this.CanEditPenalty) {
+            this.PenaltyTextLableStr = res.ContractCoefTypeName.toString() + ' '
+              + 'با مبلغ' + ' ' + (res.Value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' '
+              + ' به ازای ';
+            this.hidePenalty = true;
+            this.Coeforvalue = true;
+          } else {
+            this.PenaltyTextLableStr = 'مبلغ کل جریمه: ';
+            this.PenaltyTextLable = '';
+            this.Coeforvalue = false;
+          }
+        } else {
+          this.PenaltyTextLableStr = 'مبلغ کل جریمه: ';
+          this.PenaltyTextLable = '';
+          this.Coeforvalue = false;
+        }
+      } else {
+        this.PenaltyDuration = false;
+      }
+    });
+    this.contractpaydetail.GetDifferenceDeduction(this.CostFactorID).subscribe(result => {
+      if (result && result.ContractPayDeductionID && result.ContractPayDeductionID > 0) {
+        this.DifferenceAmount = result.DeductionAmount;
+        this.DifferenceNote = result.Note;
+        this.DifferenceAmountStr = result.DeductionAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      } else {
+        this.DifferenceAmount = null;
+        this.DifferenceNote = '';
+        this.DifferenceAmountStr = '';
+      }
+    });
   }
-
+  onDurationDayChange(event) {
+    this.DurationPenaltyDay = event;
+    this.contractpaydetail.GetPenaltyContractCoef(this.PopupParam.SelectedContractID).subscribe(res => {
+      if (res && res.ContractCoefTypeCode !== null && res.ContractCoefTypeCode > 0) {
+        if (res.ContractCoefTypeCode === 24) {
+          if ((res.Coef && !isNullOrUndefined(res.Coef))
+            && (res.Value && !isNullOrUndefined(res.Value))) {
+            this.PenaltyTextLableStr = res.ContractCoefTypeName.toString() + ' '
+              + 'با ضریب' + ' ' + (res.Coef).toString() + ' '
+              + ' به ازای ';
+            this.Coeforvalue = true;
+            this.hidePenalty = true;
+            // tslint:disable-next-line: radix
+            this.SumPenaltyAmountStr = (((parseInt((this.sumFinalAmountt.toString()).replace(/,/g, '')) / 100) * res.Coef)
+              * this.DurationPenaltyDay).toString();
+          } else if ((res.Coef && !isNullOrUndefined(res.Coef))
+            && (!res.Value || isNullOrUndefined(res.Value))) {
+            this.PenaltyTextLableStr = res.ContractCoefTypeName.toString() + ' '
+              + 'با ضریب' + ' ' + (res.Coef).toString() + ' '
+              + ' به ازای ';
+            this.Coeforvalue = true;
+            this.hidePenalty = true;
+            // tslint:disable-next-line: radix
+            this.SumPenaltyAmountStr = (((parseInt((this.sumFinalAmountt.toString()).replace(/,/g, '')) / 100) * res.Coef)
+              * this.DurationPenaltyDay).toString();
+          } else if ((res.Value && !isNullOrUndefined(res.Value))
+            && (!res.Coef || isNullOrUndefined(res.Coef))) {
+            this.PenaltyTextLableStr = res.ContractCoefTypeName.toString() + ' '
+              + 'با مبلغ' + ' ' + (res.Value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' '
+              + ' به ازای ';
+            this.Coeforvalue = true;
+            this.hidePenalty = true;
+            this.SumPenaltyAmountStr = (res.Value * this.DurationPenaltyDay).toString();
+          } else {
+            this.PenaltyTextLableStr = 'مبلغ کل جریمه: ';
+            this.PenaltyTextLable = '';
+            this.Coeforvalue = false;
+          }
+        } else {
+          this.PenaltyTextLableStr = 'مبلغ کل جریمه: ';
+          this.PenaltyTextLable = '';
+          this.Coeforvalue = false;
+        }
+      }
+    });
+  }
   close() {
     if (this.IsWFShow && this.WorkListDetailRows) {
       this.FlowService.RunAfterActionMethod(this.WorkListDetailRows).subscribe();
@@ -1512,39 +1529,52 @@ export class ContractPayDetailsComponent implements OnInit {
           null,
           0,
           true,
-          this.ContractOperationID)
-          .subscribe(
-            ress => {
-              this.ContractPayItemList = ress;
-              this.ContractPayItemList.forEach(item => {
-                // if (item.IsVolumetric) {
-                //   item.Amount = item.Price;
-                // }
-                item.ContractPayItemUnitAmount = item.Amount;
-                if (item.IsTaxValue) {
-                  // tslint:disable-next-line: radix
-                  item.ContractPayItemAmountFinal = parseInt(item.ContractPayItemAmount) + parseInt(item.TaxValue);
-                } else {
-                  // tslint:disable-next-line: radix
-                  item.ContractPayItemAmountFinal = parseInt(item.ContractPayItemAmount);
-                }
-                // item.ContractPayItemAmount = item.Amount * item.Qty;
-                const ProgressPercent = item.ProgressPercent ? item.ProgressPercent : 0;
-                const PenaltyPercentage = item.PenaltyPercentage ? item.PenaltyPercentage : 0;
-                // tslint:disable-next-line:radix
-                item.DeductionAmount = (1 - parseInt(ProgressPercent)) * item.ContractPayItemAmountCOEF;
-                // tslint:disable-next-line:radix
-                item.PenaltyAmount = parseInt(PenaltyPercentage) * (item.ContractPayItemAmountCOEF - item.DeductionAmount);
-                // tslint:disable-next-line:radix
-                item.CumultiveAmount = parseInt(item.BeforeAmount);
-                this.IsEditTaxValue = item.IsTaxValue;
-                //   item.CumultiveAmountCOEF = item.ContractPayItemAmountCOEF - item.DeductionAmount - item.PenaltyAmount;
-                this.EntityColumnDefinition(null, null, item.EntityList, false);
-                this.SetEntityDataInDataRow(item);
-              });
+          this.ContractOperationID,
+          this.IsGreenSpace,
+          this.ContractPayStartDate,
+          this.ContractPayEndDate).subscribe(ress => {
+            this.ContractPayItemList = ress;
+            let SumPenaltyAmount = 0;
+            this.ContractPayItemList.forEach(item => {
 
-            }
-          );
+              item.ContractPayItemUnitAmount = item.Amount;
+              if (item.IsTaxValue) {
+                // tslint:disable-next-line: radix
+                item.ContractPayItemAmountFinal = parseInt(item.ContractPayItemAmountCOEF) + parseInt(item.TaxValue);
+              } else {
+                // tslint:disable-next-line: radix
+                item.ContractPayItemAmountFinal = parseInt(item.ContractPayItemAmountCOEF);
+              }
+              const ProgressPercent = item.ProgressPercent ? item.ProgressPercent : 0;
+              const PenaltyPercentage = item.PenaltyPercentage ? item.PenaltyPercentage : 0;
+              // tslint:disable-next-line: radix
+              item.DeductionAmount = parseInt(ProgressPercent) > 0 ?
+                // tslint:disable-next-line:radix
+                (((100 - parseInt(ProgressPercent)) / 100) * item.ContractPayItemAmountCOEF).toFixed(2) : 0;
+              // tslint:disable-next-line:radix
+              // tslint:disable-next-line:radix
+              item.CumultiveAmount = parseInt(item.BeforeAmount);
+              this.IsEditTaxValue = item.IsTaxValue;
+              this.EntityColumnDefinition(null, null, item.EntityList, false);
+              this.SetEntityDataInDataRow(item);
+              if (item.data.DeductionAmount && parseInt(item.data.DeductionAmount) > 0 && item.ContractPayItemAmountCOEF) {
+                item.PenaltyAmount = this.IsGreenSpace ? ((parseInt(PenaltyPercentage) / 100) *
+                  // tslint:disable-next-line: radix
+                  (parseInt(item.data.DeductionAmount))).toFixed(2) : ((parseInt(PenaltyPercentage) / 100) *
+                    // tslint:disable-next-line: radix
+                    (item.ContractPayItemAmountCOEF - parseInt(item.DeductionAmount))).toFixed(2);
+                if (item.PenaltyAmount && !isNaN(item.PenaltyAmount) && item.PenaltyAmount !== 'NaN'
+                  // tslint:disable-next-line: radix
+                  && !isNullOrUndefined(item.PenaltyAmount) && parseInt(item.PenaltyAmount)) {
+                  // tslint:disable-next-line: radix
+                  SumPenaltyAmount = SumPenaltyAmount + parseInt(item.PenaltyAmount);
+                }
+              }
+            });
+            this.SumPenaltyAmount = SumPenaltyAmount;
+            this.SumPenaltyAmountStr = SumPenaltyAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+          });
       }
     }
     if (ADate.FullDate !== '') {
@@ -1557,6 +1587,10 @@ export class ContractPayDetailsComponent implements OnInit {
 
   OnContractPayStartDateChange(Date) {
     this.ContractPayStartDate = Date.MDate;
+    if (this.oldContractPayStartDate !== Date.MDate && !isNullOrUndefined(Date.MDate) && Date.MDate !== '' && this.IsGreenSpace) {
+      this.SetProgressPercentinDataRow();
+      this.oldContractPayStartDate = Date.MDate;
+    }
   }
   DateChangeGetContractOrder() {
     this.contractpaydetail.GetContractOrder(this.PopupParam.SelectedContractID,
@@ -1569,6 +1603,7 @@ export class ContractPayDetailsComponent implements OnInit {
       .subscribe(
         ress => {
           this.ContractPayItemList = ress;
+          let SumPenaltyAmount;
           this.ContractPayItemList.forEach(item => {
             // if (item.IsVolumetric) {
             //   item.Amount = item.Price;
@@ -1576,25 +1611,37 @@ export class ContractPayDetailsComponent implements OnInit {
             item.ContractPayItemUnitAmount = item.Amount;
             if (item.IsTaxValue) {
               // tslint:disable-next-line: radix
-              item.ContractPayItemAmountFinal = parseInt(item.ContractPayItemAmount) + parseInt(item.TaxValue);
+              item.ContractPayItemAmountFinal = parseInt(item.ContractPayItemAmountCOEF) + parseInt(item.TaxValue);
             } else {
               // tslint:disable-next-line: radix
-              item.ContractPayItemAmountFinal = parseInt(item.ContractPayItemAmount);
+              item.ContractPayItemAmountFinal = parseInt(item.ContractPayItemAmountCOEF);
             }
             // item.ContractPayItemAmount = item.Amount * item.Qty;
             const ProgressPercent = item.ProgressPercent ? item.ProgressPercent : 0;
             const PenaltyPercentage = item.PenaltyPercentage ? item.PenaltyPercentage : 0;
+            item.DeductionAmount = parseInt(ProgressPercent) > 0 ?
+              // tslint:disable-next-line:radix
+              (((100 - parseInt(ProgressPercent)) / 100) * item.ContractPayItemAmountCOEF).toFixed(2) : 0;
             // tslint:disable-next-line:radix
-            item.DeductionAmount = (1 - parseInt(ProgressPercent)) * item.ContractPayItemAmountCOEF;
-            // tslint:disable-next-line:radix
-            item.PenaltyAmount = parseInt(PenaltyPercentage) * (item.ContractPayItemAmountCOEF - item.DeductionAmount);
+            item.PenaltyAmount = this.IsGreenSpace ? ((parseInt(PenaltyPercentage) / 100) *
+              // tslint:disable-next-line: radix
+              (parseInt(item.data.DeductionAmount))).toFixed(2) : ((parseInt(PenaltyPercentage) / 100) *
+                // tslint:disable-next-line: radix
+                (item.ContractPayItemAmountCOEF - parseInt(item.DeductionAmount))).toFixed(2);
             // tslint:disable-next-line:radix
             item.CumultiveAmount = parseInt(item.BeforeAmount);
             this.IsEditTaxValue = item.IsTaxValue;
-            //   item.CumultiveAmountCOEF = item.ContractPayItemAmountCOEF - item.DeductionAmount - item.PenaltyAmount;
             this.EntityColumnDefinition(null, null, item.EntityList, false);
             this.SetEntityDataInDataRow(item);
+            if (item.PenaltyAmount && !isNaN(item.PenaltyAmount) && item.PenaltyAmount !== 'NaN'
+              // tslint:disable-next-line: radix
+              && !isNullOrUndefined(item.PenaltyAmount) && parseInt(item.PenaltyAmount) > 0) {
+              // tslint:disable-next-line: radix
+              SumPenaltyAmount = SumPenaltyAmount + parseInt(item.PenaltyAmount);
+            }
           });
+          this.SumPenaltyAmount = SumPenaltyAmount;
+          this.SumPenaltyAmountStr = SumPenaltyAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         }
       );
     if (this.ContractPayDate !== '') {
@@ -1603,6 +1650,10 @@ export class ContractPayDetailsComponent implements OnInit {
   }
   OnContractPayEndDateChange(Date) {
     this.ContractPayEndDate = Date.MDate;
+    if (this.oldContractPayEndDate !== Date.MDate && !isNullOrUndefined(Date.MDate) && Date.MDate !== '' && this.IsGreenSpace) {
+      this.SetProgressPercentinDataRow();
+      this.oldContractPayEndDate = Date.MDate;
+    }
   }
 
   onChangeContractPayTypeObj(newObj) {
@@ -1641,11 +1692,13 @@ export class ContractPayDetailsComponent implements OnInit {
       this.ShowMessageBoxWithOkBtn('تاریخ درخواست پرداخت نمی تواند خالی باشد');
       return;
     }
-    if (!(this.ContractPayStartDate >= this.MiladiMinStartDate && this.ContractPayStartDate <= this.MiladiMaxEndDate) ||
+    if (this.selectedContractPayTypeObj !== 3) {
+      if (!(this.ContractPayStartDate >= this.MiladiMinStartDate && this.ContractPayStartDate <= this.MiladiMaxEndDate) ||
       !(this.ContractPayEndDate >= this.MiladiMinStartDate && this.ContractPayEndDate <= this.MiladiMaxEndDate)) {
       this.ShowMessageBoxWithOkBtn('تاریخ شروع و پایان دوره درخواست پرداخت باید در بازه تاریخ قرارداد باشد');
       return;
     } // RFC 60362 , 60576
+    } // 65475   
 
     if (this.PopupParam.Mode === 'InsertMode') {
       this.SaveContractPay();
@@ -1663,6 +1716,9 @@ export class ContractPayDetailsComponent implements OnInit {
     this.gridApi.forEachNode(node => {
       if (node.data.ProductID) { this.ProductIDs.push(node.data.ProductID); }
     });
+    if (this.ModuleViewTypeCode == 11 && event.data.ProductID == 518163) {
+      this.EditableItemQty = true;
+    }
     // this.columnDef1[1].cellEditorParams.Items = this.contractpaydetail.GetContractOrder(this.PopupParam.SelectedContractID,
     //   this.ContractPayNo,
     //   this.ContractPayDate,
@@ -1683,6 +1739,13 @@ export class ContractPayDetailsComponent implements OnInit {
           : node.data.ProductTypeCode ? node.data.ProductTypeCode : 0;
       }
     });
+    if (event.colDef && (event.colDef.field === 'Qty')) {
+      this.gridApi.forEachNode(node => {
+        if (node.rowIndex === event.rowIndex) {
+
+        }
+      });
+    }
 
     if (event.colDef && (event.colDef.field === 'ContractPayItemQty')) {
       itemsToUpdate = [];
@@ -1690,19 +1753,30 @@ export class ContractPayDetailsComponent implements OnInit {
         if (node.rowIndex === event.rowIndex) {
           if (node.data.ContractPayItemQty && node.data.ContractPayItemQty > 0) {
             // tslint:disable-next-line: radix
-            // tslint:disable-next-line: max-line-length
-            // tslint:disable-next-line: radix
-            node.data.ContractPayItemAmount = parseInt((parseFloat(node.data.ContractPayItemUnitAmount) * parseFloat(node.data.ContractPayItemQty)).toString());
+            node.data.ContractPayItemAmount = parseInt((parseFloat(node.data.ContractPayItemUnitAmount)
+              * parseFloat(node.data.ContractPayItemQty)).toString());
             // tslint:disable-next-line: max-line-length
             node.data.ContractPayItemAmountCOEF = node.data.Qty ? (parseInt(node.data.AmountCOEFPact) / parseInt(node.data.Qty)) * parseFloat(node.data.ContractPayItemQty) : parseInt(node.data.AmountCOEFPact) * parseFloat(node.data.ContractPayItemQty);
             node.data.CumultiveAmountCOEF = parseInt(node.data.BeforeAmountCOEF) + parseInt(node.data.ContractPayItemAmountCOEF);
             if (node.data.IsTaxValue) {
               // tslint:disable-next-line: radix
-              node.data.TaxValue = Math.round(parseInt(node.data.ContractPayItemAmount) * 0.09);
+              node.data.TaxValue = Math.round((node.data.ContractPayItemAmountCOEF && (parseInt(node.data.ContractPayItemAmountCOEF)) > 0
+                // tslint:disable-next-line: radix
+                ? (parseInt(node.data.ContractPayItemAmountCOEF) - (node.data.Discount ? parseInt(node.data.Discount) : 0))
+                // tslint:disable-next-line: radix
+                : (parseInt(node.data.ContractPayItemAmount) - (node.data.Discount ? parseInt(node.data.Discount) : 0))) * 0.09);
+
               // tslint:disable-next-line: radix
-              node.data.ContractPayItemAmountFinal = parseInt(node.data.ContractPayItemAmount) + parseInt(node.data.TaxValue);
+              // tslint:disable-next-line: max-line-length
+              node.data.ContractPayItemAmountFinal = (node.data.ContractPayItemAmountCOEF && parseInt(node.data.ContractPayItemAmountCOEF) > 0
+                // tslint:disable-next-line: radix
+                ? parseInt(node.data.ContractPayItemAmountCOEF)
+                // tslint:disable-next-line: radix
+                : parseInt(node.data.ContractPayItemAmount)) + parseInt(node.data.TaxValue);
             } else {
-              node.data.ContractPayItemAmountFinal = parseInt(node.data.ContractPayItemAmount);
+              // tslint:disable-next-line: radix
+              node.data.ContractPayItemAmountFinal = node.data.ContractPayItemAmountCOEF && parseInt(node.data.ContractPayItemAmountCOEF) > 0
+                ? parseInt(node.data.ContractPayItemAmountCOEF) : parseInt(node.data.ContractPayItemAmount);
             }
             node.data.CumultiveAmount = parseInt(node.data.ContractPayItemAmount) + parseInt(node.data.BeforeAmount);
           }
@@ -1712,46 +1786,74 @@ export class ContractPayDetailsComponent implements OnInit {
       this.gridApi.updateRowData({ update: itemsToUpdate });
     }
 
-    if (event.colDef && event.colDef.field === 'ContractPayItemAmount') {
+    if (event.colDef && event.colDef.field === 'ContractPayItemAmount' || event.colDef.field === 'RequestedAmount') {
       itemsToUpdate = [];
+      let SumPenaltyAmount = 0;
       this.gridApi.forEachNode(node => {
         if (node.rowIndex === event.rowIndex) {
 
           const ProgressPercent = node.data.ProgressPercent ? node.data.ProgressPercent : 0;
           const PenaltyPercentage = node.data.PenaltyPercentage ? node.data.PenaltyPercentage : 0;
+          node.data.DeductionAmount = parseInt(ProgressPercent) > 0 ?
+            // tslint:disable-next-line:radix
+            (((100 - parseInt(ProgressPercent)) / 100) * node.data.ContractPayItemAmountCOEF).toFixed(2) : 0;
           // tslint:disable-next-line:radix
-          node.data.DeductionAmount = (1 - parseInt(ProgressPercent)) * node.data.ContractPayItemAmountCOEF;
-          // tslint:disable-next-line:radix
-          node.data.PenaltyAmount = parseInt(PenaltyPercentage) * (node.data.ContractPayItemAmountCOEF - node.data.DeductionAmount);
+          node.data.PenaltyAmount = this.IsGreenSpace ? ((parseInt(PenaltyPercentage) / 100) *
+            // tslint:disable-next-line: radix
+            (parseInt(node.data.data.DeductionAmount))).toFixed(2) :
+            // tslint:disable-next-line: radix
+            ((parseInt(PenaltyPercentage) / 100) *
+              // tslint:disable-next-line: radix
+              (node.data.ContractPayItemAmountCOEF - parseInt(node.data.DeductionAmount))).toFixed(2);
 
           // tslint:disable-next-line:radix
           node.data.CumultiveAmount = parseInt(node.data.BeforeAmount) +
             // tslint:disable-next-line:radix
-            parseInt(node.data.ContractPayItemAmount); // - parseInt(node.data.PenaltyAmount);
+            parseInt(node.data.ContractPayItemAmount);
 
           if (node.data.IsTaxValue) {
             // tslint:disable-next-line: radix
-            node.data.TaxValue = Math.round(0.09 * parseInt(node.data.ContractPayItemAmount));
+            node.data.TaxValue = Math.round((node.data.ContractPayItemAmountCOEF && (parseInt(node.data.ContractPayItemAmountCOEF)) > 0
+              // tslint:disable-next-line: radix
+              ? (parseInt(node.data.ContractPayItemAmountCOEF) - (node.data.Discount ? parseInt(node.data.Discount) : 0))
+              // tslint:disable-next-line: radix
+              : (parseInt(node.data.ContractPayItemAmount) - (node.data.Discount ? parseInt(node.data.Discount) : 0))) * 0.09);
             // tslint:disable-next-line: radix
-            node.data.ContractPayItemAmountFinal = parseInt(node.data.ContractPayItemAmount) + parseInt(node.data.TaxValue);
+            node.data.ContractPayItemAmountFinal = (node.data.ContractPayItemAmountCOEF && parseInt(node.data.ContractPayItemAmountCOEF) > 0
+              // tslint:disable-next-line: radix
+              ? parseInt(node.data.ContractPayItemAmountCOEF)
+              // tslint:disable-next-line: radix
+              : parseInt(node.data.ContractPayItemAmount)) + parseInt(node.data.TaxValue);
           } else {
             node.data.TaxValue = 0;
-            node.data.ContractPayItemAmountFinal = parseInt(node.data.ContractPayItemAmount);
+            // tslint:disable-next-line: radix
+            node.data.ContractPayItemAmountFinal = node.data.ContractPayItemAmountCOEF && parseInt(node.data.ContractPayItemAmountCOEF) > 0
+              ? parseInt(node.data.ContractPayItemAmountCOEF) : parseInt(node.data.ContractPayItemAmount);
           }
 
-          if (node.data.Qty) { //RFC 61913
+          if (node.data.Qty) { // RFC 61913
             if (node.data.ContractPayItemUnitAmount) {
               // tslint:disable-next-line: radix
-              node.data.ContractPayItemQty = parseFloat(node.data.ContractPayItemAmount) / parseFloat(node.data.ContractPayItemUnitAmount);
+              node.data.ContractPayItemQty = (parseFloat(node.data.ContractPayItemAmount) / parseFloat(node.data.ContractPayItemUnitAmount) < 1) ? null :
+                parseFloat(node.data.ContractPayItemAmount) / parseFloat(node.data.ContractPayItemUnitAmount);
             } else {
               node.data.ContractPayItemQty = parseFloat(node.data.ContractPayItemQty);
             }
+          } else {
+            node.data.ContractPayItemQty = null;
           }
-
+          if (node.data.PenaltyAmount && !isNaN(node.data.PenaltyAmount) && node.data.PenaltyAmount !== 'NaN'
+            // tslint:disable-next-line: radix
+            && !isNullOrUndefined(node.data.PenaltyAmount) && parseInt(node.data.PenaltyAmount)) {
+            // tslint:disable-next-line: radix
+            SumPenaltyAmount = SumPenaltyAmount + parseInt(node.data.PenaltyAmount);
+          }
           itemsToUpdate.push(node.data);
         }
       });
       this.gridApi.updateRowData({ update: itemsToUpdate });
+      this.SumPenaltyAmount = SumPenaltyAmount;
+      this.SumPenaltyAmountStr = SumPenaltyAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     }
 
     if (event.colDef && event.colDef.field === 'TaxValue') {
@@ -1768,10 +1870,20 @@ export class ContractPayDetailsComponent implements OnInit {
             if (node.rowIndex === event.rowIndex) {
               if ((IsVolumetric ? true : node.data.IsTaxValue) && (TaxValue !== 0 && TaxValue !== null)) {
                 node.data.TaxValue = parseInt(node.data.TaxValue);
-                node.data.ContractPayItemAmountFinal = node.data.TaxValue ? parseInt(node.data.ContractPayItemAmount) + node.data.TaxValue : parseInt(node.data.ContractPayItemAmount);
+                // tslint:disable-next-line: max-line-length
+                node.data.ContractPayItemAmountFinal = node.data.TaxValue ? (node.data.ContractPayItemAmountCOEF && parseInt(node.data.ContractPayItemAmountCOEF) > 0
+                  // tslint:disable-next-line: radix
+                  ? parseInt(node.data.ContractPayItemAmountCOEF)
+                  // tslint:disable-next-line: radix
+                  // tslint:disable-next-line: max-line-length
+                  : parseInt(node.data.ContractPayItemAmount)) + parseInt(node.data.TaxValue) : node.data.ContractPayItemAmountCOEF && parseInt(node.data.ContractPayItemAmountCOEF) > 0
+                  ? parseInt(node.data.ContractPayItemAmountCOEF) : parseInt(node.data.ContractPayItemAmount);
               } else if (TaxValue === 0 || TaxValue === null) {
                 node.data.TaxValue = 0;
-                node.data.ContractPayItemAmountFinal = parseInt(node.data.ContractPayItemAmount);
+                // tslint:disable-next-line: max-line-length
+                node.data.ContractPayItemAmountFinal = node.data.ContractPayItemAmountCOEF && parseInt(node.data.ContractPayItemAmountCOEF) > 0
+                  // tslint:disable-next-line: radix
+                  ? parseInt(node.data.ContractPayItemAmountCOEF) : parseInt(node.data.ContractPayItemAmoun);
               }
               itemsToUpdate.push(node.data);
             }
@@ -1780,90 +1892,23 @@ export class ContractPayDetailsComponent implements OnInit {
         });
     }
 
-    if (event.colDef && event.colDef.field === 'ProductName') {
-      // itemsToUpdate = [];
-
-      // if (this.IsVolumetric) {
-      //   this.ProductRequest.GetProductList(0,
-      //     this.RegionCode,
-      //     '',
-      //     1,
-      //     30,
-      //     this.ProdcutTypeCode,
-      //     true,
-      //     null).
-      //     subscribe(res => {
-      //       this.RefreshCartable.RefreshItemsVirtualNgSelect({
-      //         List: res.List,
-      //         TotalItemCount: res.TotalItemCount,
-      //         PageCount: Math.ceil(res.TotalItemCount / 30)
-      //       });
-      //     });
-      // } else {
-      //   this.contractpaydetail.GetContractOrderByPagination(
-      //     0,
-      //     this.RegionCode,
-      //     '',
-      //     1,
-      //     30,
-      //     this.PopupParam.SelectedContractID,
-      //     this.ContractPayNo,
-      //     this.ContractPayDate,
-      //     this.ProductIDs).subscribe(res => {
-      //       this.RefreshCartable.RefreshItemsVirtualNgSelect({
-      //         List: res.List,
-      //         TotalItemCount: res.TotalItemCount,
-      //         PageCount: Math.ceil(res.TotalItemCount / 30)
-      //       });
-      //     });
-      // }
-      // this.gridApi.forEachNode(node => {
-      //   if (node.rowIndex === event.rowIndex) {
-      //     node.data.ProductID = event.newValue.ProductID;
-      //     node.data.ProductName = event.newValue.ProductName;
-      //     node.data.ScaleName = event.newValue.ScaleName;
-      //     node.data.PersianStartDate = event.newValue.PersianStartDate;
-      //     node.data.PersianEndDate = event.newValue.PersianEndDate;
-      //     node.data.ShortStartDate = event.newValue.ShortStartDate;
-      //     node.data.ShortEndDate = event.newValue.ShortEndDate;
-      //     node.data.Qty = event.newValue.Qty;
-      //     node.data.BeforeQty = event.newValue.BeforeQty;
-      //     node.data.Amount = event.newValue.Amount;
-      //     node.data.FinalAmount = node.data.Qty * node.data.Amount;
-      //     node.data.AmountCOEFPact = node.data.AmountCOEFPact;
-      //     node.data.BeforeAmount = event.newValue.BeforeAmount;
-      //     node.data.BeforeAmountCOEF = node.data.BeforeAmountCOEF;
-      //     node.data.IsTaxValue = event.newValue.IsTaxValue;
-      //     // node.data.CumultiveAmount = event.newValue.BeforeAmount;
-      //     // node.data.ContractPayItemAmount = node.data.FinalAmount;
-      //     // node.data.ContractPayItemAmountCOEF = node.data.FinalAmount + node.data.FinalAmount * (this.MinusCoef / 100);
-
-      //     const ProgressPercent = node.data.ProgressPercent ? node.data.ProgressPercent : 0;
-      //     const PenaltyPercentage = node.data.PenaltyPercentage ? node.data.PenaltyPercentage : 0;
-      //     // tslint:disable-next-line:radix
-      //     node.data.DeductionAmount = (1 - parseInt(ProgressPercent)) * node.data.ContractPayItemAmountCOEF;
-      //     // tslint:disable-next-line:radix
-      //     node.data.PenaltyAmount = parseInt(PenaltyPercentage) * (node.data.ContractPayItemAmountCOEF - node.data.DeductionAmount);
-      //     node.data.CumultiveAmount = node.data.ContractPayItemAmount + node.data.BeforeAmount - node.data.PenaltyAmount;
-      //     node.data.CumultiveAmountCOEF = node.data.ContractPayItemAmountCOEF - node.data.DeductionAmount - node.data.PenaltyAmount;
-      //     this.EntityColumnDefinition(node.data.ProductID, node, null, true);
-      //     itemsToUpdate.push(node.data);
-      //   }
-      // });
-      // this.gridApi.updateRowData({ update: itemsToUpdate });
-    }
-
     if (event.colDef && event.colDef.field === 'PenaltyPercentage') {
       itemsToUpdate = [];
+      let SumPenaltyAmount = 0;
       this.gridApi.forEachNode(node => {
         if (node.rowIndex === event.rowIndex) {
           const ProgressPercent = node.data.ProgressPercent ? node.data.ProgressPercent : 0;
           const PenaltyPercentage = node.data.PenaltyPercentage ? node.data.PenaltyPercentage : 0;
+          // tslint:disable-next-line: radix
+          node.data.DeductionAmount = parseInt(ProgressPercent) > 0 ?
+            // tslint:disable-next-line:radix
+            (((100 - parseInt(ProgressPercent)) / 100) * node.data.ContractPayItemAmountCOEF).toFixed(2) : 0;
           // tslint:disable-next-line:radix
-          node.data.DeductionAmount = (1 - parseInt(ProgressPercent)) * node.data.ContractPayItemAmountCOEF;
-          // tslint:disable-next-line:radix
-          node.data.PenaltyAmount = parseInt(PenaltyPercentage) * (node.data.ContractPayItemAmountCOEF - node.data.DeductionAmount);
-
+          node.data.PenaltyAmount = this.IsGreenSpace ? ((parseInt(PenaltyPercentage) / 100) *
+            // tslint:disable-next-line: radix
+            (parseInt(node.data.data.DeductionAmount))).toFixed(2) : ((parseInt(PenaltyPercentage) / 100) *
+              // tslint:disable-next-line: radix
+              (node.data.ContractPayItemAmountCOEF - parseInt(node.data.DeductionAmount))).toFixed(2);
           // tslint:disable-next-line:radix
           node.data.CumultiveAmount = parseInt(node.data.BeforeAmount) +
             // tslint:disable-next-line:radix
@@ -1871,25 +1916,39 @@ export class ContractPayDetailsComponent implements OnInit {
             // tslint:disable-next-line:radix
             parseInt(node.data.PenaltyAmount);
 
-          // tslint:disable-next-line:radix
-          // node.data.CumultiveAmountCOEF = node.data.ContractPayItemAmountCOEF - node.data.DeductionAmount - node.data.PenaltyAmount;
-
           itemsToUpdate.push(node.data);
+        }
+        if (node.data.PenaltyAmount && !isNullOrUndefined(node.data.PenaltyAmount) &&
+          !isNaN(node.data.PenaltyAmount) && node.data.PenaltyAmount !== 'NaN'
+          // tslint:disable-next-line: radix
+          && !isNullOrUndefined(node.data.PenaltyAmount) && parseInt(node.data.PenaltyAmount)) {
+          // tslint:disable-next-line: radix
+          SumPenaltyAmount = SumPenaltyAmount + parseInt(node.data.PenaltyAmount);
         }
       });
       this.gridApi.updateRowData({ update: itemsToUpdate });
+      // tslint: disable - next - line: radix
+      this.SumPenaltyAmount = SumPenaltyAmount;
+      this.SumPenaltyAmountStr = SumPenaltyAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     }
 
     if (event.colDef && event.colDef.field === 'ProgressPercent') {
       itemsToUpdate = [];
+      let SumPenaltyAmount = 0;
       this.gridApi.forEachNode(node => {
         if (node.rowIndex === event.rowIndex) {
           const ProgressPercent = node.data.ProgressPercent ? node.data.ProgressPercent : 0;
           const PenaltyPercentage = node.data.PenaltyPercentage ? node.data.PenaltyPercentage : 0;
+          // tslint:disable-next-line: radix
+          node.data.DeductionAmount = parseInt(ProgressPercent) > 0 ?
+            // tslint:disable-next-line:radix
+            (((100 - parseInt(ProgressPercent)) / 100) * node.data.ContractPayItemAmountCOEF).toFixed(2) : 0;
           // tslint:disable-next-line:radix
-          node.data.DeductionAmount = (1 - parseInt(ProgressPercent)) * node.data.ContractPayItemAmountCOEF;
-          // tslint:disable-next-line:radix
-          node.data.PenaltyAmount = (parseInt(PenaltyPercentage) / 100) * parseInt(node.data.DeductionAmount);
+          node.data.PenaltyAmount = this.IsGreenSpace ? ((parseInt(PenaltyPercentage) / 100) *
+            // tslint:disable-next-line: radix
+            (parseInt(node.data.data.DeductionAmount))).toFixed(2) : ((parseInt(PenaltyPercentage) / 100) *
+              // tslint:disable-next-line: radix
+              (node.data.ContractPayItemAmountCOEF - parseInt(node.data.DeductionAmount)));
 
           // tslint:disable-next-line:radix
           node.data.CumultiveAmount = parseInt(node.data.BeforeAmount) +
@@ -1902,8 +1961,17 @@ export class ContractPayDetailsComponent implements OnInit {
           node.data.CumultiveAmountCOEF = node.data.ContractPayItemAmountCOEF - node.data.DeductionAmount - node.data.PenaltyAmount;
           itemsToUpdate.push(node.data);
         }
+        if (node.data.PenaltyAmount && !isNullOrUndefined(node.data.PenaltyAmount) &&
+          !isNaN(node.data.PenaltyAmount) && node.data.PenaltyAmount !== 'NaN'
+          // tslint:disable-next-line: radix
+          && !isNullOrUndefined(node.data.PenaltyAmount) && parseInt(node.data.PenaltyAmount) > 0) {
+          // tslint:disable-next-line: radix
+          SumPenaltyAmount = SumPenaltyAmount + parseInt(node.data.PenaltyAmount);
+        }
       });
       this.gridApi.updateRowData({ update: itemsToUpdate });
+      this.SumPenaltyAmount = SumPenaltyAmount;
+      this.SumPenaltyAmountStr = SumPenaltyAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     }
 
     if (event.colDef && event.colDef.field === 'CumultiveAmount') {
@@ -1916,21 +1984,36 @@ export class ContractPayDetailsComponent implements OnInit {
 
           if (node.data.IsTaxValue) {
             // tslint:disable-next-line: radix
-            node.data.TaxValue = Math.round(0.09 * parseInt(node.data.ContractPayItemAmount));
+            node.data.TaxValue = Math.round((node.data.ContractPayItemAmountCOEF && (parseInt(node.data.ContractPayItemAmountCOEF)) > 0
+              // tslint:disable-next-line: radix
+              ? (parseInt(node.data.ContractPayItemAmountCOEF) - (node.data.Discount ? parseInt(node.data.Discount) : 0))
+              // tslint:disable-next-line: radix
+              : (parseInt(node.data.ContractPayItemAmount) - (node.data.Discount ? parseInt(node.data.Discount) : 0))) * 0.09);
+
             // tslint:disable-next-line: radix
-            node.data.ContractPayItemAmountFinal = parseInt(node.data.ContractPayItemAmount) + parseInt(node.data.TaxValue);
+            node.data.ContractPayItemAmountFinal = (node.data.ContractPayItemAmountCOEF && parseInt(node.data.ContractPayItemAmountCOEF) > 0
+              // tslint:disable-next-line: radix
+              ? parseInt(node.data.ContractPayItemAmountCOEF)
+              // tslint:disable-next-line: radix
+              : parseInt(node.data.ContractPayItemAmount)) + parseInt(node.data.TaxValue);
           } else {
             node.data.TaxValue = 0;
-            node.data.ContractPayItemAmountFinal = parseInt(node.data.ContractPayItemAmount);
+            // tslint:disable-next-line: radix
+            node.data.ContractPayItemAmountFinal = node.data.ContractPayItemAmountCOEF && parseInt(node.data.ContractPayItemAmountCOEF) > 0
+              ? parseInt(node.data.ContractPayItemAmountCOEF) : parseInt(node.data.ContractPayItemAmount);
           }
 
-          if (node.data.Qty) { //RFC 61913
+          if (node.data.Qty) { // RFC 61913
             if (node.data.ContractPayItemUnitAmount) {
               // tslint:disable-next-line: radix
-              node.data.ContractPayItemQty = parseFloat(node.data.ContractPayItemAmount) / parseFloat(node.data.ContractPayItemUnitAmount);
+              // tslint:disable-next-line: max-line-length
+              node.data.ContractPayItemQty = (parseFloat(node.data.ContractPayItemAmount) / parseFloat(node.data.ContractPayItemUnitAmount)) < 1 ? null :
+                (parseFloat(node.data.ContractPayItemAmount) / parseFloat(node.data.ContractPayItemUnitAmount));
             } else {
               node.data.ContractPayItemQty = parseFloat(node.data.ContractPayItemQty);
             }
+          } else {
+            node.data.ContractPayItemQty = null;
           }
           itemsToUpdate.push(node.data);
         }
@@ -1938,26 +2021,129 @@ export class ContractPayDetailsComponent implements OnInit {
       this.gridApi.updateRowData({ update: itemsToUpdate });
     }
 
+    if (event.colDef && event.colDef.field === 'PenaltyAmount') {
 
-    //--------
-    // if (event.colDef && event.colDef.field === 'RequestedAmount') {
-    //   itemsToUpdate = [];
-    //   this.gridApi.forEachNode(node => {
-    //     if (node.rowIndex === event.rowIndex) {
-    //       node.data.ContractPayItemAmount = node.data.RequestedAmount;
+      let SumPenaltyAmount = 0;
+      this.gridApi.forEachNode(node => {
+        // tslint:disable-next-line: radix
+        if (node.data.PenaltyAmount && !isNullOrUndefined(node.data.PenaltyAmount) && parseInt(node.data.PenaltyAmount) > 0
+          && !isNaN(node.data.PenaltyAmount) && node.data.PenaltyAmount !== 'NaN') {
+          // tslint:disable-next-line: radix
+          SumPenaltyAmount = SumPenaltyAmount + parseInt(node.data.PenaltyAmount);
+        }
+      });
+      // tslint: disable - next - line: radix
+      this.SumPenaltyAmount = SumPenaltyAmount;
+      this.SumPenaltyAmountStr = SumPenaltyAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
 
-    //       if (node.data.IsTaxValue) {
-    //         // tslint:disable-next-line: radix
-    //         node.data.TaxValue = Math.round(0.09 * parseInt(node.data.RequestedAmount));
+    if (event.colDef && event.colDef.field === 'ProductCodeName') {
+      if (this.IsVolumetric) {
+        event.data.IsTaxValue = this.IsTaxValue && event.data.IsTaxValue;
+        //event.data.PriceID = res.List.PriceID;
+        // tslint:disable-next-line: max-line-length
+        event.data.ShortStartDate = this.ContractDetails.ShortStartDate ? this.ContractDetails.ShortStartDate : this.ContractDetails.FromContractDateString;
+        // tslint:disable-next-line: max-line-length
+        event.data.ShortEndDate = this.ContractDetails.ShortEndDate ? this.ContractDetails.ShortEndDate : this.ContractDetails.ToContractDateString;
+        // tslint:disable-next-line: max-line-length
+        event.data.PersianStartDate = this.ContractDetails.ShortStartDate ? this.ContractDetails.PersianStartDate : this.ContractDetails.PersianFromContractDateString;
+        // tslint:disable-next-line: max-line-length
+        event.data.PersianEndDate = this.ContractDetails.ShortEndDate ? this.ContractDetails.PersianEndDate : this.ContractDetails.PersianToContractDateString;
+        event.data.ContractPayItemUnitAmount = event.data.Price;
+        this.contractpaydetail.GetBeforeContractPay(this.PopupParam.SelectedContractID, // RFC 65519
+          this.ContractPayNo,
+          this.ContractOperationID,
+          event.data.ProductID).subscribe(res => {
+            if (res && res.length > 0) {
+              event.data.BeforeAmount = res[0].BeforeAmount;
+              event.data.BeforeAmountCOEF = res[0].BeforeAmountCOEF;
+              event.data.BeforeQty = res[0].BeforeQty;
+            }
+          });
 
-    //       } else {
-    //         node.data.TaxValue = 0;
-    //       }
-    //       itemsToUpdate.push(node.data);
-    //     }
-    //   });
-    //   this.gridApi.updateRowData({ update: itemsToUpdate });
-    // }
+      } else {
+        this.contractpaydetail.GetContractOrderByProduct(
+          0,
+          this.RegionCode,
+          '',
+          1,
+          30,
+          this.PopupParam.SelectedContractID,
+          this.ContractPayNo,
+          this.ContractPayDate,
+          event.data.ProductID,
+          this.ProdcutTypeCode,
+          this.IsGreenSpace,
+          this.ContractPayStartDate,
+          this.ContractPayEndDate
+        ).subscribe(res => {
+          event.data.Amount = res.Amount;
+          event.data.IsTaxValue = res.IsTaxValue;
+          event.data.Qty = res.Qty;
+          event.data.ContractPayItemUnitAmount = event.data.Amount;
+          event.data.FinalAmount = res.FinalAmount;
+          event.data.AmountCOEFPact = res.AmountCOEFPact;
+          event.data.BeforeAmount = res.BeforeAmount;
+          event.data.BeforeAmountCOEF = res.BeforeAmountCOEF;
+          event.data.BeforeQty = res.BeforeQty;
+          const ProgressPercent = res.ProgressPercent ? res.ProgressPercent : 0;
+          const PenaltyPercentage = res.PenaltyPercentage ? res.PenaltyPercentage : 0;
+          // tslint:disable-next-line:radix
+          event.data.DeductionAmount = parseInt(ProgressPercent) > 0 ? (((100 - parseInt(ProgressPercent)) / 100) *
+            res.ContractPayItemAmountCOEF).toFixed(2) : 0;
+          // tslint:disable-next-line:radix
+          event.data.PenaltyAmount = this.IsGreenSpace ? ((parseInt(PenaltyPercentage) / 100) *
+            // tslint:disable-next-line: radix
+            (parseInt(event.data.DeductionAmount))).toFixed(2) :
+            // tslint:disable-next-line: radix
+            ((parseInt(PenaltyPercentage) / 100) *
+              // tslint:disable-next-line: radix
+              (res.ContractPayItemAmountCOEF - parseInt(event.data.DeductionAmount))).toFixed(2);
+          if (!event.data.PenaltyAmount || event.data.PenaltyAmount === NaN || event.data.PenaltyAmount === 'NaN') {
+            event.data.PenaltyAmount = 0;
+          }
+          // tslint:disable-next-line: radix
+          event.data.CumultiveAmount = parseInt(event.data.BeforeAmount) - parseInt(event.data.PenaltyAmount);
+          // tslint:disable-next-line: radix
+          event.data.CumultiveAmountCOEF = parseInt(event.data.DeductionAmount) - parseInt(event.data.PenaltyAmount);
+          event.data.ProgressPercent = res.ProgressPercent;
+          event.data.PenaltyPercentage = res.PenaltyPercentage;
+        });
+      }
+      if (event.data.IsTaxValue) {
+        // tslint:disable-next-line: radix
+        event.data.ContractPayItemAmountFinal = parseInt(event.data.ContractPayItemAmount) + parseInt(event.data.TaxValue);
+      } else {
+        // tslint:disable-next-line: radix
+        event.data.ContractPayItemAmountFinal = parseInt(event.data.ContractPayItemAmount);
+      }
+    }
+
+    if (this.PopupParam.Mode === 'InsertMode') { // 65343
+      if (event.colDef && event.colDef.field === 'ContractPayItemAmount') {
+        this.gridApi.forEachNode(node => {
+          if (node.data.Qty <= 1) {
+            node.data.ContractPayItemUnitAmount = node.data.ContractPayItemAmount;
+          }
+        });
+      }
+    }
+
+    if (event.colDef && event.colDef.field === 'Discount') {
+      this.gridApi.forEachNode(node => {
+        if (node.rowIndex === event.rowIndex) {
+          if (node.data.IsTaxValue) {
+            // tslint:disable-next-line: radix
+            node.data.TaxValue = Math.round((node.data.ContractPayItemAmountCOEF && (parseInt(node.data.ContractPayItemAmountCOEF)) > 0
+              // tslint:disable-next-line: radix
+              ? (parseInt(node.data.ContractPayItemAmountCOEF) - (node.data.Discount ? parseInt(node.data.Discount) : 0))
+              // tslint:disable-next-line: radix
+              : (parseInt(node.data.ContractPayItemAmount) - (node.data.Discount ? parseInt(node.data.Discount) : 0))) * 0.09);
+
+          }
+        }
+      });
+    }
   }
 
   onContractPayItemGridReady(params: { api: any; }) {
@@ -2015,6 +2201,10 @@ export class ContractPayDetailsComponent implements OnInit {
     if (event && this.type === 'global-choose-page') {
       this.PrintSelectedReport(event);
     }
+
+    if (event && this.type === 'app-contract-pay-deduction') {
+     this. EditModeNgInit() ;
+    }
     this.btnclicked = false;
     this.HaveMaxBtn = false;
     this.OverPixelWidth = null;
@@ -2024,13 +2214,13 @@ export class ContractPayDetailsComponent implements OnInit {
   SaveContractPay() {
     const ContractPayItemList = [];
     this.gridApi.forEachNode(node => {
-      var keys = Object.keys(node.data);
+      let keys = Object.keys(node.data);
       const EntityTypeItemIDList = [];
       if (node.data.EntityList) {
         node.data.EntityList.forEach(Entity => {
-          let str = 'Subject' + Entity.EntityTypeID.toString();
-          let ID = 'EntityTypeItemID' + Entity.EntityTypeID.toString();
-          var key = keys.find(x => x === str);
+          const str = 'Subject' + Entity.EntityTypeID.toString();
+          const ID = 'EntityTypeItemID' + Entity.EntityTypeID.toString();
+          let key = keys.find(x => x === str);
 
           if (key && node.data[key]) {
             if (node.data[key].EntityTypeItemID) {
@@ -2062,7 +2252,8 @@ export class ContractPayDetailsComponent implements OnInit {
         EntityTypeItemIDList: EntityTypeItemIDList,
         ContractPayItemDate: node.data.ShortContractPayItemDate,
         ContractPayItemTechCode: node.data.ContractPayItemTechCode,
-        RequestedAmount: node.data.RequestedAmount
+        RequestedAmount: node.data.RequestedAmount,
+        Discount: node.data.Discount
       };
       ContractPayItemList.push(obj);
     });
@@ -2081,6 +2272,7 @@ export class ContractPayDetailsComponent implements OnInit {
       ContractPayTechnicalCode: (this.IsMultiInvoice) ? this.ContractPayNo : this.ContractPayTechnicalCode, // 62513
       ContractOperationId: this.ContractOperationID,
       IsConfirm: 0,
+      AdjustmentTypeCode: this.AdjustmentTypeParams.selectedObject ? this.AdjustmentTypeParams.selectedObject : null,  // 64275
     };
     const BankList = [];
     const HaveBank = (this.NgSelectBankParams.selectedObject || this.NgSelectBankParams.selectedObject !== null) ? false : true;
@@ -2135,13 +2327,13 @@ export class ContractPayDetailsComponent implements OnInit {
         CostFactorID = this.CostFactorID;
       }
 
-      var keys = Object.keys(node.data);
+      let keys = Object.keys(node.data);
       const EntityTypeItemIDList = [];
       if (node.data.EntityList) {
         node.data.EntityList.forEach(Entity => {
-          let str = 'Subject' + Entity.EntityTypeID.toString()
-          let ID = 'EntityTypeItemID' + Entity.EntityTypeID.toString();
-          var key = keys.find(x => x === str);
+          const str = 'Subject' + Entity.EntityTypeID.toString();
+          const ID = 'EntityTypeItemID' + Entity.EntityTypeID.toString();
+          let key = keys.find(x => x === str);
 
           if (key && node.data[key]) {
             if (node.data[key].EntityTypeItemID) {
@@ -2175,6 +2367,7 @@ export class ContractPayDetailsComponent implements OnInit {
         ContractPayItemDate: node.data.ShortContractPayItemDate,
         ContractPayItemTechCode: node.data.ContractPayItemTechCode,
         RequestedAmount: node.data.RequestedAmount,
+        Discount: node.data.Discount
       };
       // tslint:disable-next-line:radix
       SumContractPayItemAmount += parseInt(node.data.ContractPayItemAmount);
@@ -2195,6 +2388,9 @@ export class ContractPayDetailsComponent implements OnInit {
       ContractPayTechnicalCode: this.ContractPayTechnicalCode,
       ContractOperationId: this.ContractOperationID,
       IsConfirm: this.IsConfirm, // هماهنگی با مهندس حسینی
+      AdjustmentTypeCode: this.AdjustmentTypeParams.selectedObject ? this.AdjustmentTypeParams.selectedObject : null,  // 64275
+      PenaltyAmount: this.SumPenaltyAmount,
+      DurationPenaltyDay: this.DurationPenaltyDay
     };
     const BankList = [];
     const HaveBank = (this.NgSelectBankParams.selectedObject || this.NgSelectBankParams.selectedObject !== null) ? false : true;
@@ -2220,7 +2416,9 @@ export class ContractPayDetailsComponent implements OnInit {
       true,
       BankList,
       HaveBank,
-      this.ModuleViewTypeCode
+      this.ModuleViewTypeCode,
+      this.DifferenceAmount, // مبلغ ما به التفاوت اجاره تجهیز
+      this.DifferenceNote // توضیحات ما به التفاوت
     ).subscribe(res => {
       this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
       this.ChangeDetection = false;
@@ -2243,7 +2441,8 @@ export class ContractPayDetailsComponent implements OnInit {
       TypeCodeStr: '3-',
       DocTypeCode: 3,
       ModuleCode: 2516,
-      IsReadOnly: this.PopupParam.ShowSendBtn === 'YES' ? true : this.PopupParam.IsViewable
+      IsReadOnly: this.PopupParam.ShowSendBtn === 'YES' ? true : this.PopupParam.IsViewable,
+      DocumentTypeCodeList: [7, 8]
     };
     this.ParamObj = archiveParam;
   }
@@ -2353,10 +2552,12 @@ export class ContractPayDetailsComponent implements OnInit {
       this.IsEditConfirm = false;
     }
 
+    console.log('🚀 / کد نوع نمایش فعالیت: ', this.ModuleViewTypeCode);
     switch (this.ModuleViewTypeCode) {
       case 1:
+        this.IsFinYearDisable = false; //RFC 65397
         this.IsEditable = true;
-        this.IsContractorAgent = (this.RegionCode >= 0 && this.RegionCode < 23) ? true : false;
+        this.IsContractorAgent = (this.RegionCode > 0 && this.RegionCode < 23) ? true : false;
         break;
       case 2:
         this.IsEditableContractPayItemAmountCol = false;
@@ -2372,7 +2573,10 @@ export class ContractPayDetailsComponent implements OnInit {
         this.IsEditable = false;
         this.HaveConfirm = false;
         this.HaveAlertToFinance = true;
-        this.GridBoxHeight = 62;
+        this.GridBoxHeight = 57;
+        if (this.HaveAlertToContractPayDate) {
+          this.GridBoxHeight = 53;
+        }
         break;
       case 5:
         this.IsEditableContractPayItemAmountCol = false;
@@ -2392,15 +2596,37 @@ export class ContractPayDetailsComponent implements OnInit {
         this.ShowReportsSign = false; // RFC 57083
         this.HaveModuleViewTypeSave = true;
         break;
-      case 8:
-        this.IsEditable = true;
-        this.EditItemAmount = (this.RegionCode === 220 && this.PopupParam.Mode === 'EditMode') ? false : true; // 61809
       case 7: // RFC 62332 اصلاح ارزش افزوده
         this.IsEditableContractPayItemAmountCol = false;
         this.IsEditableProductNameCol = false;
         this.IsEditableProductTypeCol = this.IsEditable = false;
         this.IsEditTaxValue = this.HaveModuleViewTypeSave = true;
         this.DisplayControlls = this.ShowReportsSign = false;
+        break;
+      case 8:
+        this.IsEditable = true;
+        this.EditItemAmount = (this.RegionCode === 220 && this.PopupParam.Mode === 'EditMode') ? false : true; // 61809
+        break;
+      case 9: // درج جریمه
+        this.IsEditableContractPayItemAmountCol = false;
+        this.IsEditableProductNameCol = false;
+        this.IsEditableProductTypeCol = false;
+        this.IsEditTaxValue = this.IsEditable = false;
+        this.DisplayControlls = false;
+        this.ShowReportsSign = false; // RFC 57083
+        this.CanEditPenalty = this.RegionCode === 200 ? true : false;
+        this.HaveModuleViewTypeSave = true;
+        break;
+      case 10: // ناظر صورت وضعیت (فضای سبز)
+        this.IsEditableContractPayItemAmountCol = false;
+        this.IsEditableProductNameCol = false;
+        this.IsEditableProductTypeCol = false;
+        this.IsEditTaxValue = this.IsEditable = false;
+        this.DisplayControlls = false;
+        this.ShowReportsSign = false; // RFC 57083
+        this.CanEditPenalty = true;
+        this.IsProgressPercentColEditable = true;
+        this.HaveModuleViewTypeSave = true;
         break;
       case 500000: // حالت فقط خواندنی
         this.DisplayControlls = false;
@@ -2414,6 +2640,20 @@ export class ContractPayDetailsComponent implements OnInit {
         this.IsFinYearDisable = false;
         this.IsAdminToolsModule = true;
         this.IsEditTaxValue = true;  // 62417, 62641
+        this.GridBoxHeight = 58;
+        if (this.HaveAlertToContractPayDate) {
+          this.GridBoxHeight = 53;
+        }
+        break;
+      case 11:
+        this.IsEditableContractPayItemAmountCol = false;
+        this.IsEditableProductNameCol = false;
+        this.IsEditableProductTypeCol = false;
+        this.IsEditTaxValue = this.IsEditable = false;
+        this.DisplayControlls = false;
+        this.ShowReportsSign = false;
+        this.ShowSaveBtn = true;
+        this.GridBoxHeight = 56;
         break;
       default:
         break;
@@ -2490,6 +2730,7 @@ export class ContractPayDetailsComponent implements OnInit {
           this.btnConfirmName = 'بازگشت از تاييد نهايي';
           this.btnConfirmIcon = 'cancel';
         }
+        this.RefreshCartable.RefreshCartable();
         this.ShowMessageBoxWithOkBtn(messageStr);
       },
         err => {
@@ -2595,88 +2836,88 @@ export class ContractPayDetailsComponent implements OnInit {
 
   EntityColumnDefinition(ProductID, node, EntityList, hasApiCall) {
 
-    if (ProductID && hasApiCall) {
+    // if (ProductID && hasApiCall) {
 
-      this.ProductRequest.GetProductRequestEntityList(null, ProductID, null).subscribe(
-        res => {
+    //   this.ProductRequest.GetProductRequestEntityList(null, ProductID, null).subscribe(
+    //     res => {
 
-          var columnDef22 = [];
-          this.columnDef1.forEach(element => {
-            columnDef22.push(element);
-          });
-          this.columnDef1 = [];
+    //       let columnDef22 = [];
+    //       this.columnDef1.forEach(element => {
+    //         columnDef22.push(element);
+    //       });
+    //       this.columnDef1 = [];
 
-          node.data.EntityList = res;
-          res.forEach(i => {
-            const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
-            if (!obItem) {
-              const obj = {
-                index: i.EntityTypeID,
-                headerName: i.Subject,
-                field: 'Subject' + i.EntityTypeID.toString(),
-                width: 200,
-                editable: true,
-                resizable: true,
-                cellEditorFramework: NgSelectVirtualScrollComponent,
-                cellEditorParams: {
-                  Params: this.NgSelectContractEntityItemParams,
-                  Items: [],
-                  Owner: this
-                },
-                cellRenderer: 'SeRender',
-                valueFormatter: function currencyFormatter(params) {
-                  if (params.value) {
-                    return params.value.Subject;
-                  } else {
-                    return '';
-                  }
-                },
-              };
-              columnDef22.push(obj);
-            }
-          });
-          this.columnDef1 = columnDef22;
-        });
-    }
+    //       node.data.EntityList = res;
+    //       res.forEach(i => {
+    //         const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
+    //         if (!obItem) {
+    //           const obj = {
+    //             index: i.EntityTypeID,
+    //             headerName: i.Subject,
+    //             field: 'Subject' + i.EntityTypeID.toString(),
+    //             width: 200,
+    //             editable: true,
+    //             resizable: true,
+    //             cellEditorFramework: NgSelectVirtualScrollComponent,
+    //             cellEditorParams: {
+    //               Params: this.NgSelectContractEntityItemParams,
+    //               Items: [],
+    //               Owner: this
+    //             },
+    //             cellRenderer: 'SeRender',
+    //             valueFormatter: function currencyFormatter(params) {
+    //               if (params.value) {
+    //                 return params.value.Subject;
+    //               } else {
+    //                 return '';
+    //               }
+    //             },
+    //           };
+    //           columnDef22.push(obj);
+    //         }
+    //       });
+    //       this.columnDef1 = columnDef22;
+    //     });
+    // }
 
-    if (!hasApiCall && EntityList) {
+    // if (!hasApiCall && EntityList) {
 
-      var columnDef22 = [];
-      this.columnDef1.forEach(element => {
-        columnDef22.push(element);
-      });
-      this.columnDef1 = [];
+    //   let columnDef22 = [];
+    //   this.columnDef1.forEach(element => {
+    //     columnDef22.push(element);
+    //   });
+    //   this.columnDef1 = [];
 
-      EntityList.forEach(i => {
-        const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
-        if (!obItem) {
-          const obj = {
-            index: i.EntityTypeID,
-            headerName: i.Subject,
-            field: 'Subject' + i.EntityTypeID.toString(),
-            width: 200,
-            editable: true,
-            resizable: true,
-            cellEditorFramework: NgSelectVirtualScrollComponent,
-            cellEditorParams: {
-              Params: this.NgSelectContractEntityItemParams,
-              Items: [],
-              Owner: this
-            },
-            cellRenderer: 'SeRender',
-            valueFormatter: function currencyFormatter(params) {
-              if (params.value) {
-                return params.value.Subject;
-              } else {
-                return '';
-              }
-            },
-          };
-          columnDef22.push(obj);
-        }
-      });
-      this.columnDef1 = columnDef22;
-    }
+    //   EntityList.forEach(i => {
+    //     const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
+    //     if (!obItem) {
+    //       const obj = {
+    //         index: i.EntityTypeID,
+    //         headerName: i.Subject,
+    //         field: 'Subject' + i.EntityTypeID.toString(),
+    //         width: 200,
+    //         editable: true,
+    //         resizable: true,
+    //         cellEditorFramework: NgSelectVirtualScrollComponent,
+    //         cellEditorParams: {
+    //           Params: this.NgSelectContractEntityItemParams,
+    //           Items: [],
+    //           Owner: this
+    //         },
+    //         cellRenderer: 'SeRender',
+    //         valueFormatter: function currencyFormatter(params) {
+    //           if (params.value) {
+    //             return params.value.Subject;
+    //           } else {
+    //             return '';
+    //           }
+    //         },
+    //       };
+    //       columnDef22.push(obj);
+    //     }
+    //   });
+    //   this.columnDef1 = columnDef22;
+    // }
   }
 
   oncellEditingStarted(event) {
@@ -2723,7 +2964,7 @@ export class ContractPayDetailsComponent implements OnInit {
             });
           });
       } else {
-        this.contractpaydetail.GetContractOrderByPagination(
+        this.contractpaydetail.GetContractOrderListByPagination(
           0,
           this.RegionCode,
           '',
@@ -2733,7 +2974,10 @@ export class ContractPayDetailsComponent implements OnInit {
           this.ContractPayNo,
           this.ContractPayDate,
           this.ProductIDs,
-          this.ProdcutTypeCode).subscribe(res => {
+          this.ProdcutTypeCode,
+          this.IsGreenSpace,
+          this.ContractPayStartDate,
+          this.ContractPayEndDate).subscribe(res => {
             this.RefreshCartable.RefreshItemsVirtualNgSelect({
               List: res.List,
               TotalItemCount: res.TotalItemCount,
@@ -2751,8 +2995,8 @@ export class ContractPayDetailsComponent implements OnInit {
     if (element.ContractPayEntityItemList) {
       element.ContractPayEntityItemList.forEach(
         EntityItem => {
-          var Name = 'Subject' + EntityItem.EntityTypeID.toString();
-          var ID = 'EntityTypeItemID' + EntityItem.EntityTypeID.toString();
+          let Name = 'Subject' + EntityItem.EntityTypeID.toString();
+          let ID = 'EntityTypeItemID' + EntityItem.EntityTypeID.toString();
           element[Name] = EntityItem.Subject;
           element[ID] = EntityItem.EntityTypeItemID;
         });
@@ -2761,8 +3005,8 @@ export class ContractPayDetailsComponent implements OnInit {
     if (element.OrderEstimateEntityItemList) {
       element.OrderEstimateEntityItemList.forEach(
         EntityItem => {
-          var Name = 'Subject' + EntityItem.EntityTypeID.toString();
-          var ID = 'EntityTypeItemID' + EntityItem.EntityTypeID.toString();
+          let Name = 'Subject' + EntityItem.EntityTypeID.toString();
+          let ID = 'EntityTypeItemID' + EntityItem.EntityTypeID.toString();
           element[Name] = EntityItem.Subject;
           element[ID] = EntityItem.EntityTypeItemID;
         });
@@ -2869,7 +3113,7 @@ export class ContractPayDetailsComponent implements OnInit {
     this.HaveHeader = true;
     this.HaveMaxBtn = true;
     this.OverPixelWidth = 1290;
-    this.startLeftPosition = 100;
+    this.startLeftPosition = 31;
     this.startTopPosition = 15;
     this.HeightPercentWithMaxBtn = 98;
     this.MinHeightPixel = 690;
@@ -2919,7 +3163,18 @@ export class ContractPayDetailsComponent implements OnInit {
           nodee.data.ProgressPercent = node.ProgressPercent;
           nodee.data.TaxValue = node.TaxValue;
           nodee.data.ContractPayItemAmount = nodee.data.ContractPayItemQty * nodee.data.ContractPayItemUnitAmount;
-          nodee.data.ContractPayItemAmountFinal = nodee.data.TaxValue ? parseInt(nodee.data.ContractPayItemAmount) + parseInt(nodee.data.TaxValue) : parseInt(nodee.data.ContractPayItemAmount);
+          // tslint:disable-next-line: max-line-length
+          if (nodee.data.TaxValue) {
+            nodee.data.ContractPayItemAmountFinal = nodee.data.ContractPayItemAmountFinal = (nodee.data.ContractPayItemAmountCOEF && parseInt(nodee.data.ContractPayItemAmountCOEF) > 0
+              // tslint:disable-next-line: radix
+              ? parseInt(nodee.data.ContractPayItemAmountCOEF)
+              // tslint:disable-next-line: radix
+              : parseInt(nodee.data.ContractPayItemAmount)) + parseInt(nodee.data.TaxValue);
+          } else {
+            nodee.data.ContractPayItemAmountFinal = nodee.data.ContractPayItemAmountCOEF && parseInt(nodee.data.ContractPayItemAmountCOEF) > 0
+              ? parseInt(nodee.data.ContractPayItemAmountCOEF) : parseInt(nodee.data.ContractPayItemAmount);
+          }
+          // tslint:disable-next-line: radix
           nodee.data.CumultiveAmount = parseInt(nodee.data.BeforeAmount) + parseInt(nodee.data.ContractPayItemAmount);
         }
       });
@@ -2946,7 +3201,18 @@ export class ContractPayDetailsComponent implements OnInit {
               element.ProgressPercent = node.ProgressPercent;
               element.TaxValue = node.TaxValue;
               element.ContractPayItemAmount = element.ContractPayItemQty * element.ContractPayItemUnitAmount;
-              element.ContractPayItemAmountFinal = element.TaxValue ? parseInt(element.ContractPayItemAmount) + parseInt(element.TaxValue) : parseInt(element.ContractPayItemAmount);
+              // tslint:disable-next-line: max-line-length
+              if (node.data.TaxValue) {
+                node.data.ContractPayItemAmountFinal = node.data.ContractPayItemAmountFinal = (node.data.ContractPayItemAmountCOEF && parseInt(node.data.ContractPayItemAmountCOEF) > 0
+                  // tslint:disable-next-line: radix
+                  ? parseInt(node.data.ContractPayItemAmountCOEF)
+                  // tslint:disable-next-line: radix
+                  : parseInt(node.data.ContractPayItemAmount)) + parseInt(node.data.TaxValue);
+              } else {
+                node.data.ContractPayItemAmountFinal = node.data.ContractPayItemAmountCOEF && parseInt(node.data.ContractPayItemAmountCOEF) > 0
+                  ? parseInt(node.data.ContractPayItemAmountCOEF) : parseInt(node.data.ContractPayItemAmount);
+              }
+              // tslint:disable-next-line: radix
               element.CumultiveAmount = parseInt(element.BeforeAmount) + parseInt(element.ContractPayItemAmount);
               Alist.push(element);
             }
@@ -2990,7 +3256,7 @@ export class ContractPayDetailsComponent implements OnInit {
       });
     } else {
       const promise = new Promise((resolve, reject) => {
-        event.Owner.contractpaydetail.GetContractOrderByPagination(
+        event.Owner.contractpaydetail.GetContractOrderListByPagination(
           event.SearchOption,
           event.Owner.RegionCode,
           event.term,
@@ -3041,7 +3307,7 @@ export class ContractPayDetailsComponent implements OnInit {
           });
         });
     } else {
-      event.Owner.contractpaydetail.GetContractOrderByPagination(
+      event.Owner.contractpaydetail.GetContractOrderListByPagination(
         event.SearchOption,
         event.Owner.RegionCode,
         event.term,
@@ -3081,7 +3347,7 @@ export class ContractPayDetailsComponent implements OnInit {
           });
         });
     } else {
-      event.Owner.contractpaydetail.GetContractOrderByPagination(
+      event.Owner.contractpaydetail.GetContractOrderListByPagination(
         event.SearchOption,
         event.Owner.RegionCode,
         '',
@@ -3115,7 +3381,7 @@ export class ContractPayDetailsComponent implements OnInit {
         this.ParamObj = {
           ContractPayCostFactorID: this.CostFactorID,
           undertakerowData: res
-        }
+        };
       } else {
         this.ShowMessageBoxWithOkBtn('درخواست پرداخت انتخابی فاقد تعهد اعتبار می باشد.');
       }
@@ -3156,7 +3422,6 @@ export class ContractPayDetailsComponent implements OnInit {
   }
 
   OnRowDataUpdated() {
-
     this.SetSumStr();
   }
 
@@ -3180,7 +3445,8 @@ export class ContractPayDetailsComponent implements OnInit {
       });
     }
     this.sumContractPayItemAmountStr = sumContractPayItemAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    this.sumFinalAmountStr = sumFinalAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    this.sumFinalAmountStr =(sumFinalAmount - this.SumDeductionAmount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') ;
+    //this.sumFinalAmountStr = sumFinalAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
   OpenBank() {
     const ResultList = [];
@@ -3283,5 +3549,147 @@ export class ContractPayDetailsComponent implements OnInit {
       this.BranchPageCount = Math.ceil(res.TotalItemCount / 30);
       this.NgSelectBranchParams.loading = false;
     });
+  }
+
+  getSumPenaltyAmount(SumPenaltyAmount) {
+    if (SumPenaltyAmount) {
+      this.SumPenaltyAmountStr = SumPenaltyAmount;
+      // tslint:disable-next-line: radix
+      this.SumPenaltyAmount = parseInt((SumPenaltyAmount.toString()).replace(/,/g, ''));
+    } else {
+      this.SumPenaltyAmount = 0;
+      this.SumPenaltyAmountStr = '0';
+    }
+  }
+
+  // --- بدست آوردن میانگین وزنی کار با توجه به تاریخ دوره ---
+  SetProgressPercentinDataRow() {
+    if (this.DisplayControlls) {
+      const ProductIDList = [];
+      if (this.gridApi) {
+        this.gridApi.forEachNode(node => {
+          if (node.data.ProductID) {
+            ProductIDList.push(node.data.ProductID);
+          }
+        });
+        this.ContractList.GetProgressPercent(this.selectedContractID,
+          this.ContractPayStartDate,
+          this.ContractPayEndDate,
+          ProductIDList).subscribe(
+            res => {
+              if (res && res.length > 0) {
+                let SumPenaltyAmount = 0;
+                this.gridApi.forEachNode(nodee => {
+                  res.forEach(item => {
+                    if (nodee.data.ProductID === item.ProductID) {
+                      nodee.data.ProgressPercent = item.ProgressPercent;
+                      nodee.data.PenaltyPercentage = item.PenaltyPercentage;
+                      if (nodee.data.ContractPayItemAmountCOEF && !isNullOrUndefined(nodee.data.ContractPayItemAmountCOEF)) {
+                        if (nodee.data.ProgressPercent && nodee.data.ProgressPercent > 0) {
+                          // tslint:disable-next-line: radix
+                          nodee.data.DeductionAmount = parseInt(nodee.data.ProgressPercent) && parseInt(nodee.data.ProgressPercent) > 0 ?
+                            (((100 - parseInt(nodee.data.ProgressPercent)) / 100) *
+                              nodee.data.ContractPayItemAmountCOEF.toFixed(2)) : 0;
+                        }
+                        if (nodee.data.PenaltyPercentage && nodee.data.PenaltyPercentage > 0) {
+                          // tslint:disable-next-line: radix
+                          nodee.data.PenaltyAmount = this.IsGreenSpace ? ((parseInt(nodee.data.PenaltyPercentage) / 100) *
+                            // tslint:disable-next-line: radix
+                            (parseInt(nodee.data.data.DeductionAmount))).toFixed(2) : ((parseInt(nodee.data.PenaltyPercentage) / 100) *
+                              // tslint:disable-next-line: radix
+                              (nodee.data.ContractPayItemAmountCOEF - parseInt(nodee.data.DeductionAmount))).toFixed(2);
+                        }
+                        if (nodee.data.PenaltyAmount && !isNaN(nodee.data.PenaltyAmount) && nodee.data.PenaltyAmount !== 'NaN'
+                          // tslint:disable-next-line: radix
+                          && !isNullOrUndefined(nodee.data.PenaltyAmount) && parseInt(nodee.data.PenaltyAmount) > 0) {
+                          // tslint:disable-next-line: radix
+                          SumPenaltyAmount = SumPenaltyAmount + parseInt(nodee.data.PenaltyAmount);
+                        }
+                      }
+                    }
+                  });
+                });
+                this.SumPenaltyAmount = SumPenaltyAmount;
+                this.SumPenaltyAmountStr = SumPenaltyAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+              }
+            });
+      } else {
+      }
+    }
+  }
+
+  onDifferenceAmountChange(event) {
+    if (event && !isNullOrUndefined(event)) {
+      this.DifferenceAmountStr = event;
+      // tslint:disable-next-line: radix
+      this.DifferenceAmount = parseInt((event.toString()).replace(/,/g, ''));
+    } else {
+      this.DifferenceAmountStr = '';
+      this.DifferenceAmount = null;
+    }
+  }
+  onContractPayCoef() {
+    if (this.ContractPayID > 0) {
+      this.type = 'contract-pay-coef';
+      this.btnclicked = true;
+      this.HaveMaxBtn = false;
+      this.startLeftPosition = 74;
+      this.startTopPosition = 19;
+      this.ParamObj = {
+        HeaderName: 'ضرایب پرداخت قرارداد',
+        ContractID: this.PopupParam.SelectedContractID,
+        ContractPayID: this.ContractPayID,
+        ContractPayNo: this.ContractPayNo,
+        ContractAmount: this.PopupParam.ContractAmount,
+        SumContractPay: this.sumFinalAmountStr,
+        IsViewable: this.ModuleViewTypeCode !== 1 && this.ModuleViewTypeCode !== 100000,
+      };
+    } else {
+      this.ShowMessageBoxWithOkBtn('ابتدا درخواست پرداخت قراردادی را ثبت نمایید.');
+    }
+  }
+
+  UpdateContractPayItems() {
+    const ContractPayItemobj = {
+      ProductID: null,
+      ContractPayItemID: null,
+      ContractPayItemAmount: null,
+      Qty: null,
+    };
+    this.gridApi.forEachNode(node => {
+      if (node.data.ProductID === 518163) {
+        ContractPayItemobj.ContractPayItemID = node.data.ContractPayItemID;
+        ContractPayItemobj.ContractPayItemAmount = node.data.ContractPayItemAmount;
+        ContractPayItemobj.Qty = node.data.ContractPayItemQty;
+      }
+    });
+    this.contractpaydetail.UpdateContractPayItems(this.ModuleCode, ContractPayItemobj).subscribe(res => {
+      this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
+      this.ChangeDetection = false;
+    });
+
+
+  }
+
+
+  BtnDeductionInsert() {
+    if (this.ContractPayID > 0) {
+      this.type = 'app-contract-pay-deduction';
+      this.btnclicked = true;
+      this.OverPixelWidth = 1500;
+      this.HaveHeader = true;
+      this.HaveMaxBtn = true;
+      this.startLeftPosition = 260;
+      this.startTopPosition = 50;
+      this.HeightPercentWithMaxBtn = 58;
+      this.MinHeightPixel = 340;
+      this.ParamObj = {
+        HeaderName: ' درج کسورات ',
+        CostFactorID: this.CostFactorID,
+      };
+    } else {
+      this.ShowMessageBoxWithOkBtn('ابتدا درخواست پرداخت قراردادی را ثبت نمایید.');
+    }
+
   }
 }

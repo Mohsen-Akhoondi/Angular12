@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { CommonService } from 'src/app/Services/CommonService/CommonService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
-
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 @Component({
   selector: 'app-data-dictionary-page',
   templateUrl: './data-dictionary-page.component.html',
@@ -42,7 +41,7 @@ export class DataDictionaryPageComponent implements OnInit {
         headerName: 'کد قلم داده',
         field: 'DataDictionaryCode',
         width: 100,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 3 },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {

@@ -1,7 +1,5 @@
-import { Component, OnInit, Input, Output } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { GridOptions } from 'ag-grid-community';
-import { of } from 'rxjs';
 // tslint:disable-next-line:max-line-length
 import { ContractCoefTypeServices } from 'src/app/Services/ContractService/BasemodulesService/ContractCoefTypeService/ContractCoefTypeServices';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';

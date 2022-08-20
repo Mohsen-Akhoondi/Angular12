@@ -52,9 +52,12 @@
 }
 .redio-div{
     display: inline-block;
-    width: 61%;
+    width: 75%;
     text-align: right;
     padding-right: 9px;
+}
+.custom-control {
+    padding-left: 3.5rem !important;
 }
 .custom-control-label::before{
     top:0px;
@@ -66,4 +69,9 @@
 }
 textarea {
     font-size: 12px;
+}
+.table-cell-Lablle {
+    margin-left: 65px;
+    margin-right: 6px;
+    font-size: 10px;
 }

@@ -59,8 +59,7 @@
 
   <div class="main-form-body" style="display: inherit;height: 35%;">
     <!-- (RowClick)="RowClick($event)" -->
-    <app-grid [columns]="FeeDeductionColDef" [rowsData]="rowDataD" [ParentgridHeight]='80'
-      [gridHeight]=75>
+    <app-grid [columns]="FeeDeductionColDef" [rowsData]="rowDataD" [ParentgridHeight]='80' [gridHeight]=75>
     </app-grid>
     <div class="main-form-body" style=" margin-top: 4px;color: red;height: 32px;padding: 3px;">
       <!--<div *ngIf="HaseEstimate" style="min-width: 100px;font-weight: bold;display: inline-block">-->
@@ -91,7 +90,7 @@
 
 </div>
 <ng-template #IsReadyToConfirm let-row>
-  <img width="16px" height="16px" src="assets/Icons/SigneDoc.png" (click)="RowClick(row)"/>
+  <img width="16px" height="16px" src="assets/Icons/SigneDoc.png" (click)="RowClick(row)" />
 </ng-template>
 <app-over-popup *ngIf="isClicked" [PopupType]="type" [HaveMaxBtn]="HaveMaxBtn" [startLeftPosition]="startLeftPosition"
   [startTopPosition]="startTopPosition" [PopupParam]="type ==='message-box' ?alertMessageParams  : ParamObj"

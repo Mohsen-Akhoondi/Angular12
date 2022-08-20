@@ -2,7 +2,6 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
-import { of } from 'rxjs';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 
 @Component({
@@ -118,7 +117,7 @@ export class ContractPayCoefComponent implements OnInit {
                 item.Coef = '';
               }
             });
-            this.rowData1 = ress;//.filter(item => item.ContractCoefTypeCode !== 5); // ضریب پیشنهادی قرارداد
+            this.rowData1 = ress; // .filter(item => item.ContractCoefTypeCode !== 5); // ضریب پیشنهادی قرارداد
           } else {
             this.rowData1 = [];
           }

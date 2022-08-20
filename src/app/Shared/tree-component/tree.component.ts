@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild, Output, EventEmitter, SimpleChanges, Input } from '@angular/core';
 import { TreeNode, TreeComponent } from '@circlon/angular-tree-component';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
-declare var jquery: any;
 declare var $: any;
 @Component({
   selector: 'app-tree',

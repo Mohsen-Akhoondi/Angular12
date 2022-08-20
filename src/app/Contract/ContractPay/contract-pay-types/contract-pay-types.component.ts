@@ -1,4 +1,5 @@
 import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
+import { ContractPayService } from 'src/app/Services/ContractService/ContractPayServices/ContractPayService';
 
 @Component({
   selector: 'app-contract-pay-types',
@@ -10,18 +11,20 @@ export class ContractPayTypesComponent implements OnInit {
   @Output() ContractPayTypesClosed: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() PayTypesOutPutPram: EventEmitter<any> = new EventEmitter<any>();
   SelectedContractID = 0;
-  constructor() { }
+  ContractOpCodesList = [];
+  constructor(private ContPayService: ContractPayService) { }
 
   ngOnInit() {
     if (this.PopupParam != null) {
       this.SelectedContractID = this.PopupParam;
+    }
+    this.ContPayService.GetSpecificContractOperation().subscribe(res => {this.ContractOpCodesList = res})
   }
-}
 
   onClose() {
-      this.ContractPayTypesClosed.emit(true);
-    }
-    SetPayTypes(type) {
-        this.PayTypesOutPutPram.emit(type);
-    }
+    this.ContractPayTypesClosed.emit(true);
+  }
+  SetPayTypes(type) {
+    this.PayTypesOutPutPram.emit(type);
+  }
 }

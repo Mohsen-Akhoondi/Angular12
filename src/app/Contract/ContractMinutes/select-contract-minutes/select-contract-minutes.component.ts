@@ -1,5 +1,4 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { ContractPayService } from 'src/app/Services/ContractService/ContractPayServices/ContractPayService';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { ContractMinutesService } from 'src/app/Services/ContractService/ContractMinutes/ContractMinutesService';
 

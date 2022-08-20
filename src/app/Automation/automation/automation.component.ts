@@ -1,6 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter, ViewChild, TemplateRef } from '@angular/core';
 import { AutomationService } from 'src/app/Services/BaseService/AutomationService';
-import { retry } from 'rxjs/operators';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
@@ -265,6 +264,11 @@ export class AutomationComponent implements OnInit {
       this.ShowMessageBoxWithOkBtn('نوع نامه جهت اتصال انتخاب نشده است');
       return;
     }
+
+    if ((this.CostFactorLetter.RegionCode >= 210 && this.CostFactorLetter.RegionCode <= 218) && this.CostFactorLetter.LetterTypeCode === 20 && this.PopupParam.ModuleViewTypeCode == 99 && (this.LetterDate < this.PopupParam.ProductRequestDate)) {
+      this.ShowMessageBoxWithOkBtn('تاریخ نامه اتوماسیونی HSE کوچکتر از تاریخ درخواست می باشد');
+      return;
+    } // 63371
 
     this.Automation.SaveLetter(this.CostFactorLetter,
       this.SelectedDocument, this.PopupParam.OrginalModuleCode)

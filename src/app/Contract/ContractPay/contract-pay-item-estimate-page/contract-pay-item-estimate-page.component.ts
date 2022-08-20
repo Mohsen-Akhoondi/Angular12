@@ -1,6 +1,5 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import * as moment from 'jalali-moment';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { FinYearService } from 'src/app/Services/BaseService/FinYearService';
 import { forkJoin, of } from 'rxjs';
@@ -1769,6 +1768,7 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
           TaxValue: node.data.TaxValue,
           Qty: node.data.ContractPayItemQty,
           ContractPayItemListDataList: ContractPayItemListDataList,
+         
         };
         ContractPayItemList.push(obj);
       });
@@ -2139,7 +2139,8 @@ export class ContractPayItemEstimatePageComponent implements OnInit {
           ContractPayItemAmount: node.data.ContractPayItemAmount,
           TaxValue: node.data.TaxValue,
           Qty: node.data.ContractPayItemQty,
-          ContractPayItemListDataList: ContractPayItemLists
+          ContractPayItemListDataList: ContractPayItemLists,
+      
         };
         ContractPayItemList.push(obj);
       });

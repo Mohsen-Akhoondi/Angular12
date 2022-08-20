@@ -374,7 +374,7 @@ export class CumulativeContractPayListComponent implements OnInit {
   }
 
   onDelete() {
-    this.ContractPayDetails.DeleteContractPay(this.SelectedCPCostFactorID).subscribe(
+    this.ContractPayDetails.DeleteContractPay(this.SelectedCPCostFactorID,null).subscribe(
       res => {
         this.ngOnInit();
       }
