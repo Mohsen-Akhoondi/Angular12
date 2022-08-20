@@ -9,7 +9,8 @@
               style="display: block;cursor: pointer;" (click)="onAddUpRow()" />
             <img (mouseover)="onmouseover('Down')" title="افزودن ردیف جدید پایین ردیف انتخاب شده"
               (mouseout)="onmouseout('Down')" style="cursor: pointer;" (click)="onAddBelowRow()" width="12px"
-              height="8px" src="{{ImageArrowDownSrc}}" /></div>
+              height="8px" src="{{ImageArrowDownSrc}}" />
+          </div>
         </div>
         <button [disabled]="IsDisable" (click)="onAddRow()" id="btn352" class="btn btn-primary editaible-grid-btn">
           جدید
@@ -71,7 +72,11 @@
         <img width="15px" height="15px" src="assets/Icons/estate.png" />
         انتخاب ملک
       </button>
-
+      <button *ngIf="IsNeedAddItems && IsEditable" [disabled]="IsDisable" (click)="onAddItems()"
+        class="btn btn-primary editaible-grid-btn">
+        <img width="15px" height="15px" src="assets/Icons/add-tree.png" />
+        افزودن
+      </button>
 
       <img *ngIf="gridHeight && HasMaximizeBtn" width="15px" height="15px"
         [src]="this.GridMaximized ? 'assets/Icons/Minimize.png':'assets/Icons/Maximize.png'" (click)="OnGridMaximized()"
@@ -101,7 +106,7 @@
     (rowDataUpdated)="onRowDataUpdated()" (rowDoubleClicked)="onRowDoubleClicked($event)"
     (cellEditingStarted)="onCellEditingStarted($event)" (cellValueChanged)="onCellValueChanged($event)"
     (filterChanged)="OnFilterChanged($event)" (sortChanged)="OnSortChanged($event)" [getRowHeight]="RowHeightFunc"
-    [rowHeight] = "RowHeight ? RowHeight : ''">
+    [rowHeight]="RowHeight ? RowHeight : ''" (cellClicked)="onCellClickedd($event)">
   </ag-grid-angular>
   <div *ngIf="IsServerPaging" class="ag-theme-balham">
     <div class="ag-rtl">

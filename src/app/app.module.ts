@@ -346,12 +346,14 @@ import { ContractStatusSummaryRepPageComponent } from './ProductRequest/contract
 import { ContractStatusSummarySearchPageComponent } from './ProductRequest/contract-status-summary-search-page/contract-status-summary-search-page.component';
 import { ImageViewerModule } from '@udhsin/ngx-image-viewer';
 import { LoginPageComponent } from './Shared/login-page/login-page.component';
-import { StimulViewerComponent } from './Shared/stimul-viewer/stimul-viewer.component';
 import { StimulsoftViewerModule } from 'stimulsoft-viewer-angular';
 import { CustomizedTreeComponent } from './Shared/customized-tree/customized-tree.component';
 // import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { DeadlineContractListComponent } from './Contract/deadline-contract-list/deadline-contract-list.component';
 import { NgSelectModule } from './Shared/ng-select/public-api';
+import { RichTextBoxInputPageComponent } from './Shared/rich-text-box-input-page/rich-text-box-input-page.component';
+import { RoutNavigateComponent } from './Shared/rout-navigate/rout-navigate.component';
+import { SharedOverPopupComponent } from './Shared/shared-over-popup/shared-over-popup.component';
 @NgModule({
   declarations: [
     LoginPageComponent,
@@ -644,9 +646,11 @@ import { NgSelectModule } from './Shared/ng-select/public-api';
     FileViwerPageComponent,
     ContractStatusSummaryRepPageComponent,
     ContractStatusSummarySearchPageComponent,
-    StimulViewerComponent,
     CustomizedTreeComponent,
-    DeadlineContractListComponent
+    DeadlineContractListComponent,
+    RichTextBoxInputPageComponent,
+    RoutNavigateComponent,
+    SharedOverPopupComponent
   ],
   imports: [
     FormsModule,

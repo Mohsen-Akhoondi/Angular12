@@ -9,10 +9,6 @@
         [ngStyle]="{'min-width': NgSelectParams.MinWidth }" (ngModelChange)="onChangeselectedObject($event)"
         (open)="OnOpen()" [multiple]="multiple" [disabled]="NgSelectParams?.IsDisabled || Disabled"
         (scroll)="onScroll($event)" (scrollToEnd)="onScrollToEnd()">
-        <!-- <ng-template *ngIf="this.NgSelectParams.IsVirtualScroll" ng-header-tmp>
-            <small class="form-text text-muted">تعداد {{Items.length}} از {{NgSelectParams.TotalItemCount}} بارگذاری
-                شد</small>
-        </ng-template> -->
         <ng-template *ngIf="this.NgSelectParams.AdvanceSearch && this.NgSelectParams.AdvanceSearch.SearchItemDetails"
             ng-header-tmp>
             <div class="redio-div" [ngStyle]="{'min-width': NgSelectParams.DropDownMinWidth }">
