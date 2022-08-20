@@ -296,8 +296,6 @@ import { EndOfContractComponent } from './Contract/Base_modules/end-of-contract/
 import { SendSmsComponent } from './Shared/send-sms/send-sms.component';
 import { ControlProjectBgtInfoPageComponent } from './Budget/control-project-bgt-info-page/control-project-bgt-info-page.component';
 import { CivilProjectPageComponent } from './Budget/civil-project-page/civil-project-page.component';
-
-
 import { RequestEvaluateListComponent } from './ProductRequest/request-evaluate-list/request-evaluate-list.component';
 import { RequestEvaluateComponent } from './ProductRequest/request-evaluate/request-evaluate.component';
 import { EstatePropertyTypePageComponent } from './ProductRequest/estate-property-type-page/estate-property-type-page.component';
@@ -342,15 +340,12 @@ import { ReportAverageWorkflowObjectsComponent } from './WorkFlow/report-average
 import { AdjustmentPriceRangeFormulasComponent } from './ProductRequest/ProPosal/adjustment-price-range-formulas/adjustment-price-range-formulas.component';
 import { FileViwerPageComponent } from './Shared/file-viwer-page/file-viwer-page.component';
 import { ContractStatusSummaryRepPageComponent } from './ProductRequest/contract-status-summary-rep-page/contract-status-summary-rep-page.component';
-// import { ImageViewerModule } from 'ng2-image-viewer-forked';
 import { ContractStatusSummarySearchPageComponent } from './ProductRequest/contract-status-summary-search-page/contract-status-summary-search-page.component';
 import { ImageViewerModule } from '@udhsin/ngx-image-viewer';
 import { LoginPageComponent } from './Shared/login-page/login-page.component';
 import { StimulsoftViewerModule } from 'stimulsoft-viewer-angular';
 import { CustomizedTreeComponent } from './Shared/customized-tree/customized-tree.component';
-// import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { DeadlineContractListComponent } from './Contract/deadline-contract-list/deadline-contract-list.component';
-import { NgSelectModule } from './Shared/ng-select/public-api';
 import { RichTextBoxInputPageComponent } from './Shared/rich-text-box-input-page/rich-text-box-input-page.component';
 import { RoutNavigateComponent } from './Shared/rout-navigate/rout-navigate.component';
 import { SharedOverPopupComponent } from './Shared/shared-over-popup/shared-over-popup.component';

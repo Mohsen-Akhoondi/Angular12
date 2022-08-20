@@ -4,7 +4,6 @@ import { GridComponent } from '../grid-component/grid.component';
 import { AgGridModule } from 'ag-grid-angular';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgSelectVirtualScrollComponent } from '../ng-select-virtual-scroll/ng-select-virtual-scroll.component';
-import { NgSelectModule } from '../ng-select';
 import { FormsModule } from '@angular/forms';
 import { JalaliDatepickerComponent } from '../jalali-datepicker/jalali-datepicker.component';
 import { DpDatePickerModule } from '../jalali-angular-datepicker';
