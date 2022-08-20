@@ -1,4 +1,4 @@
-import { Component, OnInit, SimpleChanges, Output, EventEmitter, TemplateRef, ViewChild, Input } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, TemplateRef, ViewChild, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
 import { of } from 'rxjs';
@@ -6,6 +6,7 @@ import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_a
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
 import { DealsHallService } from 'src/app/Services/ContractService/DealsHall/DealsHallService';
+import { CommonService } from 'src/app/Services/CommonService/CommonService';
 declare var jquery: any;
 declare var $: any;
 
@@ -45,10 +46,12 @@ export class AdvertisingArchiveComponent implements OnInit {
   HasArchiveAccess = true;
   HasCheck = false;
   DocTypeData;
+  IsAutoGenerate = false;
   constructor(
     private router: Router,
     private ArchiveList: ArchiveDetailService,
-    private DealsHall: DealsHallService
+    private DealsHall: DealsHallService,
+    private ComonService: CommonService
 
   ) {
     this.defaultColDef = { resizable: false };
@@ -308,6 +311,9 @@ export class AdvertisingArchiveComponent implements OnInit {
     const ArchiveDetailCodeStr = this.ArchiveParam.TypeCodeStr + this.ArchiveParam.EntityID.toString();
     this.rowData = this.DealsHall.GetArchiveDetailList(ArchiveDetailCodeStr + '-' + this.selectedDocumentTypeCode);
     this.UseInAdvertising = event.data.UseInAdvertising;
+    this.ComonService.IsAutoGenerate(this.selectedDocumentTypeCode).subscribe(res => {
+      this.IsAutoGenerate = res;
+    });
   }
   OnCheckBoxChange(event) {
     this.UseInAdvertising = event;

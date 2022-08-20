@@ -35,6 +35,8 @@ export class DealUploadDocsComponent implements OnInit {
   HaveBenvelope = false;
   HaveCenvelope = false;
   alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false };
+  IsActive = false;
+  FinalConfirmBtnName = 'تایید نهایی و ارسال برای شهرداری';
   constructor(private DealsHall: DealsHallService,
     private CommonService: CommonServices,
     private ProductRequest: ProductRequestService) { }
@@ -90,6 +92,12 @@ export class DealUploadDocsComponent implements OnInit {
       if (res) {
         this.ProposalID = res.ProposalID;
         this.IsLock = res.IsLock;
+        this.IsActive = res.IsActive; // RFC 64234
+        if (this.IsLock) {
+          this.FinalConfirmBtnName = 'عدم تایید';
+        } else {
+          this.FinalConfirmBtnName = 'تایید نهایی و ارسال برای شهرداری';
+        }
       }
     });
   }
@@ -138,13 +146,22 @@ export class DealUploadDocsComponent implements OnInit {
     this.btnclicked = false;
   }
   FinalConfirmClick() {
-    if (this.ProposalID && !this.IsLock) {
-      this.DealsHall.ProposalFinalConfirmDocs(this.ProposalID, this.InputParams.CostFactorID).subscribe(res => {
-        if (res) {
-          this.ShowMessageBoxWithOkBtn('تایید نهایی مستندات با موفقیت انجام شد');
-          this.RefreshProposal();
-        }
-      });
+    if (this.ProposalID && this.IsActive) { // RFC 64234
+      if (!this.IsLock) {
+        this.DealsHall.ProposalFinalConfirmDocs(this.ProposalID, this.InputParams.CostFactorID).subscribe(res => {
+          if (res) {
+            this.ShowMessageBoxWithOkBtn('تایید نهایی مستندات با موفقیت انجام شد');
+            this.RefreshProposal();
+          }
+        });
+      } else {
+        this.DealsHall.CancelReceiveElectronicDocs(this.ProposalID, false).subscribe(res => {
+          if (res) {
+            this.ShowMessageBoxWithOkBtn('عدم تایید با موفقیت انجام شد');
+            this.RefreshProposal();
+          }
+        });
+      }
     }
   }
   onDownloadSignApp() {
