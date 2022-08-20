@@ -4,7 +4,6 @@ import { isUndefined } from 'util';
 import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { ProductService } from 'src/app/Services/BaseService/ProductService';
-import { of } from 'rxjs';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
@@ -1027,87 +1026,87 @@ export class ContractNoEstimateViewComponent implements OnInit {
 
   EntityColumnDefinition(ProductID, node, EntityList, hasApiCall) {
 
-    if (ProductID && hasApiCall) {
+    // if (ProductID && hasApiCall) {
 
-      this.ProductRequest.GetProductRequestEntityList(null, ProductID, null).subscribe(
-        res => {
+    //   this.ProductRequest.GetProductRequestEntityList(null, ProductID, null).subscribe(
+    //     res => {
 
-          var columnDef22 = [];
-          this.columnDef.forEach(element => {
-            columnDef22.push(element);
-          });
-          this.columnDef = [];
+    //       var columnDef22 = [];
+    //       this.columnDef.forEach(element => {
+    //         columnDef22.push(element);
+    //       });
+    //       this.columnDef = [];
 
-          node.data.EntityList = res;
-          res.forEach(i => {
-            const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
-            if (!obItem) {
-              const obj = {
-                index: i.EntityTypeID,
-                headerName: i.Subject,
-                field: 'Subject' + i.EntityTypeID.toString(),
-                width: 200,
-                editable: true,
-                resizable: true,
-                cellEditorFramework: NgSelectVirtualScrollComponent,
-                cellEditorParams: {
-                  Params: this.NgSelectContractEntityItemParams,
-                  Items: [],
-                  Owner: this
-                },
-                cellRenderer: 'SeRender',
-                valueFormatter: function currencyFormatter(params) {
-                  if (params.value) {
-                    return params.value.Subject;
-                  } else {
-                    return '';
-                  }
-                },
-              };
-              columnDef22.push(obj);
-            }
-          });
-          this.columnDef = columnDef22;
-        });
-    }
+    //       node.data.EntityList = res;
+    //       res.forEach(i => {
+    //         const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
+    //         if (!obItem) {
+    //           const obj = {
+    //             index: i.EntityTypeID,
+    //             headerName: i.Subject,
+    //             field: 'Subject' + i.EntityTypeID.toString(),
+    //             width: 200,
+    //             editable: true,
+    //             resizable: true,
+    //             cellEditorFramework: NgSelectVirtualScrollComponent,
+    //             cellEditorParams: {
+    //               Params: this.NgSelectContractEntityItemParams,
+    //               Items: [],
+    //               Owner: this
+    //             },
+    //             cellRenderer: 'SeRender',
+    //             valueFormatter: function currencyFormatter(params) {
+    //               if (params.value) {
+    //                 return params.value.Subject;
+    //               } else {
+    //                 return '';
+    //               }
+    //             },
+    //           };
+    //           columnDef22.push(obj);
+    //         }
+    //       });
+    //       this.columnDef = columnDef22;
+    //     });
+    // }
 
-    if (!hasApiCall && EntityList) {
+    // if (!hasApiCall && EntityList) {
 
-      var columnDef22 = [];
-      this.columnDef.forEach(element => {
-        columnDef22.push(element);
-      });
-      this.columnDef = [];
+    //   var columnDef22 = [];
+    //   this.columnDef.forEach(element => {
+    //     columnDef22.push(element);
+    //   });
+    //   this.columnDef = [];
 
-      EntityList.forEach(i => {
-        const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
-        if (!obItem) {
-          const obj = {
-            index: i.EntityTypeID,
-            headerName: i.Subject,
-            field: 'Subject' + i.EntityTypeID.toString(),
-            width: 200,
-            editable: true,
-            resizable: true,
-            cellEditorFramework: NgSelectVirtualScrollComponent,
-            cellEditorParams: {
-              Params: this.NgSelectContractEntityItemParams,
-              Items: [],
-              Owner: this
-            },
-            cellRenderer: 'SeRender',
-            valueFormatter: function currencyFormatter(params) {
-              if (params.value) {
-                return params.value.Subject;
-              } else {
-                return '';
-              }
-            },
-          };
-          columnDef22.push(obj);
-        }
-      });
-      this.columnDef = columnDef22;
-    }
+    //   EntityList.forEach(i => {
+    //     const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
+    //     if (!obItem) {
+    //       const obj = {
+    //         index: i.EntityTypeID,
+    //         headerName: i.Subject,
+    //         field: 'Subject' + i.EntityTypeID.toString(),
+    //         width: 200,
+    //         editable: true,
+    //         resizable: true,
+    //         cellEditorFramework: NgSelectVirtualScrollComponent,
+    //         cellEditorParams: {
+    //           Params: this.NgSelectContractEntityItemParams,
+    //           Items: [],
+    //           Owner: this
+    //         },
+    //         cellRenderer: 'SeRender',
+    //         valueFormatter: function currencyFormatter(params) {
+    //           if (params.value) {
+    //             return params.value.Subject;
+    //           } else {
+    //             return '';
+    //           }
+    //         },
+    //       };
+    //       columnDef22.push(obj);
+    //     }
+    //   });
+    //   this.columnDef = columnDef22;
+    // }
   }
 }

@@ -1,7 +1,5 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { GridOptions } from 'ag-grid-community';
-import { of } from 'rxjs';
 import { ContractAgentService } from 'src/app/Services/ContractService/BasemodulesService/ContractAgent/ContractAgentService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 declare var jquery: any;

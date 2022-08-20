@@ -26,6 +26,38 @@
           </app-ng-select-virtual-scroll>
         </td>
       </tr>
+
+      <tr>
+        <td style="width: 100%;">
+          <span class="table-cell-Lable">پیمانکار</span><input style="display: inline-block;width: 87%;"
+            class="form-control input-style" type="text" name="ContractorName" value="{{ContractorName}}" readonly />
+        </td>
+      </tr>
+      <tr>
+        <td width="25%">
+          <span class="table-cell-Lablle">وضعیت قرارداد</span>
+          <div class="redio-div">
+              <div class="custom-control custom-radio custom-control-inline">
+                  <input [checked]="IsContractStatus" type="radio" class="custom-control-input" id="ContractStatus6"
+                      name="ChoosenIsContractStatusRadioName" (click)="RedioClick(true, 6)">
+                  <label style="margin: auto;" class="custom-control-label redio-label"
+                      for="ContractStatus6">تحویل موقت</label>
+              </div>
+              <div class="custom-control custom-radio custom-control-inline">
+                  <input [checked]="!IsContractStatus" type="radio" class="custom-control-input" id="ContractStatus7"
+                      name="ChoosenIsContractStatusRadioName">
+                  <label style="margin: auto;" class="custom-control-label redio-label" for="ContractStatus7"
+                      (click)="RedioClick(false, 7)">تحویل قطعی</label>
+              </div>
+              <div class="custom-control custom-radio custom-control-inline">
+                <input [checked]="!IsContractStatus" type="radio" class="custom-control-input" id="ContractStatus3"
+                    name="ChoosenIsContractStatusRadioName">
+                <label style="margin: auto;" class="custom-control-label redio-label" for="ContractStatus3"
+                    (click)="RedioClick(false, 3)">خاتمه یافته</label>
+            </div>
+          </div>
+      </td>
+      </tr>
     </table>
 
   </div>
