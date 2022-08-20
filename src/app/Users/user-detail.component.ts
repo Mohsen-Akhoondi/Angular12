@@ -26,40 +26,46 @@ export class UserDetailComponent implements OnInit {
   OverPixelHeight;
   IsAdvertising;
   PopupType;
-  IsLogOut = false;
-  constructor(private UserDetail: UserSettingsService, private router: Router,
+  HasNewNotif = true;
+  IsIRVersion = false;
+  MinWidthPixel: number;
+  PercentWidth: number;
+  CheckNotification = true;
+  constructor(private UserDetail: UserSettingsService,
+    private router: Router,
     private CommonService: CommonServices,
     private AuthServices: AuthService,
     private RefreshService: RefreshServices) { }
 
   ngOnInit() {
     this.IsAdvertising = environment.IsAdvertising;
-    this.IsLogin = this.AuthServices.CheckAuth();
-    if (this.IsLogin) {
-      this.GetUserInfo();
-    } else {
-      this.UserDetail.GetDateDetail()
-        .subscribe(ures => {
-          this.FullCurrentDate = ures.FullCurrentDate;
-          this.FullPersianUserName = '';
-          this.UserImage = null;
-          this.MCurrentDate = ures.MCurrentDate;
-          this.SCurrentDate = ures.SCurrentDate;
-        });
+    this.IsIRVersion = environment.IsExternal;
+    if (typeof sessionStorage.HasNewNotif !== 'undefined' && sessionStorage.HasNewNotif !== '') {
+      this.HasNewNotif = (sessionStorage.HasNewNotif === true);
     }
+    if (typeof sessionStorage.CheckNotification !== 'undefined' && sessionStorage.CheckNotification !== '') {
+      this.CheckNotification = (sessionStorage.CheckNotification === true);
+    }
+    this.AuthServices.CheckAuth().subscribe(res => {
+      this.IsLogin = res;
+      if (res) {
+        this.GetUserInfo();
+        this.CheckHasNewNotification();
+      } else {
+        this.UserDetail.GetDateDetail()
+          .subscribe(ures => {
+            this.FullCurrentDate = ures.FullCurrentDate;
+            this.FullPersianUserName = '';
+            this.UserImage = null;
+            this.MCurrentDate = ures.MCurrentDate;
+            this.SCurrentDate = ures.SCurrentDate;
+          });
+      }
+    });
     this.RefreshService.LoginDetailsChange.subscribe(IsLogin => {
       if (IsLogin) {
         this.GetUserInfo();
-      } else {
-        this.FullPersianUserName = '';
-        this.UserImage = null;
-        localStorage.removeItem('UserJWTInfo');
-        if (this.IsLogOut) {
-          this.IsLogOut = false;
-          this.router.navigate([{ outlets: { primary: 'Login', PopUp: null } }]);
-        } else {
-          this.ShowLoginPage();
-        }
+        this.CheckHasNewNotification();
       }
       this.IsLogin = IsLogin;
     }
@@ -77,26 +83,56 @@ export class UserDetailComponent implements OnInit {
   }
   LogOut() {
     if (this.IsLogin) {
-      this.UserDetail.LogOutUser().subscribe(res => {
-        this.IsLogOut = true;
-        this.RefreshService.RefreshLoginDetails(false);
-      });
+      if (!environment.IsExternalForSSO) {// SSO1234
+        this.UserDetail.LogOutUser();
+      } else {
+        this.UserDetail.LogOutExternalUser().subscribe(res => {
+          window.location.href = window.location.origin + '/Account/login';
+        });
+      }
     } else {
-      this.ShowLoginPage();
+      this.LoginParam = {};
+      this.LoginParam.HeaderName = 'فرم ورود به سامانه';
+      this.overStartLeftPosition = 420;
+      this.OverStartTopPosition = 130;
+      this.OverPixelWidth = 500;
+      this.OverPixelHeight = null;
+      this.PopupType = 'advertising-login';
+      this.btnclicked = true;
     }
-  }
-  ShowLoginPage() {
-    this.LoginParam = {};
-    this.LoginParam.HeaderName = 'فرم ورود به سامانه';
-    this.overStartLeftPosition = 420;
-    this.OverStartTopPosition = 130;
-    this.OverPixelWidth = 500;
-    this.OverPixelHeight = null;
-    this.PopupType = 'login-page';
-    this.btnclicked = true;
   }
   popupclosed() {
     this.PopupType = null;
     this.btnclicked = false;
+    this.MinWidthPixel = null;
+    this.PercentWidth = null;
+  }
+  CheckHasNewNotification() {
+    if (!this.IsIRVersion && this.CheckNotification) {
+      this.UserDetail.CheckNewNotif().subscribe((HasNotif: any) => {
+        if (this.HasNewNotif) {
+          this.HasNewNotif = HasNotif;
+        }
+        this.CheckNotification = false;
+        sessionStorage.setItem('CheckNotification', this.CheckNotification.toString());
+      });
+    }
+  }
+  ShowNotificatioList() {
+    if (this.IsLogin) {
+      this.HasNewNotif = false;
+      sessionStorage.setItem('HasNewNotif', this.HasNewNotif.toString());
+      this.LoginParam = {};
+      this.LoginParam.HeaderName = 'لیست اطلاعیه ها';
+      this.overStartLeftPosition = 300;
+      this.OverStartTopPosition = 125;
+      this.OverPixelWidth = 500;
+      this.OverPixelHeight = 350;
+      this.MinWidthPixel = 450;
+      this.PercentWidth = 50;
+      this.PopupType = 'application-link';
+      this.btnclicked = true;
+
+    }
   }
 }

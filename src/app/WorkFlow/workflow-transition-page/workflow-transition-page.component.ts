@@ -1,8 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { GridOptions } from 'ag-grid-community';
-import { of } from 'rxjs';
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
+import { NgSelectConfig } from 'src/app/Shared/ng-select';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
@@ -11,7 +9,6 @@ import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServic
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { isUndefined } from 'util';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
-import { resolve } from 'q';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
@@ -27,10 +24,9 @@ export class WorkflowTransitionPageComponent implements OnInit {
   @Input() PopupParam;
   private gridApi;
   columnDef;
+  MinHeightPixel;
+  PixelHeight ;
   RowData: any;
-  PercentWidth;
-  MainMaxwidthPixel;
-  HeightPercentWithMaxBtn;
   WorkflowTypeListSet = [];
   NgSelectWorkflowTypeParams = {
     Items: [],
@@ -127,6 +123,7 @@ export class WorkflowTransitionPageComponent implements OnInit {
     DropDownMinWidth: '100px',
     type: 'UnitPattern'
   };
+  Is1578 = false;
 
   constructor(
     private router: Router,
@@ -147,12 +144,41 @@ export class WorkflowTransitionPageComponent implements OnInit {
     });
     config.notFoundText = 'موردی یافت نشد';
     this.InvalidRecords = false;
+    
+    this.route.params.subscribe(params => {
+      this.CModuleCode = +params['ModuleCode'];
+    });
+  }
+  sizeToFit() {
+    this.gridApi.sizeColumnsToFit();
+  }
+  onGridReady(params) {
+    this.gridApi = params.api;
+  }
+  onChangeRegionGroupObj(selectedRegionGroup) {
+    this.NgSelectWorkflowTypeParams.selectedObject = null;
+    this.getNewData();
+  }
+
+  onChangeWorkflowTypeObj(selectedWorkflowtype) {
+    this.RowData = this.WorkflowTypeListSet.find(x => x.WorkflowTypeCode
+      === selectedWorkflowtype).WorkflowTransitionViewList;
+  }
+
+  ngAfterViewInit(): void {
     this.columnDef = [
       {
         headerName: 'ردیف',
         field: 'ItemNo',
         width: 50,
         resizable: true,
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        }       
       },
       {
         headerName: 'نود مبدا',
@@ -186,7 +212,13 @@ export class WorkflowTransitionPageComponent implements OnInit {
         },
         width: 110,
         resizable: true,
-        editable: true
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        }     
       },
       {
         headerName: 'نوع اقدام ',
@@ -219,7 +251,13 @@ export class WorkflowTransitionPageComponent implements OnInit {
         },
         width: 100,
         resizable: true,
-        editable: true
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        }       
       },
       {
         headerName: 'گردش کار مقصد',
@@ -254,7 +292,13 @@ export class WorkflowTransitionPageComponent implements OnInit {
         },
         width: 110,
         resizable: true,
-        editable: true
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        }       
       },
       {
         headerName: 'نود مقصد',
@@ -285,7 +329,13 @@ export class WorkflowTransitionPageComponent implements OnInit {
             return false;
           }
         },
-        editable: true,
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        }       ,
         width: 110,
         resizable: true,
         sortable: true
@@ -319,7 +369,13 @@ export class WorkflowTransitionPageComponent implements OnInit {
             return false;
           }
         },
-        editable: true,
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        },
         width: 150,
         resizable: true
       },
@@ -351,7 +407,13 @@ export class WorkflowTransitionPageComponent implements OnInit {
             return false;
           }
         },
-        editable: true,
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        },
         width: 150,
         resizable: true
       },
@@ -386,7 +448,13 @@ export class WorkflowTransitionPageComponent implements OnInit {
             return false;
           }
         },
-        editable: true,
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        },
         width: 140,
         resizable: true
       },
@@ -418,7 +486,13 @@ export class WorkflowTransitionPageComponent implements OnInit {
             return false;
           }
         },
-        editable: true,
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        },
         width: 150,
         resizable: true
       },
@@ -453,7 +527,13 @@ export class WorkflowTransitionPageComponent implements OnInit {
             return false;
           }
         },
-        editable: true,
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        },
         width: 120,
         resizable: true
       },
@@ -485,21 +565,39 @@ export class WorkflowTransitionPageComponent implements OnInit {
             return false;
           }
         },
-        editable: true,
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        },
         width: 170,
         resizable: true
       },
       {
         headerName: 'توضیحات',
         field: 'Note',
-        editable: true,
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        },
         width: 300,
         resizable: true
       },
       {
         headerName: 'شرط گردش',
         field: 'FlowCondition',
-        editable: true,
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        },
         width: 200,
         resizable: true
       },
@@ -518,7 +616,13 @@ export class WorkflowTransitionPageComponent implements OnInit {
           }
         },
         resizable: true,
-        editable: true
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        },
       },
       {
         headerName: 'حداقل تعداد دریافت',
@@ -535,7 +639,13 @@ export class WorkflowTransitionPageComponent implements OnInit {
           }
         },
         resizable: true,
-        editable: true
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        },
       },
       {
         headerName: 'حداقل تعداد برگشت',
@@ -552,26 +662,50 @@ export class WorkflowTransitionPageComponent implements OnInit {
           }
         },
         resizable: true,
-        editable: true
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        },
       },
       {
         headerName: 'قبل از اجرا',
         field: 'BeforeFlow',
-        editable: true,
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        },
         width: 200,
         resizable: true
       },
       {
         headerName: 'بعد از اجرا',
         field: 'AfterFlow',
-        editable: true,
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        },
         width: 200,
         resizable: true
       },
       {
         headerName: 'بعد از اجرای برنامه',
         field: 'AfterAction',
-        editable: true,
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        },
         width: 200,
         resizable: true
       },
@@ -605,32 +739,23 @@ export class WorkflowTransitionPageComponent implements OnInit {
             return false;
           }
         },
-        editable: true,
+        editable: () => {
+          if(this.CModuleCode===3088){
+            return false;
+          }
+          if(!this.Is1578)
+          return true;
+        },
         width: 120,
         resizable: true
       },
     ];
-    this.route.params.subscribe(params => {
-      this.CModuleCode = +params['ModuleCode'];
-    });
-  }
-  sizeToFit() {
-    this.gridApi.sizeColumnsToFit();
-  }
-  onGridReady(params) {
-    this.gridApi = params.api;
-  }
-  onChangeRegionGroupObj(selectedRegionGroup) {
-    this.NgSelectWorkflowTypeParams.selectedObject = null;
-    this.getNewData();
-  }
-
-  onChangeWorkflowTypeObj(selectedWorkflowtype) {
-    this.RowData = this.WorkflowTypeListSet.find(x => x.WorkflowTypeCode
-      === selectedWorkflowtype).WorkflowTransitionViewList;
   }
 
   ngOnInit() {
+    this.Actor.CheckAdminRole1578().subscribe(res => {
+      this.Is1578 = res;
+    });
     this.RowData = [];
     this.RegionList.GetRegionGroupList().subscribe(res => {
       this.RegionGroupListSet = res;
@@ -929,7 +1054,8 @@ export class WorkflowTransitionPageComponent implements OnInit {
       this.DuplicateRecordsCount = WorkflowTransitionList.filter(x => x.FromWorkflowNodeID === res.FromWorkflowNodeID
         && x.ToWorkflowNodeID === res.ToWorkflowNodeID && x.WorkflowOperationCode === res.WorkflowOperationCode &&
         x.UnitPatternID === res.UnitPatternID && x.RegionCode === res.RegionCode && // RFC 56535
-        x.ToWorkflowTypeCode === res.ToWorkflowTypeCode && x.ItemNo !== res.ItemNo); // با هماهنگی آقای نیکویی - RFC 52443
+        x.ToWorkflowTypeCode === res.ToWorkflowTypeCode && x.ItemNo !== res.ItemNo && // با هماهنگی آقای نیکویی - RFC 52443
+        x.FlowCondition === res.FlowCondition);
       if (this.DuplicateRecordsCount.length > 0) {
         this.errmsg += ' { ';
         this.InvalidRecords = true;
@@ -966,10 +1092,10 @@ export class WorkflowTransitionPageComponent implements OnInit {
     this.btnclicked = true;
     this.HaveHeader = true;
     this.HaveMaxBtn = true;
-    this.HeightPercentWithMaxBtn =91;
-    this.OverstartTopPosition =30;
+    this.OverstartTopPosition =16;
     this.OverstartLeftPosition = 116;
-    this.PercentWidth = 82;
+    this.MinHeightPixel = 610;
+    this.PixelHeight = 610;
     this.paramObj = {
      HeaderName: 'مشاهده مسیر گردش کار',
     workFlowTypeCodeSelected : this.NgSelectWorkflowTypeParams.selectedObject,

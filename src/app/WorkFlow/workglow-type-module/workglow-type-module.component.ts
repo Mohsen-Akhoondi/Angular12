@@ -6,7 +6,6 @@ import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/n
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ModuleService } from 'src/app/Services/BaseService/ModuleService';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
-import { of } from 'rxjs';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 @Component({

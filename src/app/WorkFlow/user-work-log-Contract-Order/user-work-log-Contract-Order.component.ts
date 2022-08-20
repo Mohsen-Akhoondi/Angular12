@@ -1,9 +1,7 @@
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ModuleService } from 'src/app/Services/BaseService/ModuleService';
-import { GridOptions } from 'ag-grid-community';
-import { of, Observable, forkJoin } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Input, Component, OnInit, Output, EventEmitter, ViewChild, TemplateRef } from '@angular/core';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
@@ -35,6 +33,7 @@ export class UserWorkLogContractOrderComponent implements OnInit {
   ToRequestTotalItemCount;
   MaincolumnDef;
   IsArticle48;
+  ISTavafoghNameh;
   IsEstimate;
   ISProvisionRemain;
   NgSelectSearchTerm = '';
@@ -393,6 +392,7 @@ export class UserWorkLogContractOrderComponent implements OnInit {
   ngOnInit() {
     this.ISProvisionRemain = this.PopupParam ? this.PopupParam.ISProvisionRemain : false;
     this.IsArticle48 = this.PopupParam ? this.PopupParam.IsArticle48 : false;
+    this.ISTavafoghNameh = this.PopupParam ? this.PopupParam.ISTavafoghNameh : false;
     this.IsEstimate = this.PopupParam ? this.PopupParam.IsEstimate : false;  
     this.CustomCheckBoxConfig.color = 'state p-primary';
     this.CustomCheckBoxConfig.icon = 'fa fa-check';
@@ -712,7 +712,7 @@ export class UserWorkLogContractOrderComponent implements OnInit {
     // this.IsDisableClarification = !(this.selectedRow && this.selectedRow.data && this.selectedRow.data.ContractId);
   }
   closeModal() {
-    if (this.ISProvisionRemain || this.IsArticle48 || this.IsEstimate) {
+    if (this.ISProvisionRemain || this.IsArticle48 || this.IsEstimate || this.ISTavafoghNameh) {
       this.UserWorkLogContractOrderClosed.emit(true);
     } else {
       this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
@@ -1129,5 +1129,19 @@ export class UserWorkLogContractOrderComponent implements OnInit {
       }
       );
   }
-
+  onSetMainContractorClick() {
+    this.type = 'set-main-contractor';
+    this.btnclicked = true;
+    this.OverPixelWidth = 400;
+    this.HaveHeader = true;
+    this.HaveMaxBtn = false;
+    this.startLeftPosition = 515;
+    this.startTopPosition = 220;
+    this.HeightPercentWithMaxBtn = null;
+    this.paramObj = {
+      HeaderName: 'درج پیمانکار اصلی',
+      ModuleCode: this.ModuleCode,
+      SelectedContractID: this.selectedRow.data.ContractId
+    };
+  }
 }

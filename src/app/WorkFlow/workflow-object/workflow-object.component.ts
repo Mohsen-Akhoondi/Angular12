@@ -1,6 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { of } from 'rxjs';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 

@@ -1,9 +1,5 @@
-import { Component, OnInit, Input, Output, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, TemplateRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { GridOptions } from 'ag-grid-community';
-import { of } from 'rxjs';
-import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
-import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 declare var jquery: any;

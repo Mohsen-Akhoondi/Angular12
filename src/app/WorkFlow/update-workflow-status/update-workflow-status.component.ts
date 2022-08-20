@@ -58,7 +58,7 @@ export class UpdateWorkflowStatusComponent implements OnInit {
       this.startTopPosition = 20;
     }
 
-    if (this.InputParam.WorkflowObjectCode === 3 || this.InputParam.WorkflowObjectCode === 5 || this.InputParam.WorkflowObjectCode === 7) {
+    if (this.InputParam.WorkflowObjectCode === 3 || this.InputParam.WorkflowObjectCode === 5 || this.InputParam.WorkflowObjectCode === 7 || this.InputParam.WorkflowObjectCode === 31) {
       this.type = 'product-request-page';
       this.HeightPercentWithMaxBtn = 97;
       this.MinHeightPixel = 645;

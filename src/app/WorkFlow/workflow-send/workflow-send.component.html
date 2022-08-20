@@ -37,5 +37,7 @@
   [PopupParam]="PopUptype === 'message-box' ? alertMessageParams : PopUpParams" (popupclosed)="popupclosed($event)"
   [startLeftPosition]="startLeftPosition" [startTopPosition]="startTopPosition" [HaveHeader]="true"
   [HaveMaxBtn]="PopUptype !== 'message-box'" [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn" [minHeightPixel]="MinHeightPixel" 
-  [MainMinwidthPixel]="type === 'message-box' ? '' : MainMinwidthPixel">
+  [MainMinwidthPixel]="type === 'message-box' ? '' : MainMinwidthPixel"
+  [MainMaxwidthPixel]= "MainMaxwidthPixel"
+  [PercentWidth] = "PercentWidth">
 </app-over-popup>

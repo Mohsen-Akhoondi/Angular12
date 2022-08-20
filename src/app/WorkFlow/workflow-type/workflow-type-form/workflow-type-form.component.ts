@@ -1,8 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { GridOptions } from 'ag-grid-community';
-import { of } from 'rxjs';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
@@ -35,7 +32,7 @@ export class WorkflowTypeFormComponent implements OnInit {
   alertMessageParams = { HaveOkBtn: true, message: '' };
   OverstartLeftPosition: number;
   OverstartTopPosition: number;
-  WorkflowTypeRow: any;
+  WorkflowTypeRow = [];
   HaveSave = false;
   HaveDelete = false;
   private gridApi;
@@ -148,7 +145,9 @@ export class WorkflowTypeFormComponent implements OnInit {
     });
   }
   getRowData() {
-    this.WorkflowTypeRow = this.Workflow.GetWorkflowType();
+    this.Workflow.GetWorkflowType().subscribe(res=>{
+      this.WorkflowTypeRow = res;
+      });
   }
 
   RowClick(InputValue) {

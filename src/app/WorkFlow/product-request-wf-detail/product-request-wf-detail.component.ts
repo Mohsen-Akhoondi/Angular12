@@ -1,8 +1,7 @@
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ModuleService } from 'src/app/Services/BaseService/ModuleService';
-import { of, Observable, forkJoin } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Input, Component, OnInit, ViewChild, TemplateRef, Output, EventEmitter } from '@angular/core';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
@@ -12,7 +11,6 @@ import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_a
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
-import { catchError, finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-product-request-wf-detail',
