@@ -27,7 +27,7 @@
   </fieldset>
 
 
-  <div class="box-dev" style=" width: 100%;" [style.height.%]="78">
+  <div class="box-dev" style=" width: 100%;" [style.height.%]="81">
     <app-grid [columns]="columnDef" [rowsData]="rowData" [gridHeight]="90" (GridReady)="onGridReady($event)"
       (RowClick)="RowClick($event)">
     </app-grid>
@@ -46,9 +46,8 @@
     خروج</button>
 </div>
 
-<app-over-popup [HaveMaxBtn]="HaveMaxBtn" [startLeftPosition]="startLeftPosition" [startTopPosition]="startTopPosition"
+<app-over-popup  *ngIf="isClicked" [HaveMaxBtn]="HaveMaxBtn" [startLeftPosition]="startLeftPosition" [startTopPosition]="startTopPosition"
   [minHeightPixel]="MinHeightPixel" [PercentWidth]="PercentWidth" [MainMaxwidthPixel]="MainMaxwidthPixel"
-  [PopupType]="type" [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn"
-  [PopupParam]="type === 'message-box' ? alertMessageParams : paramObj" [HaveHeader]="HaveHeader"
-  (popupclosed)="popupclosed($event)">
-</app-over-popup> 
+  [PopupType]="type" [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn" [PopupParam]="paramObj"
+  [HaveHeader]="HaveHeader" (popupclosed)="popupclosed()">
+</app-over-popup>
