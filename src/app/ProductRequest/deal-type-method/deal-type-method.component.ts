@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { DealTypeService } from 'src/app/Services/DealTypeService/DealTypeService';
 import { DealMethodServices } from 'src/app/Services/DealMethodService/DealMethodService';
@@ -30,7 +30,7 @@ export class DealTypeMethodComponent implements OnInit {
     private DealTypeServices: DealTypeService,
     private DealMethodService: DealMethodServices,
     private ProductRequest: ProductRequestService
-    ) {
+  ) {
   }
 
   ngOnInit() {
