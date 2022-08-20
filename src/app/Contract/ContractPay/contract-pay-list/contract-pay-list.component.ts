@@ -10,6 +10,7 @@ import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServic
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { environment } from 'src/environments/environment';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-contract-pay-list',
@@ -23,6 +24,7 @@ export class ContractPayListComponent implements OnInit {
   @Output() ContractEstimateClosed: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() Closed: EventEmitter<boolean> = new EventEmitter<boolean>();
   isClicked: boolean;
+  ShowBtn: boolean = true;
   type: string;
   SelectedContractID: any;
   SelectedCostFactorID: any;
@@ -62,7 +64,7 @@ export class ContractPayListComponent implements OnInit {
   PriceListTypeCode;
   PriceListFineYearName;
   mainBodyHeight = 500;
-  gridHeight = 76;
+  gridHeight = 70;
   HaveMaxBtn = false;
   HaveSave = false;
   HaveUpdate = false;
@@ -136,6 +138,11 @@ export class ContractPayListComponent implements OnInit {
   WorkFlowInstanceId;
   IsAdmin = false;
   BtnClickedName: any;
+  tableHeight = 87;
+  SumSA = '0';
+  SumSCPA = '0';
+  IsEstimate: boolean;
+  IsOnContract: boolean;
 
   constructor(private User: UserSettingsService,
     private ShipmentService: ContractPayShipmentService,
@@ -144,7 +151,11 @@ export class ContractPayListComponent implements OnInit {
     private Cartable: CartableServices,
     private WorkFlow: WorkflowService,
     private Report: ReportService,
-    private ContractList: ContractListService) {
+    private ContractList: ContractListService,
+    private route: ActivatedRoute) {
+      this.route.params.subscribe(params => {
+        this.ModuleCode = +params['ModuleCode'];
+      });
 
     this.columnDef = [
       {
@@ -212,7 +223,7 @@ export class ContractPayListComponent implements OnInit {
         headerName: 'جمع مالیات بر ارزش افزوده',
         field: 'TaxValue',
         HaveThousand: true,
-        width: 140,
+        width: 160,
         resizable: true
       },
       {
@@ -227,7 +238,8 @@ export class ContractPayListComponent implements OnInit {
         field: 'Note',
         width: 400,
         resizable: true
-      }
+      },
+
     ];
   }
 
@@ -307,9 +319,11 @@ export class ContractPayListComponent implements OnInit {
       this.PriceListFineYearName = currentData.PriceListFineYearName;
       this.PriceListTypeName = currentData.PriceListTypeName;
       this.ContractPayNo = currentData.ContractPayNo;
+      this.IsEstimate = currentData.IsEstimate;
       this.rowData = of([]);
       this.ContPayService.GetContractPayList(this.SelectedCostFactorID, null, null).subscribe(res => {
         this.rowData = res;
+        this.SetSumAmount(this.rowData);
       });
       this.IsDown = true;
     } else if (this.PopupParam.SelectedContractID) {// مشاهده پرونده در فرم درخواست پرداخت
@@ -359,6 +373,9 @@ export class ContractPayListComponent implements OnInit {
 
   }
 
+  ngAfterViewInit(): void {
+    this.SetSumAmount(this.rowData)
+  }
   popupclosed() {
     this.PopUpType = '';
     this.PixelWidth = null;
@@ -380,6 +397,14 @@ export class ContractPayListComponent implements OnInit {
   }
 
   RowClick(event) {
+    if (event.data.ContractOperationID == 1 || event.data.ContractOperationID == 2 || event.data.ContractOperationID == 3 ||
+      event.data.ContractOperationID == 4 || event.data.ContractOperationID == 5 || event.data.ContractOperationID == 7 ||
+      event.data.ContractOperationID == 8 || event.data.ContractOperationID == 20 || event.data.ContractOperationID == 21) {
+      this.ShowBtn = true;
+    }
+    else {
+      this.ShowBtn = false;
+    }
     this.IsRowClick = true;
     this.currentRowIndex = event.rowIndex;
     let Count = 0;
@@ -393,12 +418,12 @@ export class ContractPayListComponent implements OnInit {
     this.ContractOperationID = event.data.ContractOperationID;
     this.ContractOperationName = event.data.ContractOperationName;
     if (event.data.IsConfirm === 0 && !event.data.IsConvert) {
-      this.ContPayService.HaveWorkFlowInstance(event.data.CostFactorID, 2).subscribe(res => {
+      this.ContPayService.HaveOneWorkFlowInstanceRow(event.data.CostFactorID, 2).subscribe(res => {
         this.IsEndRow = !res;
         this.IsNotWorkFlow = !res;
         this.gridHeight = (!this.IsNotWorkFlow &&
           this.currentRowIndex === this.currentRowCount - 1) ?
-          this.PopupMaximized ? 75 : 72 :
+          this.PopupMaximized ? 75 : 70 :
           this.gridHeight;
       });
     } else {
@@ -410,7 +435,7 @@ export class ContractPayListComponent implements OnInit {
       }
     });
     this.SelectedRow = event.data;
-
+    this.ContPayService.GetIsOnContract(this.ContractOperationID).subscribe(res => {this.IsOnContract = res});
   }
 
   onInsert() {
@@ -418,7 +443,9 @@ export class ContractPayListComponent implements OnInit {
     this.startTopPosition = 89;
     this.PopUpType = 'contract-pay-types';
     this.isClicked = true;
+
   }
+
 
   onEdit(isViewable: boolean) {
     if (!this.IsRowClick) {
@@ -454,42 +481,48 @@ export class ContractPayListComponent implements OnInit {
     this.ContractPayPopupParam.ModuleViewTypeCode = this.PopupParam.ModuleViewTypeCode;
     this.ContractPayPopupParam.SelectedCostFactorID = this.SelectedCostFactorID;
 
-    if (this.ContractOperationID === 1 || this.ContractOperationID === 2 ||
-      this.ContractOperationID === 21 || this.ContractOperationID === 20 ||
-      this.ContractOperationID === 7) {
+    if (this.IsOnContract) {
       this.startLeftPosition = 280;
       this.startTopPosition = 90;
       this.PixelWidth = 900;
       this.PixelHeight = (this.PopupParam.ModuleViewTypeCode === 100000 && (this.ContractPayPopupParam.RegionCode >= 0 && this.ContractPayPopupParam.RegionCode < 23)) ? 370 :
-                         (this.ContractPayPopupParam.RegionCode >= 0 && this.ContractPayPopupParam.RegionCode < 23) ? 342: 338;
+        (this.ContractPayPopupParam.RegionCode >= 0 && this.ContractPayPopupParam.RegionCode < 23) ? 342 : 338;
       this.ContractPayPopupParam.IsEditable1 = false;
       this.PopUpType = 'pre-pay';
       return;
-    } else if (this.ContractOperationID === 3 || this.ContractOperationID === 4
-      || this.ContractOperationID === 5 || this.ContractOperationID === 8) {
+
+    }
+    else if (!this.IsOnContract) {
+
+      if (this.IsEstimate) {
+        this.PopUpType = 'contract-pay-item-estimate-page';
+        return;
+      }
 
       if (this.ContractTypeCode === 26 || this.ContractTypeCode === 29) {
         this.PopUpType = 'contract-pay-details'  // 'contract-pay-item-hour';
         return;
       }
+
       if (this.ContractTypeCode === 27 || this.ContractTypeCode === 28) {
         this.PopUpType = 'contract-pay-details';
         this.ContractPayPopupParam.ShowReportsSign = true;
         return;
       }
+
       if (!this.PriceListPatternID) {
         this.PopUpType = 'contract-pay-details';
         this.ContractPayPopupParam.ShowReportsSign = true;
         return;
       }
+
       if (this.PriceListPatternID &&
-          this.ContractTypeCode !== 26 && this.ContractTypeCode !== 29) {
+        this.ContractTypeCode !== 26 && this.ContractTypeCode !== 29) {
         // this.PopUpType = 'contract-pay-item-estimate-page';
         this.PopUpType = 'contract-pay-details';
         this.ContractPayPopupParam.ShowReportsSign = true;
         return;
       }
-
     }
   }
 
@@ -503,7 +536,7 @@ export class ContractPayListComponent implements OnInit {
   }
 
   onDelete() {
-    this.ContractPayDetails.DeleteContractPay(this.SelectedCPCostFactorID).subscribe(res => {
+    this.ContractPayDetails.DeleteContractPay(this.SelectedCPCostFactorID,this.ModuleViewTypeCode).subscribe(res => {
       this.ShowMessageBoxWithOkBtn('حذف موفقیت آمیز بود');
       this.ngOnInit();
     }
@@ -533,53 +566,52 @@ export class ContractPayListComponent implements OnInit {
     if (changes.PopupMaximized && !isUndefined(changes.PopupMaximized.currentValue)) {
       this.gridHeight = (!this.IsNotWorkFlow &&
         this.currentRowIndex === this.currentRowCount - 1) ?
-        changes.PopupMaximized.currentValue ? 75 : 72 :
+        changes.PopupMaximized.currentValue ? 75 : 70 :
         changes.PopupMaximized.currentValue ? 78 : 75;
       this.mainBodyHeight = changes.PopupMaximized.currentValue ? 560 : 500;
     }
   }
 
   ReturendContractOperation(type) {
-    this.ContractOperationID = type;
     this.startLeftPosition = 100;
     this.startTopPosition = 10;
     this.PixelWidth = null;
     this.PixelHeight = null;
     this.isClicked = true;
-    if (this.ContractOperationID && this.PopUpType === 'contract-pay-types') {
-      if (this.ContractOperationID === '3' || this.ContractOperationID === '4'
-      || this.ContractOperationID === '5' || this.ContractOperationID === '8') { // RFC 62307
-      this.ContractPayPopupParam.selectedRow = this.PopupParam.selectedRow.data;
-      this.PopUpType = 'contract-pay-details';
-      this.HaveMaxBtn = true;
-      this.startLeftPosition = 5;
-      // tslint:disable-next-line: radix
-      this.ContractPayPopupParam.ContractOperationID = parseInt(this.ContractOperationID);
-      this.ContractPayPopupParam.Mode = 'InsertMode';
-      this.ContractPayPopupParam.ModuleViewTypeCode = this.PopupParam.ModuleViewTypeCode;
-      return;
-    } else if (this.ContractOperationID === '1' || this.ContractOperationID === '2' ||
-      this.ContractOperationID === '20' || this.ContractOperationID === '21' ||
-      this.ContractOperationID === '7') {
-      this.startLeftPosition = 280;
-      this.startTopPosition = 90;
-      this.PixelWidth = 900;
-      this.PixelHeight = (this.PopupParam.ModuleViewTypeCode === 100000 && (this.ContractPayPopupParam.RegionCode >= 0 && this.ContractPayPopupParam.RegionCode < 23)) ? 370 :
-                         (this.ContractPayPopupParam.RegionCode >= 0 && this.ContractPayPopupParam.RegionCode < 23) ? 342: 320;
-      this.ContractPayPopupParam.ContractOperationID = parseInt(this.ContractOperationID);
-      this.ContractPayPopupParam.CostListFinYearCode = this.CostListFinYearCode;
-      this.ContractPayPopupParam.PriceListTypeCode = this.PriceListTypeCode;
-      this.ContractPayPopupParam.PriceListFineYearName = this.PriceListFineYearName;
-      this.ContractPayPopupParam.PriceListTypeName = this.PriceListTypeName;
-      this.ContractPayPopupParam.SelectedCPCostFactorID = -1;
-      this.ContractPayPopupParam.SelectedContractPayID = this.SelectedContractPayID;
-      this.ContractPayPopupParam.selectedRow = this.PopupParam.selectedRow.data;
-      this.ContractPayPopupParam.IsViewable = false;
-      this.PopUpType = 'pre-pay';
-      this.HaveMaxBtn = false;
-      this.ContractPayPopupParam.Mode = 'InsertMode';
-      return;
-    }
+    if (type.ContractOperationID && this.PopUpType === 'contract-pay-types') {
+      if (!type.IsOnContract) { // RFC 62307
+        this.ContractPayPopupParam.selectedRow = this.PopupParam.selectedRow.data;
+
+        this.PopUpType = this.IsEstimate ? 'contract-pay-item-estimate-page' : 'contract-pay-details';
+        this.HaveMaxBtn = true;
+        this.startLeftPosition = 5;
+        this.isClicked = true;
+        this.ContractPayPopupParam.ContractOperationID = parseInt(type.ContractOperationID);
+        this.ContractPayPopupParam.Mode = 'InsertMode';
+        this.ContractPayPopupParam.ModuleViewTypeCode = this.PopupParam.ModuleViewTypeCode;
+        return;
+      }
+
+      else if (type.IsOnContract) {
+        this.startLeftPosition = 280;
+        this.startTopPosition = 90;
+        this.PixelWidth = 900;
+        this.PixelHeight = (this.PopupParam.ModuleViewTypeCode === 100000 && (this.ContractPayPopupParam.RegionCode >= 0 && this.ContractPayPopupParam.RegionCode < 23)) ? 370 :
+          (this.ContractPayPopupParam.RegionCode >= 0 && this.ContractPayPopupParam.RegionCode < 23) ? 342 : 320;
+        this.ContractPayPopupParam.ContractOperationID = parseInt(type.ContractOperationID);
+        this.ContractPayPopupParam.CostListFinYearCode = this.CostListFinYearCode;
+        this.ContractPayPopupParam.PriceListTypeCode = this.PriceListTypeCode;
+        this.ContractPayPopupParam.PriceListFineYearName = this.PriceListFineYearName;
+        this.ContractPayPopupParam.PriceListTypeName = this.PriceListTypeName;
+        this.ContractPayPopupParam.SelectedCPCostFactorID = -1;
+        this.ContractPayPopupParam.SelectedContractPayID = this.SelectedContractPayID;
+        this.ContractPayPopupParam.selectedRow = this.PopupParam.selectedRow.data;
+        this.ContractPayPopupParam.IsViewable = false;
+        this.PopUpType = 'pre-pay';
+        this.HaveMaxBtn = false;
+        this.ContractPayPopupParam.Mode = 'InsertMode';
+        return;
+      }
     }
   }
 
@@ -649,6 +681,10 @@ export class ContractPayListComponent implements OnInit {
       this.WorkFlow.GetWfInstanceIDByObjIDAndRegionCode(this.SelectedCPCostFactorID, this.PopupParam.RegionCode).subscribe(res => {
         this.PixelWidth = null;
         this.WorkFlowInstanceId = res;
+        if (res === null) {
+          this.ShowMessageBoxWithOkBtn('این قرارداد فاقد گردش کار می باشد');
+          return;
+        } // 63958
         this.PopUpType = 'user-work-log-details';
         this.isClicked = true;
         this.OverPixelWidth = 1290;
@@ -704,5 +740,27 @@ export class ContractPayListComponent implements OnInit {
     this.alertMessageParams.HaveOkBtn = false;
     this.alertMessageParams.HaveYesBtn = true;
     this.alertMessageParams.HaveNoBtn = true;
+  }
+
+  SetSumAmount(event) {
+    let SumAmount = 0;
+    let SumContractPayAmount = 0;
+
+    if (this.rowData) {
+      this.rowData.forEach(item => {
+        if (item.ContractPayAmount) {
+          SumContractPayAmount = SumContractPayAmount + item.ContractPayAmount
+
+        }
+        if (item.Amount) {
+
+          SumAmount = SumAmount + item.Amount
+        }
+
+      });
+    }
+    this.SumSA = SumAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    this.SumSCPA = SumContractPayAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
   }
 }

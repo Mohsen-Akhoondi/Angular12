@@ -1,7 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { of } from 'rxjs';
-import { ContractPayService } from 'src/app/Services/ContractService/ContractPayServices/ContractPayService';
-import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { isUndefined } from 'util';
 import { ContractMinutesService } from 'src/app/Services/ContractService/ContractMinutes/ContractMinutesService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';

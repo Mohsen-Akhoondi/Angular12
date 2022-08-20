@@ -1,5 +1,5 @@
 import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
-import { of, forkJoin } from 'rxjs';
+import { of } from 'rxjs';
 import { ContractPayService } from 'src/app/Services/ContractService/ContractPayServices/ContractPayService';
 
 @Component({

@@ -1,12 +1,10 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import * as moment from 'jalali-moment';
 import { forkJoin, of } from 'rxjs';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
-import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServices';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { ContractMinutesService } from 'src/app/Services/ContractService/ContractMinutes/ContractMinutesService';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
