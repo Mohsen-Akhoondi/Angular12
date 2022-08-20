@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { Router } from '@angular/router';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
-declare var jquery: any;
+import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
+
 declare var $: any;
 @Component({
   selector: 'app-user-menu',
@@ -14,7 +15,7 @@ export class AppMenuComponent implements OnInit {
   Menudata;
   SubMenuWidth = 0;
   IsFirstItem;
-  constructor(private UserDetails: UserSettingsService, private _router: Router, private CommonService: CommonServices) { }
+  constructor(private UserDetails: UserSettingsService, private _router: Router, private CommonService: CommonServices, private RefreshService: RefreshServices,) { }
   getMenu(parentID) {
     return this.Menudata.filter((node) => (node.ParentID === parentID)).map((node) => {
       const exists = this.Menudata.some(function (childNode) { return childNode.ParentID === node.MenuID; });
@@ -40,14 +41,9 @@ export class AppMenuComponent implements OnInit {
     });
   }
   ngOnInit() {
-    this.UserDetails.GetCurrentUserMenu()
-      .subscribe(res => {
-        if (!res || res.length === 0) {
-          this._router.navigate(['AccessDenid']);
-        } else {
-          this.Menudata = this.CommonService.FlatlistToTree(res, 'MenuID', 'ParentID');
-        }
-      });
+    this.BuildMenu();
+    this.RefreshService.UserMenuChange.subscribe(res => 
+      { this.BuildMenu(); });
   }
   OnMouseOver(e) {
     const JqSubMenu = $(e.target).next('.dropdown-menu');
@@ -64,5 +60,22 @@ export class AppMenuComponent implements OnInit {
     this.UserDetails.GetCurrentUserGUIDForProvider().subscribe(res => {
       window.open('http://contracts.tehran.iri/DesktopModules/Contract/Controls/Contractors/ConfirmContractor/?Param=' + res, '_blank');
     });
+  }
+
+  On3064Click() {
+    window.open("https://finance.tehran.iri:8085/Accounting/FeePage",
+    "_blank",
+     "toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, copyhistory=no,top=50,left=300,width=700,height=500");
+  }
+
+  BuildMenu() {
+    this.UserDetails.GetCurrentUserMenu()
+      .subscribe(res => {
+        if (!res || res.length === 0) {
+          this._router.navigate(['AccessDenid']);
+        } else {
+          this.Menudata = this.CommonService.FlatlistToTree(res, 'MenuID', 'ParentID');
+        }
+      });
   }
 }

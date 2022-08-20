@@ -1,14 +1,13 @@
-import { Component, OnInit, SimpleChanges, Output, EventEmitter, TemplateRef, ViewChild, Input } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, TemplateRef, ViewChild, Input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
 import { TemplateRendererComponent } from '../grid-component/template-renderer/template-renderer.component';
 import { of } from 'rxjs';
 import { CheckboxFieldEditableComponent } from '../checkbox-field-editable/checkbox-field-editable.component';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
-import { isUndefined } from 'util';
-
-import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
+import { isDefined } from '@angular/compiler/src/util';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
+import { CommonService } from 'src/app/Services/CommonService/CommonService';
 declare var jquery: any;
 declare var $: any;
 
@@ -61,11 +60,13 @@ export class ModalArchiveComponent implements OnInit {
   MainMaxwidthPixel;
   RegionCode: number;
   ModuleCode;
+  IsAutoGenerate = false;
   constructor(
     private router: Router,
     private ArchiveList: ArchiveDetailService,
     private Route: ActivatedRoute,
-    private CommonService: CommonServices
+    private CommonService: CommonServices,
+    private ComonService: CommonService
 
   ) {
     this.defaultColDef = { resizable: false };
@@ -93,8 +94,9 @@ export class ModalArchiveComponent implements OnInit {
       case 2793:
       case 2939:
       case 2951:
+      case 3094:
         // tslint:disable-next-line: max-line-length
-        this.ShowAdvertising = this.ArchiveParam.ModuleCode === 2730 && this.ArchiveParam.ModuleViewTypeCode && this.ArchiveParam.ModuleViewTypeCode !== null && !isUndefined(this.ArchiveParam.ModuleViewTypeCode) && this.ArchiveParam.ModuleViewTypeCode === 131 ? false : !this.ArchiveParam.IsReadOnly;
+        this.ShowAdvertising = this.ArchiveParam.ModuleCode === 2730 && this.ArchiveParam.ModuleViewTypeCode && this.ArchiveParam.ModuleViewTypeCode !== null && isDefined(this.ArchiveParam.ModuleViewTypeCode) && this.ArchiveParam.ModuleViewTypeCode === 131 ? false : !this.ArchiveParam.IsReadOnly;
         this.HasArchiveAccess = !this.ArchiveParam.IsReadOnly;
         break;
       case 2785:
@@ -103,9 +105,11 @@ export class ModalArchiveComponent implements OnInit {
       case 2921:
       case 2939:
       case 2951:
+      case 1646:
         this.HasArchiveAccess = true;
         break;
       case 2516:
+      case 3037:
         {
           if (this.ArchiveParam.IsReadOnly) {
             this.HasArchiveAccess = false;
@@ -161,7 +165,7 @@ export class ModalArchiveComponent implements OnInit {
       this.MultiParentMode = false;
     }
     if ((this.ArchiveParam.ModuleCode === 2730 && this.ArchiveParam.ModuleViewTypeCode === 156)
-    || (this.ArchiveParam.ModuleCode === 2901 && this.ArchiveParam.ModuleViewTypeCode === 2)) {
+      || (this.ArchiveParam.ModuleCode === 2901 && this.ArchiveParam.ModuleViewTypeCode === 2)) {
       this.HasArchiveAccess = this.ShowAdvertising = false;
     }
   }
@@ -367,37 +371,41 @@ export class ModalArchiveComponent implements OnInit {
       this.startLeftPosition = 449;
       this.startTopPosition = 87;
     } else {
-      const ArchiveDetailCodeStr = this.SelectedDocumentTypeParent.toString() + '-' + this.ArchiveParam.EntityID.toString();
-      const uploadData = new FormData();
-      uploadData.append('AFile', this.selectedFile, this.selectedFile.name);
-      uploadData.append('ArchiveDetailCodeStr', ArchiveDetailCodeStr);
-      uploadData.append('Note', this.selectedNote);
-      uploadData.append('DocumentTypeCode', this.selectedDocumentTypeCode);
-      uploadData.append('ModuleCode', this.ArchiveParam.ModuleCode);
-      uploadData.append('UseInAdvertising', this.UseInAdvertising.toString());
-      uploadData.append('OrginalModuleCode', this.ArchiveParam.OrginalModuleCode ? this.ArchiveParam.OrginalModuleCode :
-        (this.ArchiveParam.ModuleCode ? this.ArchiveParam.ModuleCode : null));
-      // برای بارگذاری اطلاعات تکمیلی حقیقی و حقوقی اضافه شد
-      this.ArchiveList.UploadFileToServer(uploadData).subscribe(res => {
-        if (this.ArchiveParam.MultiParentDocType) {
-          this.getListDocumentType();
-        } else {
-          this.getDocumentTypeList();
-        }
-        this.rowData = this.ArchiveList.GetArchiveDetailList(ArchiveDetailCodeStr + '-' + this.selectedDocumentTypeCode);
-      },
-        err => {
-          this.type = 'message-box';
-          this.OverHeightPercent = null;
-          this.HaveMaxBtn = false;
-          this.HaveHeader = true;
-          this.MainMaxwidthPixel = null;
-          this.OverMainMinwidthPixel = null;
-          this.alertMessageParams.message = 'بارگذاری با شکست مواجه شد.';
-          this.isClicked = true;
-          this.startLeftPosition = 449;
-          this.startTopPosition = 87;
-        });
+      if (this.IsAutoGenerate) {
+        this.alertMessageParams.message = 'مجوز بارگزاری این مستند را ندارید.';
+      } else {
+        const ArchiveDetailCodeStr = this.SelectedDocumentTypeParent.toString() + '-' + this.ArchiveParam.EntityID.toString();
+        const uploadData = new FormData();
+        uploadData.append('AFile', this.selectedFile, this.selectedFile.name);
+        uploadData.append('ArchiveDetailCodeStr', ArchiveDetailCodeStr);
+        uploadData.append('Note', this.selectedNote);
+        uploadData.append('DocumentTypeCode', this.selectedDocumentTypeCode);
+        uploadData.append('ModuleCode', this.ArchiveParam.ModuleCode);
+        uploadData.append('UseInAdvertising', this.UseInAdvertising.toString());
+        uploadData.append('OrginalModuleCode', this.ArchiveParam.OrginalModuleCode ? this.ArchiveParam.OrginalModuleCode :
+          (this.ArchiveParam.ModuleCode ? this.ArchiveParam.ModuleCode : null));
+        // برای بارگذاری اطلاعات تکمیلی حقیقی و حقوقی اضافه شد
+        this.ArchiveList.UploadFileToServer(uploadData).subscribe(res => {
+          if (this.ArchiveParam.MultiParentDocType) {
+            this.getListDocumentType();
+          } else {
+            this.getDocumentTypeList();
+          }
+          this.rowData = this.ArchiveList.GetArchiveDetailList(ArchiveDetailCodeStr + '-' + this.selectedDocumentTypeCode);
+        },
+          err => {
+            this.type = 'message-box';
+            this.OverHeightPercent = null;
+            this.HaveMaxBtn = false;
+            this.HaveHeader = true;
+            this.MainMaxwidthPixel = null;
+            this.OverMainMinwidthPixel = null;
+            this.alertMessageParams.message = 'بارگذاری با شکست مواجه شد.';
+            this.isClicked = true;
+            this.startLeftPosition = 449;
+            this.startTopPosition = 87;
+          });
+      }
     }
   }
   onDisplay() {
@@ -445,9 +453,11 @@ export class ModalArchiveComponent implements OnInit {
   }
   onDisplayAll() {
     let ParentsCodeList = [];
-    if (this.MultiParentMode)
+    if (this.MultiParentMode) {
       ParentsCodeList = this.ArchiveParam.DocTypeCodeList;
-    else ParentsCodeList.push(this.ArchiveParam.DocTypeCode);
+    } else {
+      ParentsCodeList.push(this.ArchiveParam.DocTypeCode);
+    }
     this.ArchiveList.GetAllFileDocNames(this.ArchiveParam.EntityID, ParentsCodeList).subscribe(res => {
       this.type = 'file-viwer-page';
       this.HaveHeader = true;
@@ -559,6 +569,7 @@ export class ModalArchiveComponent implements OnInit {
     this.ArchiveList.GetListDocumentType(this.ArchiveParam.DocTypeCodeList).subscribe(
       res => {
         this.DocTypeData = res;
+
       }
     );
   }
@@ -569,6 +580,9 @@ export class ModalArchiveComponent implements OnInit {
     this.SelectedDocumentTypeParent = event.data.ParentDocumentTypeCode;
     const ArchiveDetailCodeStr = this.SelectedDocumentTypeParent.toString() + '-' + this.ArchiveParam.EntityID.toString();
     this.rowData = this.ArchiveList.GetArchiveDetailList(ArchiveDetailCodeStr + '-' + this.selectedDocumentTypeCode);
+    this.ComonService.IsAutoGenerate(this.selectedDocumentTypeCode).subscribe((res: any) => {
+      this.IsAutoGenerate = res;
+    });
   }
   OnCheckBoxChange(event) {
     this.UseInAdvertising = event;
