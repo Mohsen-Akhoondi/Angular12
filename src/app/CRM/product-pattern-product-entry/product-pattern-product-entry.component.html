@@ -40,9 +40,9 @@
 
 </div>
 
-<app-over-popup *ngIf="isClicked" [PopupType]="PopUpType" [startLeftPosition]="startLeftPosition"
+<app-cfm-over-popup *ngIf="isClicked" [PopupType]="PopUpType" [startLeftPosition]="startLeftPosition"
   [startTopPosition]="startTopPosition" [minHeightPixel]="MinHeightPixel" [PercentWidth]="PercentWidth"
   [MainMaxwidthPixel]="MainMaxwidthPixel" [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn" [PopupType]="type"
   [PopupParam]="alertMessageParams " (popupclosed)="popupclosed($event)"
   (PopupOutPutParam)="PopUpType ==='message-box' ? MessageBoxAction($event) : getOutPutParam($event)">
-</app-over-popup>
+</app-cfm-over-popup>
