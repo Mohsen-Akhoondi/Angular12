@@ -1,6 +1,6 @@
-import { Component, OnInit, Input, Output } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import {  CommonService } from 'src/app/Services/CommonService/CommonService';
+import { CommonService } from 'src/app/Services/CommonService/CommonService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 @Component({
   selector: 'app-rank-parameter',
@@ -18,7 +18,7 @@ export class RankParameterComponent implements OnInit {
   type: string;
   paramObj;
   HaveHeader: boolean;
-  alertMessageParams = {HaveOkBtn: true, message: ''};
+  alertMessageParams = { HaveOkBtn: true, message: '' };
   OverstartLeftPosition: number;
   OverstartTopPosition: number;
   RankParameterRow: any;
@@ -50,7 +50,7 @@ export class RankParameterComponent implements OnInit {
         suppressSizeToFit: true
       }
     ];
-   this.route.params.subscribe(params => {
+    this.route.params.subscribe(params => {
       this.ModuleCode = +params['ModuleCode'];
     });
   }
@@ -74,7 +74,7 @@ export class RankParameterComponent implements OnInit {
 
     });
   }
-   getRowData() {
+  getRowData() {
     this.RankParameterRow = this.RankParameter.GetRankParameterList();
   }
   RowClick(InputValue) {
@@ -87,26 +87,26 @@ export class RankParameterComponent implements OnInit {
     this.gridApi.forEachNode(function (node) {
       rowData.push(node.data);
     });
-      this.RankParameter.SaveRankParameter(rowData, this.ModuleCode).subscribe(res => {
+    this.RankParameter.SaveRankParameter(rowData, this.ModuleCode).subscribe(res => {
+      this.btnclicked = true;
+      this.type = 'message-box';
+      this.HaveHeader = true;
+      this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
+    },
+      err => {
         this.btnclicked = true;
         this.type = 'message-box';
         this.HaveHeader = true;
-        this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
-      },
-        err => {
-          this.btnclicked = true;
-          this.type = 'message-box';
-          this.HaveHeader = true;
-          this.alertMessageParams.message = 'ثبت با مشکل مواجه شد!';
-        }
-      );
+        this.alertMessageParams.message = 'ثبت با مشکل مواجه شد!';
+      }
+    );
   }
   closeModal() {
     this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
-}
-popupclosed() {
-  this.btnclicked = false;
-}
+  }
+  popupclosed() {
+    this.btnclicked = false;
+  }
 }
 
 
