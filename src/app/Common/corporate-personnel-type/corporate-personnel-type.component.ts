@@ -24,14 +24,14 @@ export class CorporatePersonnelTypeComponent implements OnInit {
   private sub: any;
   PersonnelTypeColDef;
   constructor(private Service: CommonService,
-  private route: ActivatedRoute,
-  private router: Router,
-  private users: UserSettingsService ) {
+    private route: ActivatedRoute,
+    private router: Router,
+    private users: UserSettingsService) {
     this.HasSave = false;
-      this.BoxDevHeight = 80;
-      this.sub = this.route.params.subscribe(params => {
-        this.ModuleCode = +params['ModuleCode'];
-      });
+    this.BoxDevHeight = 80;
+    this.sub = this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
   }
   GridReady(event) {
     this.gridApi = event.api;
@@ -40,27 +40,27 @@ export class CorporatePersonnelTypeComponent implements OnInit {
     this.users.CheckAdmin().subscribe((res: boolean) => {
       this.HasSave = res;
       this.PersonnelTypeColDef = [
-      {
-        headerName: 'ردیف',
-        field: 'ItemNo',
-        width: 100,
-        resizable: true
-      },
-      {
-        headerName: 'کد نوع شخص',
-        field: 'PersonnelTypeCode',
-        width: 100,
-        resizable: true,
-        editable: false,
-      },
-      {
-        headerName: 'نام نوع شخص ',
-        field: 'PersonnelTypeName',
-        width: 250,
-        editable: res,
-        resizable: true
-      },
-    ];
+        {
+          headerName: 'ردیف',
+          field: 'ItemNo',
+          width: 100,
+          resizable: true
+        },
+        {
+          headerName: 'کد نوع شخص',
+          field: 'PersonnelTypeCode',
+          width: 100,
+          resizable: true,
+          editable: false,
+        },
+        {
+          headerName: 'نام نوع شخص ',
+          field: 'PersonnelTypeName',
+          width: 250,
+          editable: res,
+          resizable: true
+        },
+      ];
     });
     this.Service.GetCorporatePersonnelType().subscribe((res: any) => {
       this.rowData = res;
@@ -78,8 +78,8 @@ export class CorporatePersonnelTypeComponent implements OnInit {
     });
     this.rowData.forEach(res => {
       const MasterDocumentType = {
-        PersonnelTypeCode : res.PersonnelTypeCode,
-        PersonnelTypeName : res.PersonnelTypeName,
+        PersonnelTypeCode: res.PersonnelTypeCode,
+        PersonnelTypeName: res.PersonnelTypeName,
       };
       this.Dto.push(MasterDocumentType);
     });
@@ -91,14 +91,14 @@ export class CorporatePersonnelTypeComponent implements OnInit {
       this.Service.GetCorporatePersonnelType().subscribe((res2: any) => {
         this.rowData = [];
         this.rowData = res2;
-    });
+      });
     },
-    err => {
-      this.btnclicked = true;
-      this.type = 'message-box';
-      this.HaveHeader = true;
-      this.alertMessageParams.message = 'ثبت با مشکل مواجه شد';
-    });
+      err => {
+        this.btnclicked = true;
+        this.type = 'message-box';
+        this.HaveHeader = true;
+        this.alertMessageParams.message = 'ثبت با مشکل مواجه شد';
+      });
   }
   popupclosed() {
     this.btnclicked = false;

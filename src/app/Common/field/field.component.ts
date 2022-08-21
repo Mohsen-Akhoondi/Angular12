@@ -29,11 +29,11 @@ export class FieldComponent implements OnInit {
   constructor(private FieldService: CommonService,
     private route: ActivatedRoute,
     private router: Router,
-    private users: UserSettingsService ) {
-      this.HasSave = false;
-        this.sub = this.route.params.subscribe(params => {
-          this.ModuleCode = +params['ModuleCode'];
-        });
+    private users: UserSettingsService) {
+    this.HasSave = false;
+    this.sub = this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
   }
 
   FieldGridReady(event) {
@@ -65,10 +65,10 @@ export class FieldComponent implements OnInit {
           editable: res,
           resizable: true
         },
-    ];
+      ];
     });
-      this.FieldService.GetAllFieldData().subscribe((res: any) => {
-          this.rowData = res;
+    this.FieldService.GetAllFieldData().subscribe((res: any) => {
+      this.rowData = res;
     });
   }
   popupclosed() {
@@ -86,18 +86,18 @@ export class FieldComponent implements OnInit {
     });
     this.rowData.forEach(res => {
       const FielLst = {
-        FieldCode : res.FieldCode,
-        FieldName : res.FieldName,
+        FieldCode: res.FieldCode,
+        FieldName: res.FieldName,
       };
       this.Dto.push(FielLst);
     });
-      this.FieldService.SaveFieldDataList(this.Dto, this.ModuleCode).subscribe((res: any) => {
-        this.rowData = res;
-        this.btnclicked = true;
-        this.type = 'message-box';
-        this.HaveHeader = false;
-        this.HaveMaxBtn = false;
-        this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
-      });
+    this.FieldService.SaveFieldDataList(this.Dto, this.ModuleCode).subscribe((res: any) => {
+      this.rowData = res;
+      this.btnclicked = true;
+      this.type = 'message-box';
+      this.HaveHeader = false;
+      this.HaveMaxBtn = false;
+      this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
+    });
   }
 }

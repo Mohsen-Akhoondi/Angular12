@@ -32,10 +32,10 @@ export class ProviderAssetTypeComponent implements OnInit {
     private router: Router,
     private users: UserSettingsService,
     private Common: CommonService) {
-      this.HasSave = false;
-        this.sub = this.route.params.subscribe(params => {
-          this.ModuleCode = +params['ModuleCode'];
-        });
+    this.HasSave = false;
+    this.sub = this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
   }
 
   GridReady(event) {
@@ -68,10 +68,10 @@ export class ProviderAssetTypeComponent implements OnInit {
           editable: res,
           resizable: true
         },
-    ];
+      ];
     });
     this.Common.GetAllProviderAssetType().subscribe((res: any) => {
-          this.rowData = res;
+      this.rowData = res;
     });
   }
   popupclosed() {
@@ -89,20 +89,20 @@ export class ProviderAssetTypeComponent implements OnInit {
     });
     this.rowData.forEach(res => {
       const ProviderAssetType = {
-        ProviderAssetTypeName : res.ProviderAssetTypeName,
-        ProviderAssetTypeCode : res.ProviderAssetTypeCode,
+        ProviderAssetTypeName: res.ProviderAssetTypeName,
+        ProviderAssetTypeCode: res.ProviderAssetTypeCode,
       };
       this.Dto.push(ProviderAssetType);
     });
     // tslint:disable-next-line: no-shadowed-variable
-      this.Common.SaveProviderAssetTypeList(this.Dto, this.ModuleCode).subscribe((res: any) => {
-        this.rowData = res;
-        this.btnclicked = true;
-        this.type = 'message-box';
-        this.HaveHeader = false;
-        this.HaveMaxBtn = false;
-        this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
-      });
+    this.Common.SaveProviderAssetTypeList(this.Dto, this.ModuleCode).subscribe((res: any) => {
+      this.rowData = res;
+      this.btnclicked = true;
+      this.type = 'message-box';
+      this.HaveHeader = false;
+      this.HaveMaxBtn = false;
+      this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
+    });
   }
 }
 

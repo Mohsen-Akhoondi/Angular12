@@ -1,32 +1,31 @@
-#header
-{
+#header {
     background-color: deepskyblue;
     width: 100%;
     height: 20px;
     cursor: move;
 }
 
-#headertitle
-{
-    float : right;
+#headertitle {
+    float: right;
     padding-right: 5px;
 }
 
-.container
-{
+.container {
     border: solid blue;
 }
-.feild-set{
+
+.feild-set {
     border: 1px solid rgb(218, 218, 218);
     min-height: 50px;
     margin-bottom: 5px;
     padding: 5px;
 }
-table
-{
+
+table {
     margin-left: auto;
     margin-right: auto;
 }
+
 .container.full {
     max-width: 100%;
     overflow: hidden;
@@ -39,26 +38,24 @@ table
     height: 100%;
 }
 
-#sidebar
-  {
+#sidebar {
     background-color: transparent;
     width: 200px;
     padding: 0;
-    border : solid #a9a9a9 ;
+    border: solid #a9a9a9;
     min-width: 250px;
     float: right;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
-  }
+}
 
-#content
-{
+#content {
     background-color: transparent;
     flex: 1;
     padding: 0;
-    border: solid #a9a9a9 ;
+    border: solid #a9a9a9;
     overflow: hidden;
     float: left;
     display: flex;
@@ -67,8 +64,7 @@ table
     align-items: stretch;
 }
 
-.data-grid
-{
+.data-grid {
     flex: 1;
     background-color: transparent;
     height: 550px;
@@ -77,25 +73,22 @@ table
 }
 
 
-span
-{
-font-size: 12px;
-text-align: right;
+span {
+    font-size: 12px;
+    text-align: right;
 }
 
-.input-year
-{
+.input-year {
     float: right;
     margin: 5px auto;
     align-content: center;
 }
 
-.FontSize12
-{
+.FontSize12 {
     font-size: 12px;
 }
 
-.box-dev{
+.box-dev {
     border-radius: 5px;
     border: 1px solid rgb(218, 218, 218);
 }
