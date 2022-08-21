@@ -7,43 +7,23 @@ import { HomeComponent } from './Home/home.component';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { UserDetailComponent } from './Users/user-detail.component';
 import { AppMenuComponent } from './Shared/Menu/app-menu.component';
+import { AppSidebarComponent } from './Shared/SideBar/app-sidebar.component';
 import { AccessDeniedComponent } from './Shared/AccessControl/access-denied.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { CommonModule } from '@angular/common';
 import { registerLocaleData } from '@angular/common';
 import { ModalTwoColComponent } from './Shared/modal-two-col/modal-two-col.component';
 import en from '@angular/common/locales/en';
 import { PriceListComponent } from './PriceList/price-list.component';
 import { OverPopupComponent } from './Shared/OverPopUp/over-popup.component';
-import { GridComponent } from './Shared/grid-component/grid.component';
-import { AgGridModule } from 'ag-grid-angular';
-import { TenderPageComponent } from './Advertising/tender-page/tender-page.component';
-import { MainPageComponent } from './Advertising/main-page/main-page.component';
-import { CustomCheckBoxComponent } from './Shared/CustomComponent/custom-check-box/custom-check-box.component';
-import { NgSelectVirtualScrollComponent } from './Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
-import { TestComponent } from './test/test.component';
-import { RouterModule } from '@angular/router';
-import { CustomCheckboxModule } from './Shared/custom-checkbox/src/public_api';
-import { MessageService } from './Shared/message-box/MessageService';
-import { TreeModule } from '@circlon/angular-tree-component';
-import { ExpandMode, NgxTreeSelectModule } from './Shared/ngx-tree-select/src';
-import { MalihuScrollbarModule } from 'ngx-malihu-scrollbar';
-import { MyTreeComponent } from './Shared/tree-component/tree.component';
-import { AppSidebarComponent } from './Shared/SideBar/app-sidebar.component';
 import { PriceListAnalayseComponent } from './Shared/price-list-analayse/price-list-analayse.component';
 import { AnalayzePriceComponent } from './Shared/analayze-price/analayze-price.component';
 import { ContractListPageComponent } from './Shared/contract-list-page/contract-list-page.component';
 import { ContractEstimatePageComponent } from './Shared/contract-estimate-page/contract-estimate-page.component';
 import { ModalArchiveYearComponent } from './Shared/modal-archive-year/modal-archive-year.component';
-import { ModalArchiveComponent } from './Shared/modal-archive/modal-archive.component';
 import { ModalApprPriceIndexComponent } from './Shared/modal-appr-price-index/modal-appr-price-index.component';
-import { DpDatePickerModule } from './Shared/jalali-angular-datepicker';
-import { JalaliDatepickerComponent } from './Shared/jalali-datepicker/jalali-datepicker.component';
 import { ContractPageComponent } from './Shared/contract-page/contract-page.component';
-import { ExcelLoadDataComponent } from './Shared/excel-load-data/excel-load-data.component';
 import { ContractPersonPageComponent } from './Shared/contract-person-page/contract-person-page.component';
 import { CartableComponent } from './Cartable/cartable.component';
-import { MessageBoxComponent } from './Shared/message-box/message-box.component';
 import { WorkflowSendComponent } from './WorkFlow/workflow-send/workflow-send.component';
 import { CustomizedMenuComponent } from './Shared/CustomizedMenu/customized-menu/customized-menu.component';
 import { NgSelectCellEditorComponent } from './Shared/NgSelectCellEditor/ng-select-cell-editor.component';
@@ -63,21 +43,18 @@ import { WorkflowStatusPageComponent } from './WorkFlow/workflow-status-page/wor
 import { WorkflowOperationPageComponent } from './WorkFlow/workflow-operation-page/workflow-operation-page.component';
 import { WorkflowNodePageComponent } from './WorkFlow/workflow-node-page/workflow-node-page.component';
 import { WorkflowTransitionPageComponent } from './WorkFlow/workflow-transition-page/workflow-transition-page.component';
-// // // tslint:disable-next-line:max-line-length
+// tslint:disable-next-line:max-line-length
 import { PriceListTopicDataentryPageComponent } from './PriceList/PriceListTopic/price-list-topic-dataentry-page/price-list-topic-dataentry-page.component';
 import { NumberFieldEditableComponent } from './Shared/number-field-editable/number-field-editable.component';
 import { PriceListTopicComponent } from './PriceList/price-list-topic/price-list-topic.component';
 import { CheckboxFieldEditableComponent } from './Shared/checkbox-field-editable/checkbox-field-editable.component';
-import { ContractPayListComponent } from './Contract/ContractPay/contract-pay-list/contract-pay-list.component';
-// import { ContractPayListComponent } from './Contract/ContractPay/contract-pay-list/contract-pay-list.component';
-import { ContractPayDetailsComponent } from './Contract/ContractPay/contract-pay/contract-pay-details.component';
-// import { MessageService } from './Shared/message-box/MessageService';
+import { MessageService } from './Shared/message-box/MessageService';
 // tslint:disable-next-line:max-line-length
-import { NumberInputComponentComponent } from './Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
+import { ContractPayDetailsComponent } from './Contract/ContractPay/contract-pay/contract-pay-details.component';
 
-// import { DpDatePickerModule } from './Shared/jalali-angular-datepicker';
-// // tslint:disable-next-line:max-line-length
+// tslint:disable-next-line:max-line-length
 import { ChildPriceListTopicPageComponent } from './PriceList/PriceListTopic/child-price-list-topic-page/child-price-list-topic-page.component';
+import { ContractPayListComponent } from './Contract/ContractPay/contract-pay-list/contract-pay-list.component';
 import { ContractPayTypesComponent } from './Contract/ContractPay/contract-pay-types/contract-pay-types.component';
 import { SelecetContractEstimateComponent } from './Contract/ContractPay/selecet-contract-estimate/selecet-contract-estimate.component';
 import { ChoosenContractPayRepComponent } from './Contract/ContractPay/Report/choosen-contract-pay-rep/choosen-contract-pay-rep.component';
@@ -137,14 +114,15 @@ import { ShowFeeDetailsComponent } from './Contract/show-fee-details/show-fee-de
 import { ProductRequestPageComponent } from './ProductRequest/product-request-page/product-request-page.component';
 import { WorkflowLogComponent } from './WorkFlow/workflow-log/workflow-log.component';
 import { DealMethodComponent } from './Supply/deal-method/deal-method.component';
+import { NgxTreeSelectModule, ExpandMode } from './Shared/ngx-tree-select/src';
 import { TreeSelectComponent } from './Shared/tree-select/tree-select.component';
 import { ProductRequestSuggestionComponent } from './ProductRequest/product-request-suggestion/product-request-suggestion.component';
 import { CommonServices } from './Services/BaseService/CommonServices';
+import { CustomCheckboxModule } from './Shared/custom-checkbox/src/public_api';
 import { ProductRequestCoefTypeComponent } from './ProductRequest/product-request-coef-type/product-request-coef-type.component';
 import { ProductRequestCoefComponent } from './ProductRequest/product-request-coef/product-request-coef.component';
 import { ProductRequestCostComponent } from './ProductRequest/product-request-cost/product-request-cost.component';
 import { ProductRequestPersonItemComponent } from './ProductRequest/product-request-person-item/product-request-person-item.component';
-import { UserWorkLogDetailComponent } from './WorkFlow/user-work-log-detail/user-work-log-detail.component';
 import { ContractPersonRepComponent } from './Contract/Report/contract-person-rep/contract-person-rep.component';
 import { ProductRequestContractComponent } from './ProductRequest/product-request-contract/product-request-contract.component';
 // tslint:disable-next-line:max-line-length
@@ -172,7 +150,7 @@ import { UserWorkLogProductRequestComponent } from './WorkFlow/user-work-log-Pro
 import { DocumentTypeMasterComponent } from './Common/app-document-type-master/app-document-type-master.component';
 // tslint:disable-next-line: max-line-length
 import { DocumentTypeMasterMandatoryComponent } from './Common/app-document-type-master-mandatory/app-document-type-master-mandatory.component';
-// import { from } from 'rxjs';
+import { from } from 'rxjs';
 import { ProvisionComponent } from './ProductRequest/provision/provision.component';
 import { AdvertisingComponent } from './ProductRequest/advertising/advertising.component';
 import { NewsPaperPageComponent } from './ProductRequest/news-paper-page/news-paper-page.component';
@@ -221,7 +199,8 @@ import { ShareTypeComponent } from './Common/share-type/share-type.component';
 import { UnivercityComponent } from './Common/univercity/univercity.component';
 import { FieldComponent } from './Common/field/field.component';
 import { GradeComponent } from './Common/grade/grade.component';
-import { Tree2Component } from './Advertising/tree2/tree2.component';
+import { MainPageComponent } from './Advertising/main-page/main-page.component';
+import { TenderPageComponent } from './Advertising/tender-page/tender-page.component';
 import { DealDetailsComponent } from './Advertising/deal-details/deal-details.component';
 import { LoginComponent } from './Advertising/login/login.component';
 import { DealUploadDocsComponent } from './Advertising/deal-upload-docs/deal-upload-docs.component';
@@ -239,15 +218,13 @@ import { CommitionPrintComponent } from './ProductRequest/ProPosal/commition-pri
 // tslint:disable-next-line:max-line-length
 import { ChooseReportProductRequestItemComponent } from './Shared/choose-report-product-request-item/choose-report-product-request-item.component';
 import { ChoosenRequestRevocationComponent } from './ProductRequest/choosen-request-revocation/choosen-request-revocation.component';
-// // tslint:disable-next-line: max-line-length
+// tslint:disable-next-line: max-line-length
 import { ProductRequestPageProposalComponent } from './ProductRequest/product-request-page-proposal/product-request-page-proposal.component';
 import { ApplicationNoteComponent } from './Cartable/application-note/application-note.component';
 // tslint:disable-next-line: max-line-length
 import { EstateRecognitionSearchComponent } from './ProductRequest/ProductRequestEstate/estate-recognition-search/estate-recognition-search.component';
 import { RoleSearchComponent } from './Actors/role-search/role-search.component';
 import { ProductRequestWFDetailComponent } from './WorkFlow/product-request-wf-detail/product-request-wf-detail.component';
-import { PDFViewerComponent } from './Shared/pdfviewer/pdfviewer.component';
-import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { CreatedUserLogComponent } from './Actors/created-user-log/created-user-log.component';
 import { UsersRolesInRegionListComponent } from './Actors/users-roles-in-region-list/users-roles-in-region-list.component';
 import { CorrectionContractEstimateComponent } from './WorkFlow/correction-contract-estimate/correction-contract-estimate.component';
@@ -262,7 +239,6 @@ import { Article31PageComponent } from './ProductRequest/article31-page/article3
 import { EstateRecognitionEvaluationComponent } from './ProductRequest/ProductRequestEstate/estate-recognition-evaluation/estate-recognition-evaluation.component';
 // tslint:disable-next-line:max-line-length
 import { ProductRequestRelatedItemsComponent } from './ProductRequest/product-request-related-items/product-request-related-items.component';
-import { RadioBoxComponentComponent } from './Shared/Radio-Box/Radio-Box-Component/radio-box-component.component';
 import { FilterDocumentTypeComponent } from './Common/filter-document-type/filter-document-type.component';
 import { CorporatePersonnelTypeComponent } from './Common/corporate-personnel-type/corporate-personnel-type.component';
 // tslint:disable-next-line:max-line-length
@@ -296,6 +272,8 @@ import { EndOfContractComponent } from './Contract/Base_modules/end-of-contract/
 import { SendSmsComponent } from './Shared/send-sms/send-sms.component';
 import { ControlProjectBgtInfoPageComponent } from './Budget/control-project-bgt-info-page/control-project-bgt-info-page.component';
 import { CivilProjectPageComponent } from './Budget/civil-project-page/civil-project-page.component';
+
+
 import { RequestEvaluateListComponent } from './ProductRequest/request-evaluate-list/request-evaluate-list.component';
 import { RequestEvaluateComponent } from './ProductRequest/request-evaluate/request-evaluate.component';
 import { EstatePropertyTypePageComponent } from './ProductRequest/estate-property-type-page/estate-property-type-page.component';
@@ -338,54 +316,85 @@ import { ContractWfReportLevel2Component } from './Contract/contract-wf-report-l
 import { ContractWfReportLevel3Component } from './Contract/contract-wf-report-level3/contract-wf-report-level3.component';
 import { ReportAverageWorkflowObjectsComponent } from './WorkFlow/report-average-workflow-objects/report-average-workflow-objects.component';
 import { AdjustmentPriceRangeFormulasComponent } from './ProductRequest/ProPosal/adjustment-price-range-formulas/adjustment-price-range-formulas.component';
-import { FileViwerPageComponent } from './Shared/file-viwer-page/file-viwer-page.component';
 import { ContractStatusSummaryRepPageComponent } from './ProductRequest/contract-status-summary-rep-page/contract-status-summary-rep-page.component';
 import { ContractStatusSummarySearchPageComponent } from './ProductRequest/contract-status-summary-search-page/contract-status-summary-search-page.component';
-import { ImageViewerModule } from '@udhsin/ngx-image-viewer';
-import { LoginPageComponent } from './Shared/login-page/login-page.component';
-import { StimulsoftViewerModule } from 'stimulsoft-viewer-angular';
-import { CustomizedTreeComponent } from './Shared/customized-tree/customized-tree.component';
+import { ModuleViewTypeDocumentComponent } from './Common/module-view-type-document/module-view-type-document.component';
+import { WorkflowActionComponent } from './WorkFlow/workflow-action/workflow-action.component';
+import { CostCenterPageRepComponent } from './ProductRequest/cost-center-page-rep/cost-center-page-rep.component';
+import { WorkflowObjectComponent } from './WorkFlow/workflow-object/workflow-object.component';
+import { SacleComponent } from './Supply/sacle/sacle.component';
+import { ModuleComponent } from './AppUser/module/module/module.component';
+import { WorkflowStatusComponent } from './WorkFlow/workflow-status/workflow-status.component';
+import { ProductSearchComponent } from './Supply/product-search/product-search.component';
+import { GoodsRequestComponent } from './Supply/goods-request/goods-request.component';
+import { AppInputAdjustmentPriceRangeComponent } from './ProductRequest/ProPosal/app-input-adjustment-price-range/app-input-adjustment-price-range.component';
+import { ExternalUserDetailComponent } from './Actors/external-user-detail/external-user-detail.component';
+import { RelationTypeComponent } from './Common/relation-type/relation-type.component';
+import { CurrentSuppliersContractComponent } from './Actors/current-suppliers-contract/current-suppliers-contract.component';
+import { ShowContractListComponent } from './ProductRequest/show-contract-list/show-contract-list.component';
+import { ApplicantOutCostCenterRepComponent } from './ProductRequest/applicant-out-cost-center-rep/applicant-out-cost-center-rep.component';
+import { ProductReceiveDocComponent } from './ProductRequest/product-receive-doc/product-receive-doc.component';
+import { AssetPageComponent } from './Assets/asset-page/asset-page.component';
+import { AssetPageSearchComponent } from './Assets/asset-page-search/asset-page-search.component';
+import { ChangeCartableUserComponent } from './Cartable/change-cartable-user/change-cartable-user.component';
 import { DeadlineContractListComponent } from './Contract/deadline-contract-list/deadline-contract-list.component';
-import { NgSelectModule } from './Shared/ng-select/public-api';
-import { ActorNoteComponent } from './Actors/actor-note/actor-note.component';
-import { CorporateWithoutInquiryComponent } from './Actors/corporate-without-inquiry/corporate-without-inquiry.component';
-
 import { RichTextBoxInputPageComponent } from './Shared/rich-text-box-input-page/rich-text-box-input-page.component';
-import { RoutNavigateComponent } from './Shared/rout-navigate/rout-navigate.component';
-import { SharedOverPopupComponent } from './Shared/shared-over-popup/shared-over-popup.component';
+import { ApplicationLinkPageComponent } from './AppUser/application-link-page/application-link-page.component';
+import { ShowHistoryDetailComponent } from './AppUser/show-history-detail/show-history-detail.component';
+import { ShowOpenContractComponent } from './Contract/show-open-contract/show-open-contract.component';
+import { ConditionRegionReportComponent } from './Contract/condition-region-report/condition-region-report.component';
+import { RenewRequestsRepComponent } from './WorkFlow/renew-requests-rep/renew-requests-rep.component';
 import { CfmModule } from './CRM/CfmModule/cfm.module';
+import { ShareModule } from './Shared/SharedModule/share.module.component';
+import { MalihuScrollbarModule } from 'ngx-malihu-scrollbar';
+import { MaintenanceVolumeGreenSpaceComponent } from './Contract/Base_modules/maintenance-volume-green-space/maintenance-volume-green-space.component';
+import { ContractInfoLimitedChangePageComponent } from './ProductRequest/contract-info-limited-change-page/contract-info-limited-change-page.component';
+import { ContractSupervisionComponent } from './Contract/ContractSupervision/contract-supervision/contract-supervision.component';
+import { ApplicationNoteFormComponent } from './AppUser/application-note-form/application-note-form.component';
+import { ApplicationNoteListComponent } from './AppUser/application-note-list/application-note-list.component';
+import { RequestPeriodReportComponent } from './ProductRequest/request-period-report/request-period-report.component';
+import { ContractModule } from './Contract/ContratModule/contract/contract.module';
+import { ProdutRequestCommitionMemberReportComponent } from './ProductRequest/produt-request-commition-member-report/produt-request-commition-member-report.component';
+import { RouteNavigateComponent } from './Shared/route-navigate/route-navigate.component';
+import { ActorNoteComponent } from './Actors/actor-note/actor-note.component';
+import { ContractDealMethodBaseReportComponent } from './Contract/Report/contract-deal-method-base-report/contract-deal-method-base-report.component';
+import { ChangeContractStatusComponent } from './WorkFlow/change-contract-status/change-contract-status.component';
+import { ProxyContractListComponent } from './ProductRequest/proxy-contract-list/proxy-contract-list.component';
+import { ShowContractRelationComponent } from './Contract/show-contract-relation/show-contract-relation.component';
+import { CustomerExpertsEntryComponent } from './CRM/customer-experts-entry/customer-experts-entry.component';
+import { CorporateWithoutInquiryComponent } from './Actors/corporate-without-inquiry/corporate-without-inquiry.component';
+import { PersonWithoutInquiryComponent } from './Actors/person/person-without-inquiry/person-without-inquiry.component';
+import { ContractArchiveListComponent } from './Contract/contract-archive-list/contract-archive-list.component';
+import { ContractPayDeductionComponent } from './Contract/ContractPay/contract-pay/contract-pay-deduction/contract-pay-deduction.component';
+import { ContractComponent } from './Contract/contract/contract.component';
+import { GeneralSearchContractRequestComponent } from './WorkFlow/general-search-contract-request/general-search-contract-request.component';
+import { ProductRequestInvestArchiveComponent } from './ProductRequest/product-request-invest-archive/product-request-invest-archive.component';
+import { ShowHistoryComponent } from './Common/show-history/show-history.component';
+import { ProductRequestInvestArchiveListComponent } from './ProductRequest/product-request-invest-archive-list/product-request-invest-archive-list.component';
+
+
+
+
 @NgModule({
   declarations: [
-    LoginPageComponent,
-    ModalTwoColComponent,
-    OverPopupComponent,
-    HomeComponent,
     AppComponent,
-    GridComponent,
-    AccessDeniedComponent,
-    TenderPageComponent,
-    MainPageComponent,
-    CustomCheckBoxComponent,
-    NgSelectVirtualScrollComponent,
-    TestComponent,
+    HomeComponent,
     UserDetailComponent,
-    CheckboxFieldEditableComponent,
     AppMenuComponent,
-    PriceListComponent,
     AppSidebarComponent,
+    AccessDeniedComponent,
+    ModalTwoColComponent,
+    PriceListComponent,
+    OverPopupComponent,
     PriceListAnalayseComponent,
     AnalayzePriceComponent,
     ContractListPageComponent,
     ContractEstimatePageComponent,
     ModalArchiveYearComponent,
-    ModalArchiveComponent,
     ModalApprPriceIndexComponent,
     ContractPageComponent,
-    JalaliDatepickerComponent,
-    ExcelLoadDataComponent,
     ContractPersonPageComponent,
     CartableComponent,
-    MessageBoxComponent,
     WorkflowSendComponent,
     CustomizedMenuComponent,
     NgSelectCellEditorComponent,
@@ -395,11 +404,10 @@ import { CfmModule } from './CRM/CfmModule/cfm.module';
     UserRoleComponent,
     TemplateRendererComponent,
     LoadingComponent,
-    MyTreeComponent,
     WorkflowTypeFormComponent,
     ContractCoefTypeComponent,
     ChooseReportComponent,
-    NumberFieldEditableComponent,
+    WorkflowTypeFormComponent,
     ContractCoefComponent,
     ContractOrderitemCoefComponent,
     WorkflowStatusPageComponent,
@@ -407,10 +415,11 @@ import { CfmModule } from './CRM/CfmModule/cfm.module';
     WorkflowNodePageComponent,
     WorkflowTransitionPageComponent,
     PriceListTopicDataentryPageComponent,
+    NumberFieldEditableComponent,
     PriceListTopicComponent,
-    NumberInputComponentComponent,
+    CheckboxFieldEditableComponent,
     ContractPayListComponent,
-    JalaliDatepickerComponent,
+
     ContractPayDetailsComponent,
     ChildPriceListTopicPageComponent,
     ContractPayTypesComponent,
@@ -425,6 +434,7 @@ import { CfmModule } from './CRM/CfmModule/cfm.module';
     ContractAgentComponent,
     ContractAgentRoleComponent,
     PriceListRelatedListComponent,
+    ContractPayItemEstimatePageComponent,
     RoadTypeComponent,
     TransferDistanceItemComponent,
     WorkglowTypeModuleComponent,
@@ -445,9 +455,11 @@ import { CfmModule } from './CRM/CfmModule/cfm.module';
     ContractPersonEstimateComponent,
     ContractVehicleEstimateComponent,
     ContractIdentityPresenterComponent,
-    NgSelectVirtualScrollComponent,
+    MonthWorkHourComponent,
     ChoosenContractEstimateRepComponent,
+    MonthWorkHourComponent,
     ConsultPersonComponent,
+    MonthWorkHourComponent,
     ContractPayItemHourComponent,
     GroupMessageBoxComponent,
     ContractSupervisionListComponent,
@@ -465,12 +477,10 @@ import { CfmModule } from './CRM/CfmModule/cfm.module';
     DealMethodComponent,
     TreeSelectComponent,
     ProductRequestSuggestionComponent,
-    CustomCheckBoxComponent,
     ProductRequestCoefTypeComponent,
     ProductRequestCoefComponent,
     ProductRequestCostComponent,
     ProductRequestPersonItemComponent,
-    UserWorkLogDetailComponent,
     UserWorkLogContractPayComponent,
     UserWorkLogContractOrderComponent,
     UserWorkLogProductRequestComponent,
@@ -535,10 +545,12 @@ import { CfmModule } from './CRM/CfmModule/cfm.module';
     FieldComponent,
     GradeComponent,
     ActorCertificateComponent,
-    Tree2Component,
+    MainPageComponent,
+    TenderPageComponent,
     DealDetailsComponent,
     LoginComponent,
     DealUploadDocsComponent,
+    ActorCertificateComponent,
     GroundDeliveryMinutesComponent,
     PriceListBusinessPatternComponent,
     AdvertisingArchiveComponent,
@@ -557,7 +569,6 @@ import { CfmModule } from './CRM/CfmModule/cfm.module';
     EstateRecognitionSearchComponent,
     RoleSearchComponent,
     ProductRequestWFDetailComponent,
-    PDFViewerComponent,
     CreatedUserLogComponent,
     UsersRolesInRegionListComponent,
     CorrectionContractEstimateComponent,
@@ -569,7 +580,6 @@ import { CfmModule } from './CRM/CfmModule/cfm.module';
     Article31PageComponent,
     EstateRecognitionEvaluationComponent,
     ProductRequestRelatedItemsComponent,
-    RadioBoxComponentComponent,
     FilterDocumentTypeComponent,
     CorporatePersonnelTypeComponent,
     AdjustmentPriceRangeFormulasPageComponent,
@@ -643,28 +653,65 @@ import { CfmModule } from './CRM/CfmModule/cfm.module';
     ContractWfReportLevel3Component,
     ReportAverageWorkflowObjectsComponent,
     AdjustmentPriceRangeFormulasComponent,
-    FileViwerPageComponent,
     ContractStatusSummaryRepPageComponent,
     ContractStatusSummarySearchPageComponent,
-    CustomizedTreeComponent,
+    ModuleViewTypeDocumentComponent,
+    WorkflowActionComponent,
+    CostCenterPageRepComponent,
+    ModuleComponent,
+    GoodsRequestComponent,
+    WorkflowStatusComponent,
+    ProductSearchComponent,
+    WorkflowObjectComponent,
+    SacleComponent,
+    ModuleComponent,
+    AppInputAdjustmentPriceRangeComponent,
+    ExternalUserDetailComponent,
+    RelationTypeComponent,
+    CurrentSuppliersContractComponent,
+    ShowContractListComponent,
+    ApplicantOutCostCenterRepComponent,
+    ProductReceiveDocComponent,
+    AssetPageComponent,
+    AssetPageSearchComponent,
+    ChangeCartableUserComponent, 
     DeadlineContractListComponent,
-    ActorNoteComponent,
-    CorporateWithoutInquiryComponent,
     RichTextBoxInputPageComponent,
-    RoutNavigateComponent,
-    SharedOverPopupComponent
+    ShowHistoryDetailComponent,
+    ShowOpenContractComponent,
+    ApplicationLinkPageComponent,
+    ConditionRegionReportComponent,
+    RenewRequestsRepComponent,
+    ContractInfoLimitedChangePageComponent,
+    MaintenanceVolumeGreenSpaceComponent,
+    ApplicationNoteFormComponent,
+    ApplicationNoteListComponent,
+    ContractSupervisionComponent,
+    RequestPeriodReportComponent,
+    ProdutRequestCommitionMemberReportComponent,
+    RouteNavigateComponent,
+    ActorNoteComponent,
+    ContractDealMethodBaseReportComponent,
+    ChangeContractStatusComponent,
+    ProxyContractListComponent,
+    ShowContractRelationComponent,
+    CustomerExpertsEntryComponent,
+    CorporateWithoutInquiryComponent,
+    PersonWithoutInquiryComponent,
+    ContractArchiveListComponent,
+    ContractPayDeductionComponent,
+    ContractComponent,
+    GeneralSearchContractRequestComponent,
+    ProductRequestInvestArchiveComponent,
+    ShowHistoryComponent,
+    ProductRequestInvestArchiveListComponent,
   ],
   imports: [
-    FormsModule,
-    BrowserModule,
-    CommonModule,
     AppRoutingModule,
+    ReactiveFormsModule,
     HttpClientModule,
-    MalihuScrollbarModule.forRoot(),
-    AgGridModule.withComponents([]),
-    CustomCheckboxModule,
-    DpDatePickerModule,
-    TreeModule,
+    BrowserAnimationsModule,
+    FormsModule,
     NgxTreeSelectModule.forRoot({
       allowFilter: true,
       filterPlaceholder: 'مقدار مورد نظر را وارد نمایید...',
@@ -675,25 +722,26 @@ import { CfmModule } from './CRM/CfmModule/cfm.module';
       allowParentSelection: true,
       expandMode: ExpandMode.None
     }),
-    NgxExtendedPdfViewerModule,
-    ImageViewerModule,
-    StimulsoftViewerModule,
+    CustomCheckboxModule,
     CfmModule,
+    ShareModule,
+    MalihuScrollbarModule.forRoot(),
+    ContractModule,
   ],
   providers: [
-    JalaliDatepickerComponent,
     RefreshServices,
     LoadingService,
     MessageService,
     CommonServices
   ],
   entryComponents: [
-    JalaliDatepickerComponent,
-    CheckboxFieldEditableComponent,// Changee_1
-    NumberFieldEditableComponent, // Changee_2
+    NgSelectCellEditorComponent,
+    CheckboxFieldEditableComponent,
+    OverPopUpCellEditorComponent,
+    TemplateRendererComponent,
+    NumberFieldEditableComponent,
     TreeSelectComponent,
-    NumberInputComponentComponent,
-    NgSelectVirtualScrollComponent
+    CarTagComponent,
   ],
   bootstrap: [AppComponent]
 })

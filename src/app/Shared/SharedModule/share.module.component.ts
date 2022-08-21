@@ -10,11 +10,9 @@ import { DpDatePickerModule } from '../jalali-angular-datepicker';
 import { NumberInputComponentComponent } from '../CustomComponent/InputComponent/number-input-component/number-input-component.component';
 import { CustomizedTreeComponent } from '../customized-tree/customized-tree.component';
 import { MyTreeComponent } from '../tree-component/tree.component';
-import { TreeModule } from 'angular-tree-component';
 import { MalihuScrollbarModule } from 'ngx-malihu-scrollbar';
 import { Tree2Component } from '../../Advertising/tree2/tree2.component';
 import { FileViwerPageComponent } from '../file-viwer-page/file-viwer-page.component';
-import { ImageViewerModule } from 'ng2-image-viewer';
 import { MessageBoxComponent } from '../message-box/message-box.component';
 import { SharedOverPopupComponent } from '../shared-over-popup/shared-over-popup.component';
 import { UsersOrganizationSignComponent } from '../../AppUser/users-organization-sign/users-organization-sign.component';
@@ -82,12 +80,9 @@ import { RadioBoxComponentComponent } from '../Radio-Box/Radio-Box-Component/rad
     CommonModule,
     BrowserModule,
     AgGridModule.withComponents([]),
-    NgSelectModule,
     FormsModule,
     DpDatePickerModule,
-    TreeModule.forRoot(),
     MalihuScrollbarModule.forRoot(),
-    ImageViewerModule,
     NgxExtendedPdfViewerModule,
     CustomCheckboxModule,
     NgxGraphModule

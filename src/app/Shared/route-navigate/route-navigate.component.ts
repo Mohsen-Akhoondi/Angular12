@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
-  selector: 'app-rout-navigate',
-  templateUrl: './rout-navigate.component.html',
-  styleUrls: ['./rout-navigate.component.css']
+  selector: 'app-route-navigate',
+  templateUrl: './route-navigate.component.html',
+  styleUrls: ['./route-navigate.component.css']
 })
-export class RoutNavigateComponent implements OnInit {
+export class RouteNavigateComponent implements OnInit {
   ModuleCode;
   ModuleName: any;
 
@@ -18,8 +18,10 @@ export class RoutNavigateComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.router.navigate([{ outlets: { PopUp: ['PopUp', this.ModuleCode, this.ModuleName] } }]);
+  ngOnInit() {
+   this.router.navigate([{ outlets: {  PopUp: ['PopUp',this.ModuleCode,this.ModuleName] } }]);
+   
+
   }
 
 }
