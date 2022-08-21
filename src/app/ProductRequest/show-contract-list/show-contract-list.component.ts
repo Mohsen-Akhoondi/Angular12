@@ -1,8 +1,8 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { Console } from 'console';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { isUndefined } from 'util';
-
+import { forkJoin } from 'rxjs';
+import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 @Component({
   selector: 'app-show-contract-list',
   templateUrl: './show-contract-list.component.html',
@@ -19,14 +19,27 @@ export class ShowContractListComponent implements OnInit {
   startLeftPosition;
   startTopPosition;
   alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false };
-  mainBodyHeight = 95;
+  mainBodyHeight = 85;
   gridHeight = 97;
   columnDefPriceList: any;
   rowData: any = [];
   AgridApi;
   selectedRowContractId;
+  FinYearItems;
+  FinYearParams = {
+    bindLabelProp: 'FinYearCode',
+    bindValueProp: 'FinYearCode',
+    placeholder: '',
+    MinWidth: '130px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    Required: true
+  };
   constructor(
-    private ProductService: ProductRequestService
+    private ProductService: ProductRequestService,
+    private Workflow: WorkflowService,
   ) { }
 
   ngOnInit() {
@@ -106,8 +119,18 @@ export class ShowContractListComponent implements OnInit {
     this.rowData = [];
     if (this.InputParam &&
       (this.InputParam.RegionCode !== null && this.InputParam.RegionCode > -1 && !isUndefined(this.InputParam.RegionCode))) {
-      this.ProductService.GetContractByRegionCode(this.InputParam.RegionCode).subscribe(res => {
-        this.rowData = res;
+      forkJoin([
+        // this.ProductService.GetContractByRegion(
+        //   this.InputParam.RegionCode,
+        //   this.InputParam.IsCost,
+        //   null
+        //   ),
+        this.Workflow.GetFinYearList()
+      ]).subscribe(res => {
+        // this.rowData = res[0];
+        this.FinYearItems = res[0];
+        this.FinYearParams.selectedObject = res[0][0].FinYearCode;
+        this.onChangeFinYearObj(this.FinYearParams.selectedObject)
       });
     }
   }
@@ -155,5 +178,15 @@ export class ShowContractListComponent implements OnInit {
   popupclosed(event) {
     this.btnclicked = false;
     this.type = '';
+  }
+
+  onChangeFinYearObj(event) {
+    this.ProductService.GetContractByRegion(
+      this.InputParam.RegionCode,
+      this.InputParam.IsCost,
+      this.FinYearParams.selectedObject
+    ).subscribe(res => {
+      this.rowData = res;
+    });
   }
 }

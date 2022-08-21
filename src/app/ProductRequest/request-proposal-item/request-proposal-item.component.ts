@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, EventEmitter, Output, TemplateRef, ViewChild } from '@angular/core';
-import { of, forkJoin } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
