@@ -6,7 +6,8 @@
       <div id="tabcontent" class="tab-content" style="margin-top: 5px;" [style.height.%]="100">
         <div role="tabpanel" id="shenasnameh" class="tab-pane fade show active"
           style="height: 100%; margin-bottom: 5px;">
-          <div class="main-form-body" style="display: inherit">
+          <fieldset class="feild-set" style="display: inherit">
+            <legend class="legend">اطلاعات درخواست</legend>
             <table style="width: 100%;">
               <tr>
                 <!-- <td style="width: 33%">
@@ -69,10 +70,12 @@
                   </div>
                 </td>
                 <td style="width: 26%">
+                  <span *ngIf="IsForce" style="color: red;">*</span>
                   <span class="table-cell-Lable">علت ترک تشريفات</span>
                   <app-ng-select-virtual-scroll style="display: inline-block;width: 68%;"
                     class="select-general-for-lable" [NgSelectParams]="Article31Params" [Items]="Article31Items"
-                    [Disabled]="!IsArticle31Selected || IsNotNew || HasRelContract" [CheckValidate]="CheckValidate">
+                    [Disabled]="!IsArticle31Selected || IsNotNew || HasRelContract"
+                    [CheckValidate]="CheckValidate && IsForce">
                   </app-ng-select-virtual-scroll>
                 </td>
                 <td style="width: 34%">
@@ -106,9 +109,9 @@
                 </td>
               </tr>
             </table>
-          </div>
-
-          <div class="main-form-body" style="display: inherit">
+          </fieldset>
+          <fieldset class="feild-set" style="display: inherit">
+            <legend class="legend">اطلاعات قرارداد</legend>
             <table style="width: 100%;">
               <tr>
                 <td width="25%">
@@ -261,7 +264,7 @@
 
                 <td colspan="2" style="width: 50%">
                   <!-- <span style="color: red;">*</span> -->
-                  <span class="table-cell-Lable">طرف قرارداد </span>
+                  <span class="table-cell-Lable">{{ContractorName}}</span>
                   <app-ng-select-virtual-scroll [PageCount]="ContractorPageCount" [style.width.%]="ContractorWidth"
                     [TotalItemCount]="ContractorTotalItemCount" style="display: inline-block;"
                     class="select-general-for-lable" [Disabled]="!IsEditable || HasRelContract"
@@ -287,7 +290,7 @@
                   <input style="width:  83%" class="form-control input-style" type="text" name="Contractsubject"
                     [(ngModel)]="Contractsubject" [disabled]="(!IsEditable && !IsShow) || HasRelContract" />
                 </td>
-                <td width="25%">
+                <td *ngIf="ShowActLocation" width="25%">
                   <span style="color: red;">*</span>
                   <span class="table-cell-Lable">محدوده انجام</span>
                   <app-ng-select-virtual-scroll [Disabled]="!IsEditable || HasRelContract"
@@ -306,7 +309,7 @@
                 </td>
               </tr>
             </table>
-          </div>
+          </fieldset>
 
           <ul style="margin-top: 5px" class="nav nav-tabs" role="tablist">
             <li class="nav-item">
@@ -334,23 +337,30 @@
             <li class="nav-item" *ngIf="TabRahbari">
               <a class="nav-link" href="#questions" role="tab" data-toggle="tab">راهبری</a>
             </li>
+            <li class="nav-item" *ngIf="this.PopupParam.ModuleCode  === 2840">
+              <a class="nav-link" href="#request-person-item" role="tab" data-toggle="tab"> واحد اجرایی های مرتبط</a>
+            </li>
           </ul>
           <div class="tab-content" style="margin-top: 5px;" [style.height.%]="50">
 
             <div role="tabpanel" class="tab-pane fade show active" id="relation" [style.height.%]="100"
               style="margin-bottom: 5px;">
-              <div [style.height.%]="95" style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
+              <div [style.height.%]="75" style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
                 <!-- قرارداد مرتبط  -->
                 <app-grid [IsEditable]="IsEditable" (GridReady)="onGridReadyProdReqRel($event)"
-                  [columns]="ProdReqRelColDef" [rowsData]="ProdReqRelList"
-                  (CellValueChanged)="onCellValueChanged($event,'related-contract')" [gridHeight]="87"
+                  [columns]="ProdReqRelColDef" [rowsData]="ProdReqRelList" [gridHeight]="85"
                   (cellEditingStarted)="onContractcellEditingStarted($event)">
                 </app-grid>
+                <button id="btnShowContractRelation" class="btn btn-primary btn-gray-border small-btn btnGreen"
+                  style="margin-top: 7px !important;" (click)="onShowContractRelationClick()">
+                  <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
+                  مشاهده اقلام مرتبط با قرارداد
+                </button>
               </div>
             </div>
 
             <div role="tabpanel" class="tab-pane fade" id="supplier" [style.height.%]="100" style="margin-bottom: 5px;">
-              <div style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);" [style.height.%]="95">
+              <div style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);" [style.height.%]="87">
                 <!--طرف قرارداد-->
                 <app-grid [columns]="RequestSupplierColDef" [IsEditable]="IsEditable" [defaultSelectedRowIndex]="0"
                   [rowsData]="RSupplierList" (GridReady)="onGridReadyRequestSupplier($event)" [gridHeight]="87"
@@ -362,7 +372,7 @@
 
             <div role="tabpanel" class="tab-pane fade" id="ContractSign" [style.height.%]="100"
               style="margin-bottom: 5px;">
-              <div [style.height.%]="95" style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
+              <div [style.height.%]="87" style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
                 <app-grid [columns]="ContractsignColDef" [rowsData]="ContractsignRowsData" [gridHeight]="87"
                   [IsEditable]="IsEditable || IsNotNew" [NewItemTemp]="NewItemTemp"
                   (GridReady)="onGridReadyRequestContractsign($event)"
@@ -373,7 +383,7 @@
 
             <div role="tabpanel" class="tab-pane fade" id="ComitionMember" [style.height.%]="100"
               style="margin-bottom: 5px;">
-              <div [style.height.%]="95" style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
+              <div [style.height.%]="87" style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
                 <app-grid [columns]="ComitionMemberColDef" [IsEditable]="false" [rowsData]="ComitionMemberRowsData"
                   [gridHeight]="70">
                 </app-grid>
@@ -382,7 +392,7 @@
 
             <div role="tabpanel" class="tab-pane fade" id="estiamte" [style.height.%]="100" style="margin-bottom: 5px;">
               <!-- متره  -->
-              <div [style.height.%]="95" style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
+              <div [style.height.%]="87" style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
                 <table style="width: 100%; margin: 3px 0px; text-align: right;">
                   <tr>
                     <td style="width: 20%;">
@@ -552,7 +562,7 @@
             </div>
 
             <div role="tabpanel" class="tab-pane fade" id="RDoc" [style.height.%]="100" style="margin-bottom: 5px;">
-              <div [style.height.%]="95" style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
+              <div [style.height.%]="87" style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
                 <div [style.height.%]="RDDivGridHeight"
                   style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
                   <app-grid [columns]="ReceiveDoccolumnDef" [rowsData]="ReceiveDocrowsData" [IsEditable]="IsEditable"
@@ -611,7 +621,7 @@
             <div role="tabpanel" class="tab-pane fade" id="consultation" [style.height.%]="100"
               style="margin-bottom: 5px;">
               <!-- مشاوره  -->
-              <div [style.height.%]="95" style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
+              <div [style.height.%]="87" style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
                 <div id="div3" class="box-dev left-dev-g" style="height: 98%; margin: 2px;" [style.width.px]="GWidth"
                   [style.max-width.px]="GMaxWidth">
                   <app-grid style="width: 100%;" [columns]="WeightProdReqItemColDef" [rowsData]="ProdReqItemrowData"
@@ -628,7 +638,17 @@
               </div>
             </div>
 
-            <div role="tabpanel" class="tab-pane fade" id="questions" [style.height.%]="94" style="margin-bottom: 5px;">
+            <div class="tab-pane fade" id="request-person-item" [style.height.%]="100" style="margin-bottom: 5px;">
+              <div [style.height.%]="87" style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
+                <!-- نام نقش نوع نقش  -->
+                <app-grid (GridReady)="onGridReady($event)" [columns]="adContractPersoncol" [IsEditable]="IsEditable"
+                  [rowsData]="ContractPersonListData" [gridHeight]="87"
+                  (cellEditingStarted)="onContractPersoncellEditingStarted($event)"></app-grid>
+              </div>
+            </div>
+
+
+            <div role="tabpanel" class="tab-pane fade" id="questions" [style.height.%]="87" style="margin-bottom: 5px;">
               <div [style.height.%]="100"
                 style="width: 100%; border-radius: 5px; border: 1px solid rgb(204, 204, 204);">
 
@@ -729,6 +749,16 @@
           class="btn btn-primary btnGreen">
           <img width="15px" height="15px" src="assets/Icons/save.png" />
           ثبت
+        </button>
+        <button [disabled]="false" id="BtnProxyContract" (click)="onProxyContractClick()"
+          class="btn btn-primary btnGreen">
+          <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
+          قرارداد نیابتی
+        </button>
+        <button *ngIf="(HaveSave || HaveUpdate) && HaveSaveEditable" (click)="onSaveProductRequest()" id="btn2"
+          class="btn btn-primary btnGreen">
+          <img width="15px" height="15px" src="assets/Icons/save.png" />
+          ثبت اطلاعات درخواست
         </button>
 
         <button [disabled]="!HaveSaveEditable" id="btnCoef" (click)="onCoefClick()" class="btn btn-primary btnGreen">
