@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
 import { BaseHttpClient } from 'src/app/Services/BaseService/BaseHttpClient';
 @Injectable({ providedIn: 'root' })
 export class ContractPayDetailsService {
   constructor(private http: BaseHttpClient) {
   }
-  GetContractDetails(AContractID: any) {
-    return this.http.get(window.location.origin + '/ContractPay/GetContractDetails', { AContractID });
+  GetContractDetails(AContractID: any, ModuleCode: number = null) {
+    return this.http.get(window.location.origin + '/ContractPay/GetContractDetails', { AContractID, ModuleCode });
   }
   GetContractOperationName(AContractOperationID: any) {
     return this.http.get(window.location.origin + '/ContractPay/GetContractOperationName', { AContractOperationID });
@@ -25,8 +24,12 @@ export class ContractPayDetailsService {
     Date: any,
     ProductIDs: any,
     IsContractPayEstimate: number,
-    IsLoad: boolean ,
-    ContractOperationID = null) {
+    IsLoad: boolean,
+    ContractOperationID = null,
+    IsGreenSpace: boolean = null,
+    ContractPayStartDate: any = null,
+    ContractPayEndDate: any = null
+  ) {
 
     return this.http.get(window.location.origin + '/Contract/GetContractOrder', {
       ContractID,
@@ -34,7 +37,10 @@ export class ContractPayDetailsService {
       Date,
       ProductIDs,
       IsContractPayEstimate,
-      ContractOperationID
+      ContractOperationID,
+      IsGreenSpace,
+      ContractPayStartDate,
+      ContractPayEndDate
     },
       IsLoad);
   }
@@ -48,8 +54,8 @@ export class ContractPayDetailsService {
     BankList: any,
     HaveBank: any,
     HasCheck25Percent = false,
-    CheckMultiInvoiceType = false ,
-    ModuleCode , 
+    CheckMultiInvoiceType = false,
+    ModuleCode,
     ModuleViewTypeCode) {
 
     return this.http.post(window.location.origin + '/Contract/SaveContractPay', {
@@ -76,7 +82,9 @@ export class ContractPayDetailsService {
     CheckMultiInvoiceType = false,
     BankList: any,
     HaveBank: any,
-    ModuleViewTypeCode) {
+    ModuleViewTypeCode,
+    DifferenceAmount: number = null,
+    DifferenceNote: string = '') {
 
     return this.http.post(window.location.origin + '/Contract/UpdateContractPay', {
       ContractPay,
@@ -87,13 +95,15 @@ export class ContractPayDetailsService {
       HaveBank,
       HasCheck25Percent,
       CheckMultiInvoiceType,
-      ModuleViewTypeCode
+      ModuleViewTypeCode,
+      DifferenceAmount,
+      DifferenceNote
     }
     );
   }
 
-  DeleteContractPay(CostFactorID: any) {
-    return this.http.post(window.location.origin + '/Contract/DeleteContractPay', { CostFactorID });
+  DeleteContractPay(CostFactorID: any, ModuleViewTypeCode: number = null) {
+    return this.http.post(window.location.origin + '/Contract/DeleteContractPay', { CostFactorID, ModuleViewTypeCode });
   }
   GetContractAgent() {
     return this.http.get(window.location.origin + '/Contract/GetContractAgent', null);
@@ -161,9 +171,9 @@ export class ContractPayDetailsService {
       { ContractID, ContractOrderItemID, Amount });
   }
 
-  GetIsVolumetric(ContractID: number) {
-    return this.http.get(window.location.origin + '/Contract/GetIsVolumetric',
-      { ContractID });
+  GetContractCondition(ContractID: number, ModuleCode: number = null) {
+    return this.http.get(window.location.origin + '/Contract/GetContractCondition',
+      { ContractID, ModuleCode });
   }
   GetContractOrderByPagination(
     SearchOption: number,
@@ -175,7 +185,10 @@ export class ContractPayDetailsService {
     ContractPayNo: string,
     Date: any,
     ProductIDs: any,
-    ProductTypeCode: any,) {
+    ProductTypeCode: any,
+    IsGreenSpace: boolean = null,
+    ContractPayStartDate: any,
+    ContractPayEndDate: any) {
 
     return this.http.get(window.location.origin + '/Contract/GetContractOrderByPagination', {
       SearchOption,
@@ -187,7 +200,72 @@ export class ContractPayDetailsService {
       ContractPayNo,
       Date,
       ProductIDs,
-      ProductTypeCode
+      ProductTypeCode,
+      IsGreenSpace,
+      ContractPayStartDate,
+      ContractPayEndDate
+    });
+  }
+  GetContractOrderListByPagination(
+    SearchOption: number,
+    ARegionCode: number,
+    SearchTerm: string,
+    PageNumber: number,
+    PageSize: number,
+    ContractID: number,
+    ContractPayNo: string,
+    Date: any,
+    ProductIDs: any,
+    ProductTypeCode: any,
+    IsGreenSpace: boolean = null,
+    ContractPayStartDate: any,
+    ContractPayEndDate: any) {
+
+    return this.http.get(window.location.origin + '/Contract/GetContractOrderListByPagination', {
+      SearchOption,
+      ARegionCode,
+      SearchTerm,
+      PageNumber,
+      PageSize,
+      ContractID,
+      ContractPayNo,
+      Date,
+      ProductIDs,
+      ProductTypeCode,
+      IsGreenSpace,
+      ContractPayStartDate,
+      ContractPayEndDate
+    });
+  }
+  GetContractOrderByProduct(
+    SearchOption: number,
+    ARegionCode: number,
+    SearchTerm: string,
+    PageNumber: number,
+    PageSize: number,
+    ContractID: number,
+    ContractPayNo: string,
+    Date: any,
+    ProductID: any,
+    ProductTypeCode: any,
+    IsGreenSpace: boolean = null,
+    ContractPayStartDate: any,
+    ContractPayEndDate: any) {
+
+    return this.http.get(window.location.origin + '/Contract/GetContractOrderByProduct', {
+      SearchOption,
+      ARegionCode,
+      SearchTerm,
+      PageNumber,
+      PageSize,
+      ContractID,
+      ContractPayNo,
+      Date,
+      ProductID,
+      ProductTypeCode,
+      IsGreenSpace,
+      ContractPayStartDate,
+      ContractPayEndDate
     });
   }
   GetProductAmount(ProductID, PriceID) {
@@ -236,5 +314,84 @@ export class ContractPayDetailsService {
       ProductID
     },
       IsLoad);
+  }
+
+  GetAdjustmentType() {
+    return this.http.get(window.location.origin + '/Contract/GetAdjustmentType', false);
+  }
+
+  GetPenaltyContractCoef(ContractID: number) {
+    return this.http.get(window.location.origin + '/Contract/GetPenaltyContractCoef', { ContractID });
+  }
+  HasEndedWorkflow(ObjectID: number) {
+    return this.http.get(window.location.origin + '/ContractPay/HasEndedWorkflow', { ObjectID });
+  }
+  GetContractOrderItemOnContractPay(
+    ContractID: number,
+    ContractPayNo: string,
+    Date: any,
+    IsLoad: boolean,
+    ContractOperationID = null,
+    IsGreenSpace: boolean = null,
+    ContractPayStartDate: any = null,
+    ContractPayEndDate: any = null
+  ) {
+
+    return this.http.get(window.location.origin + '/ContractPay/GetContractOrderItemOnContractPay', {
+      ContractID,
+      ContractPayNo,
+      Date,
+      ContractOperationID,
+      IsGreenSpace,
+      ContractPayStartDate,
+      ContractPayEndDate
+    },
+      IsLoad);
+  }
+  GetDifferenceDeduction(CostFactorID: number) {
+    return this.http.get(window.location.origin + '/ContractPay/GetDifferenceDiductionObj', { CostFactorID });
+  }
+
+  UpdateContractPayItems(ModuleCode, ContractPayItemobj) {
+    return this.http.post(window.location.origin + '/Contract/UpdateContractPayItems', { ModuleCode, ContractPayItemobj });
+  }
+
+  GetAllDeductionType(Ischeck = false) {
+    return this.http.get(window.location.origin + '/ContractPay/GetAllDeductionType', null, Ischeck);
+  }
+
+  SaveContractpayDeductions(CostFactorID, DeductionList, ModuleCode) {
+    return this.http.post(window.location.origin + '/ContractPay/SaveContractpayDeductions',
+      {
+        CostFactorID,
+        DeductionList,
+        ModuleCode
+      });
+  }
+
+  GetDeductionListByCostFactorID(CostFactorID) {
+    return this.http.get(window.location.origin + '/ContractPay/GetDeductionListByCostFactorID',
+      {
+        CostFactorID,
+      });
+  }
+  GetBeforeContractPay(ContractID: number,
+    ContractPayNo: string,
+    ContractOperationID: number,
+    ProductID) {
+    return this.http.get(window.location.origin + '/ContractPay/GetBeforeContractPay',
+      {
+        ContractID,
+        ContractPayNo,
+        ContractOperationID,
+        ProductID
+      });
+  }
+
+  GetSumOfDeductionAmount(CostFactorID) {
+    return this.http.get(window.location.origin + '/ContractPay/GetSumOfDeductionAmount', 
+    {
+      CostFactorID,
+    });
   }
 }

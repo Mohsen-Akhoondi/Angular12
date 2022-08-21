@@ -20,11 +20,10 @@
             </td>
           </tr>
           <tr>
-
             <td style="width: 27%;">
               <span *ngIf="IsDisplayJobCategory && IsForcePriceList" style="color: red;">*</span>
-              <span *ngIf="IsDisplayJobCategory" class="table-cell-Lable">رسته</span>
-              <app-ng-select-virtual-scroll *ngIf="IsDisplayJobCategory"
+              <span *ngIf="IsDisplayJobCategory || IsGreenSpace" class="table-cell-Lable">رسته</span>
+              <app-ng-select-virtual-scroll *ngIf="IsDisplayJobCategory || IsGreenSpace"
                 [Disabled]="IsDisableJobCategory  || IsCompletionContractInfo || IsDisableRaste " style="display: inline-block;width: 60%;"
                 class="select-general-for-lable" style="display: inline-block;width: 50%;"
                 [NgSelectParams]="PriceListTopicRasteParams" [Items]="PriceListTopicRasteItems"
@@ -147,7 +146,7 @@
                 [(ngModel)]="Result" name="Result" class="form-control input-style" rows="2" style="width: 79.8%;"
                 id="indicator-text_note"></textarea>
             </td>
-            <td  width="33%">
+            <td  width="33%" *ngIf="HasMultiContract">
               <span class="table-cell-Lable">  آیا قرارداد چند ساله است؟</span>
               <div class="redio-div">
                 <div class="custom-control custom-radio custom-control-inline">
@@ -300,9 +299,9 @@
         (CellValueChanged)="onCellValueChanged($event)" (GridReady)="onGridReady($event)" (RowClick)="RowClick($event)"
         [GridOptionsRowStyle]="GridOptionsRowStyle" [gridHeight]="85"></app-grid>
     </div>
-    <table width="100%" style="border: 1px solid rgb(218, 218, 218); margin-top: 5px !important;">
+    <table  *ngIf="HaveSave && HasSign" width="100%" style="border: 1px solid rgb(218, 218, 218); margin-top: 5px !important;">
       <tr>
-        <td *ngIf="HaveSave" width="50%">
+        <td *ngIf="HaveSave && HasSign" width="50%">
           <fieldset class="feild-set"
             style="display: inherit; padding-top: 0px;margin: 0px;min-height: 0px; border: none !important;">
             <div style="float: right;color: blue;width: 100%;text-align: right;font-weight: bold;margin: 0px;">
@@ -460,7 +459,7 @@
       <img width="15px" height="15px" src="assets/Icons/SigneDoc.png" />
       {{BtnSignName}}
     </button>
-    <button [disabled]="(!SelectedProposal || !SelectedProposal.ProposalID)  || IsCompletionContractInfo" id="btnClose"
+    <button *ngIf="HasContractorBtn" [disabled]="(!SelectedProposal || !SelectedProposal.ProposalID)  || IsCompletionContractInfo" id="btnClose"
       class="btn btn-primary btnGreen" (click)="onShowContractorDetailsClick()">
       <img width="15px" height="15px" src="assets/Icons/ok.png" />
       اطلاعات پیمانکار

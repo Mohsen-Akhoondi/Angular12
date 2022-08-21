@@ -20,9 +20,9 @@ import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-ed
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { ActivatedRoute } from '@angular/router';
 import { OrderService } from 'src/app/Services/ProductRequest/OrderService';
-import { isUndefined } from 'util';
+import { isNullOrUndefined, isUndefined } from 'util';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
-import { readyException } from 'jquery';
+// tslint:disable-next-line: max-line-length
 import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 
 declare var jquery: any;
@@ -40,8 +40,12 @@ export class RequestContractWithoutFlowComponent implements OnInit {
   @Output() ProductRequestSuggestionClosed: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() PopupOutPut: EventEmitter<any> = new EventEmitter<any>();
   @Input() PopupParam;
+
+  adContractPersoncol = [];
   alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false };
   DurationDay;
+  private gridApi;
+  gridHeight = 55;
   SumFinalEstimateFAmount = '0';
   SumFinalEstimateSAmount = '0';
   SumFinalEstimateMAmount = '0';
@@ -69,6 +73,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
   ProductName;
   ProductCode;
   Amount;
+  ContractPersonListData = [];
   btnRequestSuggestionName = 'مناقصه';
   IsEstimateEditable = false;
   // RequestSupplierApi;
@@ -109,6 +114,9 @@ export class RequestContractWithoutFlowComponent implements OnInit {
   PersonTypeList: any;
   CommitionListSet = [];
   ContractId;
+  IsForce = false;
+  ShowActLocation = true;
+  ContractorName = 'طرف قرارداد';
   CommitionParams = {
     bindLabelProp: 'CommitionName',
     bindValueProp: 'CommitionCode',
@@ -387,6 +395,32 @@ export class RequestContractWithoutFlowComponent implements OnInit {
     IsDisabled: false,
     Required: true
   };
+  NgSelectContractPersonParams = {
+    bindLabelProp: 'ActorName',
+    bindValueProp: 'ActorID',
+    placeholder: '',
+    MinWidth: '150px',
+    PageSize: 30,
+    PageCount: 0,
+    TotalItemCount: 0,
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: true,
+    IsDisabled: false,
+    DropDownMinWidth: '300px',
+    type: 'ContractPerson',
+    AdvanceSearch: {
+      SearchLabel: 'جستجو براساس :',
+      SearchItemDetails:
+        [{ HeaderCaption: 'کدملی/شناسه', HeaderName: 'IdentityNo', width: 35, TermLenght: 10, SearchOption: 'IdentityNo' },
+        { HeaderCaption: 'نام', HeaderName: 'ActorName', width: 53, MinTermLenght: 3, SearchOption: 'ActorName' }],
+      SearchItemHeader:
+        [{ HeaderCaption: 'کدملی/شناسه', width: 35, },
+        { HeaderCaption: 'نام', width: 53, }],
+      HaveItemNo: true,
+      ItemNoWidth: 16
+    }
+  };
   ActLocationItems;
   MinHeightPixel;
   columnDef;
@@ -543,6 +577,19 @@ export class RequestContractWithoutFlowComponent implements OnInit {
     IsVirtualScroll: false,
     IsDisabled: false
   };
+  RelFinYearParams = {
+    bindLabelProp: 'FinYearCode',
+    bindValueProp: 'FinYearCode',
+    placeholder: '',
+    MinWidth: '100px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    Required: false,
+    type: 'rel-fin-year',
+  };
+  ProductRequestItemID;
 
   constructor(private ProductRequest: ProductRequestService,
     private ContractList: ContractListService,
@@ -557,8 +604,9 @@ export class RequestContractWithoutFlowComponent implements OnInit {
     private Order: OrderService,
     private CommonService: CommonServices,
     private Report: ReportService) {
-    this.PersonTypeList = [{ PersonTypeName: 'حقيقي', PersonTypeCode: 1 },
-    { PersonTypeName: 'حقوقي', PersonTypeCode: 2 }];
+
+    this.PersonTypeList = [{ PersonTypeCode: 1, PersonTypeName: 'حقیقی' },
+    { PersonTypeCode: 2, PersonTypeName: 'حقوقی' }];
     this.SeasonListItems =
       [
         { SeasonCode: 1, SeasonName: 'فصل اول' },
@@ -566,10 +614,84 @@ export class RequestContractWithoutFlowComponent implements OnInit {
         { SeasonCode: 3, SeasonName: 'فصل سوم' },
         { SeasonCode: 4, SeasonName: 'فصل جهارم' },
       ];
-    this.route.params.subscribe(params => {
-      this.ModuleCode = +params['ModuleCode'];
-      this.originModuleCode = +params['ModuleCode'];
-    });
+    this.adContractPersoncol = [
+      {
+        headerName: 'رديف ',
+        field: 'ItemNo',
+        width: 80,
+        resizable: true
+      },
+      {
+        headerName: 'نام نقش ',
+        field: 'RoleName',
+        cellEditorFramework: NgSelectCellEditorComponent,
+        cellEditorParams: {
+          Items: this.ContractList.GetRolesList(false, 2840),
+          bindLabelProp: 'RoleName',
+          bindValueProp: 'RoleID'
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.RoleName;
+
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue) {
+            params.data.RoleName = params.newValue.RoleName;
+            params.data.RoleID = params.newValue.RoleID;
+            params.data.ActorID = null;
+            params.data.ActorName = null;
+            return true;
+          } else {
+            params.data.RoleName = '';
+            params.data.RoleID = null;
+            params.data.ActorID = null;
+            params.data.ActorName = null;
+            return false;
+          }
+        },
+        editable: this.IsEditable,
+        width: 200,
+        resizable: true
+      },
+      {
+        headerName: ' نام شخص  ',
+        field: 'ActorName',
+        cellEditorFramework: NgSelectVirtualScrollComponent,
+        cellEditorParams: {
+          Params: this.NgSelectContractPersonParams,
+          Items: [],
+          MoreFunc: this.FetchMoreContractPerson,
+          FetchByTerm: this.FetchContractPersonByTerm,
+          Owner: this
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.ActorName;
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue) {
+            params.data.ActorID = params.newValue.ActorID;
+            params.data.ActorName = params.newValue.ActorName;
+            return true;
+          } else {
+            params.data.ActorID = null;
+            params.data.ActorName = null;
+            return false;
+          }
+        },
+        editable: this.IsEditable,
+        width: 400,
+        resizable: true
+      }];
   }
 
   ngOnInit() {
@@ -583,6 +705,10 @@ export class RequestContractWithoutFlowComponent implements OnInit {
     }
     if (this.PopupParam.ModuleViewTypeCode) {
       this.ModuleViewTypeCode = this.PopupParam.ModuleViewTypeCode;
+    }
+    if (this.PopupParam.ModuleCode === 3037) {
+      this.ShowActLocation = false;
+      this.ContractorName = "به نیابت از";
     }
     const promise = new Promise<void>((resolve, reject) => {
       this.User.GetModulOPByUser(this.ModuleCode).subscribe(res => {
@@ -635,7 +761,11 @@ export class RequestContractWithoutFlowComponent implements OnInit {
       this.rowsData = [];
       this.ContractObject = this.ProductRequestObject.ContractObject;
       this.RSupplierList = this.ProductRequestObject.RequestSupplierList;
+      // if (this.ModuleCode == 2739 || this.ModuleCode == 2776) {
+      //   this.ProdReqRelList = this.PopupParam.ContractRelationList;
+      // } else {
       this.ProdReqRelList = this.ProductRequestObject.ProductRequestRelationList;
+      // } // 64494   
       this.DurationDay = this.ProductRequestObject.DurationDay;
       this.DurationMonth = this.ProductRequestObject.DurationMonth;
       this.DurationYear = this.ProductRequestObject.DurationYear;
@@ -657,7 +787,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
       // if (this.IsUseProviders) {
       //   this.NgSelectContractorParams.bindValueProp = 'IdentityNo';
       // }
-
+      this.ProductRequestItemID = this.ProductRequestObject.ProductRequestItemList && this.ProductRequestObject.ProductRequestItemList.length > 0 ? this.ProductRequestObject.ProductRequestItemList[0].ProductRequestItemID : -1;
       this.CoulumnsDefinition(this.ProductRequestObject.ContractTypeCode);
       this.ProdReqPersonColDef[1].cellEditorParams.Items = this.ProductRequest.GetBusinessPattern();
       forkJoin([
@@ -676,7 +806,9 @@ export class RequestContractWithoutFlowComponent implements OnInit {
         this.FinYear.GetFinYearList(),
         this.ContractList.GetContractStatusList(),
         this.ProductRequest.GetCostCenterByRegion(0, null, null, true),
-        this.ProductRequest.GetActLocationByRegionCode(this.ProductRequestObject.RegionCode),
+        // tslint:disable-next-line: max-line-length
+        this.ProductRequest.GetActLocationByRegionCode(this.ProductRequestObject.ProxyContractorRegionCode !== null ? this.ProductRequestObject.ProxyContractorRegionCode :
+          this.ProductRequestObject.RegionCode),
         this.Order.GetCommitionList(),
         this.PriceList.GetPriceListTopics(true),
         this.ProductRequest.GetPRBalanceFactors(this.ProductRequestObject.CostFactorID),
@@ -684,10 +816,18 @@ export class RequestContractWithoutFlowComponent implements OnInit {
           this.ProductRequestObject.ShortProductRequestDate, this.ProductRequestObject.CostFactorID, this.ContractId),
         this.ProductRequest.GetConsultantSelectTypeList(), // RFC 50806
         this.ProductRequest.GetConsultantSelectWayList(),
+        this.ContractList.GetContractPersonList(this.ContractId ? this.ContractId : -1, false),
+        this.ProductRequest.GetOrdersWithProductRequest(this.ProductRequestItemID, false, this.CostFactorID, false, null,
+          (this.PopupParam && this.PopupParam.ModuleViewTypeCode ? this.PopupParam.ModuleViewTypeCode : null), this.PopupParam.ModuleCode),
       ]
       ).subscribe(res => {
         this.IsDown = true;
         this.ContractTypeItems = res[0];
+        if (this.ModuleCode === 3037) {
+          this.ContractTypeParams.selectedObject = res[0][0].ContractTypeCode;
+        } else {
+          this.ContractTypeParams.selectedObject = this.ProductRequestObject.ContractTypeCode;
+        }
         this.DealMethodItems = res[1];
         // this.Article31Items = res[2];
         this.ContractStatusParams.selectedObject = 1;
@@ -714,13 +854,28 @@ export class RequestContractWithoutFlowComponent implements OnInit {
           this.IsNotNew = true;
         }
 
-        if (res[7]) {
-          this.CommitionListSet = res[7];
-          this.CommitionParams.selectedObject = res[7][0].CommitionCode;
-          this.ProductRequest.GetContractCommitionMemberList(this.ContractId).subscribe(res => {
-            this.ComitionMemberRowsData = res;
+        // if (res[7]) {
+        //   this.CommitionListSet = res[7];
+        //   this.CommitionParams.selectedObject = res[7][0].CommitionCode;
+        //   this.ProductRequest.GetContractCommitionMemberList(this.ContractId).subscribe(res => {
+        //     this.ComitionMemberRowsData = res;
+        //   });
+        // }
+        if (res[14] && res[14].LastInquiryObject &&
+          res[14].LastInquiryObject.OrderCommitionObject &&
+          res[14].LastInquiryObject.OrderCommitionObject.OrderCommitionMemberList) {
+          const ActorIDs = [];
+          res[14].LastInquiryObject.OrderCommitionObject.OrderCommitionMemberList.forEach(item => {
+            ActorIDs.push(item.ActorID);
           });
+          this.ProductRequest.GetByActorIDs(
+            res[14].LastInquiryObject.OrderCommitionObject.CommitionCode,
+            this.ProductRequestObject.RegionCode,
+            ActorIDs).subscribe(resss => {
+              this.ComitionMemberRowsData = resss;
+            });
         }
+
         this.ActLocationItems = res[6];
         if (!this.ContractObject) {
           this.ActLocationParams.selectedObject = this.ProductRequestObject.ActLocationID;
@@ -762,6 +917,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
         );
         this.ConsultantSelectTypeItems = res[11];
         this.ConsultantSelectWayItems = res[12];
+        this.ContractPersonListData = res[13];
         this.ConsultantSelectTypeParams.selectedObject = this.ProductRequestObject.ConsultantSelectTypeCode;
         this.ConsultantSelectedWayParams.selectedObject = this.ProductRequestObject.ConsultantSelectedWayCode;
         if (this.ContractObject) {
@@ -1711,13 +1867,71 @@ export class RequestContractWithoutFlowComponent implements OnInit {
             return '';
           }
         },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.ContractRelationTypeName) {
+            params.data.ContractRelationTypeCode = params.newValue.ContractRelationTypeCode;
+            params.data.ContractRelationTypeName = params.newValue.ContractRelationTypeName;
+            return true;
+          } else {
+            params.data.ContractRelationTypeCode = null;
+            params.data.ContractRelationTypeName = '';
+            return false;
+          }
+        },
         editable: this.PopupParam && this.PopupParam.ModuleViewTypeCode === 500000 ? false : true,
-        width: 300,
+        width: 150,
         resizable: true
       },
       {
-        headerName: 'قرارداد ',
-        field: 'Contract',
+        headerName: 'سال مالی',
+        field: 'FinYearCode',
+        cellEditorFramework: NgSelectVirtualScrollComponent,
+        cellEditorParams: {
+          Params: this.RelFinYearParams,
+          Items: []
+        },
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.FinYearCode;
+          } else {
+            return '';
+          }
+        },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.FinYearCode) {
+            params.data.FinYearCode = params.newValue.FinYearCode;
+            params.data.ContractId = null;
+            params.data.Subject = '';
+            params.data.Contract = '';
+            params.data.ContractAmountStr = '';
+            params.data.ContractorFullName = '';
+            params.data.LetterNo = '';
+            params.data.ContractCode = '';
+            params.data.PersianFromContractDateString = '';
+            params.data.Note = '';
+            return true;
+          } else {
+            params.data.FinYearCode = null;
+            params.data.ContractId = null;
+            params.data.Subject = '';
+            params.data.Contract = '';
+            params.data.ContractAmountStr = '';
+            params.data.ContractorFullName = '';
+            params.data.LetterNo = '';
+            params.data.ContractCode = '';
+            params.data.PersianFromContractDateString = '';
+            params.data.Note = '';
+            return false;
+          }
+        },
+        editable: this.PopupParam && this.PopupParam.ModuleViewTypeCode === 500000 ? false : true,
+        width: 120,
+        resizable: true
+      },
+      {
+        headerName: 'موضوع قرارداد ',
+        field: 'Subject',
         cellEditorFramework: NgSelectVirtualScrollComponent,
         cellEditorParams: {
           Params: this.NgSelectVCParams,
@@ -1734,8 +1948,82 @@ export class RequestContractWithoutFlowComponent implements OnInit {
             return '';
           }
         },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.Subject) {
+            params.data.FinYearCode = params.data.FinYearCode === null || isUndefined(params.data.FinYearCode) ?
+              params.newValue.FinYearCode : params.newValue.FinYearCode;
+            params.data.RelatedContractID = params.newValue.ContractId;
+            params.data.Subject = params.newValue.Subject;
+            params.data.ContractAmountStr = params.newValue.ContractAmountStr;
+            params.data.ContractorFullName = params.newValue.ContractorFullName;
+            params.data.LetterNo = params.newValue.LetterNo;
+            params.data.ContractCode = params.newValue.ContractCode;
+            params.data.PersianFromContractDateString = params.newValue.PersianFromContractDateString;
+            params.data.Note = '';
+            params.data.ContractTypeCode = params.newValue.ContractTypeCode;
+            params.data.IsMuncipalityRegionContractor = params.newValue.IsMuncipalityRegionContractor;
+            params.data.ProxyContractorRegionCode = params.newValue.ProxyContractorRegionCode;
+            params.data.ContractIsCost = params.newValue.ContractIsCost;
+            if (params.data.ContractRelationTypeCode === 5 &&
+              (!isNullOrUndefined(params.data.IsMuncipalityRegionContractor) && params.data.IsMuncipalityRegionContractor === true) &&
+              params.data.ContractTypeCode === 20 &&
+              (!isNullOrUndefined(params.data.ContractIsCost) && params.data.ContractIsCost === false) &&
+              (!isNullOrUndefined(this.ProductRequestObject.IsCost) && this.ProductRequestObject.IsCost === true) &&
+              this.ProductRequestObject.RelatedContractID === null) { // شرایط نیابتی
+
+              this.ActLocationParams.selectedObject = null;
+              this.ProductRequest.GetActLocationByRegionCode(params.data.ProxyContractorRegionCode).subscribe(res => {
+                this.ActLocationItems = res;
+              });
+            }
+            return true;
+
+          } else {
+            params.data.RelatedContractID = null;
+            params.data.Subject = '';
+            params.data.FinYearCode = null;
+            params.data.ContractAmountStr = '';
+            params.data.ContractorFullName = '';
+            params.data.LetterNo = '';
+            params.data.ContractCode = '';
+            params.data.PersianFromContractDateString = '';
+            params.data.Note = '';
+            params.data.ContractTypeCode = null;
+            return false;
+          }
+        },
         editable: this.PopupParam && this.PopupParam.ModuleViewTypeCode === 500000 ? false : true,
         width: 300,
+        resizable: true
+      },
+      {
+        headerName: 'شماره قراداد',
+        field: 'LetterNo',
+        width: 100,
+        resizable: true
+      },
+      {
+        headerName: 'کد قراداد',
+        field: 'ContractCode',
+        width: 100,
+        resizable: true
+      },
+      {
+        headerName: 'پیمانکار',
+        field: 'ContractorFullName',
+        width: 200,
+        resizable: true
+      },
+      {
+        headerName: 'مبلغ قرارداد',
+        field: 'ContractAmountStr',
+        width: 150,
+        resizable: true
+      },
+      {
+        headerName: 'تاریخ شروع قرارداد',
+        field: 'PersianFromContractDateString',
+        width: 150,
         resizable: true
       },
       {
@@ -1998,6 +2286,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
 
   onChangeDealMethod(DealMethodCode) {
     if (DealMethodCode) {
+      this.IsForce = false;
       this.PriceList.GetAticle31ListByDealMethodCode(DealMethodCode, this.RegionCode).subscribe((res: any) => {
         if (res && res.length > 0) {
           this.Article31Items = res;
@@ -2014,6 +2303,10 @@ export class RequestContractWithoutFlowComponent implements OnInit {
       });
     }
     this.DealMethodParams.selectedObject = DealMethodCode;
+    if (DealMethodCode == 4 || DealMethodCode == 7) //RFC 63863
+    {
+      this.IsForce = true;
+    }
   }
 
   onChangeArticle31() { }
@@ -2261,15 +2554,24 @@ export class RequestContractWithoutFlowComponent implements OnInit {
             ProdReqItemList.push(node.data);
           });
           this.ProdReqRelApi.forEachNode(node => {
+            if (!node.data.ContractRelationTypeCode || node.data.ContractRelationTypeCode === null || node.data.ContractRelationTypeCode < 1) {
+              this.ShowMessageBoxWithOkBtn(' در تب قرارداد های مرتبط نوع ارتباط را انتخاب نمایید');
+              return;
+            }
             const ProdReqRelationObj = {
               ProductRequestRelationID: node.data.ProductRequestRelationID ? node.data.ProductRequestRelationID : -1,
               // tslint:disable-next-line:max-line-length
-              RelatedContractID: (node.data.Contract && node.data.Contract.ContractId) ? node.data.Contract.ContractId : (node.data.RelatedContractID ? node.data.RelatedContractID : null),
+              RelatedContractID: node.data.Subject.ContractId ? node.data.Subject.ContractId : (node.data.RelatedContractID ? node.data.RelatedContractID : null),
               // tslint:disable-next-line:max-line-length
               ContractRelationTypeCode: (node.data.ContractRelationTypeName && node.data.ContractRelationTypeName.ContractRelationTypeCode) ? node.data.ContractRelationTypeName.ContractRelationTypeCode : (node.data.ContractRelationTypeCode ? node.data.ContractRelationTypeCode : null),
               CostFactorID: this.ProductRequestObject.CostFactorID,
               Note: node.data.Note,
-              IsIncreament: 0
+              IsIncreament: 0,
+              ItemNo: node.data.ItemNo,
+              ContractTypeCode: node.data.ContractTypeCode,
+              IsMuncipalityRegionContractor: node.data.IsMuncipalityRegionContractor,
+              ContractIsCost: node.data.ContractIsCost,
+              ProxyContractorRegionCode: node.data.ProxyContractorRegionCode
             };
             ProductRequestRelationList.push(ProdReqRelationObj);
           });
@@ -2435,6 +2737,17 @@ export class RequestContractWithoutFlowComponent implements OnInit {
           //   return;
           // }
           // tslint:disable-next-line: max-line-length
+          const ContractpersonList = [];
+          this.gridApi.forEachNode((item) => {
+            const obj = {
+              ContractPersonID: item.data.ContractPersonID ? item.data.ContractPersonID : -1,
+              ActorID: item.data.ActorID,
+              RoleID: item.data.RoleID,
+              ContractOrderItemID: null
+            };
+            ContractpersonList.push(obj);
+          });
+
           this.ProductRequestObject.ProductRequestDate = this.CommonService.ConvertToASPDateTime(this.ProductRequestObject.ProductRequestDate);
           if (this.ProductRequestObject.IsCost === true) {
             this.ProductRequest.UpdateProductRequestContract(this.ProductRequestObject,
@@ -2449,7 +2762,8 @@ export class RequestContractWithoutFlowComponent implements OnInit {
               this.ModuleCode,
               this.CostFactorLetter ? this.CostFactorLetter : null,
               this.SelectedDocument ? this.SelectedDocument : null,
-              this.PopupParam.OrginalModuleCode
+              this.PopupParam.OrginalModuleCode,
+              ContractpersonList
             )
               .subscribe(
                 (res: any) => {
@@ -2500,6 +2814,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
               this.ModuleCode,
               this.CostFactorLetter ? this.CostFactorLetter : null,
               this.SelectedDocument ? this.SelectedDocument : null,
+              this.PopupParam.OrginalModuleCode,
               this.PopupParam.ModuleViewTypeCode
             )
               .subscribe(
@@ -2751,6 +3066,29 @@ export class RequestContractWithoutFlowComponent implements OnInit {
     }
     if (this.PopUpType === 'product-request-item-coef') { // RFC 61094-Item 1
       this.ProductRequestObject.CoefLevelCode = event;
+    }
+    if (this.PopUpType === 'proxy-contract-list') {
+      let ProdReqRelGridData = [];
+      let ProdReqRelrow;
+      this.ProdReqRelApi.forEachNode(node => {
+        ProdReqRelGridData.push(node.data);
+      })
+      ProdReqRelrow = {
+        FinYearCode: event.data.FinYearCode,
+        Subject: event.data.Subject,
+        LetterNo: event.data.LetterNo,
+        ContractCode: event.data.ContractCode,
+        ContractorFullName: event.data.ContractorName,
+        CostFactorID: event.data.CostFactorID,
+        ContractAmountStr: event.data.ContractAmount,
+        Note: event.data.Note,
+        PersianFromContractDateString: event.data.FromContractDatePersian,
+        Validate: true,
+        RelatedContractID: event.data.PRRelatedContractID
+      }
+      ProdReqRelGridData.push(ProdReqRelrow);
+      this.ProdReqRelList = ProdReqRelGridData;
+      this.ProdReqRelApi.updateRowData({ add: ProdReqRelGridData });
     }
   }
 
@@ -3035,17 +3373,17 @@ export class RequestContractWithoutFlowComponent implements OnInit {
   onCellValueChanged(event, type) {
     const itemsToUpdate = [];
     switch (type) {
-      case 'related-contract':
-        if (event.newValue && event.newValue.ContractId) {
-          this.ProdReqRelApi.forEachNode(node => {
-            if (node.rowIndex === event.rowIndex) {
-              node.data.RelatedContractID = event.newValue.ContractId;
-              itemsToUpdate.push(node.data);
-            }
-          });
-          this.ProdReqRelApi.updateRowData({ update: itemsToUpdate });
-        }
-        break;
+      // case 'related-contract':
+      //   if (event.newValue && event.newValue.ContractId) {
+      //     this.ProdReqRelApi.forEachNode(node => {
+      //       if (node.rowIndex === event.rowIndex) {
+      //         node.data.RelatedContractID = event.newValue.ContractId;
+      //         itemsToUpdate.push(node.data);
+      //       }
+      //     });
+      //     this.ProdReqRelApi.updateRowData({ update: itemsToUpdate });
+      //   }
+      //   break;
       // case 'Comition-Member':
       //   const items = [];
       //   if (event.newValue && event.columnDefPriceList &&
@@ -3106,11 +3444,12 @@ export class RequestContractWithoutFlowComponent implements OnInit {
       event.term,
       event.SearchOption,
       this.ContractorType,
-      false, false, null, null, false, null, false, true).subscribe(res => {
+      false, false, null, null, false, null, false, true, this.ModuleCode).subscribe(res => {
         event.CurrentItems.forEach(el => {
           ResultList.push(el);
         });
         res.List.forEach(element => {
+          element.IdentityNo = element.IdentityNo ? element.IdentityNo : element.ParentIdentityNo;
           ResultList.push(element);
         });
         this.ContractorItems = ResultList;
@@ -3123,7 +3462,10 @@ export class RequestContractWithoutFlowComponent implements OnInit {
     //  this.NgSelectContractorParams.loading = true;
     // tslint:disable-next-line: max-line-length
     this.Actor.GetActorPaging(1, 30, '', 'ActorID', this.ContractorType, false, false, this.NgSelectContractorParams.selectedObject,
-      null, null, false, null, false, true).subscribe(res => {
+      null, null, false, null, false, true, this.ModuleCode).subscribe(res => {
+        res.List.forEach(el => {
+          el.IdentityNo = el.IdentityNo === null ? el.ParentIdentityNo : el.IdentityNo;
+        });
         this.ContractorItems = res.List;
         this.ContractorTotalItemCount = res.TotalItemCount;
         this.ContractorPageCount = Math.ceil(res.TotalItemCount / 30);
@@ -3138,7 +3480,10 @@ export class RequestContractWithoutFlowComponent implements OnInit {
       event.term,
       event.SearchOption,
       this.ContractorType,
-      false, false, null, null, false, null, false, true).subscribe(res => {
+      false, false, null, null, false, null, false, true, this.ModuleCode).subscribe(res => {
+        res.List.forEach(el => {
+          el.IdentityNo = el.IdentityNo ? el.IdentityNo : el.ParentIdentityNo;
+        });
         this.ContractorItems = res.List;
         this.ContractorTotalItemCount = res.TotalItemCount;
         this.ContractorPageCount = Math.ceil(res.TotalItemCount / 30);
@@ -3183,6 +3528,9 @@ export class RequestContractWithoutFlowComponent implements OnInit {
     }
 
     this.Actor.GetActorPaging(1, 30, '', 'IdentityNo', this.ContractorType, false, false).subscribe(res => {
+      res.List.forEach(el => {
+        el.IdentityNo = el.IdentityNo ? el.IdentityNo : el.ParentIdentityNo;
+      });
       this.ContractorItems = res.List;
       this.ContractorTotalItemCount = res.TotalItemCount;
       this.ContractorPageCount = Math.ceil(res.TotalItemCount / 30);
@@ -3285,11 +3633,11 @@ export class RequestContractWithoutFlowComponent implements OnInit {
     };
   }
   FetchMoreContract(event) {
-    event.Owner.ProdReqRelColDef[2].cellEditorParams.Params.loading = true;
+    event.Owner.ProdReqRelColDef[3].cellEditorParams.Params.loading = true;
     const ResultList = [];
     const promise = new Promise((resolve, reject) => {
       event.Owner.ContractList.GetRelatedContractpaging(event.PageNumber, event.PageSize, event.term, event.SearchOption,
-        event.Owner.ProductRequestObject.RegionCode, event.Owner.ProductRequestObject.IsCost, null).subscribe((res: any) => {
+        event.Owner.ProductRequestObject.RegionCode, event.Owner.FinYearCode, null).subscribe((res: any) => {
           event.CurrentItems.forEach(el => {
             ResultList.push(el);
           });
@@ -3313,9 +3661,9 @@ export class RequestContractWithoutFlowComponent implements OnInit {
     if (event.SearchOption === 'null' || event.SearchOption == null) {
       event.SearchOption = 'LetterNo';
     }
-    event.Owner.ProdReqRelColDef[2].cellEditorParams.Params.loading = true;
+    event.Owner.ProdReqRelColDef[3].cellEditorParams.Params.loading = true;
     event.Owner.ContractList.GetRelatedContractpaging(event.PageNumber, 30, event.term,
-      event.SearchOption, event.Owner.ProductRequestObject.RegionCode, event.Owner.ProductRequestObject.IsCost, null).
+      event.SearchOption, event.Owner.ProductRequestObject.RegionCode, event.Owner.FinyearCode, null).
       subscribe((res: any) => {
         event.Owner.RefreshPersonItems.RefreshItemsVirtualNgSelect({
           List: res.List,
@@ -3325,14 +3673,14 @@ export class RequestContractWithoutFlowComponent implements OnInit {
           type: 'related-contract'
         });
       });
-    event.Owner.ProdReqRelColDef[2].cellEditorParams.Params.loading = false;
+    event.Owner.ProdReqRelColDef[3].cellEditorParams.Params.loading = false;
   }
   onContractcellEditingStarted(event) {
-    if (event.colDef && event.colDef.field === 'Contract') {
+    if (event.colDef && event.colDef.field === 'Subject') {
       this.ContractList.
         GetRelatedContractpaging(1, 30, '', null,
           this.ProductRequestObject.RegionCode,
-          this.ProductRequestObject.IsCost,
+          event.data.FinYearCode,
           event.data.RelatedContractID)
         .subscribe((res: any) => {
           this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
@@ -3340,6 +3688,14 @@ export class RequestContractWithoutFlowComponent implements OnInit {
             TotalItemCount: res.TotalItemCount,
             PageCount: Math.ceil(res.TotalItemCount / 30),
             type: 'related-contract'
+          });
+        });
+    } else if (event.colDef && event.colDef.field === 'FinYearCode') {
+      this.FinYear.GetFinYearList()
+        .subscribe((res: any) => {
+          this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
+            List: res,
+            type: 'rel-fin-year'
           });
         });
     }
@@ -3946,46 +4302,46 @@ export class RequestContractWithoutFlowComponent implements OnInit {
   EntityColumnDefinition(selectedPRItemRow) {
 
 
-    if (selectedPRItemRow.PRIEntityList) {
+    // if (selectedPRItemRow.PRIEntityList) {
 
-      var columnDef22 = [];
-      this.ProdReqEstColDef.forEach(element => {
-        columnDef22.push(element);
-      });
-      this.ProdReqEstColDef = [];
+    //   var columnDef22 = [];
+    //   this.ProdReqEstColDef.forEach(element => {
+    //     columnDef22.push(element);
+    //   });
+    //   this.ProdReqEstColDef = [];
 
-      selectedPRItemRow.PRIEntityList.forEach(i => {
-        const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
+    //   selectedPRItemRow.PRIEntityList.forEach(i => {
+    //     const obItem = columnDef22.find(x => x.index && x.index === i.EntityTypeID);
 
-        if (!obItem) {
-          const obj = {
-            index: i.EntityTypeID,
-            headerName: i.Subject,
-            field: 'Subject' + i.EntityTypeID.toString(),
-            width: 200,
-            editable: true,
-            resizable: true,
-            cellEditorFramework: NgSelectVirtualScrollComponent,
-            cellEditorParams: {
-              Params: this.NgSelectContractEntityItemParams,
-              Items: [],
-              Owner: this
-            },
-            cellRenderer: 'SeRender',
-            valueFormatter: function currencyFormatter(params) {
-              if (params.value) {
-                return params.value.Subject;
-              } else {
-                return '';
-              }
-            },
-          };
-          columnDef22.push(obj);
-        }
-      });
+    //     if (!obItem) {
+    //       const obj = {
+    //         index: i.EntityTypeID,
+    //         headerName: i.Subject,
+    //         field: 'Subject' + i.EntityTypeID.toString(),
+    //         width: 200,
+    //         editable: true,
+    //         resizable: true,
+    //         cellEditorFramework: NgSelectVirtualScrollComponent,
+    //         cellEditorParams: {
+    //           Params: this.NgSelectContractEntityItemParams,
+    //           Items: [],
+    //           Owner: this
+    //         },
+    //         cellRenderer: 'SeRender',
+    //         valueFormatter: function currencyFormatter(params) {
+    //           if (params.value) {
+    //             return params.value.Subject;
+    //           } else {
+    //             return '';
+    //           }
+    //         },
+    //       };
+    //       columnDef22.push(obj);
+    //     }
+    //   });
 
-      this.ProdReqEstColDef = columnDef22;
-    }
+    //   this.ProdReqEstColDef = columnDef22;
+    // }
   }
 
   OnChPRTaxvalueChange(event) {
@@ -4083,6 +4439,9 @@ export class RequestContractWithoutFlowComponent implements OnInit {
       this.RequestSupplierColDef[2].cellEditorParams.Params.loading = true;
       this.Actor.GetActorPaging(1, 30, '', '', event.data.PersonTypeCode === 1, false, true,
         event.data.ActorID, null, RegionCode, false, this.ProductRequestObject.CostFactorID, true, true).subscribe(res => {
+          res.List.forEach(el => {
+            el.IdentityNo = el.IdentityNo ? el.IdentityNo : el.ParentIdentityNo;
+          });
           this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
             List: res.List,
             TotalItemCount: res.TotalItemCount,
@@ -4108,6 +4467,7 @@ export class RequestContractWithoutFlowComponent implements OnInit {
               ResultList.push(el);
             });
             res.List.forEach(element => {
+              element.IdentityNo = element.IdentityNo ? element.IdentityNo : element.ParentIdentityNo;
               ResultList.push(element);
             });
             resolve(res.TotalItemCount);
@@ -4128,6 +4488,9 @@ export class RequestContractWithoutFlowComponent implements OnInit {
       event.Owner.Actor.GetActorPaging(event.PageNumber, event.PageSize, event.term, event.SearchOption,
         event.Owner.SelectedPersonTypeCode === 1, false, true,
         null, null, null, false, null, false, true).subscribe(res => {
+          res.List.forEach(el => {
+            el.IdentityNo = el.IdentityNo ? el.IdentityNo : el.ParentIdentityNo;
+          });
           event.Owner.RefreshPersonItems.RefreshItemsVirtualNgSelect({
             List: res.List,
             term: event.term,
@@ -4138,5 +4501,158 @@ export class RequestContractWithoutFlowComponent implements OnInit {
         });
     }
 
+  }
+
+  FetchMoreContractPerson(event) {
+    event.Owner.adContractPersoncol[2].cellEditorParams.Params.loading = true;
+    const ResultList = [];
+    const promise = new Promise((resolve, reject) => {
+      event.Owner.Actor.GetCustomerActorPaging(event.PageNumber,
+        event.PageSize,
+        event.term,
+        event.SearchOption,
+        false,
+        false, false).subscribe(res => {
+          event.CurrentItems.forEach(el => {
+            ResultList.push(el);
+          });
+          res.List.forEach(element => {
+            element.ActorID = element.ActorId;
+            ResultList.push(element);
+          });
+          resolve(res.TotalItemCount);
+        });
+    }).then((TotalItemCount: number) => {
+      event.Owner.RefreshPersonItems.RefreshItemsVirtualNgSelect({
+        List: ResultList,
+        term: event.term,
+        TotalItemCount: TotalItemCount,
+        PageCount: Math.ceil(TotalItemCount / 30),
+        type: 'ContractPerson'
+      });
+    });
+  }
+
+  FetchContractPersonByTerm(event) {
+
+    this.adContractPersoncol[2].cellEditorParams.Params.loading = true;
+    event.Owner.Actor.GetCustomerActorPaging(event.PageNumber, event.PageSize, event.term, event.SearchOption,
+      false, false, false).subscribe(res => {
+        res.List.forEach(el => {
+          el.ActorID = el.ActorId;
+        });
+        event.Owner.RefreshPersonItems.RefreshItemsVirtualNgSelect({
+          List: res.List,
+          term: event.term,
+          TotalItemCount: res.TotalItemCount,
+          PageCount: Math.ceil(res.TotalItemCount / 30),
+          type: 'ContractPerson'
+        });
+      });
+  }
+  onGridReady(params) {
+    this.gridApi = params.api;
+  }
+
+  onContractPersoncellEditingStarted(event) {
+
+    if (event.colDef && event.colDef.field === 'ActorName') {
+      this.adContractPersoncol[2].cellEditorParams.Params.loading = true;
+      this.Actor.GetCustomerActorPaging(1, 30, '', '', false, false, false).subscribe(res => {
+        res.List.forEach(el => {
+          el.ActorID = el.ActorId;
+        });
+        this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
+          List: res.List,
+          TotalItemCount: res.TotalItemCount,
+          PageCount: Math.ceil(res.TotalItemCount / 30),
+          type: 'ContractPerson'
+        });
+      });
+    }
+  }
+
+  onSaveProductRequest() {
+    let ValidateForm = true;
+    ValidateForm =
+      ValidateForm &&
+      this.DealMethodParams.selectedObject &&
+      this.ContractTypeParams.selectedObject;
+    if (ValidateForm) {
+      this.ProductRequestObject.ContractTypeCode = this.ContractTypeParams.selectedObject ? this.ContractTypeParams.selectedObject : null;
+      this.ProductRequestObject.ConsultantSelectTypeCode = this.ConsultantSelectTypeParams.selectedObject ? this.ConsultantSelectTypeParams.selectedObject : null; // RFC 51021
+      this.ProductRequestObject.DealMethodCode = this.DealMethodParams.selectedObject ? this.DealMethodParams.selectedObject : null;
+      this.ProductRequestObject.ConsultantSelectedWayCode = this.ConsultantSelectedWayParams.selectedObject ? this.ConsultantSelectedWayParams.selectedObject : null;
+      this.ProductRequestObject.Article31ID = this.Article31Params.selectedObject ? this.Article31Params.selectedObject : null;
+      this.ProductRequestObject.DurationDay = this.DurationDay;
+      this.ProductRequestObject.DurationMonth = this.DurationMonth;
+      this.ProductRequestObject.DurationYear = this.DurationYear;
+      /////
+      this.ProductRequestObject.IsPact = 1;
+      this.ProductRequestObject.PriceListPatternID = this.PriceListPatternID;
+      this.ProductRequestObject.IsBalancing = this.IsBalancing;
+      this.ProductRequestObject.IsMaterialsDifference = this.IsMaterialsDifference;
+      this.ProductRequestObject.SeasonCode = this.SeasonListParams.selectedObject ? this.SeasonListParams.selectedObject : null;
+      this.ProductRequestObject.IsTaxValue = this.PRIsTaxValue;
+      /////
+      this.ProductRequest.UpdateProductRequestInfo(
+        this.ProductRequestObject,
+        this.PopupParam.OrginalModuleCode,
+        this.ModuleCode
+      ).subscribe(
+        (res: any) => {
+          this.PopupOutPut.emit(res);
+          const LetterTypeCodeList = [];
+          LetterTypeCodeList.push(1);
+          this.LetterParam = {
+            CostFactorID: res.CostFactorID,
+            RegionCode: res.RegionCode,
+            LetterTypeCodeList: LetterTypeCodeList,
+            OrganizationCode: this.ProductRequestObject.OrganizationCode,
+            ReceiveDocID: null,
+            SaveMode: this.IsEditable,
+            ReadOnlyMode: !this.IsEditable
+          };
+          this.ShowMessageBoxWithOkBtn('ثبت با موفقيت انجام شد');
+        },
+        err => {
+          if (!err.error.Message.includes('|')) {
+            this.ShowMessageBoxWithOkBtn('ثبت با شکست مواجه شد');
+            this.IsValidContract = false;
+          }
+        }
+      );
+    }
+  }
+
+  onProxyContractClick() {
+    this.PopUpType = 'proxy-contract-list';
+    this.HaveHeader = true;
+    this.isClicked = true;
+    this.startLeftPosition = 20;
+    this.startTopPosition = 20;
+    this.HaveMaxBtn = false;
+    this.MainMaxwidthPixel = 600;
+    this.MinHeightPixel = 600;
+    this.PopupParam = {
+      ProxyContract: true,
+      RegionCode: this.ProductRequestObject.RegionCode,
+      OrginalModuleCode: this.PopupParam.OrginalModuleCode ? this.PopupParam.OrginalModuleCode : this.ModuleCode
+    };
+  }
+
+  onShowContractRelationClick() {
+    this.PopUpType = 'show-contract-relation';
+    this.HaveHeader = true;
+    this.isClicked = true;
+    this.startLeftPosition = 200;
+    this.startTopPosition = 20;
+    this.HaveMaxBtn = false;
+    this.MainMaxwidthPixel = 600;
+    this.MinHeightPixel = 600;
+    this.PopupParam = {
+      CostFactorID: this.ProductRequestObject.ContractObject.CostFactorId,
+      IsCost: this.ProductRequestObject.IsCost
+    };
   }
 }

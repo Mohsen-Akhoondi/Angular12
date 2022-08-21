@@ -21,10 +21,22 @@ export class GlobalChoosePageComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {
-    this.type = this.InputParam &&
+  ngOnInit() { // RFC 64628
+    if (this.InputParam &&
       this.InputParam.RadioItems &&
-      this.InputParam.RadioItems.length > 0 ? this.InputParam.RadioItems[0].type : null;
+      this.InputParam.RadioItems.length > 0) {
+      let keepGoing = true;
+      this.InputParam.RadioItems.forEach(element => {
+        if (keepGoing) {
+          if (!element.IsDisable) {
+            element.checked = true;
+            this.type = element.type;
+            keepGoing = false;
+          }
+        }
+      });
+
+    }
     this.HaveDelete = this.InputParam.ModuleCode === 2730
       && (this.InputParam.ModuleViewTypeCode === 47 ||
         this.InputParam.ModuleViewTypeCode === 68 ||

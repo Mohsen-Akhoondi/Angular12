@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
 import { BaseHttpClient } from 'src/app/Services/BaseService/BaseHttpClient';
 @Injectable({ providedIn: 'root' })
 export class WorkflowService {
@@ -198,8 +197,14 @@ export class WorkflowService {
     GetNodesByInstance(WorkFlowInstanceID: number) {
         return this.http.get(window.location.origin + '/Workflow/GetNodesByInstance', { WorkFlowInstanceID });
     }
+    GetNodesLineByInstance(WorkFlowInstanceID: number) {
+        return this.http.get(window.location.origin + '/Workflow/GetNodesLineByInstance', { WorkFlowInstanceID });
+    }
     GetEdgesByInstance(WorkFlowInstanceID: number) {
         return this.http.get(window.location.origin + '/Workflow/GetEdgesByInstance', { WorkFlowInstanceID });
+    }
+    GetEdgesLineByInstance(WorkFlowInstanceID: number) {
+        return this.http.get(window.location.origin + '/Workflow/GetEdgesLineByInstance', { WorkFlowInstanceID });
     }
     GetFindWorkFlowUser(WorkflowTransitionID,WorkflowLogID){
         return this.http.get(window.location.origin + '/Workflow/FindWorkFlowUser' , {WorkflowTransitionID , WorkflowLogID});

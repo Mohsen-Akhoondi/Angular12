@@ -29,11 +29,11 @@ export class GradeComponent implements OnInit {
   constructor(private GradeService: CommonService,
     private route: ActivatedRoute,
     private router: Router,
-    private users: UserSettingsService ) {
-      this.HasSave = false;
-        this.sub = this.route.params.subscribe(params => {
-          this.ModuleCode = +params['ModuleCode'];
-        });
+    private users: UserSettingsService) {
+    this.HasSave = false;
+    this.sub = this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
   }
 
   GradeGridReady(event) {
@@ -65,10 +65,10 @@ export class GradeComponent implements OnInit {
           editable: res,
           resizable: true
         },
-    ];
+      ];
     });
-      this.GradeService.GetAllGradeData().subscribe((res: any) => {
-          this.rowData = res;
+    this.GradeService.GetAllGradeData().subscribe((res: any) => {
+      this.rowData = res;
     });
   }
   popupclosed() {
@@ -86,18 +86,18 @@ export class GradeComponent implements OnInit {
     });
     this.rowData.forEach(res => {
       const FielLst = {
-        GradeCode : res.GradeCode,
-        GradeName : res.GradeName,
+        GradeCode: res.GradeCode,
+        GradeName: res.GradeName,
       };
       this.Dto.push(FielLst);
     });
-      this.GradeService.SaveGradeDataList(this.Dto, this.ModuleCode).subscribe((res: any) => {
-        this.rowData = res;
-        this.btnclicked = true;
-        this.type = 'message-box';
-        this.HaveHeader = false;
-        this.HaveMaxBtn = false;
-        this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
-      });
+    this.GradeService.SaveGradeDataList(this.Dto, this.ModuleCode).subscribe((res: any) => {
+      this.rowData = res;
+      this.btnclicked = true;
+      this.type = 'message-box';
+      this.HaveHeader = false;
+      this.HaveMaxBtn = false;
+      this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
+    });
   }
 }

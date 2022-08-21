@@ -1,19 +1,18 @@
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
+import { NgSelectConfig } from 'src/app/Shared/ng-select';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ModuleService } from 'src/app/Services/BaseService/ModuleService';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Input, Component, OnInit, Output, EventEmitter, TemplateRef, ViewChild, ANALYZE_FOR_ENTRY_COMPONENTS } from '@angular/core';
+import { Input, Component, OnInit, Output, EventEmitter, TemplateRef, ViewChild } from '@angular/core';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
-import { of, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { isUndefined } from 'util';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
@@ -31,7 +30,8 @@ export class UserWorkLogDetailComponent implements OnInit {
   @Input() PopupParam;
   HasSave: boolean;
   Subject: any;
-  PercentWidth;
+  MinHeightPixel;
+  PixelHeight;
   paramObj;
   HeightPercentWithMaxBtn;
   LetterNo: any;
@@ -765,15 +765,15 @@ export class UserWorkLogDetailComponent implements OnInit {
     this.WorkflowOperationList = this.Workflow.GetWorkflowOperation();
     this.SetFormData();
     this.FillWorkLog();
-    this.HasSave = this.ParentModuleCode === 2793 || this.ParentModuleCode === 2842 || this.ParentModuleCode === 2875
-      || this.ParentModuleCode === 2948; // ابزار // RFC 52223
+    this.HasSave = this.ParentModuleCode === 2793 || this.ParentModuleCode === 2842 || this.ParentModuleCode === 2875 || this.ParentModuleCode === 3029
+    || this.ParentModuleCode === 3071 || this.ParentModuleCode === 2948; // ابزار // RFC 52223
     if (this.ParentModuleCode === 2793 || this.ParentModuleCode === 2948) {
       this.DisableRevoke = true;
     }
     if (this.ParentModuleCode === 2785 || this.ParentModuleCode === 2784) {
       this.HasSave = this.PopupParam.IsAdmin;
     }
-    if ((this.ParentModuleCode === 2785 || this.ParentModuleCode === 2784) && this.PopupParam.IsAdmin) {
+    if ((this.ParentModuleCode === 2785 || this.ParentModuleCode === 2784 || this.ParentModuleCode === 3029) && this.PopupParam.IsAdmin) {
       this.HaveDelete = true;
     }
   }
@@ -1163,6 +1163,7 @@ export class UserWorkLogDetailComponent implements OnInit {
       null,
       this.WorkFlowInstanceId).subscribe(res => {
       this.ShowMessageBoxWithOkBtn('درخواست با موفقیت ابطال شد');
+      this.ngOnInit();
     });
   }
   BtnVeiwclick(){
@@ -1171,12 +1172,12 @@ export class UserWorkLogDetailComponent implements OnInit {
      this.btnclicked = true;
      this.HaveHeader = true;
      this.HaveMaxBtn = true;
-     this.startTopPosition =30;
-     this.startLeftPosition = 116;
-     this.PercentWidth = 83;
-     this.HaveMaxBtn = true;
-     this.HeightPercentWithMaxBtn =91;
-     this.paramObj = {
+     this.startTopPosition =10;
+    this.startLeftPosition = 110;
+    this.HaveMaxBtn = true;
+    this.MinHeightPixel = 625;
+    this.PixelHeight = 650;
+    this.paramObj = {
       HeaderName: 'مشاهده گراف جزئیات گردش کار',
       WorkFlowInstanceIdSelected :  this.WorkFlowInstanceId
      };

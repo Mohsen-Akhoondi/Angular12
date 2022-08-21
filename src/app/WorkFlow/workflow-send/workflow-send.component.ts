@@ -7,7 +7,6 @@ import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
 import { CommonService } from 'src/app/Services/CommonService/CommonService';
-import { single } from 'rxjs/operators';
 
 @Component({
   selector: 'app-workflow-send',
@@ -80,13 +79,15 @@ export class WorkflowSendComponent implements OnInit {
   }
 
   IsEditableActorName = false;
+  MainMaxwidthPixel: number;
+  PercentWidth: number;
   constructor(private Cartable: CartableServices,
     private RefreshCartable: RefreshServices,
-    private Workflow : WorkflowService,
+    private Workflow: WorkflowService,
     private RefreshEquipmentTypeItems: RefreshServices,
     private CommonService: CommonServices,
     private Common: CommonService,
-    ) {
+  ) {
   }
 
   ngOnInit() {
@@ -102,8 +103,8 @@ export class WorkflowSendComponent implements OnInit {
         this.gridHeightPxel = 250;
       }
 
-      if(this.rowData && this.rowData.length ==1 && this.rowData[0].WorkflowActionTypeCode === 2 
-        && !this.rowData[0].ActorName && !this.rowData[0].AfterFlow){
+      if (this.rowData && this.rowData.length == 1 && this.rowData[0].WorkflowActionTypeCode === 2
+        && !this.rowData[0].ActorName && !this.rowData[0].AfterFlow) {
         this.IsEditableActorName = true;
       }
 
@@ -203,8 +204,8 @@ export class WorkflowSendComponent implements OnInit {
         headerName: 'نام و نام خانوادگی',
         field: 'ActorName',
         width: 210,
-        resizable: true ,
-        cellEditorFramework : NgSelectVirtualScrollComponent,
+        resizable: true,
+        cellEditorFramework: NgSelectVirtualScrollComponent,
         cellEditorParams: {
           Params: this.NgSelectActorCSMParams,
           Items: [],
@@ -219,22 +220,21 @@ export class WorkflowSendComponent implements OnInit {
             return '';
           }
         },
-        valueSetter: (params) =>
-        {
-          if (params.newValue && params.newValue.ActorName){
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.ActorName) {
             params.data.ActorID = params.newValue.ActorID;
             params.data.ActorName = params.newValue.ActorName;
             params.data.DesUserID = params.newValue.UserID;
             params.data.UserImage = params.newValue.UserImage;
             return true;
-          }else {
+          } else {
             params.data.ActorID = null;
             params.data.ActorName = '';
             return false;
           }
         },
         editable: () => {
-          return this.IsEditableActorName ;
+          return this.IsEditableActorName;
         },
       },
       {
@@ -278,42 +278,42 @@ export class WorkflowSendComponent implements OnInit {
       switch (this.OperationCode) {
 
         case 1:
-            if (this.InputParam.MinimumPosting && this.InputParam.MinimumPosting !== GridrowData.length) {
-              this.PopUptype = 'message-box';
-              this.startLeftPosition = 449;
-              this.startTopPosition = 87;
-              this.isClicked = true;
-              this.IsDisable = false;
-              this.alertMessageParams.message = 'تعداد ردیف های انتخاب شده باید ' + this.InputParam.MinimumPosting + ' ردیف باشد';
-              return;
-            }
-            this.Cartable.UserConfirmBatchWorkFlow(
-              this.CurrWorkFlow,
-              this.WorkFlowID,
-              this.ObjectNo,
-              this.WorkflowTypeName,
-              this.WorkflowTypeCode,
-              this.ObjectID,
-              GridrowData,
-              this.WorkflowObjectCode,
-              this.InputParam.OrginalModuleCode,
-              this.ModuleViewTypeCode,
-              this.CartableUserID)
-              .subscribe(res => {
-                this.RefreshCartable.RefreshCartable();
-                this.ISworkFlowSend.emit(true);
-                this.close();
-              },
-                err => {
-                  if (!err.error.Message.includes('|')) {
-                    this.IsDisable = false;
-                    this.PopUptype = 'message-box';
-                    this.startLeftPosition = 449;
-                    this.startTopPosition = 87;
-                    this.alertMessageParams.message = 'خطای پیش بینی نشده';
-                    this.isClicked = true;
-                  }
-                });
+          if (this.InputParam.MinimumPosting && this.InputParam.MinimumPosting !== GridrowData.length) {
+            this.PopUptype = 'message-box';
+            this.startLeftPosition = 449;
+            this.startTopPosition = 87;
+            this.isClicked = true;
+            this.IsDisable = false;
+            this.alertMessageParams.message = 'تعداد ردیف های انتخاب شده باید ' + this.InputParam.MinimumPosting + ' ردیف باشد';
+            return;
+          }
+          this.Cartable.UserConfirmBatchWorkFlow(
+            this.CurrWorkFlow,
+            this.WorkFlowID,
+            this.ObjectNo,
+            this.WorkflowTypeName,
+            this.WorkflowTypeCode,
+            this.ObjectID,
+            GridrowData,
+            this.WorkflowObjectCode,
+            this.InputParam.OrginalModuleCode,
+            this.ModuleViewTypeCode,
+            this.CartableUserID)
+            .subscribe(res => {
+              this.RefreshCartable.RefreshCartable();
+              this.ISworkFlowSend.emit(true);
+              this.close();
+            },
+              err => {
+                if (!err.error.Message.includes('|')) {
+                  this.IsDisable = false;
+                  this.PopUptype = 'message-box';
+                  this.startLeftPosition = 449;
+                  this.startTopPosition = 87;
+                  this.alertMessageParams.message = 'خطای پیش بینی نشده';
+                  this.isClicked = true;
+                }
+              });
           break;
         case 2:
           if (this.CurrWorkFlow.MinimumReturn && this.CurrWorkFlow.MinimumReturn !== ReturnGridrowData.length) {
@@ -376,41 +376,51 @@ export class WorkflowSendComponent implements OnInit {
       if (this.InputParam.selectedRow && this.InputParam.selectedRow.data.WorkflowObjectCode === 2) {
 
         if (this.InputParam.CurrWorkFlow.ObjectTypeCode === 2) {
-          if (this.InputParam.ContractTypeCode === 26 || this.InputParam.ContractTypeCode === 29) {
-            this.PopUptype ='contract-pay-details'; // 'contract-pay-item-hour';
-            this.startLeftPosition = 59;
-            this.startTopPosition = 20;
-          }
-          if (this.InputParam.ContractTypeCode === 27 || this.InputParam.ContractTypeCode === 28) {
-            this.PopUptype = 'contract-pay-details';
-            this.PopUpParams.ShowReportsSign = false;
-            this.startLeftPosition = 59;
-            this.startTopPosition = 20;
-          }
-          if (!this.InputParam.PriceListPatternID) {
-            this.PopUptype = 'contract-pay-details';
-            this.PopUpParams.ShowReportsSign = false;
-            this.startLeftPosition = 59;
-            this.startTopPosition = 20;
-          }
+          // if (this.InputParam.ContractTypeCode === 26 || this.InputParam.ContractTypeCode === 29) {
+          //   this.PopUptype ='contract-pay-details'; // 'contract-pay-item-hour';
+          //   this.startLeftPosition = 59;
+          //   this.startTopPosition = 20;
+          // }
+          // if (this.InputParam.ContractTypeCode === 27 || this.InputParam.ContractTypeCode === 28) {
+          //   this.PopUptype = 'contract-pay-details';
+          //   this.PopUpParams.ShowReportsSign = false;
+          //   this.startLeftPosition = 59;
+          //   this.startTopPosition = 20;
+          // }
+          // if (!this.InputParam.PriceListPatternID) {
+          //   this.PopUptype = 'contract-pay-details';
+          //   this.PopUpParams.ShowReportsSign = false;
+          //   this.startLeftPosition = 59;
+          //   this.startTopPosition = 20;
+          // }
 
-          if (this.InputParam.PriceListPatternID &&
-            this.InputParam.ContractTypeCode !== 26 &&
-            this.InputParam.ContractTypeCode !== 29) {
-            // this.PopUpParams.WorkFlowID = this.SelectedRow.data.WorkFlowLogID;
-            // this.PopUptype = 'contract-pay-item-estimate-page';
-            // this.startLeftPosition = 59;
-            // this.startTopPosition = 20;
-            this.PopUptype = 'contract-pay-details';
-            this.PopUpParams.ShowReportsSign = false;
-            this.startLeftPosition = 59;
-            this.startTopPosition = 20;
-          }
+          // if (this.InputParam.PriceListPatternID &&
+          //   this.InputParam.ContractTypeCode !== 26 &&
+          //   this.InputParam.ContractTypeCode !== 29) {
+          //   // this.PopUpParams.WorkFlowID = this.SelectedRow.data.WorkFlowLogID;
+          //   // this.PopUptype = 'contract-pay-item-estimate-page';
+          //   // this.startLeftPosition = 59;
+          //   // this.startTopPosition = 20;
+          //   this.PopUptype = 'contract-pay-details';
+          //   this.PopUpParams.ShowReportsSign = false;
+          //   this.startLeftPosition = 59;
+          //   this.startTopPosition = 20;
+          // }
+          // this.HeightPercentWithMaxBtn = 97;
+          // this.HaveMaxBtn = true;
+          // this.MinHeightPixel = 645;
+        }
+
+        if (this.InputParam.CurrWorkFlow.ObjectTypeCode === 2) {
+          this.PopUptype = 'contract-pay-details';
+          this.startLeftPosition = 7;
+          this.startTopPosition = 15;
           this.HeightPercentWithMaxBtn = 97;
           this.HaveMaxBtn = true;
           this.MinHeightPixel = 645;
         }
-        if (this.InputParam.CurrWorkFlow.ObjectTypeCode === 9 || this.InputParam.CurrWorkFlow.ObjectTypeCode === 10) { // پیش پرداخت و علی الحساب
+
+        if (this.InputParam.CurrWorkFlow.ObjectTypeCode === 9) { // پیش پرداخت و علی الحساب
           this.startLeftPosition = 300;
           this.startTopPosition = 100;
           this.PopUptype = 'pre-pay';
@@ -423,7 +433,8 @@ export class WorkflowSendComponent implements OnInit {
       if (this.InputParam.selectedRow &&
         (this.InputParam.selectedRow.data.WorkflowObjectCode === 3
           || this.InputParam.selectedRow.data.WorkflowObjectCode === 5
-          || this.InputParam.selectedRow.data.WorkflowObjectCode === 7)) {
+          || this.InputParam.selectedRow.data.WorkflowObjectCode === 7
+          || this.InputParam.selectedRow.data.WorkflowObjectCode === 31)) {
         this.PopUptype = 'product-request-page';
         this.startLeftPosition = 10;
         this.startTopPosition = 0;
@@ -434,7 +445,8 @@ export class WorkflowSendComponent implements OnInit {
         (this.InputParam.selectedRow.data.WorkflowObjectCode === 4
           || this.InputParam.selectedRow.data.WorkflowObjectCode === 6
           || this.InputParam.selectedRow.data.WorkflowObjectCode === 9
-          || this.InputParam.selectedRow.data.WorkflowObjectCode === 13)) {
+          || this.InputParam.selectedRow.data.WorkflowObjectCode === 13
+          || this.InputParam.selectedRow.data.WorkflowObjectCode === 29)) {
         this.PopUptype = 'product-request-page-without-flow';
         this.HeightPercentWithMaxBtn = 97;
         this.MinHeightPixel = 645;
@@ -489,12 +501,55 @@ export class WorkflowSendComponent implements OnInit {
       if (this.InputParam.CurrWorkFlow &&
         (this.InputParam.CurrWorkFlow.WorkflowObjectCode === 25)) {
         this.PopUptype = 'customer-order';
-        this.startLeftPosition = 10;
-        this.startTopPosition = 0;
+        this.startLeftPosition = 100;
+        this.startTopPosition = 10;
         this.HeightPercentWithMaxBtn = 97;
         this.MinHeightPixel = 645;
+        this.MainMinwidthPixel = 1100;
+      }
+      if (this.InputParam.CurrWorkFlow &&
+        (this.InputParam.CurrWorkFlow.WorkflowObjectCode === 27)) {
+        this.PopUptype = 'customer-product-request-page';
+        this.startLeftPosition = 50;
+        //this.PercentWidth = 90;
+        this.startTopPosition = 10;
+        this.HeightPercentWithMaxBtn = 97;
+        this.MinHeightPixel = 645;
+        this.MainMinwidthPixel = 1215;
       }
 
+      if (this.InputParam.CurrWorkFlow &&
+        (this.InputParam.CurrWorkFlow.WorkflowObjectCode === 26)){
+        this.PopUptype = 'app-asset';
+        this.startLeftPosition = 50;
+        //this.PercentWidth = 90;
+        this.startTopPosition = 10;
+        this.HeightPercentWithMaxBtn = 97;
+        this.MinHeightPixel = 645;
+        this.MainMinwidthPixel = 1215;
+      }
+      if (this.InputParam.CurrWorkFlow &&
+        (this.InputParam.CurrWorkFlow.WorkflowObjectCode === 28)){
+        this.PopUptype = 'contract-supervision';
+        this.startLeftPosition = 50;
+        //this.PercentWidth = 90;
+        this.startTopPosition = 10;
+        this.HeightPercentWithMaxBtn = 97;
+        this.MinHeightPixel = 645;
+        this.MainMinwidthPixel = 1215;
+      }
+      if (this.InputParam.CurrWorkFlow &&
+        (this.InputParam.CurrWorkFlow.WorkflowObjectCode === 30)) {
+        this.PopUptype = 'product-request-invest-archive';   
+        this.HeightPercentWithMaxBtn = 97;
+        this.PercentWidth = 80;
+        this.MinHeightPixel = 626;
+        this.startLeftPosition = 115;
+        this.startTopPosition = 11;
+        //this.MainMaxwidthPixel = this.MainMinwidthPixel = 1200;
+        this.HaveMaxBtn = true;
+      }
+ 
       this.isClicked = true;
     }
   }
@@ -621,7 +676,7 @@ export class WorkflowSendComponent implements OnInit {
   }
   onCellEditingStarted(event) {
     if (event.colDef && event.colDef.field === 'ActorName') {
-      this.Workflow.GetFindWorkFlowUser(event.data.WorkFlowTransitionID,this.WorkFlowID).subscribe(res => {
+      this.Workflow.GetFindWorkFlowUser(event.data.WorkFlowTransitionID, this.WorkFlowID).subscribe(res => {
         if (res != null && res.length > 0) {
           res.forEach(element => {
             element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);

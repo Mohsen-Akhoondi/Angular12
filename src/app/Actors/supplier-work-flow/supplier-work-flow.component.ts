@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, TemplateRef, Input, Output, EventEmitter } from '@angular/core';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
-import { Router, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServices';

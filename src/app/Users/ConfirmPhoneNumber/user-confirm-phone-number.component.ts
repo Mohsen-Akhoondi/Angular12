@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
-import { isNumber } from 'util';
 declare var jquery: any;
 declare var $: any;
 @Component({

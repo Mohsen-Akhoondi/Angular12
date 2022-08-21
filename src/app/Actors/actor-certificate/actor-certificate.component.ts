@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, Input, EventEmitter, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { of } from 'rxjs';
 import { Router } from '@angular/router';

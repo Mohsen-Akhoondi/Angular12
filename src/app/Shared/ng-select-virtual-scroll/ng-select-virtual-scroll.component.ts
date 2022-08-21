@@ -103,14 +103,18 @@ export class NgSelectVirtualScrollComponent implements ICellEditorAngularComp, O
   mouseEnter() {
     if (this.Items &&
       this.Items.length > 0 &&
-      this.NgSelectParams.selectedObject &&
-      this.NgSelectParams.selectedObject.length &&
-      this.NgSelectParams.selectedObject.length > 0) {
+      this.NgSelectParams.selectedObject) {
       let ATooltipText = '';
-      this.NgSelectParams.selectedObject.forEach(element => {
-        const Item = this.Items.filter((x: { [x: string]: any; }) => x[this.NgSelectParams.bindValueProp] === element)[0]
-        ATooltipText += Item[this.NgSelectParams.bindLabelProp] + '\n';
-      });
+      if (this.NgSelectParams.selectedObject.length &&
+        this.NgSelectParams.selectedObject.length > 0) {
+        this.NgSelectParams.selectedObject.forEach(element => {
+          const Item = this.Items.filter((x: { [x: string]: any; }) => x[this.NgSelectParams.bindValueProp] === element)[0]
+          ATooltipText += Item[this.NgSelectParams.bindLabelProp] + '\n';
+        });
+      } else {
+        const Item = this.Items.filter((x: { [x: string]: any; }) => x[this.NgSelectParams.bindValueProp] === this.NgSelectParams.selectedObject)[0]
+        ATooltipText = Item[this.NgSelectParams.bindLabelProp];
+      }
       this.TooltipText = ATooltipText;
     }
   }

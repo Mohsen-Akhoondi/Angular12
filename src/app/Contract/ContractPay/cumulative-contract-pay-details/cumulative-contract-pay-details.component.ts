@@ -1,6 +1,5 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import * as moment from 'jalali-moment';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { FinYearService } from 'src/app/Services/BaseService/FinYearService';
 import { forkJoin, of } from 'rxjs';
@@ -11,7 +10,6 @@ import { isUndefined } from 'util';
 import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServices';
 import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-// import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-angular-datepicker/jalali-datepicker/jalali-datepicker.component';
 import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 
 @Component({

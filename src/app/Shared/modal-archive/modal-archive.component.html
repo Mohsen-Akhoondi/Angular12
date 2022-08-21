@@ -8,7 +8,7 @@
               [columns]="DocTypecolumnDef" [rowsData]="DocTypeData" [gridHeightPxel]="195"
               (RowClick)="onDocTypeRowClicked($event)"></app-grid>
           </div>
-          <fieldset *ngIf="HasArchiveAccess === true" align="right" class="feild-set" style="display: inherit">
+          <fieldset *ngIf="HasArchiveAccess" align="right" class="feild-set" style="display: inherit">
             <legend style="width: 15%;">بارگذاری پیوست</legend>
             <!-- <div class="input-group mb-3" style="margin-top: 15px;margin-bottom: 3px !important;height: 100px;"> -->
             <table class="input-group mb-3" style="margin-top: 15px;margin-bottom: 3px !important;width: 100%;">
@@ -102,9 +102,9 @@
     [src]="row.USE_IN_ADVERTISING ? 'assets/Icons/TrueCheckBox.png':'assets/Icons/uncheck.png'" />
 </ng-template>
 
-<app-over-popup *ngIf="isClicked" [PopupType]="type"
+<app-shared-over-popup *ngIf="isClicked" [PopupType]="type"
   [PopupParam]="type === 'message-box' ? alertMessageParams : paramObj" (popupclosed)="popupclosed($event)"
   [startLeftPosition]="startLeftPosition" [startTopPosition]="startTopPosition" [HaveHeader]="HaveHeader"
   [MainMaxwidthPixel]="MainMaxwidthPixel" [HeightPercentWithMaxBtn]="OverHeightPercent" [HaveMaxBtn]="HaveMaxBtn"
   [MainMinwidthPixel]="OverMainMinwidthPixel">
-</app-over-popup>
+</app-shared-over-popup>

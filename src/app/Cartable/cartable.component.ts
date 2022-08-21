@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserSettingsService } from '../Services/BaseService/UserSettingsService';
-import { of } from 'rxjs';
 import { GridOptions } from 'ag-grid-community';
 import { CartableServices } from '../Services/WorkFlowService/CartableServices';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
@@ -9,10 +8,7 @@ import { RefreshServices } from '../Services/BaseService/RefreshServices';
 import { CommonServices } from '../Services/BaseService/CommonServices';
 import { TemplateRendererComponent } from '../Shared/grid-component/template-renderer/template-renderer.component';
 import { ActorService } from '../Services/BaseService/ActorService';
-import { resolve } from 'path';
 import { WorkflowService } from '../Services/WorkFlowService/WorkflowServices';
-import { SpawnSyncOptionsWithStringEncoding } from 'child_process';
-import { isUndefined } from 'util';
 import { ReportService } from '../Services/ReportService/ReportService';
 import { environment } from 'src/environments/environment';
 
@@ -208,6 +204,7 @@ export class CartableComponent implements OnInit {
   ISIRVersion = false;
   btnclicked = false;
   PopupType = '';
+  NewUserMenuSelected: boolean; // 64114
 
   constructor(private router: Router,
     private ContractList: ContractListService,
@@ -220,6 +217,7 @@ export class CartableComponent implements OnInit {
     private Report: ReportService,
   ) {
     this.NewUserSelected = false;
+    this.NewUserMenuSelected = false;
   }
   ngOnInit() {
     this.ISIRVersion = environment.IsExternal; // RFC 56670
@@ -227,6 +225,7 @@ export class CartableComponent implements OnInit {
     this.UserSettings.ChangeCartableUserPermission().subscribe(res => {
       this.IsAdmin = res.HaveAdminPermission;
       this.NewUserSelected = res.HaveSelectedUserSession;
+      this.NewUserMenuSelected = res.HaveSelectedUserMenuSession;
       if (res.HaveSelectedUserSession && res.CurrentUser) {
         this.gridheader = res.CurrentUser.ActorFullName + ': ';
         for (let i = 0; i < res.CurrentUser.UsersRolesList.length; i++) {
@@ -830,8 +829,6 @@ export class CartableComponent implements OnInit {
   }
 
   onRowDoubleClicked(Value) {
-    console.log("Value",Value);
-    
     this.HeightPercentWithMaxBtn = 95;
     this.MinHeightPixel = 645;
     this.UserSettings.GetUserRegionCodeByWorkflowTransitionID(Value.data.WorkflowID).subscribe(res => {
@@ -857,8 +854,7 @@ export class CartableComponent implements OnInit {
         HeaderName = Value.data.ModuleViewTypeName.split('|')[0];
       }
     }
-    console.log("Value.data.WorkflowObjectCode",Value.data.WorkflowObjectCode);
-    
+
     this.Cartable.UserUpdateWorkFlowStatus(Value.data.JoinWorkflowLogID.split('|'), Value.data.CartableUserID).
       subscribe(res => {
         if (Value.data.WorkflowObjectCode === 1) {
@@ -957,30 +953,45 @@ export class CartableComponent implements OnInit {
 
           if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
 
-            if (Value.data.ContractTypeCode === 26 || Value.data.ContractTypeCode === 29) {
-              this.type = 'contract-pay-details' // 'contract-pay-item-hour';
-            }
+            // if (Value.data.ContractTypeCode === 26 || Value.data.ContractTypeCode === 29) {
+            //   this.type = 'contract-pay-details' // 'contract-pay-item-hour';
+            // }
 
-            if (Value.data.ContractTypeCode === 27 || Value.data.ContractTypeCode === 28) {
+            // if (Value.data.ContractTypeCode === 27 || Value.data.ContractTypeCode === 28) {
+            //   this.type = 'contract-pay-details';
+            // }
+
+            // if (!Value.data.PriceListPatternID) {
+            //   this.type = 'contract-pay-details';
+            // }
+
+            // if (Value.data.PriceListPatternID &&
+            //   Value.data.ContractTypeCode !== 26 &&
+            //   Value.data.ContractTypeCode !== 29) {
+            //   // this.type = 'contract-pay-item-estimate-page';
+            //   this.type = 'contract-pay-details';
+            // }
+
+            // this.HaveMaxBtn = true;
+            // this.HeightPercentWithMaxBtn = 97;
+            // this.startLeftPosition = 59;
+            // this.startTopPosition = 20;
+
+
+            // case when co.is_on_contract = 0 then 2                                                              
+            //      when co.is_on_contract = 1 then 9
+            //      else 10 end    object_type_code
+
+
+            if (Value.data.ObjectTypeCode === 2) {
               this.type = 'contract-pay-details';
+              this.HaveMaxBtn = true;
+              this.HeightPercentWithMaxBtn = 97;
+              this.startLeftPosition = 59;
+              this.startTopPosition = 20;
             }
 
-            if (!Value.data.PriceListPatternID) {
-              this.type = 'contract-pay-details';
-            }
-
-            if (Value.data.PriceListPatternID &&
-              Value.data.ContractTypeCode !== 26 &&
-              Value.data.ContractTypeCode !== 29) {
-              // this.type = 'contract-pay-item-estimate-page';
-              this.type = 'contract-pay-details';
-            }
-            this.HaveMaxBtn = true;
-            this.HeightPercentWithMaxBtn = 97;
-            this.startLeftPosition = 59;
-            this.startTopPosition = 20;
-
-            if (Value.data.ObjectTypeCode === 9 || Value.data.ObjectTypeCode === 10) { // پیش پرداخت و علی الحساب
+            if (Value.data.ObjectTypeCode === 9) { // پیش پرداخت و علی الحساب
               this.startLeftPosition = 300;
               this.startTopPosition = 100;
               this.HaveMaxBtn = true;
@@ -988,6 +999,7 @@ export class CartableComponent implements OnInit {
               this.MainMinwidthPixel = 780;
               this.type = 'pre-pay';
             }
+
             this.paramObj = {
               CurrWorkFlow: Value.data,
               ReferenceUserName: Value.data.ReferenceUserName,
@@ -1088,10 +1100,8 @@ export class CartableComponent implements OnInit {
             });
           }
         }
-        if (Value.data.WorkflowObjectCode === 3 || Value.data.WorkflowObjectCode === 5 || Value.data.WorkflowObjectCode === 7) {
+        if (Value.data.WorkflowObjectCode === 3 || Value.data.WorkflowObjectCode === 5 || Value.data.WorkflowObjectCode === 7 || Value.data.WorkflowObjectCode === 31) {
           if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
-            console.log("معاملاتت");
-            
             this.type = 'product-request-page';
             this.HaveMaxBtn = true;
             this.startLeftPosition = 10;
@@ -1120,6 +1130,7 @@ export class CartableComponent implements OnInit {
               ContractTypeCode: -1,
               ISProvisionRemain: Value.data.WorkflowObjectCode === 5,
               ISArticle48: Value.data.WorkflowObjectCode === 7,
+              ISTavafoghNameh: Value.data.WorkflowObjectCode === 31,
               RegionCode: Value.data.RegionCode,
               RegionName: Value.data.RegionName,
               MinimumPosting: Value.data.MinimumPosting,
@@ -1129,7 +1140,7 @@ export class CartableComponent implements OnInit {
             };
             this.isClicked = true;
           } else {
-            
+
             this.IsDown = false;
             const WorkLogIDs = Value.data.JoinWorkflowLogID.split('|');
             this.paramObj = { rows: <any>[], IsWFShow: true };
@@ -1171,6 +1182,7 @@ export class CartableComponent implements OnInit {
                   ContractTypeCode: -1,
                   ISProvisionRemain: Value.data.WorkflowObjectCode === 5,
                   ISArticle48: Value.data.WorkflowObjectCode === 7,
+                  ISTavafoghNameh: Value.data.WorkflowObjectCode === 31,
                   MinimumPosting: Value.data.MinimumPosting,
                   HeaderName: HeaderName,
                   CartableUserID: Value.data.CartableUserID,
@@ -1202,7 +1214,8 @@ export class CartableComponent implements OnInit {
           }
         }
         // tslint:disable-next-line: max-line-length
-        if (Value.data.WorkflowObjectCode === 4 || Value.data.WorkflowObjectCode === 6 || Value.data.WorkflowObjectCode === 9 || Value.data.WorkflowObjectCode === 13) {
+        if (Value.data.WorkflowObjectCode === 4 || Value.data.WorkflowObjectCode === 6 ||
+          Value.data.WorkflowObjectCode === 9 || Value.data.WorkflowObjectCode === 13) {
           if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
             this.type = 'product-request-page-without-flow';
             this.HaveMaxBtn = true;
@@ -1929,13 +1942,14 @@ export class CartableComponent implements OnInit {
           if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
             this.type = 'customer-order';
             this.HaveMaxBtn = true;
-            this.startLeftPosition = 10;
-            this.startTopPosition = 0;
+            this.startLeftPosition = 100;
+            this.startTopPosition = 10;
             this.HeightPercentWithMaxBtn = 97;
             this.MinHeightPixel = 645;
+            this.MainMinwidthPixel = 1100;
             this.paramObj = {
               CurrWorkFlow: Value.data,
-              CustomerOrderID :Value.data.ObjectID,
+              CustomerOrderID: Value.data.ObjectID,
               ModuleViewTypeCode: Number(ModuleViewTypeCode),
               Mode: 'EditMode',
               HeaderName: HeaderName,
@@ -1956,11 +1970,347 @@ export class CartableComponent implements OnInit {
                   rows: res,
                   IsWFShow: true,
                   CurrWorkFlow: Value.data,
-                  CustomerOrderID :Value.data.ObjectID,
+                  CustomerOrderID: Value.data.ObjectID,
                   ModuleViewTypeCode: Number(ModuleViewTypeCode),
                   UserRegionCode: this.UserRegionCode,
                   Mode: 'EditMode',
                   HeaderName: HeaderName,
+                  MinimumPosting: Value.data.MinimumPosting,
+                };
+                this.type = 'work-flow-send';
+                this.isClicked = true;
+                this.HaveMaxBtn = false;
+                this.startLeftPosition = 250;
+                this.startTopPosition = 70;
+              } else {
+                this.showMessageBox('رکوردی برای نمایش وجود ندارد.');
+                return;
+              }
+            });
+          }
+        }
+        if (Value.data.WorkflowObjectCode === 27) {
+          if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
+            this.type = 'customer-product-request-page';
+            this.HaveMaxBtn = true;
+            this.startLeftPosition = 50;
+            this.startTopPosition = 10;
+            this.HaveMaxBtn = true;
+            this.HeightPercentWithMaxBtn = 97
+            this.PercentWidth = 90;
+            this.MainMinwidthPixel = 1215;
+            this.MinHeightPixel = 645;
+            this.paramObj = {
+              CurrWorkFlow: Value.data,
+              CustomerOrderID: Value.data.ObjectID,
+              ModuleViewTypeCode: Number(ModuleViewTypeCode),
+              Mode: 'EditMode',
+              HeaderName: HeaderName,
+              UserRegionCode: this.UserRegionCode,
+            };
+            this.isClicked = true;
+          } else {
+            this.IsDown = false;
+            const WorkLogIDs = Value.data.JoinWorkflowLogID.split('|');
+            this.paramObj = { rows: <any>[], IsWFShow: true };
+            this.Cartable.GetFinWorkFlowByWorkLogDetailID(WorkLogIDs).subscribe((res: any[]) => {
+              this.IsDown = true;
+              if (res.length > 0) {
+                res.forEach(element => {
+                  element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
+                });
+                this.paramObj = {
+                  rows: res,
+                  IsWFShow: true,
+                  CurrWorkFlow: Value.data,
+                  CustomerOrderID: Value.data.ObjectID,
+                  ModuleViewTypeCode: Number(ModuleViewTypeCode),
+                  UserRegionCode: this.UserRegionCode,
+                  Mode: 'EditMode',
+                  HeaderName: HeaderName,
+                  MinimumPosting: Value.data.MinimumPosting,
+                };
+                this.type = 'work-flow-send';
+                this.isClicked = true;
+                this.HaveMaxBtn = false;
+                this.startLeftPosition = 250;
+                this.startTopPosition = 70;
+              } else {
+                this.showMessageBox('رکوردی برای نمایش وجود ندارد.');
+                return;
+              }
+            });
+          }
+        }
+        if (Value.data.WorkflowObjectCode === 26) {
+          if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
+            this.type = 'app-asset';
+            this.HaveMaxBtn = true;
+            this.startLeftPosition = 100;
+            this.startTopPosition = 10;
+            this.HeightPercentWithMaxBtn = 97;
+            this.MinHeightPixel = 645;
+            this.MainMinwidthPixel = 1100;
+            this.paramObj = {
+              CurrWorkFlow: Value.data,
+              AssetID: Value.data.ObjectID,
+              ModuleViewTypeCode: Number(ModuleViewTypeCode),
+              Mode: 'EditMode',
+              HeaderName: HeaderName,
+              UserRegionCode: this.UserRegionCode,
+              selectedRow: {
+                WorkflowTypeName: Value.data.WorkflowTypeName,
+                WorkflowTypeCode: Value.data.WorkflowTypeCode,
+                WorkflowObjectCode: Value.data.WorkflowObjectCode,
+                ObjectNo: Value.data.ObjectNo,
+                AssetID: Value.data.ObjectID,
+                RegionCode: Value.data.RegionCode,
+                RegionName: Value.data.RegionName,
+                CartableUserID: Value.data.CartableUserID,
+                ProductID: Value.data.ContractID
+
+
+              }
+            };
+            this.isClicked = true;
+          } else {
+            this.IsDown = false;
+            const WorkLogIDs = Value.data.JoinWorkflowLogID.split('|');
+            this.paramObj = { rows: <any>[], IsWFShow: true };
+            this.Cartable.GetFinWorkFlowByWorkLogDetailID(WorkLogIDs).subscribe((res: any[]) => {
+              this.IsDown = true;
+              if (res.length > 0) {
+                res.forEach(element => {
+                  element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
+                });
+                this.paramObj = {
+                  rows: res,
+                  IsWFShow: true,
+                  CurrWorkFlow: Value.data,
+                  AssetID: Value.data.ObjectID,
+                  ModuleViewTypeCode: Number(ModuleViewTypeCode),
+                  UserRegionCode: this.UserRegionCode,
+                  Mode: 'EditMode',
+                  HeaderName: HeaderName,
+                  MinimumPosting: Value.data.MinimumPosting,
+                  selectedRow: {
+                    WorkflowTypeName: Value.data.WorkflowTypeName,
+                    WorkflowTypeCode: Value.data.WorkflowTypeCode,
+                    WorkflowObjectCode: Value.data.WorkflowObjectCode,
+                    ObjectNo: Value.data.ObjectNo,
+                    AssetID: Value.data.ObjectID,
+                    ContractOrderId: Value.data.ObjectID,
+                    RegionCode: Value.data.RegionCode,
+                    RegionName: Value.data.RegionName,
+                    CartableUserID: Value.data.CartableUserID,
+                    ProductID: Value.data.ContractID
+
+                  }
+                };
+                this.type = 'work-flow-send';
+                this.isClicked = true;
+                this.HaveMaxBtn = false;
+                this.startLeftPosition = 250;
+                this.startTopPosition = 70;
+              } else {
+                this.showMessageBox('رکوردی برای نمایش وجود ندارد.');
+                return;
+              }
+            });
+          }
+        }
+        if (Value.data.WorkflowObjectCode === 28) {
+          if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
+            this.type = 'contract-supervision';
+            this.HaveMaxBtn = true;
+            this.startLeftPosition = 50;
+            this.startTopPosition = 10;
+            this.HaveMaxBtn = true;
+            this.HeightPercentWithMaxBtn = 97
+            this.PercentWidth = 90;
+            this.MainMinwidthPixel = 1215;
+            this.MinHeightPixel = 645;
+            this.paramObj = {
+              CurrWorkFlow: Value.data,
+              SelectedCnrtSupervisionID: Value.data.ObjectID,
+              ModuleViewTypeCode: Number(ModuleViewTypeCode),
+              Mode: 'EditMode',
+              HeaderName: HeaderName,
+              UserRegionCode: this.UserRegionCode,
+            };
+            this.isClicked = true;
+          } else {
+            this.IsDown = false;
+            const WorkLogIDs = Value.data.JoinWorkflowLogID.split('|');
+            this.paramObj = { rows: <any>[], IsWFShow: true };
+            this.Cartable.GetFinWorkFlowByWorkLogDetailID(WorkLogIDs).subscribe((res: any[]) => {
+              this.IsDown = true;
+              if (res.length > 0) {
+                res.forEach(element => {
+                  element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
+                });
+                this.paramObj = {
+                  rows: res,
+                  IsWFShow: true,
+                  CurrWorkFlow: Value.data,
+                  SelectedCnrtSupervisionID: Value.data.ObjectID,
+                  ModuleViewTypeCode: Number(ModuleViewTypeCode),
+                  UserRegionCode: this.UserRegionCode,
+                  Mode: 'EditMode',
+                  HeaderName: HeaderName,
+                  MinimumPosting: Value.data.MinimumPosting,
+                };
+                this.type = 'work-flow-send';
+                this.isClicked = true;
+                this.HaveMaxBtn = false;
+                this.startLeftPosition = 250;
+                this.startTopPosition = 70;
+              } else {
+                this.showMessageBox('رکوردی برای نمایش وجود ندارد.');
+                return;
+              }
+            });
+          }
+        }
+        if (Value.data.WorkflowObjectCode === 29) {
+          if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
+            this.type = 'contract';
+            this.HaveMaxBtn = true;
+            this.startLeftPosition = 60;
+            this.startTopPosition = 5;
+            this.HeightPercentWithMaxBtn = 97;
+            this.MainMinwidthPixel = 1215;
+            this.MinHeightPixel = 645;
+            this.paramObj = {
+              CurrWorkFlow: Value.data,
+              ReferenceUserName: Value.data.ReferenceUserName,
+              RoleName: Value.data.RoleName,
+              ReferenceRoleName: Value.data.ReferenceRoleName,
+              Note: Value.data.Note,
+              ContractReceiveFactorID: Value.data.ObjectID,
+              WorkFlowID: Value.data.WorkflowID,
+              ReadyToConfirm: Value.data.ReadyToConfirm,
+              IsEnd: Value.data.IsEnd,
+              WorkflowTypeName: Value.data.WorkflowTypeName,
+              WorkflowTypeCode: Value.data.WorkflowTypeCode,
+              WorkflowObjectCode: Value.data.WorkflowObjectCode,
+              ObjectNo: Value.data.ObjectNo,
+              ObjectID: Value.data.ObjectID,
+              ModuleCode: Value.data.ModuleCode,
+              ModuleViewTypeCode: Number(ModuleViewTypeCode),
+              Mode: 'EditMode',
+              IsViewable: false,
+              CostFactorID: Value.data.ObjectID,
+              SelectedRow: null,
+              ContractTypeCode: -1,
+              ISProvisionRemain: Value.data.WorkflowObjectCode === 4,
+              ISEstateRequest: Value.data.WorkflowObjectCode === 6,
+              ISTahator: Value.data.WorkflowObjectCode === 13,
+              RegionCode: Value.data.RegionCode,
+              RegionName: Value.data.RegionName,
+              MinimumPosting: Value.data.MinimumPosting,
+              HeaderName: HeaderName,
+              UserRegionCode: this.UserRegionCode,
+              CartableUserID: Value.data.CartableUserID,
+            };
+            this.isClicked = true;
+          } else {
+            this.IsDown = false;
+            const WorkLogIDs = Value.data.JoinWorkflowLogID.split('|');
+            this.paramObj = { rows: <any>[], IsWFShow: true };
+            this.Cartable.GetFinWorkFlowByWorkLogDetailID(WorkLogIDs).subscribe((res: any[]) => {
+              this.IsDown = true;
+              if (res.length > 0) {
+                res.forEach(element => {
+                  element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
+                });
+                this.type = 'contract';
+                this.HaveMaxBtn = true;
+                this.startLeftPosition = 60;
+                this.startTopPosition = 5;
+                this.MainMinwidthPixel = 1215;
+                this.HeightPercentWithMaxBtn = 97;
+                this.MinHeightPixel = 645;
+                this.paramObj = {
+                  CurrWorkFlow: Value.data,
+                  ReferenceUserName: Value.data.ReferenceUserName,
+                  RoleName: Value.data.RoleName,
+                  ReferenceRoleName: Value.data.ReferenceRoleName,
+                  Note: Value.data.Note,
+                  ContractReceiveFactorID: Value.data.ObjectID,
+                  WorkFlowID: Value.data.WorkflowID,
+                  ReadyToConfirm: Value.data.ReadyToConfirm,
+                  IsEnd: Value.data.IsEnd,
+                  WorkflowTypeName: Value.data.WorkflowTypeName,
+                  WorkflowTypeCode: Value.data.WorkflowTypeCode,
+                  WorkflowObjectCode: Value.data.WorkflowObjectCode,
+                  ObjectNo: Value.data.ObjectNo,
+                  ObjectID: Value.data.ObjectID,
+                  ModuleCode: Value.data.ModuleCode,
+                  ModuleViewTypeCode: Number(ModuleViewTypeCode),
+                  Mode: 'EditMode',
+                  IsViewable: false,
+                  CostFactorID: Value.data.ObjectID,
+                  SelectedRow: null,
+                  ContractTypeCode: -1,
+                  ISProvisionRemain: Value.data.WorkflowObjectCode === 4,
+                  ISEstateRequest: Value.data.WorkflowObjectCode === 6,
+                  ISTahator: Value.data.WorkflowObjectCode === 13,
+                  RegionCode: Value.data.RegionCode,
+                  RegionName: Value.data.RegionName,
+                  MinimumPosting: Value.data.MinimumPosting,
+                  HeaderName: HeaderName,
+                  UserRegionCode: this.UserRegionCode,
+                  CartableUserID: Value.data.CartableUserID,
+                };
+                this.isClicked = true;
+              } else {
+                this.showMessageBox('رکوردی برای نمایش وجود ندارد.');
+                return;
+              }
+            });
+          }
+        }
+        if (Value.data.WorkflowObjectCode === 30) {
+          if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
+            this.type = 'product-request-invest-archive';
+            this.HaveMaxBtn = true;
+            this.HeightPercentWithMaxBtn = 97;
+            this.PercentWidth = 80;
+            //this.MainMaxwidthPixel = 809;
+            this.MinHeightPixel = 626;
+            this.startLeftPosition = 115;
+            this.startTopPosition = 11;
+            //this.MainMaxwidthPixel = this.MainMinwidthPixel = 1200;
+            this.paramObj = {
+              CurrWorkFlow: Value.data,
+              CostFactorID: Value.data.ObjectID,
+              ModuleViewTypeCode: Number(ModuleViewTypeCode),
+              Mode: 'EditMode',
+              HeaderName: HeaderName,
+              UserRegionCode: this.UserRegionCode,
+            };
+            this.isClicked = true;
+          } else {
+            this.IsDown = false;
+            const WorkLogIDs = Value.data.JoinWorkflowLogID.split('|');
+            this.paramObj = { rows: <any>[], IsWFShow: true };
+            this.Cartable.GetFinWorkFlowByWorkLogDetailID(WorkLogIDs).subscribe((res: any[]) => {
+              this.IsDown = true;
+              if (res.length > 0) {
+                res.forEach(element => {
+                  element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
+                });
+                this.paramObj = {
+                  rows: res,
+                  IsWFShow: true,
+                  CurrWorkFlow: Value.data,
+                  CostFactorID: Value.data.ObjectID,
+                  ModuleViewTypeCode: Number(ModuleViewTypeCode),
+                  UserRegionCode: this.UserRegionCode,
+                  Mode: 'EditMode',
+                  HeaderName: HeaderName,
+                  MinimumPosting: Value.data.MinimumPosting,
                 };
                 this.type = 'work-flow-send';
                 this.isClicked = true;
@@ -2040,31 +2390,38 @@ export class CartableComponent implements OnInit {
     }
     if (Value.data.WorkflowObjectCode === 2) {
 
-      if (Value.data.ContractTypeCode === 26 || Value.data.ContractTypeCode === 29) {
-        this.type ='contract-pay-details' ; // 'contract-pay-item-hour';
-      }
+      // if (Value.data.ContractTypeCode === 26 || Value.data.ContractTypeCode === 29) {
+      //   this.type = 'contract-pay-details'; // 'contract-pay-item-hour';
+      // }
 
-      if (Value.data.ContractTypeCode === 27 || Value.data.ContractTypeCode === 28) {
+      // if (Value.data.ContractTypeCode === 27 || Value.data.ContractTypeCode === 28) {
+      //   this.type = 'contract-pay-details';
+      // }
+
+      // if (!Value.data.PriceListPatternID) {
+      //   this.type = 'contract-pay-details';
+      // }
+
+      // if (Value.data.PriceListPatternID &&
+      //   Value.data.ContractTypeCode !== 26 &&
+      //   Value.data.ContractTypeCode !== 29) {
+      //   this.type = 'contract-pay-details';
+      //   // this.type = 'contract-pay-item-estimate-page';
+      // }
+
+      // this.HaveMaxBtn = true;
+      // this.startLeftPosition = 59;
+      // this.startTopPosition = 20;
+      // this.HeightPercentWithMaxBtn = 97;
+      if (Value.data.ObjectTypeCode === 2) {
         this.type = 'contract-pay-details';
+        this.HaveMaxBtn = true;
+        this.startLeftPosition = 59;
+        this.startTopPosition = 20;
+        this.HeightPercentWithMaxBtn = 97;
       }
 
-      if (!Value.data.PriceListPatternID) {
-        this.type = 'contract-pay-details';
-      }
-
-      if (Value.data.PriceListPatternID &&
-        Value.data.ContractTypeCode !== 26 &&
-        Value.data.ContractTypeCode !== 29) {
-        this.type = 'contract-pay-details';
-        // this.type = 'contract-pay-item-estimate-page';
-      }
-
-      this.HaveMaxBtn = true;
-      this.startLeftPosition = 59;
-      this.startTopPosition = 20;
-      this.HeightPercentWithMaxBtn = 97;
-
-      if (Value.data.ObjectTypeCode === 9 || Value.data.ObjectTypeCode === 10) { // پیش پرداخت و علی الحساب
+      if (Value.data.ObjectTypeCode === 9) { // پیش پرداخت و علی الحساب
         this.startLeftPosition = 300;
         this.startTopPosition = 100;
         this.HaveMaxBtn = true;
@@ -2139,6 +2496,7 @@ export class CartableComponent implements OnInit {
         ContractTypeCode: -1,
         ISProvisionRemain: Value.data.WorkflowObjectCode === 5,
         ISArticle48: Value.data.WorkflowObjectCode === 7,
+        ISTavafoghNameh: Value.data.WorkflowObjectCode === 31,
         RegionCode: Value.data.RegionCode,
         RegionName: Value.data.RegionName,
         HeaderName: HeaderName,
@@ -2148,7 +2506,7 @@ export class CartableComponent implements OnInit {
       };
       this.isClicked = true;
     }
-    if (Value.data.WorkflowObjectCode === 5 || Value.data.WorkflowObjectCode === 7) {
+    if (Value.data.WorkflowObjectCode === 5 || Value.data.WorkflowObjectCode === 7 || Value.data.WorkflowObjectCode === 31) {
 
       this.type = 'product-request-page';
       this.HaveMaxBtn = true;
@@ -2179,6 +2537,7 @@ export class CartableComponent implements OnInit {
         ContractTypeCode: -1,
         ISProvisionRemain: Value.data.WorkflowObjectCode === 5,
         ISArticle48: Value.data.WorkflowObjectCode === 7,
+        ISTavafoghNameh: Value.data.WorkflowObjectCode === 31,
         RegionCode: Value.data.RegionCode,
         RegionName: Value.data.RegionName,
         HeaderName: HeaderName,
@@ -2416,7 +2775,6 @@ export class CartableComponent implements OnInit {
       };
       this.isClicked = true;
     }
-
     if (Value.data.WorkflowObjectCode === 17) {
 
       this.type = 'single-sale-invoice';
@@ -2434,26 +2792,213 @@ export class CartableComponent implements OnInit {
       };
       this.isClicked = true;
     }
-
     if (Value.data.WorkflowObjectCode === 25) {
 
       this.type = 'customer-order';
       this.HaveMaxBtn = true;
-      this.startLeftPosition = 10;
-      this.startTopPosition = 0;
+      this.startLeftPosition = 100;
+      this.startTopPosition = 10;
       this.HeightPercentWithMaxBtn = 97;
       this.MinHeightPixel = 645;
+      this.MainMinwidthPixel = 1100;
 
       this.paramObj = {
         CurrWorkFlow: Value.data,
-        CustomerOrderID :Value.data.ObjectID,
+        CustomerOrderID: Value.data.ObjectID,
         ModuleViewTypeCode: 200000,
         Mode: 'EditMode',
         IsInFinishedCartable: num === 2 ? true : false, // RFC 61296
       };
       this.isClicked = true;
     }
+    if (Value.data.WorkflowObjectCode === 27) {
 
+      this.type = 'customer-product-request-page';
+      this.HaveMaxBtn = true;
+      this.startLeftPosition = 50;
+      this.startTopPosition = 10;
+      this.HeightPercentWithMaxBtn = 97;
+      this.MinHeightPixel = 645;
+      this.PercentWidth = 90;
+      this.MainMinwidthPixel = 1215;
+      this.paramObj = {
+        CurrWorkFlow: Value.data,
+        CustomerOrderID: Value.data.ObjectID,
+        ModuleViewTypeCode: 200000,
+        Mode: 'EditMode',
+        IsInFinishedCartable: num === 2 ? true : false, // RFC 61296
+      };
+      this.isClicked = true;
+    }
+    if (Value.data.WorkflowObjectCode === 26) {
+
+      this.type = 'app-asset';
+      this.HaveMaxBtn = true;
+      this.startLeftPosition = 50;
+      this.startTopPosition = 10;
+      this.HeightPercentWithMaxBtn = 97;
+      this.MinHeightPixel = 645;
+      this.PercentWidth = 90;
+      this.MainMinwidthPixel = 1215;
+      this.paramObj = {
+        CurrWorkFlow: Value.data,
+        AssetID: Value.data.ObjectID,
+        ModuleViewTypeCode: 200000,
+        Mode: 'EditMode',
+        IsInFinishedCartable: num === 2 ? true : false,
+        selectedRow: {
+          WorkflowTypeName: Value.data.WorkflowTypeName,
+          WorkflowTypeCode: Value.data.WorkflowTypeCode,
+          WorkflowObjectCode: Value.data.WorkflowObjectCode,
+          ObjectNo: Value.data.ObjectNo,
+          AssetID: Value.data.ObjectID,
+          ContractOrderId: Value.data.ObjectID,
+          RegionCode: Value.data.RegionCode,
+          RegionName: Value.data.RegionName,
+          CartableUserID: Value.data.CartableUserID,
+          ProductID: Value.data.ContractID
+
+        }
+
+      };
+      this.isClicked = true;
+    }
+    if (Value.data.WorkflowObjectCode === 28) {
+      this.type = 'contract-supervision';
+      this.HaveMaxBtn = true;
+      this.startLeftPosition = 100;
+      this.startTopPosition = 10;
+      this.HeightPercentWithMaxBtn = 97;
+      this.MinHeightPixel = 645;
+      this.MainMinwidthPixel = 1100;
+
+      this.paramObj = {
+        CurrWorkFlow: Value.data,
+        SelectedCnrtSupervisionID: Value.data.ObjectID,
+        ModuleViewTypeCode: 200000,
+        Mode: 'EditMode',
+        IsInFinishedCartable: num === 2 ? true : false,
+      };
+      this.isClicked = true;
+    }
+    if (Value.data.WorkflowObjectCode === 29) {
+      if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
+        this.type = 'contract';
+        this.HaveMaxBtn = true;
+        this.startLeftPosition = 60;
+        this.startTopPosition = 5;
+        this.HeightPercentWithMaxBtn = 97;
+        this.MainMinwidthPixel = 1215;
+        this.MinHeightPixel = 645;
+        this.paramObj = {
+          CurrWorkFlow: Value.data,
+          ReferenceUserName: Value.data.ReferenceUserName,
+          RoleName: Value.data.RoleName,
+          ReferenceRoleName: Value.data.ReferenceRoleName,
+          Note: Value.data.Note,
+          ContractReceiveFactorID: Value.data.ObjectID,
+          WorkFlowID: Value.data.WorkflowID,
+          ReadyToConfirm: Value.data.ReadyToConfirm,
+          IsEnd: Value.data.IsEnd,
+          WorkflowTypeName: Value.data.WorkflowTypeName,
+          WorkflowTypeCode: Value.data.WorkflowTypeCode,
+          WorkflowObjectCode: Value.data.WorkflowObjectCode,
+          ObjectNo: Value.data.ObjectNo,
+          ObjectID: Value.data.ObjectID,
+          ModuleCode: Value.data.ModuleCode,
+          ModuleViewTypeCode: Number(ModuleViewTypeCode),
+          Mode: 'EditMode',
+          IsViewable: false,
+          CostFactorID: Value.data.ObjectID,
+          SelectedRow: null,
+          ContractTypeCode: -1,
+          ISProvisionRemain: Value.data.WorkflowObjectCode === 4,
+          ISEstateRequest: Value.data.WorkflowObjectCode === 6,
+          ISTahator: Value.data.WorkflowObjectCode === 13,
+          RegionCode: Value.data.RegionCode,
+          RegionName: Value.data.RegionName,
+          MinimumPosting: Value.data.MinimumPosting,
+          HeaderName: HeaderName,
+          UserRegionCode: this.UserRegionCode,
+          CartableUserID: Value.data.CartableUserID,
+        };
+        this.isClicked = true;
+      } else {
+        this.IsDown = false;
+        const WorkLogIDs = Value.data.JoinWorkflowLogID.split('|');
+        this.paramObj = { rows: <any>[], IsWFShow: true };
+        this.Cartable.GetFinWorkFlowByWorkLogDetailID(WorkLogIDs).subscribe((res: any[]) => {
+          this.IsDown = true;
+          if (res.length > 0) {
+            res.forEach(element => {
+              element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
+            });
+            this.type = 'contract';
+            this.HaveMaxBtn = true;
+            this.startLeftPosition = 60;
+            this.startTopPosition = 5;
+            this.MainMinwidthPixel = 1215;
+            this.HeightPercentWithMaxBtn = 97;
+            this.MinHeightPixel = 645;
+            this.paramObj = {
+              CurrWorkFlow: Value.data,
+              ReferenceUserName: Value.data.ReferenceUserName,
+              RoleName: Value.data.RoleName,
+              ReferenceRoleName: Value.data.ReferenceRoleName,
+              Note: Value.data.Note,
+              ContractReceiveFactorID: Value.data.ObjectID,
+              WorkFlowID: Value.data.WorkflowID,
+              ReadyToConfirm: Value.data.ReadyToConfirm,
+              IsEnd: Value.data.IsEnd,
+              WorkflowTypeName: Value.data.WorkflowTypeName,
+              WorkflowTypeCode: Value.data.WorkflowTypeCode,
+              WorkflowObjectCode: Value.data.WorkflowObjectCode,
+              ObjectNo: Value.data.ObjectNo,
+              ObjectID: Value.data.ObjectID,
+              ModuleCode: Value.data.ModuleCode,
+              ModuleViewTypeCode: Number(ModuleViewTypeCode),
+              Mode: 'EditMode',
+              IsViewable: false,
+              CostFactorID: Value.data.ObjectID,
+              SelectedRow: null,
+              ContractTypeCode: -1,
+              ISProvisionRemain: Value.data.WorkflowObjectCode === 4,
+              ISEstateRequest: Value.data.WorkflowObjectCode === 6,
+              ISTahator: Value.data.WorkflowObjectCode === 13,
+              RegionCode: Value.data.RegionCode,
+              RegionName: Value.data.RegionName,
+              MinimumPosting: Value.data.MinimumPosting,
+              HeaderName: HeaderName,
+              UserRegionCode: this.UserRegionCode,
+              CartableUserID: Value.data.CartableUserID,
+            };
+            this.isClicked = true;
+          } else {
+            this.showMessageBox('رکوردی برای نمایش وجود ندارد.');
+            return;
+          }
+        });
+      }
+    }
+    if (Value.data.WorkflowObjectCode === 30) {
+
+      this.type = 'product-request-invest-archive';
+      this.HaveMaxBtn = true;
+      this.startLeftPosition = 115;
+      this.startTopPosition = 10;
+      this.HeightPercentWithMaxBtn = 97;
+      this.MinHeightPixel = 645;
+      this.PercentWidth = 80;
+      //this.MainMaxwidthPixel = this.MainMinwidthPixel = 1200;
+      this.paramObj = {
+        CurrWorkFlow: Value.data,
+        CostFactorID: Value.data.ObjectID,
+        ModuleViewTypeCode: 200000,
+        Mode: 'EditMode',
+        IsInFinishedCartable: num === 2 ? true : false, // RFC 61296
+      };
+      this.isClicked = true;
+    }
   }
   onFinishedWorkListRowDoubleClicked(Value) {
     this.HaveHeader = true;
@@ -2553,34 +3098,41 @@ export class CartableComponent implements OnInit {
       }
     }
     if (Value.data.WorkflowObjectCode === 2) {
-
       if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
 
-        if (Value.data.ContractTypeCode === 26 || Value.data.ContractTypeCode === 29) {
-          this.type ='contract-pay-details' ; // 'contract-pay-item-hour';
-        }
+        // if (Value.data.ContractTypeCode === 26 || Value.data.ContractTypeCode === 29) {
+        //   this.type = 'contract-pay-details'; // 'contract-pay-item-hour';
+        // }
 
-        if (Value.data.ContractTypeCode === 27 || Value.data.ContractTypeCode === 28) {
+        // if (Value.data.ContractTypeCode === 27 || Value.data.ContractTypeCode === 28) {
+        //   this.type = 'contract-pay-details';
+        // }
+
+        // if (!Value.data.PriceListPatternID) {
+        //   this.type = 'contract-pay-details';
+        // }
+
+        // if (Value.data.PriceListPatternID &&
+        //   Value.data.ContractTypeCode !== 26 &&
+        //   Value.data.ContractTypeCode !== 29) {
+        //   // this.type = 'contract-pay-item-estimate-page';
+        //   this.type = 'contract-pay-details';
+        // }
+
+        // this.HaveMaxBtn = true;
+        // this.HeightPercentWithMaxBtn = 97;
+        // this.startLeftPosition = 59;
+        // this.startTopPosition = 20;
+
+        if (Value.data.ObjectTypeCode === 2) {
           this.type = 'contract-pay-details';
+          this.HaveMaxBtn = true;
+          this.HeightPercentWithMaxBtn = 97;
+          this.startLeftPosition = 59;
+          this.startTopPosition = 20;
         }
 
-        if (!Value.data.PriceListPatternID) {
-          this.type = 'contract-pay-details';
-        }
-
-        if (Value.data.PriceListPatternID &&
-          Value.data.ContractTypeCode !== 26 &&
-          Value.data.ContractTypeCode !== 29) {
-          // this.type = 'contract-pay-item-estimate-page';
-          this.type = 'contract-pay-details';
-        }
-
-        this.HaveMaxBtn = true;
-        this.HeightPercentWithMaxBtn = 97;
-        this.startLeftPosition = 59;
-        this.startTopPosition = 20;
-
-        if (Value.data.ObjectTypeCode === 9 || Value.data.ObjectTypeCode === 10) { // پیش پرداخت و علی الحساب
+        if (Value.data.ObjectTypeCode === 9) { // پیش پرداخت و علی الحساب
           this.startLeftPosition = 300;
           this.startTopPosition = 100;
           this.HaveMaxBtn = true;
@@ -2691,7 +3243,7 @@ export class CartableComponent implements OnInit {
         });
       }
     }
-    if (Value.data.WorkflowObjectCode === 3 || Value.data.WorkflowObjectCode === 5 || Value.data.WorkflowObjectCode === 7) {
+    if (Value.data.WorkflowObjectCode === 3 || Value.data.WorkflowObjectCode === 5 || Value.data.WorkflowObjectCode === 7 || Value.data.WorkflowObjectCode === 31) {
       if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
         this.type = 'product-request-page';
         this.HaveMaxBtn = true;
@@ -2721,6 +3273,7 @@ export class CartableComponent implements OnInit {
           ContractTypeCode: -1,
           ISProvisionRemain: Value.data.WorkflowObjectCode === 5,
           ISArticle48: Value.data.WorkflowObjectCode === 7,
+          ISTavafoghNameh: Value.data.WorkflowObjectCode === 31,
           RegionCode: Value.data.RegionCode,
           RegionName: Value.data.RegionName,
           MinimumPosting: Value.data.MinimumPosting,
@@ -2772,6 +3325,7 @@ export class CartableComponent implements OnInit {
               ContractTypeCode: -1,
               ISProvisionRemain: Value.data.WorkflowObjectCode === 5,
               ISArticle48: Value.data.WorkflowObjectCode === 7,
+              ISTavafoghNameh: Value.data.WorkflowObjectCode === 31,
               selectedRow: {
                 data:
                 {
@@ -2909,7 +3463,6 @@ export class CartableComponent implements OnInit {
         });
       }
     }
-
     if (Value.data.WorkflowObjectCode === 10) {
       if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
         this.type = 'pure-product-request-page';
@@ -3018,7 +3571,6 @@ export class CartableComponent implements OnInit {
         });
       }
     }
-
     if (Value.data.WorkflowObjectCode === 17) {
       if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
         this.type = 'single-sale-invoice';
@@ -3066,18 +3618,18 @@ export class CartableComponent implements OnInit {
         });
       }
     }
-
-     if (Value.data.WorkflowObjectCode === 25) {
+    if (Value.data.WorkflowObjectCode === 25) {
       if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
         this.type = 'customer-order';
         this.HaveMaxBtn = true;
-        this.startLeftPosition = 10;
-        this.startTopPosition = 0;
+        this.startLeftPosition = 100;
+        this.startTopPosition = 10;
         this.HeightPercentWithMaxBtn = 97;
         this.MinHeightPixel = 645;
+        this.MainMinwidthPixel = 1100;
         this.paramObj = {
           CurrWorkFlow: Value.data,
-          CustomerOrderID :Value.data.ObjectID,
+          CustomerOrderID: Value.data.ObjectID,
           ModuleViewTypeCode: Number(ModuleViewTypeCode),
           Mode: 'EditMode',
           HeaderName: HeaderName,
@@ -3098,11 +3650,345 @@ export class CartableComponent implements OnInit {
               rows: res,
               IsWFShow: true,
               CurrWorkFlow: Value.data,
-              CustomerOrderID :Value.data.ObjectID,
+              CustomerOrderID: Value.data.ObjectID,
               ModuleViewTypeCode: Number(ModuleViewTypeCode),
               UserRegionCode: this.UserRegionCode,
               Mode: 'EditMode',
               HeaderName: HeaderName,
+              MinimumPosting: Value.data.MinimumPosting,
+            };
+            this.type = 'work-flow-send';
+            this.isClicked = true;
+            this.HaveMaxBtn = false;
+            this.startLeftPosition = 250;
+            this.startTopPosition = 70;
+          } else {
+            this.showMessageBox('رکوردی برای نمایش وجود ندارد.');
+            return;
+          }
+        });
+      }
+    }
+    if (Value.data.WorkflowObjectCode === 27) {
+      if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
+        this.type = 'customer-product-request-page';
+        this.HaveMaxBtn = true;
+        this.startLeftPosition = 50;
+        this.startTopPosition = 10;
+        this.HeightPercentWithMaxBtn = 97;
+        this.MinHeightPixel = 645;
+        this.PercentWidth = 90;
+        this.MainMinwidthPixel = 1215;
+        this.paramObj = {
+          CurrWorkFlow: Value.data,
+          CustomerOrderID: Value.data.ObjectID,
+          ModuleViewTypeCode: Number(ModuleViewTypeCode),
+          Mode: 'EditMode',
+          HeaderName: HeaderName,
+          UserRegionCode: this.UserRegionCode,
+        };
+        this.isClicked = true;
+      } else {
+        this.IsDown = false;
+        const WorkLogIDs = Value.data.JoinWorkflowLogID.split('|');
+        this.paramObj = { rows: <any>[], IsWFShow: true };
+        this.Cartable.GetFinWorkFlowByWorkLogDetailID(WorkLogIDs).subscribe((res: any[]) => {
+          this.IsDown = true;
+          if (res.length > 0) {
+            res.forEach(element => {
+              element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
+            });
+            this.paramObj = {
+              rows: res,
+              IsWFShow: true,
+              CurrWorkFlow: Value.data,
+              CustomerOrderID: Value.data.ObjectID,
+              ModuleViewTypeCode: Number(ModuleViewTypeCode),
+              UserRegionCode: this.UserRegionCode,
+              Mode: 'EditMode',
+              HeaderName: HeaderName,
+              MinimumPosting: Value.data.MinimumPosting,
+            };
+            this.type = 'work-flow-send';
+            this.isClicked = true;
+            this.HaveMaxBtn = false;
+            this.startLeftPosition = 250;
+            this.startTopPosition = 70;
+          } else {
+            this.showMessageBox('رکوردی برای نمایش وجود ندارد.');
+            return;
+          }
+        });
+      }
+    }
+    if (Value.data.WorkflowObjectCode === 26) {
+      if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
+        this.type = 'app-asset';
+        this.HaveMaxBtn = true;
+        this.startLeftPosition = 50;
+        this.startTopPosition = 10;
+        this.HeightPercentWithMaxBtn = 97;
+        this.MinHeightPixel = 645;
+        this.PercentWidth = 90;
+        this.MainMinwidthPixel = 1215;
+        this.paramObj = {
+          CurrWorkFlow: Value.data,
+          AssetID: Value.data.ObjectID,
+          ModuleViewTypeCode: Number(ModuleViewTypeCode),
+          Mode: 'EditMode',
+          HeaderName: HeaderName,
+          UserRegionCode: this.UserRegionCode,
+          selectedRow: {
+            WorkflowTypeName: Value.data.WorkflowTypeName,
+            WorkflowTypeCode: Value.data.WorkflowTypeCode,
+            WorkflowObjectCode: Value.data.WorkflowObjectCode,
+            ObjectNo: Value.data.ObjectNo,
+            AssetID: Value.data.ObjectID,
+            ContractOrderId: Value.data.ObjectID,
+            RegionCode: Value.data.RegionCode,
+            RegionName: Value.data.RegionName,
+            CartableUserID: Value.data.CartableUserID,
+            ProductID: Value.data.ContractID
+
+          }
+        };
+        this.isClicked = true;
+      } else {
+        this.IsDown = false;
+        const WorkLogIDs = Value.data.JoinWorkflowLogID.split('|');
+        this.paramObj = { rows: <any>[], IsWFShow: true };
+        this.Cartable.GetFinWorkFlowByWorkLogDetailID(WorkLogIDs).subscribe((res: any[]) => {
+          this.IsDown = true;
+          if (res.length > 0) {
+            res.forEach(element => {
+              element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
+            });
+            this.paramObj = {
+              rows: res,
+              IsWFShow: true,
+              CurrWorkFlow: Value.data,
+              AssetID: Value.data.ObjectID,
+              ModuleViewTypeCode: Number(ModuleViewTypeCode),
+              UserRegionCode: this.UserRegionCode,
+              Mode: 'EditMode',
+              HeaderName: HeaderName,
+              MinimumPosting: Value.data.MinimumPosting,
+              selectedRow: {
+                WorkflowTypeName: Value.data.WorkflowTypeName,
+                WorkflowTypeCode: Value.data.WorkflowTypeCode,
+                WorkflowObjectCode: Value.data.WorkflowObjectCode,
+                ObjectNo: Value.data.ObjectNo,
+                AssetID: Value.data.ObjectID,
+                ContractOrderId: Value.data.ObjectID,
+                RegionCode: Value.data.RegionCode,
+                RegionName: Value.data.RegionName,
+                CartableUserID: Value.data.CartableUserID,
+                ProductID: Value.data.ContractID
+
+              }
+            };
+            this.type = 'work-flow-send';
+            this.isClicked = true;
+            this.HaveMaxBtn = false;
+            this.startLeftPosition = 250;
+            this.startTopPosition = 70;
+          } else {
+            this.showMessageBox('رکوردی برای نمایش وجود ندارد.');
+            return;
+          }
+        });
+      }
+    }
+    if (Value.data.WorkflowObjectCode === 28) {
+      if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
+        this.type = 'contract-supervision';
+        this.HaveMaxBtn = true;
+        this.startLeftPosition = 100;
+        this.startTopPosition = 10;
+        this.HeightPercentWithMaxBtn = 97;
+        this.MinHeightPixel = 645;
+        this.MainMinwidthPixel = 1100;
+        this.paramObj = {
+          CurrWorkFlow: Value.data,
+          SelectedCnrtSupervisionID: Value.data.ObjectID,
+          ModuleViewTypeCode: Number(ModuleViewTypeCode),
+          Mode: 'EditMode',
+          HeaderName: HeaderName,
+          UserRegionCode: this.UserRegionCode,
+        };
+        this.isClicked = true;
+      } else {
+        this.IsDown = false;
+        const WorkLogIDs = Value.data.JoinWorkflowLogID.split('|');
+        this.paramObj = { rows: <any>[], IsWFShow: true };
+        this.Cartable.GetFinWorkFlowByWorkLogDetailID(WorkLogIDs).subscribe((res: any[]) => {
+          this.IsDown = true;
+          if (res.length > 0) {
+            res.forEach(element => {
+              element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
+            });
+            this.paramObj = {
+              rows: res,
+              IsWFShow: true,
+              CurrWorkFlow: Value.data,
+              SelectedCnrtSupervisionID: Value.data.ObjectID,
+              ModuleViewTypeCode: Number(ModuleViewTypeCode),
+              UserRegionCode: this.UserRegionCode,
+              Mode: 'EditMode',
+              HeaderName: HeaderName,
+              MinimumPosting: Value.data.MinimumPosting,
+            };
+            this.type = 'work-flow-send';
+            this.isClicked = true;
+            this.HaveMaxBtn = false;
+            this.startLeftPosition = 250;
+            this.startTopPosition = 70;
+          } else {
+            this.showMessageBox('رکوردی برای نمایش وجود ندارد.');
+            return;
+          }
+        });
+      }
+    }
+    if (Value.data.WorkflowObjectCode === 29) {
+      if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
+        this.type = 'contract';
+        this.HaveMaxBtn = true;
+        this.startLeftPosition = 60;
+        this.startTopPosition = 5;
+        this.HeightPercentWithMaxBtn = 97;
+        this.MainMinwidthPixel = 1215;
+        this.MinHeightPixel = 645;
+        this.paramObj = {
+          CurrWorkFlow: Value.data,
+          ReferenceUserName: Value.data.ReferenceUserName,
+          RoleName: Value.data.RoleName,
+          ReferenceRoleName: Value.data.ReferenceRoleName,
+          Note: Value.data.Note,
+          ContractReceiveFactorID: Value.data.ObjectID,
+          WorkFlowID: Value.data.WorkflowID,
+          ReadyToConfirm: Value.data.ReadyToConfirm,
+          IsEnd: Value.data.IsEnd,
+          WorkflowTypeName: Value.data.WorkflowTypeName,
+          WorkflowTypeCode: Value.data.WorkflowTypeCode,
+          WorkflowObjectCode: Value.data.WorkflowObjectCode,
+          ObjectNo: Value.data.ObjectNo,
+          ObjectID: Value.data.ObjectID,
+          ModuleCode: Value.data.ModuleCode,
+          ModuleViewTypeCode: Number(ModuleViewTypeCode),
+          Mode: 'EditMode',
+          IsViewable: false,
+          CostFactorID: Value.data.ObjectID,
+          SelectedRow: null,
+          ContractTypeCode: -1,
+          ISProvisionRemain: Value.data.WorkflowObjectCode === 4,
+          ISEstateRequest: Value.data.WorkflowObjectCode === 6,
+          ISTahator: Value.data.WorkflowObjectCode === 13,
+          RegionCode: Value.data.RegionCode,
+          RegionName: Value.data.RegionName,
+          MinimumPosting: Value.data.MinimumPosting,
+          HeaderName: HeaderName,
+          UserRegionCode: this.UserRegionCode,
+          CartableUserID: Value.data.CartableUserID,
+        };
+        this.isClicked = true;
+      } else {
+        this.IsDown = false;
+        const WorkLogIDs = Value.data.JoinWorkflowLogID.split('|');
+        this.paramObj = { rows: <any>[], IsWFShow: true };
+        this.Cartable.GetFinWorkFlowByWorkLogDetailID(WorkLogIDs).subscribe((res: any[]) => {
+          this.IsDown = true;
+          if (res.length > 0) {
+            res.forEach(element => {
+              element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
+            });
+            this.type = 'contract';
+            this.HaveMaxBtn = true;
+            this.startLeftPosition = 60;
+            this.startTopPosition = 5;
+            this.MainMinwidthPixel = 1215;
+            this.HeightPercentWithMaxBtn = 97;
+            this.MinHeightPixel = 645;
+            this.paramObj = {
+              CurrWorkFlow: Value.data,
+              ReferenceUserName: Value.data.ReferenceUserName,
+              RoleName: Value.data.RoleName,
+              ReferenceRoleName: Value.data.ReferenceRoleName,
+              Note: Value.data.Note,
+              ContractReceiveFactorID: Value.data.ObjectID,
+              WorkFlowID: Value.data.WorkflowID,
+              ReadyToConfirm: Value.data.ReadyToConfirm,
+              IsEnd: Value.data.IsEnd,
+              WorkflowTypeName: Value.data.WorkflowTypeName,
+              WorkflowTypeCode: Value.data.WorkflowTypeCode,
+              WorkflowObjectCode: Value.data.WorkflowObjectCode,
+              ObjectNo: Value.data.ObjectNo,
+              ObjectID: Value.data.ObjectID,
+              ModuleCode: Value.data.ModuleCode,
+              ModuleViewTypeCode: Number(ModuleViewTypeCode),
+              Mode: 'EditMode',
+              IsViewable: false,
+              CostFactorID: Value.data.ObjectID,
+              SelectedRow: null,
+              ContractTypeCode: -1,
+              ISProvisionRemain: Value.data.WorkflowObjectCode === 4,
+              ISEstateRequest: Value.data.WorkflowObjectCode === 6,
+              ISTahator: Value.data.WorkflowObjectCode === 13,
+              RegionCode: Value.data.RegionCode,
+              RegionName: Value.data.RegionName,
+              MinimumPosting: Value.data.MinimumPosting,
+              HeaderName: HeaderName,
+              UserRegionCode: this.UserRegionCode,
+              CartableUserID: Value.data.CartableUserID,
+            };
+            this.isClicked = true;
+          } else {
+            this.showMessageBox('رکوردی برای نمایش وجود ندارد.');
+            return;
+          }
+        });
+      }
+    }
+
+    if (Value.data.WorkflowObjectCode === 30) {
+      if (Value.data.WorkflowStatusCode === 1 || !Value.data.RelatedWorkflowLogID) {
+        this.type = 'product-request-invest-archive';
+        this.HaveMaxBtn = true;
+        this.startLeftPosition = 115;
+        this.startTopPosition = 10;
+        this.HeightPercentWithMaxBtn = 97;
+        this.MinHeightPixel = 645;
+        this.PercentWidth = 80;
+        //this.MainMaxwidthPixel = this.MainMinwidthPixel = 1200;
+        this.paramObj = {
+          CurrWorkFlow: Value.data,
+          CostFactorID: Value.data.ObjectID,
+          ModuleViewTypeCode: Number(ModuleViewTypeCode),
+          Mode: 'EditMode',
+          HeaderName: HeaderName,
+          UserRegionCode: this.UserRegionCode,
+        };
+        this.isClicked = true;
+      } else {
+        this.IsDown = false;
+        const WorkLogIDs = Value.data.JoinWorkflowLogID.split('|');
+        this.paramObj = { rows: <any>[], IsWFShow: true };
+        this.Cartable.GetFinWorkFlowByWorkLogDetailID(WorkLogIDs).subscribe((res: any[]) => {
+          this.IsDown = true;
+          if (res.length > 0) {
+            res.forEach(element => {
+              element.UserImage = this.CommonService._arrayBufferToBase64(element.UserImage);
+            });
+            this.paramObj = {
+              rows: res,
+              IsWFShow: true,
+              CurrWorkFlow: Value.data,
+              CostFactorID: Value.data.ObjectID,
+              ModuleViewTypeCode: Number(ModuleViewTypeCode),
+              UserRegionCode: this.UserRegionCode,
+              Mode: 'EditMode',
+              HeaderName: HeaderName,
+              MinimumPosting: Value.data.MinimumPosting,
             };
             this.type = 'work-flow-send';
             this.isClicked = true;
@@ -3238,28 +4124,33 @@ export class CartableComponent implements OnInit {
     }
 
     if (this.type === 'user-select') {
-      this.NewUserSelected = true;
-      this.gridheader = event.ActorName + ': ';
-      for (let i = 0; i < event.Roles.length; i++) {
-        if (i < (event.Roles.length - 1)) {
-          const temp = event.Roles[i] + '  ,  ';
-          this.gridheader += temp;
-        } else {
-          this.gridheader += event.Roles[i];
+      if (event.SelectType === 1) {
+        this.NewUserSelected = true;
+        this.gridheader = event.ActorName + ': ';
+        for (let i = 0; i < event.Roles.length; i++) {
+          if (i < (event.Roles.length - 1)) {
+            const temp = event.Roles[i] + '  ,  ';
+            this.gridheader += temp;
+          } else {
+            this.gridheader += event.Roles[i];
+          }
         }
-      }
-      this.WorkflowObjectItems = this.DeletedWorkflowObjectItems = this.FinishedWorkflowObjectItems = this.InProgWorkflowObjectItems = null;
-      this.OnOpenNgSelect('Current', true);
-      if (this.IsFinishCartableClick) {
-        this.OnOpenNgSelect('Finished', true);
-      }
+        this.WorkflowObjectItems = this.DeletedWorkflowObjectItems = this.FinishedWorkflowObjectItems = this.InProgWorkflowObjectItems = null;
+        this.OnOpenNgSelect('Current', true);
+        if (this.IsFinishCartableClick) {
+          this.OnOpenNgSelect('Finished', true);
+        }
 
-      if (this.InProgressCartableClick) {
-        this.OnOpenNgSelect('InProg', true);
-      }
+        if (this.InProgressCartableClick) {
+          this.OnOpenNgSelect('InProg', true);
+        }
 
-      if (this.IsDeletedCartableClick) {
-        this.OnOpenNgSelect('Deleted', true);
+        if (this.IsDeletedCartableClick) {
+          this.OnOpenNgSelect('Deleted', true);
+        }
+      } else {
+        this.NewUserMenuSelected = true;
+        this.CrtableRefreshService.RefreshMenu();
       }
     }
   }
@@ -3597,4 +4488,18 @@ export class CartableComponent implements OnInit {
     this.HaveMaxBtn = false;
     this.PopupType = '';
   }
+  RemoveChangedMenu() {
+    // tslint:disable-next-line: no-shadowed-variable
+    const promise = new Promise<void>((resolve, reject) => {
+      this.Actor.RemoveSelectedUserSessionForMenu().subscribe(res => {
+        resolve();
+      }, err => {
+        reject();
+      });
+    }).then(() => {
+      this.CrtableRefreshService.RefreshMenu();
+      this.NewUserMenuSelected = false;
+    }).catch(() => {
+    });
+  } // 64114
 }

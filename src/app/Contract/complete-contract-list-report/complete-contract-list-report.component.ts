@@ -1,11 +1,8 @@
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
-import { ReportService } from 'src/app/Services/ReportService/ReportService';
-import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 
@@ -33,6 +30,14 @@ export class CompleteContractListReportComponent implements OnInit {
   alertMessageParams = { HaveOkBtn: true, message: '' };
   columnDef;
   rowData = [];
+  CostCenterIDList = [];
+  DisabledContractPayDate = false ;
+  DisabledFromContractDate = false;
+  DisabledToContractDate = false;
+  DisabledWorkFlowDate = false;
+  SelectMultipleCostCenter ;
+
+
   RegionItems;
   RegionParams = {
     bindLabelProp: 'RegionName',
@@ -48,6 +53,7 @@ export class CompleteContractListReportComponent implements OnInit {
 
   CostCenterItems;
   CostCenterParams = {
+    Items: [],
     bindLabelProp: 'CostCenterName',
     bindValueProp: 'CostCenterId',
     placeholder: '',
@@ -122,6 +128,13 @@ export class CompleteContractListReportComponent implements OnInit {
       ContractOperationID: 4
     },
   ];
+  ContractPayDate: any;
+  PersianContractPayDate: any;
+  FromContractDate: any;
+  PersianFromContractDate: any;
+  ToContractDate: any;
+  PersianToContractDate: any;
+  WorkFlowDate : any;
 
   constructor(private router: Router,
     private ProductRequest: ProductRequestService,
@@ -147,6 +160,8 @@ export class CompleteContractListReportComponent implements OnInit {
     this.CustomCheckBoxConfig.color = 'state p-primary';
     this.CustomCheckBoxConfig.icon = 'fa fa-check';
     this.CustomCheckBoxConfig.styleCheckBox = 'pretty p-icon p-rotate';
+    this.CustomCheckBoxConfig.AriaWidth = 4;
+  
     this.ColumnsDefinition();
   }
 
@@ -200,6 +215,12 @@ export class CompleteContractListReportComponent implements OnInit {
               resizable: true
             },
             {
+              headerName: 'معاونت مجری',
+              field: 'CostCenterName',
+              width: 200,
+              resizable: true
+            },
+            {
               headerName: 'شماره',
               field: 'LetterNo',
               width: 100,
@@ -219,6 +240,20 @@ export class CompleteContractListReportComponent implements OnInit {
               resizable: true,
               hide : !this.IsContract
             },
+            {
+              headerName: 'تاريخ قرارداد از',
+              field: 'FromContractDatePersian',
+              width: 150,
+              resizable: true,
+              hide : !this.IsContract
+            },
+            {
+              headerName: 'تاريخ قرارداد تا',
+              field: 'ToContractDatePersian',
+              width: 150,
+              resizable: true,
+              hide : !this.IsContract
+            },
           ]
         },
         {
@@ -229,6 +264,20 @@ export class CompleteContractListReportComponent implements OnInit {
               headerName: 'شماره',
               field: 'ContractPayNoStr',
               width: 60,
+              resizable: true,
+              hide : !this.IsContract
+            },
+            {
+              headerName: 'تاریخ صورت وضعیت',
+              field: 'ContractPayDatePersian',
+              width: 150,
+              resizable: true,
+              hide : !this.IsContract
+            },
+            {
+              headerName: 'تاریخ ایجاد صورت وضعیت',
+              field: 'WorkFlowDatePersian',
+              width: 170,
               resizable: true,
               hide : !this.IsContract
             },
@@ -276,7 +325,7 @@ export class CompleteContractListReportComponent implements OnInit {
               field: 'AvrageWaitingDay',
               width: 100,
               resizable: true
-            },
+            },      
           ]
         },
       ];
@@ -303,6 +352,12 @@ export class CompleteContractListReportComponent implements OnInit {
               headerName: 'پیمانکار',
               field: 'ActorName',
               width: 150,
+              resizable: true
+            },
+            {
+              headerName: 'معاونت مجری',
+              field: 'CostCenterName',
+              width: 200,
               resizable: true
             },
             {
@@ -442,14 +497,16 @@ export class CompleteContractListReportComponent implements OnInit {
     if (!this.IsSeniorHeadReports && !this.CostCenterParams.selectedObject) {
       this.CheckValidate = true;
     }
-    else {
-      this.ContractService.ContractListReport(this.RegionParams.selectedObject, this.CostCenterParams.selectedObject, this.ModuleCode, this.IsInternal, this.IsCost , this.IsContract, this.ContractOperationID).subscribe(res => {
-        this.rowData = res;
+    else {      
+      this.ContractService.ContractListReport(this.RegionParams.selectedObject, this.CostCenterParams.selectedObject, this.ModuleCode, this.IsInternal, this.IsCost , this.IsContract, this.ContractOperationID,
+         this.FromContractDate , this.ToContractDate, this.ContractPayDate , this.WorkFlowDate ).subscribe(res => {
+        this.rowData = res;  
         if (this.ModuleCode === 2965) {
           this.SetSumFinalAmount(this.rowData);
         }
         if (this.ModuleCode === 2964) {
           this.SetSumAmount(this.rowData);
+          
         }
       });
     }
@@ -709,13 +766,69 @@ export class CompleteContractListReportComponent implements OnInit {
       this.InWorkFlowSumStr = 'جمع صورت وضعیت در جریان';
       this.TerminateSumStr = 'جمع صورت وضعیت تایید نهایی';
       this.FinalAmountStr = 'مبلغ کل قرارداد :';
+      this.DisabledContractPayDate = false;
+      this.DisabledFromContractDate = false;
+      this.DisabledToContractDate = false;
+      this.DisabledWorkFlowDate = false;
     } else {
       this.InWorkFlowSumStr = 'جمع فاکتور در جریان';
       this.TerminateSumStr = 'جمع فاکتور تایید نهایی';
       this.FinalAmountStr = 'مبلغ کل فاکتور :';
+      this.ContractPayDate = null;
+      this.FromContractDate = null;
+      this.ToContractDate = null;
+      this.WorkFlowDate = null ;
+      this.DisabledContractPayDate = true;
+      this.DisabledFromContractDate = true;
+      this.DisabledToContractDate = true;
+      this.DisabledWorkFlowDate = true;
     }
   }
   OnChangeContractOperation(event) {
     this.ContractOperationID = event;
+  }
+  OnContractPayDateChange(ADate) {
+    this.ContractPayDate = ADate.MDate;
+
+  }
+
+  OnFromContractDateChange(ADate) {
+    this.FromContractDate = ADate.MDate;
+    
+  }
+
+  OnToContractDateChange(ADate) {
+    this.ToContractDate = ADate.MDate;
+   
+  }
+  OnWorkFlowDateChange(ADate) {
+    this.WorkFlowDate = ADate.MDate;
+
+  }
+
+  OnChangeCheckBoxValue(Ischeck, type) {
+    switch (type) {
+      case 'SelectMultipleCostCenter':
+        {
+
+          this.SelectMultipleCostCenter = Ischeck;
+          const CostCenterIdList = [];
+          if (Ischeck) {
+            this.CostCenterItems.forEach(item => {
+              CostCenterIdList.push(item.CostCenterId);
+              
+            });
+            this.CostCenterParams.selectedObject = CostCenterIdList;
+          }
+          
+        }
+        if (!Ischeck) {
+          this.CostCenterParams.selectedObject = null;
+        }
+        break;
+      default:
+        break;
+    }
+
   }
 }

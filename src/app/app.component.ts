@@ -23,6 +23,7 @@ export class AppComponent implements OnInit {
   alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false };
   IsShowVersion = false;
   UrlIsProviders;
+  IsCrm;
   constructor(private router: Router,
     private UserSettings: UserSettingsService,
     private titleService: Title,
@@ -35,10 +36,12 @@ export class AppComponent implements OnInit {
     this.IsLoading.LoadingChange.subscribe(IsShow => { this.IsShow = IsShow; });
     this.IsAdvertising = environment.IsAdvertising;
     this.UrlIsProviders = environment.UrlIsProviders;
+    this.IsCrm = environment.IsCrm;
     this.UserSettings.GetSysName().subscribe(res => {
       this.title = res.SysName;
       this.titleService.setTitle(res.SysName);
       environment.IsExternal = res.IsExternal;
+      environment.IsExternalForSSO = res.IsExternalForSSO;
       environment.IsTestMode = this.IsTestMode = res.IsTestMode;
     });
     this.Message.MessageChange.subscribe(res => {

@@ -1,7 +1,7 @@
 import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
-import { NgForm } from '@angular/forms';
+
 
 @Component({
   selector: 'app-contract-person-page',
@@ -25,7 +25,7 @@ constructor(private ContractList: ContractListService, private Actor: ActorServi
     this.ContractList.GetRolesList().subscribe(res => {
       this.RolesSet = res;
     });
-    this.Actor.GetPersonList(1, null, false).subscribe(res => {
+    this.Actor.GetPersonList(1,null, null, false).subscribe(res => {
       for (const i of res) {
         i.PersonName = i.FirstName + ' ' + i.LastName;
       }

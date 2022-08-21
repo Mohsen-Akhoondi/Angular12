@@ -9,8 +9,8 @@ import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { CheckboxFieldEditableComponent } from '../checkbox-field-editable/checkbox-field-editable.component';
 import { TemplateRendererComponent } from '../grid-component/template-renderer/template-renderer.component';
+import { LoadingService } from 'src/app/Load/loading/LoadingService';
 
-declare var jquery: any;
 declare var $: any;
 
 @Component({
@@ -29,7 +29,7 @@ export class ModalApprPriceIndexComponent implements OnInit {
   isClicked = false;
   rowData;
   IsEditable = true;
-  rowDataYears: any[];
+  PriceListTopicItems: any[];
   IndicatorData: any[] = [
     {
       IndicatorName: 'رشته ای',
@@ -52,13 +52,19 @@ export class ModalApprPriceIndexComponent implements OnInit {
       AttachmentName: 'پیوست سه',
       AttachmentValue: 3
     }];
+  PriceListTypeItems: any[] = [
+    {
+      PriceListTypeName: '01 - پایه سازمان برنامه',
+      PriceListTypeCode: '01'
+    },
+    {
+      PriceListTypeName: '02 - نظام اجرایی فنی و عمرانی',
+      PriceListTypeCode: '02'
+    }];
   columnDefs: any;
   gridApi: any;
   gridColumnApi: any;
   defaultColDef: any;
-  selectedYear = 1397;
-  selectedAttachmentNo = 2;
-  selectedLevelCode = 4;
   RastehParams = {
     Items: [],
     bindLabelProp: 'RastehTitle',
@@ -70,7 +76,7 @@ export class ModalApprPriceIndexComponent implements OnInit {
     IsVirtualScroll: false,
     IsDisabled: false,
     clearable: false,
-    type: 'Reshteh'
+    type: 'Rasteh'
   };
   ReshtehParams = {
     bindLabelProp: 'ReshtehTitle',
@@ -132,6 +138,54 @@ export class ModalApprPriceIndexComponent implements OnInit {
     clearable: false,
     type: 'Fasl'
   };
+  PriceListTopicParams = {
+    bindLabelProp: 'PriceListTopicCodeName',
+    bindValueProp: 'PriceListTopicCode',
+    placeholder: '',
+    MinWidth: '120px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    Required: true,
+    clearable: false
+  };
+  IndiactorParams = {
+    bindLabelProp: 'IndicatorName',
+    bindValueProp: 'IndicatorValue',
+    placeholder: '',
+    MinWidth: '120px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    Required: true,
+    clearable: false
+  };
+  PriceListTypeParams = {
+    bindLabelProp: 'PriceListTypeName',
+    bindValueProp: 'PriceListTypeCode',
+    placeholder: '',
+    MinWidth: '120px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    Required: true,
+    clearable: false
+  };
+  AttachmentParams = {
+    bindLabelProp: 'AttachmentName',
+    bindValueProp: 'AttachmentValue',
+    placeholder: '',
+    MinWidth: '120px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    Required: true,
+    clearable: false
+  };
 
   constructor(
     private router: Router,
@@ -140,16 +194,17 @@ export class ModalApprPriceIndexComponent implements OnInit {
     private RefreshPersonItems: RefreshServices,
     config: NgSelectConfig,
     private Report: ReportService,
+    private Loading: LoadingService
   ) {
     config.notFoundText = 'موردی یافت نشد';
 
   }
-   // tslint:disable-next-line:use-life-cycle-interface
-   ngAfterViewInit(): void {
-     this.DefColumns(this.selectedLevelCode);
+  // tslint:disable-next-line:use-life-cycle-interface
+  ngAfterViewInit(): void {
+    this.DefColumns(this.IndiactorParams.selectedObject);
     this.defaultColDef = { resizable: true };
 
-   }
+  }
   sizeToFit() {
     this.gridApi.sizeColumnsToFit();
   }
@@ -160,42 +215,47 @@ export class ModalApprPriceIndexComponent implements OnInit {
   }
   ngOnInit() {
     this.PriceList.GetPriceListTopics(true).subscribe(res => {
-      this.rowDataYears = res;
-      for (const i of res) {
-        i.PriceListTopicCodeName = i.PriceListTopicCode + ' - ' + i.PriceListTopicName;
-      }
-      this.selectedYear = res[0].PriceListTopicCode;
+      this.PriceListTopicItems = res;
+      this.PriceListTopicParams.selectedObject = res[0].PriceListTopicCode;
+      this.IndiactorParams.selectedObject = this.IndicatorData[0].IndicatorValue;
+      this.PriceListTypeParams.selectedObject = this.PriceListTypeItems[0].PriceListTypeCode;
+      this.AttachmentParams.selectedObject = this.AttachmentData[1].AttachmentValue;
+      this.DefColumns(this.IndiactorParams.selectedObject);
       this.onLoadGrid();
     });
   }
 
-  onChangeYear(year: number) {
+  onChangeYear(year) {
     this.onLoadGrid();
   }
 
-  onChangeAttachment(attachmentNo: number) {
+  onChangeAttachment(attachmentNo) {
+    this.onLoadGrid();
+  }
+  onChangePriceListType(event) {
     this.onLoadGrid();
   }
 
-  onChangeLevelCode(levelCode: number) {
-    this.DefColumns(this.selectedLevelCode);
-    this.onChangeLevelCodeCahngeValue();
+  onChangeLevelCode(levelCode) {
+    this.DefColumns(levelCode);
     this.onLoadGrid();
   }
 
   onLoadGrid() {
     this.rowData = this.PriceListTopic.GetApprovalPriceIndexList(
-      this.selectedYear,
-      this.selectedAttachmentNo,
-      this.selectedLevelCode
+      this.PriceListTopicParams.selectedObject,
+      this.AttachmentParams.selectedObject,
+      this.IndiactorParams.selectedObject,
+      this.PriceListTypeParams.selectedObject
     );
   }
 
   onShowReport() {
     this.Report.ShowapprpriceindexReport(
-      this.selectedYear,
-      this.selectedAttachmentNo,
-      this.selectedLevelCode
+      this.PriceListTopicParams.selectedObject,
+      this.AttachmentParams.selectedObject,
+      this.IndiactorParams.selectedObject,
+      this.PriceListTypeParams.selectedObject
     );
   }
 
@@ -204,6 +264,7 @@ export class ModalApprPriceIndexComponent implements OnInit {
   }
 
   onSave() {
+    this.Loading.Show();
     this.gridApi.stopEditing();
     const GridData = [];
     this.gridApi.forEachNode(res => {
@@ -211,49 +272,63 @@ export class ModalApprPriceIndexComponent implements OnInit {
     });
     this.PriceListTopic.UpdatePriceList(
       GridData,
-      this.selectedYear,
-      this.selectedAttachmentNo,
-      this.selectedLevelCode).subscribe(ress => {
-        this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
+      this.PriceListTopicParams.selectedObject,
+      this.AttachmentParams.selectedObject,
+      this.IndiactorParams.selectedObject,
+      this.PriceListTypeParams.selectedObject).subscribe(ress => {
+        if (ress) {
+          this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
+          this.onLoadGrid();
+        }
       });
   }
   oncellEditingStarted(event) {
-    if (event.colDef && event.colDef.field === 'ReshtehTitle') {
-      this.columnDefs[2].cellEditorParams.Params.loading = true;
-      this.PriceListTopic.GetPriceListPatternReshteh(event.data.Level1Code, this.selectedYear, this.selectedLevelCode).subscribe(ress => {
-        this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
-          List: ress,
-          type: 'Reshteh'
-        });
-      });
-      this.columnDefs[2].cellEditorParams.Params.loading = false;
-    } else if (event.colDef && event.colDef.field === 'FaslTitle') {
-      if (this.selectedLevelCode !== 4) {
-        this.columnDefs[3].cellEditorParams.Params.loading = true;
-        this.PriceListTopic.GetPriceListPatternFasl(event.data.Level1Code, event.data.Level2Code,
-                                                    this.selectedYear, this.selectedLevelCode).subscribe(ress => {
+    if (event.colDef && event.colDef.field === 'RastehTitle') {
+      this.PriceListTopic.GetPriceListPatternRasteh(this.IndiactorParams.selectedObject,
+        this.PriceListTopicParams.selectedObject, this.PriceListTypeParams.selectedObject).subscribe(ress => {
           this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
             List: ress,
-            type: 'Fasl'
+            type: 'Rasteh'
           });
         });
+    } else if (event.colDef && event.colDef.field === 'ReshtehTitle') {
+      this.columnDefs[2].cellEditorParams.Params.loading = true;
+      this.PriceListTopic.GetPriceListPatternReshteh(event.data.Level1Code,
+        this.PriceListTopicParams.selectedObject, this.IndiactorParams.selectedObject,
+        this.PriceListTypeParams.selectedObject).subscribe(ress => {
+          this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
+            List: ress,
+            type: 'Reshteh'
+          });
+        });
+      this.columnDefs[2].cellEditorParams.Params.loading = false;
+    } else if (event.colDef && event.colDef.field === 'FaslTitle') {
+      if (this.IndiactorParams.selectedObject !== 4) {
+        this.columnDefs[3].cellEditorParams.Params.loading = true;
+        this.PriceListTopic.GetPriceListPatternFasl(event.data.Level1Code, event.data.Level2Code,
+          this.PriceListTopicParams.selectedObject, this.IndiactorParams.selectedObject,
+          this.PriceListTypeParams.selectedObject).subscribe(ress => {
+            this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
+              List: ress,
+              type: 'Fasl'
+            });
+          });
         this.columnDefs[3].cellEditorParams.Params.loading = false;
       }
     } else if (event.colDef && event.colDef.field === 'RadifTitle') {
-      if (this.selectedLevelCode === 6) {
+      if (this.IndiactorParams.selectedObject === 6) {
         this.columnDefs[4].cellEditorParams.Params.loading = true;
         this.PriceListTopic.GetPriceListPatternRadif(event.data.Level1Code, event.data.Level2Code, event.data.Level3Code,
-                                                     this.selectedYear, this.selectedLevelCode).subscribe(ress => {
-          this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
-            List: ress,
-            type: 'Radif'
+          this.PriceListTopicParams.selectedObject, this.IndiactorParams.selectedObject,
+          this.PriceListTypeParams.selectedObject).subscribe(ress => {
+            this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
+              List: ress,
+              type: 'Radif'
+            });
           });
-        });
         this.columnDefs[4].cellEditorParams.Params.loading = false;
       }
     }
-  }
-  onChangeLevelCodeCahngeValue() {
   }
 
   ShowMessageBoxWithOkBtn(message) {
@@ -288,11 +363,10 @@ export class ModalApprPriceIndexComponent implements OnInit {
             width: 180,
             editable: true,
             resizable: true,
-            cellEditorFramework: NgSelectCellEditorComponent,
+            cellEditorFramework: NgSelectVirtualScrollComponent,
             cellEditorParams: {
-              Items: this.PriceListTopic.GetPriceListPatternRasteh(this.selectedLevelCode, this.selectedYear),
-              bindLabelProp: 'RastehTitle',
-              bindValueProp: 'Level1Code'
+              Params: this.RastehParams,
+              Items: []
             },
             cellRenderer: 'SeRender',
             valueFormatter: function currencyFormatter(params) {
@@ -386,7 +460,7 @@ export class ModalApprPriceIndexComponent implements OnInit {
             editable: true
           },
           {
-            headerName: 'قطعی' ,
+            headerName: 'قطعی',
             field: 'IsDefinite',
             width: 100,
             resizable: true,
@@ -432,11 +506,10 @@ export class ModalApprPriceIndexComponent implements OnInit {
             width: 180,
             editable: true,
             resizable: true,
-            cellEditorFramework: NgSelectCellEditorComponent,
+            cellEditorFramework: NgSelectVirtualScrollComponent,
             cellEditorParams: {
-              Items: this.PriceListTopic.GetPriceListPatternRasteh(this.selectedLevelCode, this.selectedYear),
-              bindLabelProp: 'RastehTitle',
-              bindValueProp: 'Level1Code'
+              Params: this.RastehParams,
+              Items: []
             },
             cellRenderer: 'SeRender',
             valueFormatter: function currencyFormatter(params) {
@@ -567,7 +640,7 @@ export class ModalApprPriceIndexComponent implements OnInit {
             editable: true
           },
           {
-            headerName: 'قطعی' ,
+            headerName: 'قطعی',
             field: 'IsDefinite',
             width: 100,
             resizable: true,
@@ -613,11 +686,10 @@ export class ModalApprPriceIndexComponent implements OnInit {
             width: 180,
             editable: true,
             resizable: true,
-            cellEditorFramework: NgSelectCellEditorComponent,
+            cellEditorFramework: NgSelectVirtualScrollComponent,
             cellEditorParams: {
-              Items: this.PriceListTopic.GetPriceListPatternRasteh(this.selectedLevelCode, this.selectedYear),
-              bindLabelProp: 'RastehTitle',
-              bindValueProp: 'Level1Code'
+              Params: this.RastehParams,
+              Items: []
             },
             cellRenderer: 'SeRender',
             valueFormatter: function currencyFormatter(params) {
@@ -779,7 +851,7 @@ export class ModalApprPriceIndexComponent implements OnInit {
             editable: true
           },
           {
-            headerName: 'قطعی' ,
+            headerName: 'قطعی',
             field: 'IsDefinite',
             width: 100,
             resizable: true,

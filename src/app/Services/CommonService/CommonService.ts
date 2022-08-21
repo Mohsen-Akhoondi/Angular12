@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
 import { BaseHttpClient } from 'src/app/Services/BaseService/BaseHttpClient';
 @Injectable({ providedIn: 'root' })
 export class CommonService {
@@ -164,8 +163,8 @@ export class CommonService {
         SearchTerm: string,
         PageNumber: number,
         PageSize: number,
-        UnitPatternID: number,
-        BusinessPatternID: number) {
+        UnitPatternID: number = null,
+        BusinessPatternID: number = null) {
         return this.http.get(window.location.origin + '/Common/GetBusinessPatternPaging', {
             SearchOption,
             SearchTerm,
@@ -173,8 +172,7 @@ export class CommonService {
             PageSize,
             UnitPatternID,
             BusinessPatternID,
-        },
-            false);
+        }, false);
     }
     GetUniversityList(SearchOption: string,
         SearchTerm: string,
@@ -357,9 +355,9 @@ export class CommonService {
     GetGoodsList(ActorID: number) {
         return this.http.get(window.location.origin + '/Common/GetGoodsList', { ActorID });
     }
-    GetAllArchiveDetailList(archiveDetailCode: number, TypeCodeList: any, checkSign: any, checkExist: boolean = true) {
+    GetAllArchiveDetailList(ObjectID: number, TypeCodeList: any, checkSign: any, checkExist: boolean = true) {
         return this.http.get(window.location.origin + '/Common/GetAllArchiveDetailList', {
-            archiveDetailCode,
+            ObjectID,
             TypeCodeList,
             checkSign,
             checkExist
@@ -407,28 +405,65 @@ export class CommonService {
     GetExperienceCoefList() {
         return this.http.get(window.location.origin + '/Common/GetExperienceCoefList', null, false);
     }
-    DeleteArchiveDetailDocuments(archiveDetailCode: number, DTypeCode: any, ModuleCode) {
+    DeleteArchiveDetailDocuments(ObjectID: number, DTypeCode: any, ModuleCode) {
         return this.http
             .post(window.location.origin + '/Common/DeleteArchiveDetailDocuments',
-                { archiveDetailCode, DTypeCode, ModuleCode });
+                { ObjectID, DTypeCode, ModuleCode });
     }
     SaveModuleViewTypeDocument(DataObj: any) {
         return this.http.post(window.location.origin + '/Common/SaveModuleViewTypeDocument', {
             DataObj
         }, true);
     }
-    GetModuleViewTypeDocumentList () {
+    GetModuleViewTypeDocumentList() {
         return this.http.get(window.location.origin + '/Common/GetModuleViewTypeDocumentList', null, false);
     }
     GetRelationTypeList() {
         return this.http.get(window.location.origin + '/Common/GetRelationTypeList', null);
     }
     SaveRelationTypeList(ARelationTypeList: any) {
-        return this.http.post(window.location.origin + '/Common/SaveRelationTypeList', {ARelationTypeList});
+        return this.http.post(window.location.origin + '/Common/SaveRelationTypeList', { ARelationTypeList });
     }
     GetAllResponsibilityTypeByCorporateType(ModuleCode) {
         return this.http.get(window.location.origin + '/Common/GetAllResponsibilityTypeByCorporateType', {
             ModuleCode
         });
     }
+    GetAllAssetType() {
+        return this.http.get(window.location.origin + '/Common/GetAllAssetType', {});
+    }
+    CheckPDFHasSigned(ObjectID: number, DocTypeCode: number) {
+        return this.http.get(window.location.origin + '/Common/CheckPDFHasSigned',
+            { ObjectID, DocTypeCode });
+    }
+    GetAllNotifList() {
+        return this.http.get(window.location.origin + '/Home/GetAllNotifList', null);
+    }
+    GetAllByObjectID(ObjectID: number, ModuleCode: number) {
+        return this.http.get(window.location.origin + '/Home/GetAllByObjectID', {
+            ObjectID,
+            ModuleCode
+        });
+    }
+    GetAllAuditHistoryBySessionID(SessionID: number, ObjectID: number, ModuleCode: number) {
+        return this.http.get(window.location.origin + '/Home/GetAllAuditHistoryBySessionID', {
+            SessionID,
+            ObjectID,
+            ModuleCode
+        });
+    }
+    GetLastAuditByObjectID(ObjectID: number) {
+        return this.http.get(window.location.origin + '/Home/GetLastAuditByObjectID', {
+            ObjectID
+        }, true);
+    }
+    IsAutoGenerate(DocumentTypeCode: number) {
+        return this.http.get(window.location.origin + '/Common/IsAutoGenerate', { DocumentTypeCode });
+    }
+    CheckAllowState(ActorID: number) {
+        return this.http.get(window.location.origin + '/Home/CheckAllowState', { ActorID });
+    }
+    GetAllTable(OperationCode: number) {
+        return this.http.get(window.location.origin + '/Common/GetAllTable', { OperationCode });
+}
 }

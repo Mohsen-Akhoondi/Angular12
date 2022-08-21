@@ -1,6 +1,5 @@
 import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { of, forkJoin } from 'rxjs';
-import { ContractPayService } from 'src/app/Services/ContractService/ContractPayServices/ContractPayService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 
 @Component({
@@ -23,7 +22,7 @@ export class SelectProductRequestEstimateComponent implements OnInit {
   @Output() Closed: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() OutputParam: EventEmitter<any> = new EventEmitter<any>();
   CostFactorID: any;
-  constructor( private ProductRequest: ProductRequestService) {
+  constructor(private ProductRequest: ProductRequestService) {
     this.colDefRight = [
       {
         headerName: 'ردیف',
@@ -137,13 +136,13 @@ export class SelectProductRequestEstimateComponent implements OnInit {
 
     forkJoin([
       this.rowDataRight = this.ProductRequest.GetProductRequestEstimateListWithProduct(this.CostFactorID,
-                                                                                      this.ProductID,
-                                                                                      this.PriceListPatternIDs,
-                                                                                     1),
+        this.ProductID,
+        this.PriceListPatternIDs,
+        1),
       this.rowDataLeft = this.ProductRequest.GetProductRequestEstimateListWithProduct(this.CostFactorID,
-                                                                                      this.ProductID,
-                                                                                      this.PriceListPatternIDs,
-                                                                                      0)
+        this.ProductID,
+        this.PriceListPatternIDs,
+        0)
     ]);
   }
 

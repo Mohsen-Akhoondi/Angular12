@@ -1,6 +1,5 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import * as moment from 'jalali-moment';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
 import { FinYearService } from 'src/app/Services/BaseService/FinYearService';
 import { forkJoin, of } from 'rxjs';
@@ -12,7 +11,6 @@ import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServi
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { ContractMinutesService } from 'src/app/Services/ContractService/ContractMinutes/ContractMinutesService';
 import { OverPopUpCellEditorComponent } from 'src/app/Shared/OverPopUpcellEditor/over-pop-up-cell-editor.component';
-import { isUndefined } from 'util';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';

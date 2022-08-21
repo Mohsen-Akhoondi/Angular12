@@ -40,6 +40,7 @@ export class ChoosenContractPayRepComponent implements OnInit {
   Select = false;
   closee;
   ModuleCode;
+  ShowSign = false;
 
   constructor(private router: Router,
     private ContractPayDetails: ContractPayDetailsService,
@@ -52,6 +53,9 @@ export class ChoosenContractPayRepComponent implements OnInit {
 
   ngOnInit() {
     this.CostFactorID = this.PopupParam.SelectedCPCostFactorID
+    this.ContractPayDetails.HasEndedWorkflow(this.CostFactorID).subscribe(res => {
+      this.ShowSign = res;
+    });
     this.PeymanItems = [
       {
         PeymanName: 'کارت پیمان',
@@ -206,14 +210,14 @@ export class ChoosenContractPayRepComponent implements OnInit {
         // this.ContractPayDetails.ContractPayDetailsSeventhLevelReport(this.PopupParam.SelectedCPCostFactorID, this.ContractID,
         //   this.PopupParam.ModuleCode, this.IsColorful, 'اقدام صورت وضعیت');
       }
-      if (this.SelectedLevelCode === 8) {
+      if (this.SelectedLevelCode === 8) { 
         this.ContractID = this.PopupParam.SelectedContractID;
         this.Report.ContractPayRep(
           this.ContractID,
           this.CostFactorID,
           this.PopupParam.RegionCode,
           this.ModuleCode,
-          true,
+          this.ShowSign,
           'گزارش صورت وضعیت'
         );
       }
@@ -226,7 +230,7 @@ export class ChoosenContractPayRepComponent implements OnInit {
           'گزارش خلاصه مالی کل',
           this.ContractPayNo,
           this.PopupParam.RegionCode,
-          true
+          this.ShowSign
         );
         return;
       }

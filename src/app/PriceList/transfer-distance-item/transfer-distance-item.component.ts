@@ -2,9 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TransferDistanceItemService } from 'src/app/Services/BaseService/TransferDistanceItemService';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
-import { AnalayzePriceTypeService } from 'src/app/Services/BaseService/AnalayzePriceTypeService';
 import { of } from 'rxjs';
-import { AnalayzePriceListService } from 'src/app/Services/BaseService/AnalayzePriceListService';
 @Component({
   selector: 'app-transfer-distance-item',
   templateUrl: './transfer-distance-item.component.html',

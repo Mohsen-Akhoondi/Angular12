@@ -72,42 +72,42 @@ export class SubLedgerAccBookComponent implements OnInit {
   FinYearListSet = [];
   RegionListSet = [];
   VoucherStatusListSet =
-  [
-    {
-      VoucherStatusName : 'ثبت شده',
-      VoucherStatusCode: 1,
-    },
-    {
-      VoucherStatusName : 'ثبت نشده',
-      VoucherStatusCode: 2,
-    },
-    {
-      VoucherStatusName : 'کلیه اسناد',
-      VoucherStatusCode: 3,
-    },
-  ];
+    [
+      {
+        VoucherStatusName: 'ثبت شده',
+        VoucherStatusCode: 1,
+      },
+      {
+        VoucherStatusName: 'ثبت نشده',
+        VoucherStatusCode: 2,
+      },
+      {
+        VoucherStatusName: 'کلیه اسناد',
+        VoucherStatusCode: 3,
+      },
+    ];
   ReportTypeListSet =
-  [
-    {
-      ReportTypeName: 'به سر جمع',
-      ReportTypeCode : 1,
-    },
-    {
-      ReportTypeName: 'به ریز',
-      ReportTypeCode : 2,
-    },
-  ];
+    [
+      {
+        ReportTypeName: 'به سر جمع',
+        ReportTypeCode: 1,
+      },
+      {
+        ReportTypeName: 'به ریز',
+        ReportTypeCode: 2,
+      },
+    ];
   SortTypeListSet =
-  [
-    {
-      SortTypeName: 'شماره سند',
-      SortTypeCode: 1,
-    },
-    {
-      SortTypeName: 'تاریخ سند',
-      SortTypeCode: 2,
-    }
-  ];
+    [
+      {
+        SortTypeName: 'شماره سند',
+        SortTypeCode: 1,
+      },
+      {
+        SortTypeName: 'تاریخ سند',
+        SortTypeCode: 2,
+      }
+    ];
   SelectedSortType;
   LedgerAccFromPageCount;
   LedgerAccFromParams = {
@@ -194,10 +194,10 @@ export class SubLedgerAccBookComponent implements OnInit {
     private Finyearserv: FinYearService,
     private AccountingServ: AccountingService,
     private route: ActivatedRoute) {
-      this.route.params.subscribe(params => {
-        this.ModuleCode = +params['ModuleCode'];
-      });
-    }
+    this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
+  }
 
   ngOnInit() {
     this.SubLedgerAccRows = of([]);
@@ -241,12 +241,12 @@ export class SubLedgerAccBookComponent implements OnInit {
     switch (el) {
       case 'From':
         this.FromLedgerID = event;
-      break;
+        break;
       case 'To':
         this.ToLedgerID = event;
-      break;
+        break;
       default:
-      break;
+        break;
     }
     this.SubLedgerAccToParams.selectedObject = null;
     this.ToSubLedgerID = null;
@@ -259,12 +259,12 @@ export class SubLedgerAccBookComponent implements OnInit {
     switch (el) {
       case 'From':
         this.FromSubLedgerID = event;
-      break;
+        break;
       case 'To':
         this.ToSubLedgerID = event;
-      break;
+        break;
       default:
-      break;
+        break;
     }
   }
 
@@ -285,7 +285,7 @@ export class SubLedgerAccBookComponent implements OnInit {
         this.cb1Selected = param;
         break;
       default:
-      break;
+        break;
     }
   }
 
@@ -294,10 +294,10 @@ export class SubLedgerAccBookComponent implements OnInit {
       return;
     }
     this.AccountingServ.GetSubLedgerByLedger(this.FromLedgerID,
-    this.ToLedgerID).subscribe(res => {
-      this.SubLedgerAccFromSet = res;
-      this.SubLedgerAccToSet = res;
-    });
+      this.ToLedgerID).subscribe(res => {
+        this.SubLedgerAccFromSet = res;
+        this.SubLedgerAccToSet = res;
+      });
   }
 
 
@@ -315,11 +315,11 @@ export class SubLedgerAccBookComponent implements OnInit {
       case 'From':
         this.FromDate = param ? param.MDate : null;
         break;
-        case 'To':
-          this.ToDate = param ? param.MDate : null;
-          break;
-        default:
-          break;
+      case 'To':
+        this.ToDate = param ? param.MDate : null;
+        break;
+      default:
+        break;
     }
   }
 
@@ -328,11 +328,11 @@ export class SubLedgerAccBookComponent implements OnInit {
       case 'From':
         this.FromVoucherCode = param ? param : null;
         break;
-        case 'To':
-          this.ToVoucherCode = param ? param : null;
-          break;
-        default:
-          break;
+      case 'To':
+        this.ToVoucherCode = param ? param : null;
+        break;
+      default:
+        break;
     }
   }
   onShowReport() {
@@ -340,12 +340,12 @@ export class SubLedgerAccBookComponent implements OnInit {
       this.SubLedgerColdef();
       this.SubLedgerAccRows = this.AccountingServ.SubLedgerAccBookRep(this.SelectedRegion, this.SelectedFinYear, this.FromDate, this.ToDate,
         this.VoucherStatusCode, this.FromVoucherCode, this.ToVoucherCode, this.FromLedgerID, this.ToLedgerID,
-        this.FromSubLedgerID, this.ToSubLedgerID, this.SelectedSortType, this.cb1Selected ? 1 : 0 );
+        this.FromSubLedgerID, this.ToSubLedgerID, this.SelectedSortType, this.cb1Selected ? 1 : 0);
     } else if (this.SelectedReportType === 2) {
       this.SubLedgerDetailcoldef();
       this.SubLedgerAccRows = this.AccountingServ.SubLedgerAccBookDetailRep(this.SelectedRegion, this.SelectedFinYear, this.FromDate,
         this.ToDate, this.VoucherStatusCode, this.FromVoucherCode, this.ToVoucherCode, this.FromLedgerID, this.ToLedgerID,
-         this.FromSubLedgerID, this.ToSubLedgerID, this.SelectedSortType, this.cb1Selected ? 1 : 0 );
+        this.FromSubLedgerID, this.ToSubLedgerID, this.SelectedSortType, this.cb1Selected ? 1 : 0);
     }
 
 

@@ -1,5 +1,4 @@
 import { Component, OnInit, Input, Output, EventEmitter, ViewChild } from '@angular/core';
-import { identifierModuleUrl } from '@angular/compiler';
 import { isUndefined } from 'util';
 import { ICellEditorAngularComp } from 'ag-grid-angular';
 

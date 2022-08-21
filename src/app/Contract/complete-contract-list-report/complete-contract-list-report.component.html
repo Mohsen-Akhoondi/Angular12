@@ -1,42 +1,69 @@
 <div class="main-form-body" style="margin-top: 3px; height:87%;">
   <fieldset class="feild-set" style="display: inherit">
-    <table style="margin-bottom: 10px;margin-top: 7px; width: 100%; text-align: center;">
+    <table style="margin-bottom: 10px;margin-top: 7px; width: 100%;">
       <tr>
-        <td style="width: 33%;padding-left: 5px;">
+        <td style="width: 33%;">
           <span class="table-cell-Lable">واحد اجرایی</span>
-          <app-ng-select-virtual-scroll style="display: inline-block;width: 77%;" [NgSelectParams]="RegionParams"
+          <app-ng-select-virtual-scroll style="display: inline-block;width: 60%;" [NgSelectParams]="RegionParams"
             [Items]="RegionItems" (Open)="OnOpenNgSelect('Region')">
           </app-ng-select-virtual-scroll>
         </td>
         <td style="width: 33%;">
           <span *ngIf="!IsSeniorHeadReports" style="color: red;">*</span>
           <span class="table-cell-Lable">معاونت مجری</span>
-          <app-ng-select-virtual-scroll style="display: inline-block;width: 77%;" [NgSelectParams]="CostCenterParams"
-            [Items]="CostCenterItems" (Open)="OnOpenNgSelect('CostCenter')" [CheckValidate]="CheckValidate">
+          <app-ng-select-virtual-scroll [multiple]="true" style="display: inline-block;width: 56%"
+            [NgSelectParams]="CostCenterParams" [Items]="CostCenterItems" (Open)="OnOpenNgSelect('CostCenter')"
+            [CheckValidate]="CheckValidate">
           </app-ng-select-virtual-scroll>
+          <app-custom-check-box style="vertical-align: sub;" [configurationInfo]="CustomCheckBoxConfig"
+          (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'SelectMultipleCostCenter')" title="انتخاب معاونت های مجری"
+          [isSelected]="SelectMultipleCostCenter">
+        </app-custom-check-box>
         </td>
-        <td width="33%">
+        <td style="width: 33%;">
           <span class="table-cell-Lable">
             نوع صورت وضعیت
           </span>
-          <app-ng-select-virtual-scroll style="display: inline-block;width: 50%;" [NgSelectParams]="ContractOperationParams"
-            [Items]="ContractOperationItems" (selectedChange)="OnChangeContractOperation($event)">
+          <app-ng-select-virtual-scroll style="display: inline-block;width: 56%;"
+            [NgSelectParams]="ContractOperationParams" [Items]="ContractOperationItems"
+            (selectedChange)="OnChangeContractOperation($event)">
           </app-ng-select-virtual-scroll>
         </td>
+      </tr>
+      <tr *ngIf="ModuleCode === 2964">
+        <td style="width: 33%;">
+          <span class="table-cell-Lable">تاریخ قرارداد از</span>
+          <app-jalali-datepicker [Disabled]="DisabledFromContractDate" [WidthPC]="60" 
+           [CurrMiladiDateValue]="FromContractDate" [Required]="true" (Change)="OnFromContractDateChange($event)">
+          </app-jalali-datepicker>
+        </td>
+        <td style="width: 33%;">
+          <span class="table-cell-Lable">تاریخ قرارداد تا</span>
+          <app-jalali-datepicker [Disabled]="DisabledToContractDate" [WidthPC]="60" 
+           [CurrMiladiDateValue]="ToContractDate" [Required]="true" (Change)="OnToContractDateChange($event)">
+          </app-jalali-datepicker>
+        </td>
+        <td style="width: 33%;">
+          <span class="table-cell-Lable">تاریخ صورت وضعیت</span>
+          <app-jalali-datepicker  [Disabled]="DisabledContractPayDate" [WidthPC]="56" 
+            [CurrMiladiDateValue]="ContractPayDate" [Required]="true" (Change)="OnContractPayDateChange($event)">
+          </app-jalali-datepicker>
+        </td>
+     
       </tr>
       <tr>
         <td style="width: 33%;">
           <span class="table-cell-Lable">نحوه معامله</span>
-          <div class="redio-div">
+          <div class="redio-div1">
             <div class="custom-control custom-radio custom-control-inline">
               <input  [checked]="IsContract" type="radio" class="custom-control-input"
                 id="IsContractRadio" name="ChoosenIsContractRadioName" (click)="ContractRedioClick(true)">
               <label style="margin: auto;" class="custom-control-label redio-label" for="IsContractRadio">قراردادی
-                </label>
+              </label>
             </div>
             <div class="custom-control custom-radio custom-control-inline">
-              <input [checked]="!IsContract" type="radio" class="custom-control-input"
-                id="IsInvoiceRadio" name="ChoosenIsContractRadioName">
+              <input [checked]="!IsContract" type="radio" class="custom-control-input" 
+              id="IsInvoiceRadio" name="ChoosenIsContractRadioName">
               <label style="margin: auto;" class="custom-control-label redio-label" for="IsInvoiceRadio"
                 (click)="ContractRedioClick(false)">غیرقراردادی(موردی)</label>
             </div>
@@ -44,30 +71,45 @@
         </td>
         <td style="width: 33%;">
           <span class="table-cell-Lable">نوع معامله</span>
-          <div class="redio-div">
+          <div class="redio-div2">
             <div class="custom-control custom-radio custom-control-inline">
-              <input  [checked]="IsCost" type="radio" class="custom-control-input"
-                id="ISCostRadio" name="ChoosenISCostRadioName" (click)="RedioClick(true)">
+              <input  [checked]="IsCost" type="radio" class="custom-control-input" 
+               id="ISCostRadio" name="ChoosenISCostRadioName" (click)="RedioClick(true)">
               <label style="margin: auto;" class="custom-control-label redio-label" for="ISCostRadio">هزینه
                 ای</label>
             </div>
             <div class="custom-control custom-radio custom-control-inline">
-              <input [checked]="!IsCost" type="radio" class="custom-control-input"
-                id="ISIncomeRadio" name="ChoosenISCostRadioName">
+              <input [checked]="!IsCost" type="radio" class="custom-control-input" 
+               id="ISIncomeRadio" name="ChoosenISCostRadioName">
               <label style="margin: auto;" class="custom-control-label redio-label" for="ISIncomeRadio"
                 (click)="RedioClick(false)">درآمدی</label>
             </div>
           </div>
         </td>
-
-        <td *ngIf="ModuleCode === 2964" style="width: 33%">
+        <!-- <td *ngIf="ModuleCode === 2964" style="width: 33%">
           <span *ngIf="ModuleCode === 2964" class="table-cell-Lable">گردش داخل سازمان</span>
-          <app-custom-check-box *ngIf="ModuleCode === 2964" style="vertical-align: sub;" [configurationInfo]="CustomCheckBoxConfig"
-            style="margin-left: 67%;" [isSelected]="IsInternal" (PrettyCheckBoxChange)="OnCheckBoxChange($event)">
+          <app-custom-check-box *ngIf="ModuleCode === 2964"
+           style="vertical-align: sub; margin-left: 53%; " [configurationInfo]="CustomCheckBoxConfig"
+           [isSelected]="IsInternal" (PrettyCheckBoxChange)="OnCheckBoxChange($event)">
           </app-custom-check-box>
+        </td> -->
+        <td *ngIf="ModuleCode === 2964" style="width: 33%">
+            <span class="table-cell-Lable1">تاریخ ایجاد صورت وضعیت</span>
+            <app-jalali-datepicker  [Disabled]="DisabledWorkFlowDate" [WidthPC]="56" [CurrMiladiDateValue]="WorkFlowDate"
+              [Required]="true" (Change)="OnWorkFlowDateChange($event)">
+            </app-jalali-datepicker>
         </td>
         <!-- <td style="width: 50%;">
         </td> -->
+      </tr>
+      <tr>
+        <td *ngIf="ModuleCode === 2964" style="width: 33%">
+          <span *ngIf="ModuleCode === 2964" class="table-cell-Lable">گردش داخل سازمان</span>
+          <app-custom-check-box  *ngIf="ModuleCode === 2964"
+           style="vertical-align: sub; margin-left: 50%; " [configurationInfo]="CustomCheckBoxConfig"
+           [isSelected]="IsInternal" (PrettyCheckBoxChange)="OnCheckBoxChange($event)">
+          </app-custom-check-box>
+        </td>
       </tr>
     </table>
   </fieldset>
@@ -92,143 +134,143 @@
 
   <div *ngIf="this.ModuleCode === 2965" class="main-form-body" style="margin-top: 3px; height:19%;">
     <table style=" margin-top: 1px; width: 100%;">
-    <tr>
-      <td width="15%" style="padding-right: 32px;">
-        <div style="min-width: 80px;font-weight: bold; float: right; margin: 2px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable"> {{InWorkFlowSumStr}}</span>
-        </div>
-      </td>
-      <td width="22%">
-        <div style="min-width: 80px;font-weight: bold; float: right; padding-right: 68px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable"> مبلغ :</span>
-          <label for="sum-final-estimate-amount" style="margin:2px"> {{SumWCPAmount}} </label>
-        </div>
-      </td>
-      <td width="21%">
-        <div style="min-width: 80px; font-weight: bold; float: right; margin-right: 22px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable">  ارزش افزوده : </span>
-          <label for="sum-final-estimate-amount" style="margin:2px"> {{SumWTValue}} </label>
-        </div>
-      </td>
-      <td width="21%">
-        <div style="min-width: 80px;font-weight: bold; float: right; padding-right: 38px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable"> مبلغ کل :</span>
-          <label for="sum-final-estimate-amount" style="margin:2px"> {{SumWFA}} </label>
-        </div>
-      </td>
-     
-      <td width="22%">
-        <fieldset class="feild-set" style="display: inherit;padding: 1px;margin-bottom: 1px;min-height: 23px;">
-        <div style="min-width: 80px;font-weight: bold;color:rgb(19, 19, 138); float: right;margin-right: 36px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable">{{FinalAmountStr}}</span>
-          <label for="sum-final-estimate-amount" style="margin:1px"> {{SumFinalCAmount}} </label>
-        </div>
-      </fieldset>
-      </td>
-      
-    </tr>
+      <tr>
+        <td width="15%" style="padding-right: 32px;">
+          <div style="min-width: 80px;font-weight: bold; float: right; margin: 2px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable"> {{InWorkFlowSumStr}}</span>
+          </div>
+        </td>
+        <td width="22%">
+          <div style="min-width: 80px;font-weight: bold; float: right; padding-right: 68px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable"> مبلغ :</span>
+            <label for="sum-final-estimate-amount" style="margin:2px"> {{SumWCPAmount}} </label>
+          </div>
+        </td>
+        <td width="21%">
+          <div style="min-width: 80px; font-weight: bold; float: right; margin-right: 22px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable">  ارزش افزوده : </span>
+            <label for="sum-final-estimate-amount" style="margin:2px"> {{SumWTValue}} </label>
+          </div>
+        </td>
+        <td width="21%">
+          <div style="min-width: 80px;font-weight: bold; float: right; padding-right: 38px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable"> مبلغ کل :</span>
+            <label for="sum-final-estimate-amount" style="margin:2px"> {{SumWFA}} </label>
+          </div>
+        </td>
 
-    <tr>
-      <td width="15%" style="padding-right: 5px;">
-        <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 20px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable"> {{TerminateSumStr}} </span>
-        </div>
-      </td>
-      <td width="22%">
-        <div style="min-width: 80px;font-weight: bold; float: right; padding-right: 68px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable"> مبلغ :</span>
-          <label for="sum-final-estimate-amount" style="margin:1px"> {{SumTCPA}} </label>
-        </div>
-      </td>
-      <td width="21%">
-        <div style="min-width: 80px; font-weight: bold; float: right; margin-right: 22px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable"> ارزش افزوده : </span>
-          <label for="sum-final-estimate-amount" style="margin:2px"> {{SumTTV}} </label>
-        </div>
-      </td>
-      <td width="21%">
-        <div style="min-width: 80px;font-weight: bold;float: right;padding-right: 38px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable"> مبلغ کل :</span>
-          <label for="sum-final-estimate-amount" style="margin:2px"> {{SumTFA}} </label>
-        </div>
-      </td>
-    
-      <td width="22%">
-        <fieldset class="feild-set" style="display: inherit;padding: 1px;margin-bottom: 1px;min-height: 23px;">
-        <div style="min-width: 80px;font-weight: bold;color:rgb(19, 19, 138); float: right;margin-right: -7px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable"> درصد پرداختی به مبلغ کل :</span>
-          <label for="sum-final-estimate-amount" style="margin:2px"> {{SumAPercent}} </label>
-        </div>
-      </fieldset>
-      </td>
-   
-    </tr>
+        <td width="22%">
+          <fieldset class="feild-set" style="display: inherit;padding: 1px;margin-bottom: 1px;min-height: 23px;">
+            <div style="min-width: 80px;font-weight: bold;color:rgb(19, 19, 138); float: right;margin-right: 36px;">
+              <span id="sum-final-estimate-amount" class="table-cell-Lable">{{FinalAmountStr}}</span>
+              <label for="sum-final-estimate-amount" style="margin:1px"> {{SumFinalCAmount}} </label>
+            </div>
+          </fieldset>
+        </td>
 
-    <tr *ngIf="this.IsCost">
-      <td width="15%" style="padding-right: 71px;">
-        <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 20px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable">جمع حسابداری </span>
-        </div>
-      </td>
-      <td width="22%">
-        <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 3px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable">{{SumCAmountStr}}</span>
-          <label for="sum-final-estimate-amount" style="margin:2px"> {{SumCAmount}} </label>
-        </div>
-      </td>
-      <td width="21%">
-        <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 10px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable"> {{SumDAStr}}</span>
-          <label for="sum-final-estimate-amount" style="margin:2px"> {{SumDA}} </label>
-        </div>
-      </td>
-      <td width="21%">
-        <div style="min-width: 80px; font-weight: bold; float: right; margin-right: 1px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable">{{SumOCAStr}}</span>
-          <label for="sum-final-estimate-amount" style="margin:2px"> {{SumOCA}} </label>
-        </div>
-      </td>
-      <td width="22%">
-        <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 45px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable">{{SumTAStr}}</span>
-          <label for="sum-final-estimate-amount" style="margin:2px"> {{SumTA}} </label>
-        </div>
-      </td>
-    </tr>
+      </tr>
 
-    <tr *ngIf="!this.IsCost">
-      <td width="15%" style="padding-right: 71px;">
-        <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 20px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable">جمع حسابداری </span>
-        </div>
-      </td>
-      <td width="22%">
-        <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 10px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable">{{SumCAmountStr}}</span>
-          <label for="sum-final-estimate-amount" style="margin:2px"> {{SumCAmount}} </label>
-        </div>
-      </td>
-      <td width="21%">
-        <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 1px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable"> {{SumDAStr}}</span>
-          <label for="sum-final-estimate-amount" style="margin:2px"> {{SumDA}} </label>
-        </div>
-      </td>
-      <td width="21%">
-        <div style="min-width: 80px; font-weight: bold; float: right; padding-right: 37px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable">{{SumOCAStr}}</span>
-          <label for="sum-final-estimate-amount" style="margin:2px"> {{SumOCA}} </label>
-        </div>
-      </td>
-      <td width="22%">
-        <div style="min-width: 80px;font-weight: bold; float: right; padding-right: 68px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable">{{SumTAStr}}</span>
-          <label for="sum-final-estimate-amount" style="margin:2px"> {{SumTA}} </label>
-        </div>
-      </td>
-    </tr>
+      <tr>
+        <td width="15%" style="padding-right: 5px;">
+          <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 20px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable"> {{TerminateSumStr}} </span>
+          </div>
+        </td>
+        <td width="22%">
+          <div style="min-width: 80px;font-weight: bold; float: right; padding-right: 68px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable"> مبلغ :</span>
+            <label for="sum-final-estimate-amount" style="margin:1px"> {{SumTCPA}} </label>
+          </div>
+        </td>
+        <td width="21%">
+          <div style="min-width: 80px; font-weight: bold; float: right; margin-right: 22px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable"> ارزش افزوده : </span>
+            <label for="sum-final-estimate-amount" style="margin:2px"> {{SumTTV}} </label>
+          </div>
+        </td>
+        <td width="21%">
+          <div style="min-width: 80px;font-weight: bold;float: right;padding-right: 38px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable"> مبلغ کل :</span>
+            <label for="sum-final-estimate-amount" style="margin:2px"> {{SumTFA}} </label>
+          </div>
+        </td>
 
-  </table>
+        <td width="22%">
+          <fieldset class="feild-set" style="display: inherit;padding: 1px;margin-bottom: 1px;min-height: 23px;">
+            <div style="min-width: 80px;font-weight: bold;color:rgb(19, 19, 138); float: right;margin-right: -7px;">
+              <span id="sum-final-estimate-amount" class="table-cell-Lable"> درصد پرداختی به مبلغ کل :</span>
+              <label for="sum-final-estimate-amount" style="margin:2px"> {{SumAPercent}} </label>
+            </div>
+          </fieldset>
+        </td>
+
+      </tr>
+
+      <tr *ngIf="this.IsCost">
+        <td width="15%" style="padding-right: 71px;">
+          <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 20px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable">جمع حسابداری </span>
+          </div>
+        </td>
+        <td width="22%">
+          <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 3px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable">{{SumCAmountStr}}</span>
+            <label for="sum-final-estimate-amount" style="margin:2px"> {{SumCAmount}} </label>
+          </div>
+        </td>
+        <td width="21%">
+          <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 10px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable"> {{SumDAStr}}</span>
+            <label for="sum-final-estimate-amount" style="margin:2px"> {{SumDA}} </label>
+          </div>
+        </td>
+        <td width="21%">
+          <div style="min-width: 80px; font-weight: bold; float: right; margin-right: 1px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable">{{SumOCAStr}}</span>
+            <label for="sum-final-estimate-amount" style="margin:2px"> {{SumOCA}} </label>
+          </div>
+        </td>
+        <td width="22%">
+          <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 45px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable">{{SumTAStr}}</span>
+            <label for="sum-final-estimate-amount" style="margin:2px"> {{SumTA}} </label>
+          </div>
+        </td>
+      </tr>
+
+      <tr *ngIf="!this.IsCost">
+        <td width="15%" style="padding-right: 71px;">
+          <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 20px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable">جمع حسابداری </span>
+          </div>
+        </td>
+        <td width="22%">
+          <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 10px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable">{{SumCAmountStr}}</span>
+            <label for="sum-final-estimate-amount" style="margin:2px"> {{SumCAmount}} </label>
+          </div>
+        </td>
+        <td width="21%">
+          <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 1px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable"> {{SumDAStr}}</span>
+            <label for="sum-final-estimate-amount" style="margin:2px"> {{SumDA}} </label>
+          </div>
+        </td>
+        <td width="21%">
+          <div style="min-width: 80px; font-weight: bold; float: right; padding-right: 37px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable">{{SumOCAStr}}</span>
+            <label for="sum-final-estimate-amount" style="margin:2px"> {{SumOCA}} </label>
+          </div>
+        </td>
+        <td width="22%">
+          <div style="min-width: 80px;font-weight: bold; float: right; padding-right: 68px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable">{{SumTAStr}}</span>
+            <label for="sum-final-estimate-amount" style="margin:2px"> {{SumTA}} </label>
+          </div>
+        </td>
+      </tr>
+
+    </table>
   </div>
 
   <div *ngIf="this.ModuleCode === 2964" class="main-form-body" style=" margin-top: 6px;height: 66px; overflow: auto;">
@@ -239,13 +281,13 @@
         </div>
       </td>
       <div>
-      <td width="20%">
-        <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 1px;">
-          <span id="sum-final-estimate-amount" class="table-cell-Lable">جمع مبلغ کل قرارداد :</span>
-          <label for="sum-final-estimate-amount" style="margin:2px"> {{SumAmountN}} </label>
-        </div>
-      </td>
-    </div>
+        <td width="20%">
+          <div style="min-width: 80px;font-weight: bold; float: right; margin-right: 1px;">
+            <span id="sum-final-estimate-amount" class="table-cell-Lable">جمع مبلغ کل قرارداد :</span>
+            <label for="sum-final-estimate-amount" style="margin:2px"> {{SumAmountN}} </label>
+          </div>
+        </td>
+      </div>
     </tr>
     <tr>
       <td width="15%" style="padding-right: 48px;">

@@ -3,8 +3,8 @@ import { GridOptions } from 'ag-grid-community';
 import { NgSelectConfig } from '../../Shared/ng-select';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ProductPatternService } from 'src/app/Services/CRM/ProductPatternService';
-import { relativeTimeThreshold } from 'jalali-moment';
-import { hasData } from 'jquery';
+import { PriceListService } from '../../Services/BaseService/PriceListService';
+import { Router } from '@angular/router';
 declare var $: any;
 @Component({
   selector: 'app-product-pattern',
@@ -12,6 +12,7 @@ declare var $: any;
   styleUrls: ['./product-pattern.component.css']
 })
 export class ProductPatternComponent implements OnInit {
+  ShowGrid = true;
   HaveMaxBtn = false;
   startLeftPosition: number;
   startTopPosition: number;
@@ -50,7 +51,7 @@ export class ProductPatternComponent implements OnInit {
   PricelistTopicCode;
   PricelistTopicSearch;
   CostListFinYearCode;
-  @Input() MainContentHeight = 98;
+  @Input() MainContentHeight = 92;
   @Input() treeHeight = 88.5;
   @Input() NeedSelected = false;
   @Input() PopUpParam;
@@ -71,7 +72,7 @@ export class ProductPatternComponent implements OnInit {
       field: 'ProductCode',
       sortable: true,
       filter: true,
-      width: 85,
+      width: 120,
       resizable: true
     },
     {
@@ -93,13 +94,18 @@ export class ProductPatternComponent implements OnInit {
   TreeInputParam = { Owner: this, GetChildren: this.GetChildren, GetRoots: this.GetRoots };
   IsDisable = false;
   hasChildren: any;
-  hasCreate:any;
+  hasCreate: any;
   ProductPatternID;
   ProductPatternProductsID: any;
   InputParam: any;
   ProductPatternName: any;
   ProductPatternCode: any;
-  constructor(
+  PID: any;
+  ModuleViewTypeCode: any;
+  SelectedProductPattern: any;
+  SecondID = null;
+  constructor(private router: Router,
+    private PriceList: PriceListService,
     private ProductPattern: ProductPatternService,
     config: NgSelectConfig,
     private RegionList: RegionListService,
@@ -120,10 +126,15 @@ export class ProductPatternComponent implements OnInit {
     });
   }
   ngOnInit() {
+    this.ShowGrid = this.PopUpParam ? this.PopUpParam.ShowGrid : true;
     this.RegionList.GetRegionGroupList(true).subscribe(res => {
       this.RegionGroupItems = res;
       this.NgSelectParams.IsDisabled = this.NeedSelected;
       this.NgSelectParams.selectedObject = this.PopUpParam ? this.PopUpParam.RegionGroupCode : 2;
+      this.PID = this.PopUpParam && this.PopUpParam.ProductPatternID ? this.PopUpParam.ProductPatternID : null;
+      this.SecondID =this.PopUpParam.SearchSTR?this.PopUpParam.SearchSTR :null;
+      this.PricelistTopicSearch =this.PopUpParam.SearchSTR?this.PopUpParam.SearchSTR :null;
+      // this.MainContentHeight = this.PopUpParam && this.PopUpParam.MainContentHeight ? this.PopUpParam.MainContentHeight : 97;
     });
     this.gridrows = [];
   }
@@ -134,13 +145,16 @@ export class ProductPatternComponent implements OnInit {
     this.PercentWidth = null;
   }
   tree_selectedchange(event) {
+    this.SelectedProductPattern = "";
     this.hasChildren = event.hasChildren;
     this.SelectedID = event.id;
     if (!this.hasChildren) {
+      this.SelectedProductPattern = this.SelectedID;
       this.FillGridData(this.SelectedID);
     } else {
+      this.SelectedProductPattern = "";
       this.gridrows = [];
-      this.hasCreate = false;  
+      this.hasCreate = false;
     }
   }
   onChangeRegionGroup(event) {
@@ -184,23 +198,25 @@ export class ProductPatternComponent implements OnInit {
   }
 
   FillGridData(PriceListPatternID) {
-    this.ProductPattern.GetProductPatternProductsList(PriceListPatternID).subscribe(res => {
-      this.gridrows = res;
+    if (this.ShowGrid) {
+      this.ProductPattern.GetProductPatternProductsList(PriceListPatternID).subscribe(res => {
+        this.gridrows = res;
 
-      if(this.gridrows && this.gridrows.length > 0){
-        this.hasCreate = true;
-      }else
-      {
-        this.hasCreate = false;
-      }
+        if (this.gridrows && this.gridrows.length > 0) {
+          this.hasCreate = true;
+        } else {
+          this.hasCreate = false;
+        }
 
-    });
+      });
+    }
+
   }
 
   GetChildren(event) {
 
     return new Promise((resolve, reject) => {
-      event.Owner.ProductPattern.GetProductPatternChildren(event.ParentID).subscribe(data => {
+      event.Owner.ProductPattern.GetProductPatternChildren(event.ParentID, event.Owner.PID , event.Owner.SecondID).subscribe(data => {
         const children = [];
         data.forEach(item => {
           children.push({
@@ -218,19 +234,22 @@ export class ProductPatternComponent implements OnInit {
   GetRoots(event) {
     let nodes = [];
     return new Promise((resolve, reject) => {
-      event.Owner.ProductPattern.GetProductPatternRoots(event.FirstID).subscribe(res => {
-        nodes = [];
-        res.forEach(item => {
-          nodes.push({
-            name: item.ProductPatternName,
-            id: item.ProductPatternID,
-            hasChildren: !item.IsLeaf,
-            // levelCode: item.PriceListLevelCode,
-            // TopicCode: item.PriceListTopiCode
+      event.Owner.ProductPattern.GetProductPatternRoots(
+        event.Owner.NgSelectParams.selectedObject, //event.FirstID, 
+        event.Owner.PID,
+        event.Owner.SecondID).subscribe(res => {
+          nodes = [];
+          res.forEach(item => {
+            nodes.push({
+              name: item.ProductPatternName,
+              id: item.ProductPatternID,
+              hasChildren: !item.IsLeaf,
+              // levelCode: item.PriceListLevelCode,
+              // TopicCode: item.PriceListTopiCode
+            });
           });
+          resolve(nodes);
         });
-        resolve(nodes);
-      });
 
 
       // return nodes;
@@ -263,35 +282,36 @@ export class ProductPatternComponent implements OnInit {
     this.startLeftPosition = 449;
     this.startTopPosition = 87;
     this.HaveMaxBtn = true;
-    this.HeightPercentWithMaxBtn = 30;
+    this.HeightPercentWithMaxBtn = 40;
     this.PercentWidth = 40;
     this.paramObj = {
       ProductPatternID: this.SelectedID,
-      RegionGroupCode:this.NgSelectParams.selectedObject
+      RegionGroupCode: this.NgSelectParams.selectedObject
     };
   }
 
   Btnclick(BtnName) {
     if (BtnName === 'update') {
-      this.type ='product-pattern-entry';
+      this.type = 'product-pattern-entry';
       this.HaveHeader = true;
       this.btnclicked = true;
       this.startLeftPosition = 449;
       this.startTopPosition = 87;
       this.HaveMaxBtn = true;
-      this.HeightPercentWithMaxBtn = 30;
+      this.HeightPercentWithMaxBtn = 40;
       this.PercentWidth = 40;
       this.MainMaxwidthPixel = 2000;
       this.MinHeightPixel = 645;
       this.paramObj = {
         ProductPatternID: this.SelectedID,
         RegionGroupCode: this.NgSelectParams.selectedObject,
+        hasChildren: this.hasChildren,
         Mode: 'EditMode',
-        
+
       };
-   
-      return;    
-  
+
+      return;
+
     }
 
   }
@@ -309,7 +329,7 @@ export class ProductPatternComponent implements OnInit {
     } else {
       this.ShowMessageBoxWithOkBtn('ردیفی جهت حذف انتخاب نشده است');
       return;
-    } 
+    }
   }
 
 
@@ -327,18 +347,16 @@ export class ProductPatternComponent implements OnInit {
     this.btnclicked = false;
   }
   DoDelete2() {
-    this.ProductPatternID= this.SelectedID;
-    
-   
-    this.ProductPattern.DeleteProductPatternEntry(this.ProductPatternID,this.ModuleCode).subscribe(
+    this.ProductPatternID = this.SelectedID;
+    this.ProductPattern.DeleteProductPatternEntry(this.ProductPatternID, this.ModuleCode).subscribe(
       res => {
         this.ShowMessageBoxWithOkBtn('حذف با موفقیت انجام شد.');
       });
-    
+
   }
 
 
-  
+
   DoDelete() {
     this.ProductPatternProductsID = this.selectedRow.data.ProductPatternProductsID;
     this.ProductPattern.DeleteProductPatternProductsList(this.ProductPatternProductsID, this.ModuleCode).subscribe(res => {
@@ -373,11 +391,13 @@ export class ProductPatternComponent implements OnInit {
   onOkClick() {
 
     const selectedRows = this.gridApi.getSelectedRows();
+
     const Result = [];
     if (this.PopUpParam && this.PopUpParam.GroupSelected) {
       if (selectedRows && selectedRows.length) {
         selectedRows.forEach(element => {
-          Result.push(element.ProductID);
+          Result.push(element);
+          //Result.push(element.ProductPatternName);
         });
         this.RowSelected.emit(Result);
         this.Closed.emit(true);
@@ -396,11 +416,32 @@ export class ProductPatternComponent implements OnInit {
       }
     } else {
       if (selectedRows && selectedRows.length) {
-        Result.push(selectedRows[0].ProductID);
+
+        Result.push(selectedRows[0]);
         this.RowSelected.emit(Result);
         this.Closed.emit(true);
       }
     }
   }
+  OnSearchPriceListCodeClick() {
 
+    if (this.ShowGrid && this.PricelistTopicSearch !== '') {
+      this.ProductPattern.GetProductPatternProductsListSearch(this.PricelistTopicSearch).subscribe(res => {
+        this.gridrows = res;
+      });
+    }
+
+    if (!this.ShowGrid && this.PricelistTopicSearch !== '') {
+      this.SecondID = this.PricelistTopicSearch;
+    }
+  }
+
+  Close() {
+    this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
+  }
+
+  TreeOkClick() {
+    this.RowSelected.emit(this.SelectedProductPattern);
+    this.Closed.emit(true);
+  }
 }

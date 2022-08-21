@@ -10,6 +10,7 @@ export class RefreshServices {
   @Output() ItemsVirtualNgSelect: EventEmitter<any> = new EventEmitter<any>();
   @Output() LoginDetailsChange: EventEmitter<any> = new EventEmitter<any>();
   @Output() ProductRequestObjectChange: EventEmitter<any> = new EventEmitter<any>();
+  @Output() UserMenuChange: EventEmitter<any> = new EventEmitter<any>(); 
   RefreshCartable() {
     this.WorkListChange.emit(true);
   }
@@ -34,4 +35,7 @@ export class RefreshServices {
   RefreshProductRequestPage(ProductRequestObject) {
     this.ProductRequestObjectChange.emit(ProductRequestObject);
   }
+  RefreshMenu() {
+    this.UserMenuChange.emit(true);
+  } // 64114 
 }

@@ -49,6 +49,7 @@ export class GridComponent implements OnInit {
   @Input() HasMaximizeBtn = true;
   @Input() HaveDelete = true;
   @Input() RowHeight;
+  @Input() IsNeedAddItems = false;
   @Output() Delete: EventEmitter<any> =
     new EventEmitter<any>();
   @Output() RowClick: EventEmitter<any> =
@@ -82,6 +83,10 @@ export class GridComponent implements OnInit {
   @Output() RowAdded: EventEmitter<any> =
     new EventEmitter<any>();
   @Output() ChangePage: EventEmitter<any> =
+    new EventEmitter<any>();
+  @Output() AddItems: EventEmitter<any> =
+    new EventEmitter<any>();
+  @Output() CellClick: EventEmitter<any> =
     new EventEmitter<any>();
   constructor(private excelService: ExcelService,
     private PriceList: PriceListService,
@@ -743,5 +748,11 @@ export class GridComponent implements OnInit {
       this.CurrentPageNumber = this.TotalPageCount;
       this.onChangePage();
     }
+  }
+  onCellClickedd(event: any) {
+    this.CellClick.emit(event);
+  }
+  onAddItems() {
+    this.AddItems.emit(true);
   }
 }

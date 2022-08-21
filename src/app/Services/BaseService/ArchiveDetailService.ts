@@ -142,4 +142,15 @@ export class ArchiveDetailService {
       }
     );
   }
+  ReturnArchiveDetailToLast(OrderCommitionID: number) {
+    return this.http.post(window.location.origin + '/ProductRequest/ReturnArchiveDetailToLast', { OrderCommitionID });
+  }
+  GetArchiveDetailByParentDocType(ParentDocType: number) {
+    return this.http.get(
+      window.location.origin + '/Home/GetArchiveDetailByParentDocType', { ParentDocType });
+  }
+  ProductRequestInvestArchiveDetailList(CostFactorID: number, ParentDocumentTypeList) {
+    return this.http.get(
+      window.location.origin + '/ProductRequest/ProductRequestInvestArchiveDetailList', { CostFactorID, ParentDocumentTypeList });
+  }
 }

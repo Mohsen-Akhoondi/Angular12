@@ -174,6 +174,60 @@
       </tr>
     </table>
 
+    <table *ngIf="WorkflowType == 655">
+      <tr>
+        <td width="25%">
+          <span class="table-cell-Lable">کد قرارداد</span>
+          <input readonly name="ContractCode" style="display: inline-block;width: 55%;" class="form-control input-style"
+            readonly value="{{ContractCode}}" type="text" />
+        </td>
+        <td width="25%">
+          <span class="table-cell-Lable">نوع قرارداد</span>
+          <input readonly name="ContractType" value="{{ContractTypeName}}" style="display: inline-block;width: 55%;"
+            class="form-control input-style" type="text" />
+        </td>
+        <td width="25%">
+          <span class="table-cell-Lable"> پیمانکار</span>
+          <input name="Contractor" style="display: inline-block;width: 55%;" class="form-control input-style" readonly
+            value="{{ContractorName}}" type="text" />
+        </td>
+        <td width="25%">
+          <span class="table-cell-Lable">مبلغ</span>
+          <input readonly name="Price" style="display: inline-block;width: 55%;" value="{{ContractAmount}}"
+            class="form-control input-style" type="text" />
+        </td>
+      </tr>
+      <tr class="Row_Margin">
+        <td width="25%">
+          <span class="table-cell-Lable">شماره نامه</span>
+          <input name="LetterNo" style="display: inline-block;width: 55%;" class="form-control input-style" readonly
+            value="{{LetterNo}}" type="text" />
+        </td>
+        <td width="25%">
+          <span class="table-cell-Lable">تاریخ نامه</span>
+          <input name="LetterDate" style="display: inline-block;width: 55%;" class="form-control input-style"
+            value="{{LetterDatePersian}}" readonly type="text" />
+        </td>
+        <td colspan="2" width="25%">
+          <span class="table-cell-Lable">موضوع</span>
+          <input readonly value="{{Subject}}" name="Subject" style="display: inline-block;width:77.6%"
+            class="form-control input-style" type="text" />
+        </td>
+      </tr>
+      <tr>
+        <td width="25%">
+          <span class="table-cell-Lable">تاریخ نظارت</span>
+          <input name="ContractSupervisionDate" style="display: inline-block;width: 55%;" class="form-control input-style"
+            readonly value="{{ContractSupervisionDate}}" type="text" />
+        </td>
+        <td width="25%">
+          <span class="table-cell-Lable">شماره نظارت</span>
+          <input name="ContractSupervisionCode" style="display: inline-block;width: 55%;"
+            class="form-control input-style" readonly value="{{ContractSupervisionCode}}" type="text" />
+        </td>
+      </tr>
+    </table>
+
   </fieldset>
 
   <div style="padding-bottom: 5px;" [style.height.%]="gridHeight">
@@ -244,10 +298,10 @@
 </ng-template>
 
 
-<app-over-popup *ngIf="btnclicked" [HaveMaxBtn]="HaveMaxBtn" [startLeftPosition]="startLeftPosition"
+<app-shared-over-popup *ngIf="btnclicked" [HaveMaxBtn]="HaveMaxBtn" [startLeftPosition]="startLeftPosition"
   [startTopPosition]="startTopPosition" [minHeightPixel]="MinHeightPixel" [PopupType]="type"
-  [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn"
-  [PopupParam]="type === 'message-box' ? alertMessageParams : paramObj" [HaveHeader]="HaveHeader"
+  [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn"     [PixelHeight]="PixelHeight"
+  [PopupParam]="type === 'message-box' ? alertMessageParams : paramObj" [HaveHeader]="HaveHeader" 
   (PopupOutPutParam)="type ==='message-box' ? MessageBoxAction($event) : 'user-work-log-detail-graph'" (popupclosed)="popupclosed($event)"
-  [HaveMaxBtn]="HaveMaxBtn" [PercentWidth]="PercentWidth" >
-</app-over-popup>
+  [HaveMaxBtn]="HaveMaxBtn" >
+</app-shared-over-popup>

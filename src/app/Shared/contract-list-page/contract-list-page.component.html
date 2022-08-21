@@ -22,11 +22,11 @@
             [NgSelectParams]="ToFinYearParams" [Items]="FinYearItems">
           </app-ng-select-virtual-scroll>
         </td>
-        <td *ngIf="ModuleCode === 2501" width="25%">
+        <td *ngIf="ModuleCode === 2501 || ModuleCode === 3096" width="25%">
           <span class="table-cell-Lablle">ماهیت قرارداد</span>
           <div class="redio-div">
             <div class="custom-control custom-radio custom-control-inline">
-              <input [checked]="IsCost" type="radio" class="custom-control-input" id="ISCostRadio"
+              <input [checked]="IsCost"  [disabled]="ModuleCode === 3096" type="radio" class="custom-control-input" id="ISCostRadio"
                 name="ChoosenISCostRadioName" (click)="RedioClick(true)">
               <label style="margin: auto;" class="custom-control-label redio-label" for="ISCostRadio">هزینه
                 ای</label>

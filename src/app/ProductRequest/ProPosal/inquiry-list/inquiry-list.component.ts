@@ -1,7 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter, ViewChild, TemplateRef } from '@angular/core';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
-import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 
 @Component({
   selector: 'app-inquiry-list',
@@ -219,7 +217,7 @@ export class InquiryListComponent implements OnInit {
           IsMultiContract: this.ProductRequestObject.IsMultiContract ? true : false,
           InquiryObject: this.SelectedInquiry,
           IsAdmin: this.PopupParam.IsAdmin,
-          IsInProgressCartable : this.PopupParam.IsInProgressCartable, // 59699
+          IsInProgressCartable: this.PopupParam.IsInProgressCartable, // 59699
         };
         if (this.PopupParam) {
           this.PopUpType = 'app-commition';

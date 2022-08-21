@@ -1,9 +1,7 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { of } from 'rxjs';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-
 declare var jquery: any;
 declare var $: any;
 

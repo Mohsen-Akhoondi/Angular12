@@ -15,17 +15,10 @@ import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
 import { ArchiveDetailService } from 'src/app/Services/BaseService/ArchiveDetailService';
-import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { ContractPayDetailsService } from 'src/app/Services/ContractService/Contract_Pay/ContractPayDetailsService';
-import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
 import { CartableServices } from 'src/app/Services/WorkFlowService/CartableServices';
-import * as $ from 'jquery';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { AutomationService } from 'src/app/Services/BaseService/AutomationService';
-import * as moment from 'jalali-moment';
-import { resolve } from 'q';
-import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
-import { RadioBoxModel } from 'src/app/Shared/Radio-Box/Radio-Box-Model/RadioBoxModel';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 @Component({
   selector: 'app-pure-product-request-page',
@@ -1531,7 +1524,7 @@ export class PureProductRequestPageComponent implements OnInit {
   }
   onPRPersonCellValueChanged(event) {
     if (event.newValue && event.colDef && event.colDef.field === 'RoleName') {
-      this.ProductRequestPersoncolDef[2].cellEditorParams.Items = this.Actor.GetPersonList(event.newValue.RoleID, null, false);
+      this.ProductRequestPersoncolDef[2].cellEditorParams.Items = this.Actor.GetPersonList(event.newValue.RoleID, null, null, false);
       const itemsToUpdate = [];
       this.gridApi.forEachNode(node => {
         if (node.rowIndex === event.rowIndex) {
@@ -2295,7 +2288,7 @@ export class PureProductRequestPageComponent implements OnInit {
       case 'CustomerOrder':
         const CurrentCustomerOrderID = this.ProductRequestObject
           && this.ProductRequestObject.CustomerOrderID ? this.ProductRequestObject.CustomerOrderID :
-             this.InputParam.CustomerOrderID ? this.InputParam.CustomerOrderID : null;
+          this.InputParam.CustomerOrderID ? this.InputParam.CustomerOrderID : null;
         this.CustomerOrderParams.loading = true;
         const ResList = [];
         const promised = new Promise((resolve_res3, reject_res3) => {
@@ -2313,9 +2306,11 @@ export class PureProductRequestPageComponent implements OnInit {
             PageCount: Math.ceil(TotalItemCount / 30),
             type: 'customer-order',
           });
+
           if (IsFill && CurrentCustomerOrderID) {
             this.CustomerOrderParams.selectedObject = CurrentCustomerOrderID;
           }
+
           if (IsFill && FillResolve) {
             FillResolve();
           }

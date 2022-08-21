@@ -574,13 +574,13 @@ export class CorporateComponent implements OnInit {
       }
       else {
         if (this.ActorId > 0) {
-          this.Actor.UpdateActorCorporate(this.CorporateObject, corporatepositionList).subscribe(res => {
+          this.Actor.UpdateActorCorporate(this.CorporateObject, corporatepositionList , this.ModuleCode).subscribe(res => {
             this.CorporateObject = res;
             this.Validate = this.CorporateObject.Validate;
             this.ShowMessageBoxWithOkBtn('ویرایش اطلاعات با موفقیت انجام شد');
           });
         } else {
-          this.Actor.SaveActorCorporate(this.CorporateObject, corporatepositionList).subscribe(res => {
+          this.Actor.SaveActorCorporate(this.CorporateObject, corporatepositionList ,this.ModuleCode).subscribe(res => {
             this.CorporateObject = res;
             this.Validate = this.CorporateObject.Validate;
             this.ShowMessageBoxWithOkBtn('ثبت اطلاعات با موفقیت انجام شد');

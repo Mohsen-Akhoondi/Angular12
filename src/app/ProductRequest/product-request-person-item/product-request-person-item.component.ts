@@ -1,5 +1,4 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
-import { of } from 'rxjs';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
@@ -73,7 +72,7 @@ export class ProductRequestPersonItemComponent implements OnInit {
     if (!this.ModuleCode) {
       this.ModuleCode = this.PopupParam.ModuleCode;
     }
-    const promise = new Promise<void>((resolve, reject) => {
+    const promise = new Promise((resolve, reject) => {
       this.User.GetModulOPByUser(this.ModuleCode).subscribe(res => {
         res.forEach(node => {
           switch (node.OperationCode) {
@@ -237,7 +236,7 @@ export class ProductRequestPersonItemComponent implements OnInit {
           type: 'person'
         });
       } else {
-        this.Actor.GetPersonList(event.data.RoleID, this.ProductRequestObject.RegionCode, false).subscribe(ress => {
+        this.Actor.GetPersonList(event.data.RoleID,null, this.ProductRequestObject.RegionCode, false).subscribe(ress => {
           this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
             List: ress,
             type: 'person'
@@ -326,7 +325,7 @@ export class ProductRequestPersonItemComponent implements OnInit {
           type: 'person'
         });
       } else {
-        this.Actor.GetPersonList(event.data.RoleID, this.ProductRequestObject.RegionCode, false).subscribe(ress => {
+        this.Actor.GetPersonList(event.data.RoleID,null, this.ProductRequestObject.RegionCode, false).subscribe(ress => {
           this.RefreshPersonItems.RefreshItemsVirtualNgSelect({
             List: ress,
             type: 'person'

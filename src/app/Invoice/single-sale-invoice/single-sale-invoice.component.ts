@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { type } from 'os';
 import { forkJoin } from 'rxjs';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
@@ -446,8 +445,7 @@ export class SingleSaleInvoiceComponent implements OnInit {
 
   CalculateTaxValue(node) {
     const Price = node.data.Price;
-
-    if (Price && Price > 0) {
+    if (Price && Price > 0 && node.data.IsTaxValue) {
       // tslint:disable-next-line: radix
       node.data.TaxValue = parseInt((Price * 0.09).toString());
     }
@@ -571,9 +569,9 @@ export class SingleSaleInvoiceComponent implements OnInit {
       forkJoin([
         // tslint:disable-next-line: max-line-length
         this.RegionList.GetRegionList(this.ModuleCode),
-        this.ProductRequest.GetCostCenterByRegion(InvoiceObject.RegionCode,
+        this.ProductRequest.GetCostCenterByRegionAndRequestOwner(InvoiceObject.RegionCode,
           InvoiceObject.SubCostCenterObject ? InvoiceObject.SubCostCenterObject.CostCenterId : null, this.ModuleCode, false),
-        this.ProductRequest.GetSubCostCenter(InvoiceObject.SubCostCenterObject.CostCenterId, this.ModuleCode, true),
+        this.ProductRequest.GetListByCostCenterId(InvoiceObject.SubCostCenterObject.CostCenterId, this.ModuleCode, true,InvoiceObject.SubCostCenterObject.CostCenterObject.RegionCode),
         this.Workflow.GetFinYearList(),
         this.ProductRequest.GetSubCostCenterPriPerson(
           InvoiceObject.SubCostCenterObject.CostCenterId,
@@ -628,12 +626,12 @@ export class SingleSaleInvoiceComponent implements OnInit {
           this.InvoiceObject.SubCostCenterObject.CostCenterId ?
           this.InvoiceObject.SubCostCenterObject.CostCenterId : null;
         // tslint:disable-next-line: max-line-length
-        this.ProductRequest.GetCostCenterByRegion(this.RegionParams.selectedObject, CurrCostCenterID, this.ModuleCode, false).subscribe(res => {
+        this.ProductRequest.GetCostCenterByRegionAndRequestOwner(this.RegionParams.selectedObject, CurrCostCenterID, this.ModuleCode, false).subscribe(res => {
           this.CostCenterItems = res;
           if (IsFill &&
             this.InvoiceObject &&
             this.InvoiceObject.SubCostCenterObject &&
-            this.InvoiceObject.SubCostCenterObject.CostCenterId) {
+            this.InvoiceObject.SubCostCenterObject.CostCenterId) {          
             this.CostCenterParams.selectedObject = this.InvoiceObject.SubCostCenterObject.CostCenterId;
             this.OnOpenNgSelect('SubCostCenter');
           } else if (IsFill && this.CurrentUserSubCostCenter && this.CurrentUserSubCostCenter.CostCenterID) {
@@ -646,10 +644,10 @@ export class SingleSaleInvoiceComponent implements OnInit {
             FillResolve();
           }
         });
-        break;
+       break;
       case 'SubCostCenter':
         if (this.CostCenterParams.selectedObject) {
-          this.ProductRequest.GetSubCostCenter(this.CostCenterParams.selectedObject, this.ModuleCode, true).subscribe(res => {
+          this.ProductRequest.GetListByCostCenterId(this.CostCenterParams.selectedObject, this.ModuleCode, true, this.RegionParams.selectedObject,).subscribe(res => {
             this.SubCostCenterItems = res;
             if (IsFill &&
               this.InvoiceObject &&
@@ -673,6 +671,8 @@ export class SingleSaleInvoiceComponent implements OnInit {
 
         break;
       case 'RequestedPerson':
+        this.RequestedPersonParams.selectedObject = null;
+        this.RequestedPersonItems = [];
         if (this.CostCenterParams.selectedObject) {
           // tslint:disable-next-line: max-line-length
           this.ProductRequest.GetSubCostCenterPriPerson(
@@ -766,6 +766,7 @@ export class SingleSaleInvoiceComponent implements OnInit {
     this.RequestedPersonParams.selectedObject = null;
     this.AdministratorActorParams.selectedObject = null;
     this.InvoiceObject.SubCostCenterID = SubCostCenterID;
+    this.OnOpenNgSelect('RequestedPerson' , false);
   }
 
   onRequestedPersonSelectedchanged(RequestedPersonID) {
@@ -983,7 +984,7 @@ export class SingleSaleInvoiceComponent implements OnInit {
       1,
       30,
       event.Owner.ProdcutTypeCode,
-      event.Owner.IsCost,
+      true,
       null).
       subscribe(res => {
         event.Owner.InvocieItemcolumnDef[2].cellEditorParams.Params.loading = false;
@@ -1065,8 +1066,9 @@ export class SingleSaleInvoiceComponent implements OnInit {
     });
   }
 
+ 
   FetchProductByTerm(event) {
-    // event.Owner.columnDef[2].cellEditorParams.Params.loading = true;
+    event.Owner.InvocieItemcolumnDef[2].cellEditorParams.Params.loading = true;
     event.Owner.ProductRequest.GetProductList(event.SearchOption,
       event.Owner.RegionParams.selectedObject,
       event.term,
@@ -1082,6 +1084,8 @@ export class SingleSaleInvoiceComponent implements OnInit {
           PageCount: Math.ceil(res.TotalItemCount / 30)
         });
       });
+      
+      
   }
 
   onGridReady(params: { api: any; }) {
@@ -1102,6 +1106,7 @@ export class SingleSaleInvoiceComponent implements OnInit {
           : node.data.ProductTypeCode ? node.data.ProductTypeCode : 0;
       }
     });
+   
 
     if (event.colDef && event.colDef.field === 'ProductCodeName') {
       this.InvocieItemcolumnDef[2].cellEditorParams.Params.loading = true;
@@ -1995,12 +2000,18 @@ export class SingleSaleInvoiceComponent implements OnInit {
           if (params.newValue && params.newValue.ProductCodeName) {
             params.data.ProductCodeName = params.newValue.ProductCodeName;
             params.data.ProductID = params.newValue.ProductID;
+            params.data.IsTaxValue = params.newValue.IsTaxValue;
+            this.ProductRequest.GetProductScaleName(params.newValue.ProductID).subscribe(res => {
+              params.data.ScaleName = res;
+            });
 
             return true;
           } else {
             params.data.ProductCodeName = '';
             params.data.ProductID = null;
             params.data.ScaleName = '';
+            params.data.IsTaxValue = null;
+            
             return false;
           }
         },

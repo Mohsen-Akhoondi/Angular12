@@ -46,63 +46,31 @@
     <app-rank-parameter *ngIf="ModuleCode == 2935"></app-rank-parameter>
     <app-workflow-type-form *ngIf="ModuleCode == 2676"></app-workflow-type-form>
     <app-sacle *ngIf="ModuleCode == 1271"></app-sacle>
-    <app-workflow-transition-page *ngIf="ModuleCode == 2699"></app-workflow-transition-page>
+    <app-workflow-transition-page *ngIf="ModuleCode == 2699|| ModuleCode == 3088 "></app-workflow-transition-page>
     <app-workflow-status-page *ngIf="ModuleCode == 2695"></app-workflow-status-page>
     <app-workflow-node-page *ngIf="ModuleCode == 2696"></app-workflow-node-page>
     <app-workflow-operation-page *ngIf="ModuleCode == 2697"></app-workflow-operation-page>
     <app-road-type *ngIf="ModuleCode == 2698"></app-road-type>
     <app-contract-agent *ngIf="ModuleCode == 2691"></app-contract-agent>
     <app-contract-agent-role *ngIf="ModuleCode == 2692"></app-contract-agent-role>
-    <app-contract-list-page *ngIf="(ModuleCode == 2501 || ModuleCode == 3008) && IsShow" [ModuleName]="ModuleName"
-      [ModuleCode]="ModuleCode" [InputParam]="poutputParam">
-    </app-contract-list-page>
-    <app-contract-list-page *ngIf="ModuleCode == 2645 && IsShow" [ModuleName]="ModuleName" [ModuleCode]="ModuleCode"
-      [InputParam]="poutputParam">
-    </app-contract-list-page>
-    <app-contract-list-page *ngIf="ModuleCode == 2646 && IsShow" [ModuleName]="ModuleName" [ModuleCode]="ModuleCode"
-      [InputParam]="poutputParam">
-    </app-contract-list-page>
-    <app-contract-list-page *ngIf="ModuleCode == 2647 && IsShow" [ModuleName]="ModuleName" [ModuleCode]="ModuleCode"
-      [InputParam]="poutputParam">
-    </app-contract-list-page>
-    <app-contract-list-page *ngIf="ModuleCode == 2648 && IsShow" [ModuleName]="ModuleName" [ModuleCode]="ModuleCode"
-      [InputParam]="poutputParam">
-    </app-contract-list-page>
-    <app-contract-list-page *ngIf="ModuleCode == 2805 && IsShow" [ModuleName]="ModuleName" [ModuleCode]="ModuleCode"
-      [InputParam]="poutputParam">
-    </app-contract-list-page>
-    <app-contract-list-page *ngIf="ModuleCode == 2516 && IsShow" [ModuleName]="ModuleName" [ModuleCode]="ModuleCode"
-      [InputParam]="poutputParam">
-    </app-contract-list-page>
-    <app-contract-list-page *ngIf="ModuleCode == 2876 && IsShow" [ModuleName]="ModuleName" [ModuleCode]="ModuleCode"
-      [InputParam]="poutputParam">
-    </app-contract-list-page>
-    <app-contract-list-page *ngIf="ModuleCode == 2654 && IsShow" [ModuleName]="ModuleName" [ModuleCode]="ModuleCode"
-      [InputParam]="poutputParam">
-    </app-contract-list-page>
-    <app-contract-list-page *ngIf="ModuleCode == 2769 && IsShow" [ModuleName]="ModuleName" [ModuleCode]="ModuleCode"
-      [InputParam]="poutputParam">
-    </app-contract-list-page>
-    <app-contract-list-page *ngIf="ModuleCode == 2921 && IsShow" [ModuleName]="ModuleName" [ModuleCode]="ModuleCode"
-      [InputParam]="poutputParam">
-    </app-contract-list-page>
-    <app-contract-list-page *ngIf="ModuleCode == 2687 && IsShow" [ModuleName]="ModuleName" [ModuleCode]="ModuleCode"
-      [InputParam]="poutputParam">
+    <app-contract-list-page *ngIf="(ModuleCode == 2501 || ModuleCode == 2876 || ModuleCode == 2516 ||
+            ModuleCode == 3008 || ModuleCode == 2654 || ModuleCode == 3096 ||
+            ModuleCode == 2645 || ModuleCode == 3071 || ModuleCode == 2805 ||
+            ModuleCode == 2646 || ModuleCode == 2769 || ModuleCode == 2687 ||
+            ModuleCode == 2647 || ModuleCode == 2921 || ModuleCode == 2648
+            ) && IsShow" [ModuleName]="ModuleName" [ModuleCode]="ModuleCode" [InputParam]="poutputParam">
     </app-contract-list-page>
     <app-user-role *ngIf="ModuleCode == 1109"></app-user-role>
     <app-customized-menu *ngIf="ModuleCode == 2660" [ModuleName]="ModuleName" [ModuleCode]="ModuleCode">
     </app-customized-menu>
     <app-price-list-topic *ngIf="ModuleCode == 2628"></app-price-list-topic>
-    <!-- <app-contract-case-list *ngIf="ModuleCode == 2687" [ModuleName]="ModuleName" [ModuleCode]="ModuleCode">
-    </app-contract-case-list> -->
     <app-transfer-distance-item *ngIf="ModuleCode == 2704"></app-transfer-distance-item>
     <app-workglow-type-module *ngIf="ModuleCode == 2700" [ModuleName]="ModuleName" [ModuleCode]="ModuleCode">
     </app-workglow-type-module>
-    <app-contract-identity-presenter *ngIf="ModuleCode == 2705" [ModuleName]="ModuleName" [ModuleCode]="ModuleCode">
-    </app-contract-identity-presenter>
     <app-consult-person *ngIf="ModuleCode == 2711 "></app-consult-person>
     <app-month-work-hour *ngIf="ModuleCode == 2707"></app-month-work-hour>
-    <app-user-work-log-Contract-Order *ngIf="ModuleCode == 2727"></app-user-work-log-Contract-Order>
+    <app-user-work-log-Contract-Order *ngIf="ModuleCode == 2727 || ModuleCode == 2705">
+    </app-user-work-log-Contract-Order>
     <app-user-work-log-Product-Request
       *ngIf="ModuleCode == 2756 || ModuleCode == 2793  || ModuleCode == 2824 || ModuleCode == 2838 || ModuleCode == 2896 || ModuleCode == 2980 || ModuleCode == 2996 || ModuleCode == 3033">
     </app-user-work-log-Product-Request>
@@ -117,16 +85,15 @@
     </app-consultant-select-type>
     <app-deal-method *ngIf="ModuleCode == 2734"></app-deal-method>
     <app-contract-type *ngIf="ModuleCode == 1560"> </app-contract-type>
-    <!-- <app-product-request-page *ngIf="ModuleCode == 2501" ></app-product-request-page> -->
-    <!-- <app-product-request-page [PopupMaximized] = "IsMaximized" *ngIf="ModuleCode == 2730" ></app-product-request-page> -->
     <app-product-request-coef-type *ngIf="ModuleCode == 2733"></app-product-request-coef-type>
     <app-product-request-list *ngIf="ModuleCode == 2730 || ModuleCode == 2773 
                                      || ModuleCode == 2862 || ModuleCode == 2895
                                      || ModuleCode == 2910 || ModuleCode == 2939 
-                                     || ModuleCode == 2951">
+                                     || ModuleCode == 2951 || ModuleCode == 3090 
+                                     || ModuleCode == 3095 || ModuleCode == 3094">
     </app-product-request-list>
     <app-contract-without-flow-list
-      *ngIf="ModuleCode == 2739 || ModuleCode == 2776 || ModuleCode == 2840 || ModuleCode == 2901  || ModuleCode == 2934">
+      *ngIf="ModuleCode == 2739 || ModuleCode == 2776 || ModuleCode == 2840 || ModuleCode == 2901  || ModuleCode == 2934 || ModuleCode == 3034 || ModuleCode == 3037">
     </app-contract-without-flow-list>
     <app-order-page [PopupMaximized]="IsMaximized" *ngIf="ModuleCode == 2741"></app-order-page>
     <app-advertising-list *ngIf="ModuleCode == 2760"></app-advertising-list>
@@ -172,11 +139,11 @@
     <app-contracting-card-search *ngIf="ModuleCode == 2872"></app-contracting-card-search>
     <app-request-item-entity-page *ngIf="ModuleCode == 2883"></app-request-item-entity-page>
     <app-entity-type *ngIf="ModuleCode == 2912"></app-entity-type>
-    <app-providers-search-page *ngIf="ModuleCode == 2885 || ModuleCode == 2893"></app-providers-search-page>
+    <app-providers-search-page *ngIf="ModuleCode == 2885 || ModuleCode == 2893  || ModuleCode == 3092">
+    </app-providers-search-page>
     <app-management-type-page *ngIf="ModuleCode == 2894"></app-management-type-page>
     <app-responsibility-type-page *ngIf="ModuleCode == 2899"></app-responsibility-type-page>
-    <!-- <app-researcher-product-request-list *ngIf="ModuleCode == 2895"></app-researcher-product-request-list> -->
-    <app-product-entity-page *ngIf="ModuleCode == 2898"></app-product-entity-page>
+    <app-product-entity-page *ngIf="ModuleCode == 2898" (Closed)="closeModal()"></app-product-entity-page>
     <app-end-of-contract *ngIf="ModuleCode == 3003 || ModuleCode == 3004 || ModuleCode == 3025"
       (Output)="MessageBoxAction($event)"></app-end-of-contract>
     <app-civil-project-page *ngIf="ModuleCode == 2907"></app-civil-project-page>
@@ -227,7 +194,32 @@
     <app-asset-page-search *ngIf="ModuleCode == 1618"></app-asset-page-search>
     <app-letter-type *ngIf="ModuleCode == 3018"></app-letter-type>
     <app-change-cartable-user *ngIf="ModuleCode == 3028" (Closed)="closeModal()"></app-change-cartable-user>
-    <app-deadline-contract-list *ngIf="ModuleCode == 3031"></app-deadline-contract-list>
+    <app-deadline-contract-list
+      *ngIf="ModuleCode == 3031 || ModuleCode == 3042 || ModuleCode == 3043 || ModuleCode == 3044 || ModuleCode == 3052">
+    </app-deadline-contract-list>
+    <app-show-open-contract *ngIf="ModuleCode == 3040" (Closed)="closeModal()"></app-show-open-contract>
+    <app-application-note-list *ngIf="ModuleCode == 1960"></app-application-note-list>
+    <app-maintenance-volume-green-space *ngIf="ModuleCode == 3045" (Closed)="closeModal()">
+    </app-maintenance-volume-green-space>
+    <app-renew-requests-rep *ngIf="ModuleCode == 3051"></app-renew-requests-rep>
+    <app-request-period-report *ngIf="ModuleCode == 2944"></app-request-period-report>
+    <app-mutual-contract-info *ngIf="ModuleCode == 3053 || ModuleCode == 3073" (Closed)="closeModal()">
+    </app-mutual-contract-info>
+    <app-customer-file *ngIf="ModuleCode == 3056"></app-customer-file>
+    <app-produt-request-commition-member-report *ngIf="ModuleCode == 3065 || ModuleCode == 3067"
+      (Closed)="closeModal()">
+    </app-produt-request-commition-member-report>
+    <app-contract-deal-method-base-report *ngIf="ModuleCode == 3077" (Closed)="closeModal()">
+    </app-contract-deal-method-base-report>
+    <app-customer-experts-entry *ngIf="ModuleCode == 3086">
+    </app-customer-experts-entry>
+    <app-corporate-without-inquiry *ngIf="ModuleCode == 2375"></app-corporate-without-inquiry>
+    <app-person-without-inquiry *ngIf="ModuleCode == 2114"></app-person-without-inquiry>
+    <app-contract-archive-list *ngIf="ModuleCode == 3087"> </app-contract-archive-list>
+    <app-general-search-contract-request *ngIf="ModuleCode == 2803" (Closed)="closeModal()">
+    </app-general-search-contract-request>
+    <app-show-history *ngIf="ModuleCode == 3097"></app-show-history>
+    <app-product-request-invest-archive-list *ngIf="ModuleCode == 3098" ></app-product-request-invest-archive-list>
   </div>
 
 </div>

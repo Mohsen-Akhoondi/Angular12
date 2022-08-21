@@ -1,9 +1,8 @@
 import {
   Component,
   forwardRef,
-  HostListener,
   Input,
-  OnInit
+ 
   } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { ItemPipe } from '../pipes/item.pipe';

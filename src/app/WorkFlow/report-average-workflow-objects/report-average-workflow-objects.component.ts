@@ -1,6 +1,6 @@
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
-import { ActivatedRoute, Router } from '@angular/router';
-import { of, Observable, forkJoin } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { Input, Component, OnInit, ViewChild, TemplateRef, Output, EventEmitter } from '@angular/core';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { ModuleService } from 'src/app/Services/BaseService/ModuleService';
@@ -142,13 +142,13 @@ export class ReportAverageWorkflowObjectsComponent implements OnInit {
         headerName: 'تعداد',
         children: [
           {
-            headerName: 'فرآیند',
+            headerName: 'کار',  
             field: 'TotalCount',
             width: 85,
             resizable: true
           },
           {
-            headerName: 'کار',
+            headerName: 'فرآیند',
             field: 'TotalWorkLog',
             width: 85,
             resizable: true
@@ -159,13 +159,13 @@ export class ReportAverageWorkflowObjectsComponent implements OnInit {
         headerName: 'میانگین زمان ماندگاری(ساعت)',
         children: [
           {
-            headerName: 'فرآیند',
+            headerName: 'کار', 
             field: 'AvrageWaitingHour',
             width: 85,
             resizable: true
           },
           {
-            headerName: 'کار',
+            headerName: 'فرآیند',
             field: 'AvrageWorkLogHour',
             width: 85,
             resizable: true
@@ -219,13 +219,13 @@ export class ReportAverageWorkflowObjectsComponent implements OnInit {
         headerName: 'تعداد',
         children: [
           {
-            headerName: 'فرآیند',
+            headerName: 'کار',
             field: 'TotalCount',
             width: 85,
             resizable: true
           },
           {
-            headerName: 'کار',
+            headerName: 'فرآیند',
             field: 'TotalWorkLog',
             width: 85,
             resizable: true
@@ -236,13 +236,13 @@ export class ReportAverageWorkflowObjectsComponent implements OnInit {
         headerName: 'میانگین زمان ماندگاری(ساعت)',
         children: [
           {
-            headerName: 'فرآیند',
+            headerName: 'کار',
             field: 'AvrageWaitingHour',
             width: 85,
             resizable: true
           },
           {
-            headerName: 'کار',
+            headerName: 'فرآیند',
             field: 'AvrageWorkLogHour',
             width: 85,
             resizable: true
@@ -291,13 +291,13 @@ export class ReportAverageWorkflowObjectsComponent implements OnInit {
         headerName: 'تعداد',
         children: [
           {
-            headerName: 'فرآیند',
+            headerName: 'کار',
             field: 'TotalCount',
             width: 85,
             resizable: true
           },
           {
-            headerName: 'کار',
+            headerName: 'فرآیند',
             field: 'TotalWorkLog',
             width: 85,
             resizable: true
@@ -308,13 +308,13 @@ export class ReportAverageWorkflowObjectsComponent implements OnInit {
         headerName: 'میانگین زمان ماندگاری(ساعت)',
         children: [
           {
-            headerName: 'فرآیند',
+            headerName: 'کار',
             field: 'AvrageWaitingHour',
             width: 85,
             resizable: true
           },
           {
-            headerName: 'کار',
+            headerName: 'فرآیند',      
             field: 'AvrageWorkLogHour',
             width: 85,
             resizable: true

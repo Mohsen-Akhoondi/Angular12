@@ -1,15 +1,11 @@
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
+import { NgSelectConfig } from 'src/app/Shared/ng-select';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ModuleService } from 'src/app/Services/BaseService/ModuleService';
-import { GridOptions } from 'ag-grid-community';
-import { of, Observable } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Input, Component, OnInit } from '@angular/core';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { resolve } from 'url';
-import { reject } from 'q';
 import { RadioBoxModel } from 'src/app/Shared/Radio-Box/Radio-Box-Model/RadioBoxModel';
 import { ContractPayService } from 'src/app/Services/ContractService/ContractPayServices/ContractPayService';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
@@ -112,6 +108,7 @@ export class UserWorkLogContractPayComponent implements OnInit {
   SearchOption: string;
   SubjectParameter: string;
   LetterParameter: string;
+  ContractPayTechnicalCode : any ;
 
   BoxDevHeight: number;
   selectedRow;
@@ -507,6 +504,13 @@ export class UserWorkLogContractPayComponent implements OnInit {
         field: 'ContractorName',
         width: 120,
         resizable: true
+      },
+      {
+        headerName: 'پیمانکار اصلی',
+        field: 'MainContractorName',
+        width: 120,
+        resizable: true,
+        hide: this.ModuleCode === 2875 ? false : true
       },
       {
         headerName: 'مبلغ',
@@ -906,6 +910,13 @@ export class UserWorkLogContractPayComponent implements OnInit {
           resizable: true
         },
         {
+          headerName: 'پیمانکار اصلی',
+          field: 'MainContractorName',
+          width: 120,
+          resizable: true,
+          hide: this.ModuleCode === 2875 ? false : true
+        },
+        {
           headerName: 'سال مالی صورت وضعیت',
           field: 'FinYearCodeCPay',
           width: 150,
@@ -1050,6 +1061,13 @@ export class UserWorkLogContractPayComponent implements OnInit {
           resizable: true
         },
         {
+          headerName: 'پیمانکار اصلی',
+          field: 'MainContractorName',
+          width: 120,
+          resizable: true,
+          hide: this.ModuleCode === 2875 ? false : true
+        },
+        {
           headerName: 'مبلغ',
           field: 'ContractAmount',
           HaveThousand: true,
@@ -1088,10 +1106,11 @@ export class UserWorkLogContractPayComponent implements OnInit {
         this.NgSelectToFinYearParams.selectedObject,  //  تا سال مالی
         ByDetail,                                     //  دکمه به ریز یا به سرجمع
         this.NgSelectContractorParams.selectedObject,  //  پیمانکار
-        this.ContractOperation                        // نوع صورت وضعیت  60460
+        this.ContractOperation,
+        this.ContractPayTechnicalCode                        // نوع صورت وضعیت  60460
       ).subscribe(res => {
         this.rowData = res;
-      });
+      });   
     }
   }
 
@@ -1153,6 +1172,10 @@ export class UserWorkLogContractPayComponent implements OnInit {
       this.ContractPayPopupParam.NgSelectRegionCode = this.NgSelectRegionParams.selectedObject;
       this.paramObj = this.ContractPayPopupParam;
       if (this.selectedRow.data.ContractOperationID === 3) {
+        if (this.selectedRow.data.IsEstimate) {
+          this.OnOpenContractEstimate();
+          return;
+        }
         if (this.ContractTypeCode === 26 || this.ContractTypeCode === 29) {
           this.type = 'contract-pay-details'; // 'contract-pay-item-hour';
           return;
@@ -1181,36 +1204,7 @@ export class UserWorkLogContractPayComponent implements OnInit {
         this.type = 'pre-pay';
       }
     } else {
-      this.type = 'PriceList_contract_estimate';
-      this.HaveMaxBtn = true;
-      this.PixelWidth = '';
-      this.HaveHeader = true;
-      this.startLeftPosition = 94;
-      this.startTopPosition = 10;
-      this.MinHeightPixel = 550;
-      this.selectedRow.data.CostFactorID = this.selectedRow.data.CostContractID;
-      this.paramObj = {
-        HeaderName: this.ModuleName,
-        ModuleCode: this.ModuleCode,
-        WorkFlowID: null,
-        ReadyToConfirm: null,
-        selectedRow: this.selectedRow,
-        selectedRegion: this.selectedRegion,
-        ContractTypeCode: this.selectedRow.data.ContractTypeCode,
-        ContractID: this.selectedRow.data.ContractId,
-        ReceiveFactorID: this.selectedRow.data.ReceiveFactorID,
-        OrderNo: this.selectedRow.data.OrderNo,
-        PersianOrderDate: this.selectedRow.data.PersianOrderDate,
-        Note: this.selectedRow.data.OrderNote,
-        ContractOrderID: this.selectedRow.data.ContractOrderID,
-        GridHeightInTab: 100,
-        PanelHeightInTab: 99,
-        RegionCode: this.selectedRow.data.RegionCode,
-        RegionName: this.selectedRow.data.RegionName,
-        SeasonCode: this.selectedRow.data.SeasonCode,
-        ModuleViewTypeCode: 100000,
-        BeforPageTypeName: 'contract-list-page'
-      };
+      this.OnOpenContractEstimate();
     }
   }
 
@@ -1378,5 +1372,37 @@ export class UserWorkLogContractPayComponent implements OnInit {
   }
   OnChangeContractOperation(event) {
     this.ContractOperation = event;
+  }
+  OnOpenContractEstimate() {
+    this.type = 'PriceList_contract_estimate';
+      this.HaveMaxBtn = true;
+      this.PixelWidth = '';
+      this.HaveHeader = true;
+      this.startLeftPosition = 94;
+      this.startTopPosition = 10;
+      this.MinHeightPixel = 550;
+      this.selectedRow.data.CostFactorID = this.selectedRow.data.CostContractID;
+      this.paramObj = {
+        HeaderName: this.ModuleName,
+        ModuleCode: this.ModuleCode,
+        WorkFlowID: null,
+        ReadyToConfirm: null,
+        selectedRow: this.selectedRow,
+        selectedRegion: this.selectedRegion,
+        ContractTypeCode: this.selectedRow.data.ContractTypeCode,
+        ContractID: this.selectedRow.data.ContractId,
+        ReceiveFactorID: this.selectedRow.data.ReceiveFactorID,
+        OrderNo: this.selectedRow.data.OrderNo,
+        PersianOrderDate: this.selectedRow.data.PersianOrderDate,
+        Note: this.selectedRow.data.OrderNote,
+        ContractOrderID: this.selectedRow.data.ContractOrderID,
+        GridHeightInTab: 100,
+        PanelHeightInTab: 99,
+        RegionCode: this.selectedRow.data.RegionCode,
+        RegionName: this.selectedRow.data.RegionName,
+        SeasonCode: this.selectedRow.data.SeasonCode,
+        ModuleViewTypeCode: 100000,
+        BeforPageTypeName: 'contract-list-page'
+      };
   }
 }

@@ -1,9 +1,7 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { CommonService } from 'src/app/Services/CommonService/CommonService';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-import { resolve } from 'q';
 
 @Component({
   selector: 'app-consultant-select-type',
@@ -26,14 +24,14 @@ export class ConsultantSelectTypeComponent implements OnInit {
   HasSave: boolean;
   private sub: any;
   constructor(private ConsultantSelectTypeService: ProductRequestService,
-  private route: ActivatedRoute,
-  private router: Router,
-  private users: UserSettingsService ) {
+    private route: ActivatedRoute,
+    private router: Router,
+    private users: UserSettingsService) {
     this.HasSave = false;
-      this.BoxDevHeight = 80;
-      this.sub = this.route.params.subscribe(params => {
-        this.ModuleCode = +params['ModuleCode'];
-      });
+    this.BoxDevHeight = 80;
+    this.sub = this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
   }
   ConsultantSelectTypeGridReady(event) {
     this.gridApi = event.api;
@@ -62,11 +60,11 @@ export class ConsultantSelectTypeComponent implements OnInit {
           editable: res,
           resizable: true
         },
-    ];
+      ];
     });
-      this.ConsultantSelectTypeService.GetConsultantSelectTypeList().subscribe((res: any) => {
-          this.rowData = res;
-      });
+    this.ConsultantSelectTypeService.GetConsultantSelectTypeList().subscribe((res: any) => {
+      this.rowData = res;
+    });
   }
   closeModal() {
     this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
@@ -80,23 +78,23 @@ export class ConsultantSelectTypeComponent implements OnInit {
     });
     this.rowData.forEach(res => {
       const ConsultantSelectType = {
-        ConsultantSelectTypeName : res.ConsultantSelectTypeName,
-        ConsultantSelectTypeCode : res.ConsultantSelectTypeCode,
+        ConsultantSelectTypeName: res.ConsultantSelectTypeName,
+        ConsultantSelectTypeCode: res.ConsultantSelectTypeCode,
       };
       this.Dto.push(ConsultantSelectType);
     });
     // tslint:disable-next-line: no-shadowed-variable
-      this.ConsultantSelectTypeService.SaveConsultantSelectTypeList(this.Dto, this.ModuleCode).subscribe(res => {
-        this.btnclicked = true;
-        this.type = 'message-box';
-        this.HaveHeader = true;
-        this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
-      });
+    this.ConsultantSelectTypeService.SaveConsultantSelectTypeList(this.Dto, this.ModuleCode).subscribe(res => {
+      this.btnclicked = true;
+      this.type = 'message-box';
+      this.HaveHeader = true;
+      this.alertMessageParams.message = 'ثبت با موفقیت انجام شد';
+    });
   }
   popupclosed() {
     this.btnclicked = false;
     this.ConsultantSelectTypeService.GetConsultantSelectTypeList().subscribe((res2: any) => {
       this.rowData = res2;
-  });
+    });
   }
 }

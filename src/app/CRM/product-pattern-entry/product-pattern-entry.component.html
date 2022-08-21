@@ -1,10 +1,10 @@
-<div class="main-form-body" style="margin-top: 3px; height:53%;">
+<div class="main-form-body" style="margin-top: 3px; height:60%;">
 
   <table style="width: 100%;">
 
     <tr>
 
-      <td width="50%">
+      <td width="68%">
         <span class="table-cell-Lable"> کد گروه محصول</span>
         <app-number-input-component [HaveThousand]="false" [ReadOnly]="true" [Value]="ProductPatternCode" class="col-form-label"
           [PerCentWidth]="75" [PixelHeight]="25">
@@ -14,12 +14,34 @@
     </tr>
 
     <tr>
-      <td width="50%">
-        <span> نام گروه محصول </span>
+      <td width="68%">
+        <span class="table-cell-Lable"> نام گروه محصول </span>
         <input [(ngModel)]="ProductPatternName"  name="ProductPatternName" style="display: inline-block;width:75%; margin-right: 10px;" class="form-control input-style"
         type="text" />
       </td>
     </tr>
+  
+    <tr>
+      <td width="68%">
+        <span class="table-cell-Lable">معاونت تخصصی</span>
+        <app-ng-select-virtual-scroll style="display: inline-block;width: 75%;"
+        [Disabled]="CostCenter"
+       [NgSelectParams]="CostCenterParams"  (selectedChange)="onChangeCostCenterObj($event)" [Items]="CostCenterItems">
+        </app-ng-select-virtual-scroll>
+      </td>
+    </tr>
+    
+    <tr>
+      <td width="68%">
+        <span class="table-cell-Lable">اداره تخصصی</span>
+        <app-ng-select-virtual-scroll style="display: inline-block;width: 75%;"
+        [Disabled]="CostCenter"
+         [NgSelectParams]="SubCostCenterParams" [Items]="SubCostCenterItems"   >
+        </app-ng-select-virtual-scroll>
+      </td>
+    </tr>
+
+
     <div class="redio-div">
 
 
@@ -64,9 +86,9 @@
 
 </div>
 
-<app-over-popup *ngIf="isClicked" [PopupType]="PopUpType" [startLeftPosition]="startLeftPosition"
+<app-cfm-over-popup *ngIf="isClicked" [PopupType]="PopUpType" [startLeftPosition]="startLeftPosition"
   [startTopPosition]="startTopPosition" [minHeightPixel]="MinHeightPixel" [PercentWidth]="PercentWidth"
   [MainMaxwidthPixel]="MainMaxwidthPixel" [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn" [PopupType]="type"
   [PopupParam]="alertMessageParams " (popupclosed)="popupclosed($event)"
   (PopupOutPutParam)="PopUpType ==='message-box' ? MessageBoxAction($event) : getOutPutParam($event)">
-</app-over-popup>
+</app-cfm-over-popup>

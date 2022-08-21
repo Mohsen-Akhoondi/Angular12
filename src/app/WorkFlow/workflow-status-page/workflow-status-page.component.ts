@@ -1,7 +1,5 @@
-import { Component, OnInit, Input, Output } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { GridOptions } from 'ag-grid-community';
-import { of } from 'rxjs';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 declare var jquery: any;

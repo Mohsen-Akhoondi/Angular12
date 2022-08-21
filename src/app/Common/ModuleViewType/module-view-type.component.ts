@@ -4,10 +4,7 @@ import { CommonService } from 'src/app/Services/CommonService/CommonService';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { Observable } from 'rxjs';
-import { resolve } from 'path';
 import { ModuleService } from 'src/app/Services/BaseService/ModuleService';
-import { sequence } from '@angular/animations';
-import { reject } from 'q';
 
 @Component({
   selector: 'app-module-view-type',

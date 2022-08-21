@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, EventEmitter, Output, ViewChild } from '@angular/core';
+import { Component, OnInit,EventEmitter, Output, ViewChild } from '@angular/core';
 import { ICellEditorAngularComp } from 'ag-grid-angular';
 import { LoadingService } from 'src/app/Load/loading/LoadingService';
 

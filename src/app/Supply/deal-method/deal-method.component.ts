@@ -1,16 +1,12 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { GridOptions } from 'ag-grid-community';
-import { of } from 'rxjs';
-import { NumberFieldEditableComponent } from 'src/app/Shared/number-field-editable/number-field-editable.component';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { DealMethodServices } from 'src/app/Services/DealMethodService/DealMethodService'
-
-
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 declare var jquery: any;
 declare var $: any;
 @Component({
@@ -59,7 +55,7 @@ export class DealMethodComponent implements OnInit {
         headerName: 'کد روش انجام معامله',
         field: 'DealMethodCode',
         width: 335,
-        cellEditorFramework: NumberFieldEditableComponent,
+        cellEditorFramework: NumberInputComponentComponent,
         cellEditorParams: { MaxLength: 3 },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {

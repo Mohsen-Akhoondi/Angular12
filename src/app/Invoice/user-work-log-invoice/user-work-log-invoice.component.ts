@@ -3,17 +3,15 @@ import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
-import { single } from 'rxjs/operators';
-import { GridOptions } from 'ag-grid-community';
 import { forkJoin, of } from 'rxjs';
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
+import { NgSelectConfig } from 'src/app/Shared/ng-select';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { environment } from 'src/environments/environment';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { InvoiceService } from 'src/app/Services/Invoice/InvoiceService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
+import { NumberInputComponentComponent } from 'src/app/Shared/CustomComponent/InputComponent/number-input-component/number-input-component.component';
 declare var jquery: any;
 declare var $: any;
 @Component({
@@ -28,6 +26,7 @@ export class UserWorkLogInvoiceComponent implements OnInit {
   columnDef;
   private defaultColDef;
   private rowSelection;
+  deleteClick = false;
   rowData: any;
   selectedRegion = -1;
   RegionListSet = [];
@@ -41,6 +40,7 @@ export class UserWorkLogInvoiceComponent implements OnInit {
   HaveHeader: boolean;
   Enabled: boolean;
   HaveMaxBtn = false;
+  BtnClickedName: string;
   alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false };
   startLeftPosition: number;
   OverPixelWidth: number;
@@ -188,6 +188,7 @@ export class UserWorkLogInvoiceComponent implements OnInit {
     IsDisabled: false,
     Required: true
   };
+  SumFinalPrice: any;
 
   constructor(
     private router: Router,
@@ -287,6 +288,24 @@ export class UserWorkLogInvoiceComponent implements OnInit {
         resizable: true,
         sortable: true,
       },
+      {
+        headerName: 'مبلغ نهایی',
+        field: 'SumFinalPrice',
+        HaveThousand: true,
+        width: 120,
+        resizable: true,
+        editable: false,
+        cellEditorFramework: NumberInputComponentComponent,
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value;
+          } else {
+            return '';
+          }
+        },
+      },
+
     ];
   }
 
@@ -315,6 +334,10 @@ export class UserWorkLogInvoiceComponent implements OnInit {
     }
   }
   ngOnInit() {
+    if (this.ModuleCode === 2948) {
+      this.deleteClick = true;
+    }
+
     this.rowData = [];
     this.BtnName = this.ModuleCode === 2948 ? "اصلاح" : (this.ModuleCode === 2949 || this.ModuleCode === 2972) ? "مشاهده" : "";
     this.getNewData();
@@ -366,18 +389,20 @@ export class UserWorkLogInvoiceComponent implements OnInit {
       this.SubCostCenterParams.selectedObject,
       this.AdministratorActorParams.selectedObject,
       this.EndWFParams.selectedObject,
-      this.RequestedPersonParams.selectedObject).subscribe(res => {
-        if (res && res.length > 0) {
-          this.rowData = res;
-        } else {
-          this.type = 'message-box';
-          this.HaveHeader = true;
-          this.alertMessageParams.message = 'رکوردی جهت نمایش یافت نشد';
-          this.btnclicked = true;
-          this.startLeftPosition = 500;
-          this.startTopPosition = 100;
-        }
-      });
+      this.RequestedPersonParams.selectedObject,
+      this.SumFinalPrice,
+    ).subscribe(res => {
+      if (res && res.length > 0) {
+        this.rowData = res;
+      } else {
+        this.type = 'message-box';
+        this.HaveHeader = true;
+        this.alertMessageParams.message = 'رکوردی جهت نمایش یافت نشد';
+        this.btnclicked = true;
+        this.startLeftPosition = 500;
+        this.startTopPosition = 100;
+      }
+    });
   }
   onChangeFinYear(event) {
     this.FinYearParams.selectedObject = event;
@@ -576,5 +601,57 @@ export class UserWorkLogInvoiceComponent implements OnInit {
           this.RequestedPersonItems = res;
         });
     }
+  }
+
+  onDeleteclick() {
+    this.BtnClickedName = 'BtnDelete';
+    if(this.selectedRow.data.WorkflowInstanceID)
+    {
+      this.ShowMessageBoxWithYesNoBtn('فاکتور دارای گردش است،آیا از حذف مطمئن هستید؟');
+    }
+    else
+    {
+      this.ShowMessageBoxWithYesNoBtn('آیا از حذف فاکتور مطمئن هستید؟');
+    }
+  }
+
+  MessageBoxAction(ActionResult) {
+    if (this.BtnClickedName === 'BtnDelete' && ActionResult === 'YES') {
+      this.DoDelete();
+    } else {
+      this.Closed.emit(true);
+    }
+    this.type = '';
+    this.BtnClickedName = '';
+    this.btnclicked = false;
+  }
+
+  ShowMessageBoxWithYesNoBtn(message) {
+    this.btnclicked = true;
+    this.type = 'message-box';
+    this.HaveHeader = true;
+    this.HaveMaxBtn = false;
+    this.startLeftPosition = 449;
+    this.startTopPosition = 87;
+    this.alertMessageParams.message = message;
+    this.alertMessageParams.HaveOkBtn = false;
+    this.alertMessageParams.HaveYesBtn = true;
+    this.alertMessageParams.HaveNoBtn = true;
+  }
+
+  DoDelete() {
+    this.Invoice.DeleteInvoice(this.selectedRow.data.InvoiceID,this.ModuleCode).subscribe(
+      res => {
+        if (res === true) {
+          this.Search();
+          this.ShowMessageBoxWithOkBtn('حذف با موفقیت انجام شد');
+        } else {
+          this.ShowMessageBoxWithOkBtn('خطای پیش بینی نشده');
+        }
+      });
+  }
+
+  getOutPutParam(event) {
+
   }
 }

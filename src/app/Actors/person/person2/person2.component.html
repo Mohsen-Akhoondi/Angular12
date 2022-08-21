@@ -48,21 +48,24 @@
           <td width="33%">
             <span class="table-cell-Lable">کد ملی</span>
             <input [disabled]="true" style="width: 55%; text-align: right;" class="form-control input-style" type="text"
-              name="IdentityNo" [(ngModel)]="IdentityNo" />
+              name="IdentityNo" [(ngModel)]="IdentityNo"
+              [ngStyle]="{'background-color': IdentityNoSearchChangeFlag ? BackGroundColor:''}" />
           </td>
 
           <td width="33%">
             <span class="table-cell-Lable">تاریخ تولد</span>
             <app-jalali-datepicker [WidthPC]="55" [CheckValidate]="false" [Required]="false"
               [CurrMiladiDateValue]="BirthDate" style="text-align: right;" [Disabled]="true"
-              (Change)="OnBirthDateChange($event)">
+              (Change)="OnBirthDateChange($event)"
+              [ngStyle]="{'background-color': BirthDateSearchChangeFlag ? BackGroundColor:''}">
             </app-jalali-datepicker>
           </td>
 
           <td width="33%">
             <span class="table-cell-Lable">نام</span>
             <input [disabled]="true" style="width: 55%; text-align: right;" class="form-control input-style" type="text"
-              name="FirstName" [(ngModel)]="FirstName" />
+              name="FirstName" [(ngModel)]="FirstName"
+              [ngStyle]="{'background-color': FirstNameChangeFlag ? BackGroundColor:''}" />
           </td>
 
         </tr>
@@ -70,17 +73,20 @@
           <td width="33%">
             <span class="table-cell-Lable"> نام خانوادگی</span>
             <input [disabled]="true" style="width: 55%; text-align: right;" class="form-control input-style" type="text"
-              name="LastName" [(ngModel)]="LastName" />
+              name="LastName" [(ngModel)]="LastName"
+              [ngStyle]="{'background-color': LastNameChangeFlag ? BackGroundColor:''}" />
           </td>
           <td width="33%">
             <span class="table-cell-Lable">نام پدر</span>
             <input [disabled]="!IsEditableForType3" style="width: 55%; text-align: right;"
-              class="form-control input-style" type="text" name="FatherName" [(ngModel)]="FatherName" />
+              class="form-control input-style" type="text" name="FatherName" [(ngModel)]="FatherName"
+              [ngStyle]="{'background-color': FatherNameChangeFlag ? BackGroundColor:''}" />
           </td>
           <td width="33%">
             <span class="table-cell-Lable"> شماره شناسنامه </span>
             <input [disabled]="!IsEditableForType3" style="width: 55%; text-align: right;"
-              class="form-control input-style" type="text" name="BirthCertificateNo" [(ngModel)]="BirthCertificateNo" />
+              class="form-control input-style" type="text" name="BirthCertificateNo" [(ngModel)]="BirthCertificateNo"
+              [ngStyle]="{'background-color': BirthCertificateNoChangeFlag ? BackGroundColor:''}" />
           </td>
         </tr>
         <tr>
@@ -88,24 +94,28 @@
             <span class="table-cell-Lable"> سریال شناسنامه </span>
             <input [disabled]="!IsEditableForType3" style="width: 55%; text-align: right;"
               class="form-control input-style" type="text" name="BirthCertificateSerial"
-              [(ngModel)]="BirthCertificateSerial" />
+              [(ngModel)]="BirthCertificateSerial"
+              [ngStyle]="{'background-color': BirthCertificateSerialChangeFlag ? BackGroundColor:''}" />
           </td>
           <td width="33%">
             <span class="table-cell-Lable"> محل تولد </span>
             <input [disabled]="!IsEditableForType3" style="width: 55%; text-align: right;"
-              class="form-control input-style" type="text" name="BirthPlace" [(ngModel)]="BirthPlace" />
+              class="form-control input-style" type="text" name="BirthPlace" [(ngModel)]="BirthPlace"
+              [ngStyle]="{'background-color': BirthPlaceChangeFlag ? BackGroundColor:''}" />
           </td>
           <td width="33%">
             <span class="table-cell-Lable"> محل صدور </span>
             <input [disabled]="!IsEditableForType3" style="width: 55%; text-align: right;"
-              class="form-control input-style" type="text" name="IssuancePlace" [(ngModel)]="IssuancePlace" />
+              class="form-control input-style" type="text" name="IssuancePlace" [(ngModel)]="IssuancePlace"
+              [ngStyle]="{'background-color': IssuancePlaceChangeFlag ? BackGroundColor:''}" />
           </td>
         </tr>
         <tr>
           <td width="33%">
             <span class="table-cell-Lable"> کد اقتصادی </span>
             <input [disabled]="!IsEditableForType3" style="width: 55%; text-align: right;"
-              class="form-control input-style" type="text" name="EconomicCode" [(ngModel)]="EconomicCode" />
+              class="form-control input-style" type="text" name="EconomicCode" [(ngModel)]="EconomicCode"
+              [ngStyle]="{'background-color': EconomicCodeChangeFlag ? BackGroundColor:''}" />
           </td>
           <td width="33%">
             <span class="table-cell-Lable"> تصویر شناسنامه/کارت ملی</span>
@@ -120,14 +130,16 @@
           <td width="33%">
             <span class="table-cell-Lable">وضعیت در سیستم قدیم</span>
             <input style="width: 55%;" class="form-control input-style" type="text" name="AllowStateName"
-              [(ngModel)]="AllowStateName" [disabled]="!IsEditable" readonly />
+              [(ngModel)]="AllowStateName" [disabled]="!IsEditable" readonly
+              [ngStyle]="{'background-color': AllowStateNameChangeFlag ? BackGroundColor:''}" />
           </td>
         </tr>
         <tr>
           <td width="33%" style="vertical-align: top;">
             <span class="table-cell-Lable">درصد جانبازی </span>
             <input [disabled]="!IsEditable" style="width: 55%; text-align: right;" class="form-control input-style"
-              type="text" name="VeteranPercent" [(ngModel)]="VeteranPercent" />
+              type="text" name="VeteranPercent" [(ngModel)]="VeteranPercent"
+              [ngStyle]="{'background-color': VeteranPercentChangeFlag ? BackGroundColor:''}" />
           </td>
           <td width="81%" colspan="3" style="vertical-align: top;">
             <span class="table-cell-Lable">توضیحات تایید کننده </span>
@@ -144,39 +156,44 @@
           <span class="table-cell-Lable">پیمانکار</span>
           <app-custom-check-box style="vertical-align: sub; " [configurationInfo]="CustomCheckBoxConfig"
             [isSelected]="IsContractor" (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'IsContractor')"
-            [Disabled]="!IsEditable">
+            [Disabled]="!IsEditable" [ngStyle]="{'background-color': IsContractorChangeFlag ? BackGroundColor:''}">
           </app-custom-check-box>
         </div>
         <div style="width: 10%;display: inline-block; text-align: right; ">
-          <span class="table-cell-Lable">مشاور</span>
+          <span class="table-cell-Lable"
+            [ngStyle]="{'background-color': IsConsultChangeFlag ? BackGroundColor:''}">مشاور</span>
           <app-custom-check-box style="vertical-align: sub; " [isSelected]="IsConsult"
             [configurationInfo]="CustomCheckBoxConfig"
             (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'IsConsult')" [Disabled]="!IsEditable">
           </app-custom-check-box>
         </div>
         <div style="width: 10%;display: inline-block; text-align: right; ">
-          <span class="table-cell-Lable">تولیدکننده</span>
+          <span class="table-cell-Lable"
+            [ngStyle]="{'background-color': IsProducerChangeFlag ? BackGroundColor:''}">تولیدکننده</span>
           <app-custom-check-box style="vertical-align: sub;" [isSelected]="IsProducer"
             [configurationInfo]="CustomCheckBoxConfig"
             (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'IsProducer')" [Disabled]="!IsEditable">
           </app-custom-check-box>
         </div>
         <div style="width: 10%;display: inline-block; text-align: right; ">
-          <span class="table-cell-Lable">تامین کننده</span>
+          <span class="table-cell-Lable"
+            [ngStyle]="{'background-color': IsSupplierChangeFlag ? BackGroundColor:''}">تامین کننده</span>
           <app-custom-check-box style="vertical-align: sub;" [isSelected]="IsSupplier"
             [configurationInfo]="CustomCheckBoxConfig"
             (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'IsSupplier')" [Disabled]="!IsEditable">
           </app-custom-check-box>
         </div>
         <div style="width: 11%;display: inline-block; text-align: right; ">
-          <span class="table-cell-Lable">سازنده داخلی</span>
+          <span class="table-cell-Lable"
+            [ngStyle]="{'background-color': IsInternalBuildersChangeFlag ? BackGroundColor:''}">سازنده داخلی</span>
           <app-custom-check-box style="vertical-align: sub;" [isSelected]="IsInternalBuilders"
             [configurationInfo]="CustomCheckBoxConfig"
             (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'IsInternalBuilders')" [Disabled]="!IsEditable">
           </app-custom-check-box>
         </div>
         <div style="width: 11%;display: inline-block; text-align: right; ">
-          <span class="table-cell-Lable">سازنده خارجی</span>
+          <span class="table-cell-Lable"
+            [ngStyle]="{'background-color': IsExternalBuildersChangeFlag ? BackGroundColor:''}">سازنده خارجی</span>
           <app-custom-check-box style="vertical-align: sub;" [isSelected]="IsExternalBuilders"
             [configurationInfo]="CustomCheckBoxConfig"
             (PrettyCheckBoxChange)="OnChangeCheckBoxValue($event,'IsExternalBuilders')" [Disabled]="!IsEditable">
@@ -244,7 +261,8 @@
             <td width="100%" colspan="4">
               <span class="table-cell-Lable">آدرس محل سکونت </span>
               <input [disabled]="!IsEditable" style="width: 90%;" class="form-control input-style" type="text"
-                name="Address" [(ngModel)]="Address" />
+                name="Address" [(ngModel)]="Address"
+                [ngStyle]="{'background-color': AddressChangeFlag ? BackGroundColor:''}" />
             </td>
           </tr>
           <tr>
@@ -253,11 +271,11 @@
               <input [disabled]="!IsEditable" style="width: 80%;" class="form-control input-style" type="text"
                 name="Tel" [(ngModel)]="Tel" />
             </td>
-
             <td width="50%">
               <span class="table-cell-Lable">کدپستی محل سکونت </span>
               <input [disabled]="!IsEditable" style="width: 80%;" class="form-control input-style" type="text"
-                name="PostCode" [(ngModel)]="PostCode" />
+                name="PostCode" [(ngModel)]="PostCode"
+                [ngStyle]="{'background-color': PostCodeChangeFlag ? BackGroundColor:''}" />
             </td>
           </tr>
           <tr>
@@ -284,7 +302,8 @@
             <td width="50%">
               <span class="table-cell-Lable"> پست الکترونیک </span>
               <input [disabled]="!IsEditable" style="width: 80%;" class="form-control input-style" type="text"
-                name="Email" [(ngModel)]="Email" />
+                name="Email" [(ngModel)]="Email"
+                [ngStyle]="{'background-color': EmailChangeFlag ? BackGroundColor:''}" />
             </td>
 
             <td width="50%">
@@ -303,7 +322,7 @@
             <td width="50%">
               <span class="table-cell-Lable"> وب سایت </span>
               <input [disabled]="!IsEditable" style="width: 80%;" class="form-control input-style" type="text"
-                name="Web" [(ngModel)]="Web" />
+                name="Web" [(ngModel)]="Web" [ngStyle]="{'background-color': WebChangeFlag ? BackGroundColor:''}" />
             </td>
           </tr>
           <tr>
@@ -606,7 +625,11 @@
     <button *ngIf="ModuleViewTypeCode === 7" (click)="onWFSave()" id="btnSave" class="btn btn-primary btnGreen">
       <img width="15px" height="15px" src="assets/Icons/save.png" />
       ثبت
-  </button>
+    </button>
+    <button (click)="OnshowhistorydetailClick()" id="showhistorydetail" class="btn btn-primary btnGreen">
+      <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
+      مشاهده ریز اصلاحات
+    </button>
     <button *ngIf="ActorId" id="btnPrint" class="btn btn-primary btnGreen" (click)="btnPrintClick()">
       <img width="15px" height="15px" src="assets/Icons/print.png" />
       چاپ
@@ -692,10 +715,11 @@
     (click)="onShowHistoryListClick(row)" />
 </ng-template>
 
-<app-over-popup *ngIf="isClicked" [PopupType]="PopUpType" [HaveMaxBtn]="false" [startLeftPosition]="startLeftPosition"
-  [startTopPosition]="startTopPosition" [PopupParam]="PopUpType === 'message-box' ? alertMessageParams : PopupParam"
-  [HaveHeader]="HaveHeader" (popupclosed)="popupclosed($event)"
-  [PixelWidth]="PopUpType === 'message-box'? '' : OverPixelWidth" [minHeightPixel]="MinHeightPixel"
+<app-over-popup *ngIf="isClicked" [PopupType]="PopUpType" [HaveMaxBtn]="HaveMaxBtn"
+  [startLeftPosition]="startLeftPosition" [startTopPosition]="startTopPosition"
+  [PopupParam]="PopUpType === 'message-box' ? alertMessageParams : PopupParam" [HaveHeader]="HaveHeader"
+  (popupclosed)="popupclosed($event)" [PixelWidth]="PopUpType === 'message-box'? '' : OverPixelWidth"
+  [minHeightPixel]="MinHeightPixel"
   [PixelHeight]="PopUpType === 'person2' ? PixelHeight : PopUpType === 'current-suppliers-contract' ? MinHeightPixel: ''"
   [HeightPercentWithMaxBtn]="PopUpType === 'current-suppliers-contract' ? '' : 98"
   [MainMaxwidthPixel]="PopUpType === 'current-suppliers-contract' ? MainMaxwidthPixel : ''"

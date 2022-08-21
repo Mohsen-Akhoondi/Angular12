@@ -8,12 +8,12 @@
             <span class="table-cell-Lable">واحد اجرایی</span>
             <app-ng-select-virtual-scroll
               [Disabled]="(DisableControlles === false ? (RequestedPersonDisable || CheckRegionWritable || (!IsEditable && ProductRequestObject)) && ModuleCode != 2773 : true) && IsdisablebleAdmin"
-              style="display: inline-block;width: 60%;" class="" [NgSelectParams]="RegionParams"
+              style="display: inline-block;width: 72%;" class="" [NgSelectParams]="RegionParams"
               [CheckValidate]="CheckValidate" (selectedChange)="onChangeRegion($event)" [Items]="RegionItems"
               (Open)="OnOpenNgSelect('Region', false)">
             </app-ng-select-virtual-scroll>
           </td>
-          <td width="25%">
+          <td width="27%">
             <span style="color: red;">*</span>
             <span class="table-cell-Lable">محل هزینه</span>
             <app-ng-select-virtual-scroll style="display: inline-block;width: 68%;" class=""
@@ -22,13 +22,14 @@
               [Items]="VWExeUnitItems" (Open)="OnOpenNgSelect('VWExeUnit', false)">
             </app-ng-select-virtual-scroll>
           </td>
-          <td width="25%">
+          <td width="23%">
             <span class="table-cell-Lable">نوع درخواست</span>
             <input *ngIf="ModuleCode === 2773 || HasProvisionContractID" [disabled]="true" style="width: 60%"
               class="form-control input-style" type="text" value="تامین مانده اعتبار" />
             <input *ngIf="ModuleCode === 2787" [disabled]="true" style="width: 60%" class="form-control input-style"
               type="text" value="ماده 48" />
-            <div *ngIf="(ModuleCode !== 2773 && ModuleCode !== 2787) && !HasProvisionContractID" class="redio-div">
+            <div *ngIf="(ModuleCode !== 2773 && ModuleCode !== 2787) && !HasProvisionContractID"
+              style="width: 59% !important;" class="redio-div">
               <div class="custom-control custom-radio custom-control-inline">
                 <input [disabled]="!IsEditable || IsInsert" [checked]="IsNew" type="radio" class="custom-control-input"
                   id="ISNewRadio" name="ChoosenISNewRadioName" (click)="IsNewRedioClick(true)">
@@ -68,7 +69,7 @@
         <tr>
           <td width="25%">
             <span class="table-cell-Lable">ماهیت درخواست</span>
-            <div class="redio-div">
+            <div class="redio-div" style="width: 70% !important;">
               <div class="custom-control custom-radio custom-control-inline">
                 <input [disabled]="!IsEditable || IsInsert" [checked]="IsCost" type="radio" class="custom-control-input"
                   id="ISCostRadio" name="ChoosenISCostRadioName" (click)="RedioClick(true)">
@@ -83,22 +84,37 @@
               </div>
             </div>
           </td>
-          <td width="25%">
-            <span class="table-cell-Lable">کد درخواست</span><input style="width: 68% " class="form-control input-style"
-              type="text" value="{{ProductRequestCode}}" readonly />
+          <td width="27%">
+            <span class="table-cell-Lable">نوع درخواست معامله</span>
+            <app-ng-select-virtual-scroll [Disabled]="IsNew ? (!IsEditable || IsInsert) : true"
+              style="display: inline-block;width: 68% !important;" class="select-general-for-lable"
+              [CheckValidate]="CheckValidatePRType"
+              [NgSelectParams]="PRTypeParams" [Items]="PRTypeItems" (selectedChange)="onChangePRType($event)"
+             >
+            </app-ng-select-virtual-scroll>
+          </td>
+          <td width="23%">
+            <span class="table-cell-Lable">رسته</span>
+            <app-ng-select-virtual-scroll [Disabled]="IsNew ? ((!IsEditable || IsInsert) && PriceListTopicRasteDisable) : true"
+              style="display: inline-block;width: 58% !important;" class="select-general-for-lable"
+              [NgSelectParams]="PriceListTopicRasteParams" [Items]="PriceListTopicRasteItems"
+              (Open)="OnOpenNgSelect('PriceListTopicRaste', false)"
+              [CheckValidate]="CheckValidateTopic"
+              (selectedChange)="onChangePriceListTopicRaste($event)">
+            </app-ng-select-virtual-scroll>
           </td>
           <td width="25%">
             <span style="color: red;">*</span>
-            <span class="table-cell-Lable">تاریخ درخواست</span>
+            <span class="table-cell-Lable" style="margin-right: 5px !important; margin-left: 5px !important;">تاریخ
+              درخواست</span>
             <app-jalali-datepicker
               [Disabled]="DisableControlles === false ? !IsEditable && ModuleCode !== 2773 && !HasProvisionContractID : true"
-              [WidthPC]="60" [CheckValidate]="CheckValidate" [CurrMiladiDateValue]="ProductRequestDate"
+              [WidthPC]="27" [CheckValidate]="CheckValidate" [CurrMiladiDateValue]="ProductRequestDate"
               [Required]="true" (Change)="OnProductRequestDateChange($event)">
             </app-jalali-datepicker>
-          </td>
-          <td width="25%">
-            <span class="table-cell-Lable">مهلت تامین</span>
-            <app-jalali-datepicker [Disabled]="!IsEditable" [WidthPC]="66" [Required]="CheckValidate"
+            <span class="table-cell-Lable" style="margin-right: 5px !important; margin-left: 5px !important;">مهلت
+              تامین</span>
+            <app-jalali-datepicker [Disabled]="!IsEditable" [WidthPC]="26" [Required]="CheckValidate"
               [CurrMiladiDateValue]="DeadLineDate" (Change)="OnDeadLineDateChange($event)">
             </app-jalali-datepicker>
           </td>
@@ -109,13 +125,13 @@
             <span class="table-cell-Lable">معاونت مجری</span>
             <app-ng-select-virtual-scroll
               [Disabled]="((!IsEditable && ModuleCode !== 2773  && ModuleCode !== 2787) || IsContractDisable) && IsdisablebleAdmin"
-              style="display: inline-block;width: 60%;" [NgSelectParams]="CostCenterParams"
+              style="display: inline-block;width: 72%;" [NgSelectParams]="CostCenterParams"
               (selectedChange)="onChangeCostCenter($event)" [Items]="CostCenterItems"
               (Open)="OnOpenNgSelect('CostCenter', false)" [CheckValidate]="CheckValidateCostCenterParams">
               <!-- IsType114 for RFC 51334 -->
             </app-ng-select-virtual-scroll>
           </td>
-          <td width="25%">
+          <td width="27%">
             <span style="color: red;">*</span>
             <span class="table-cell-Lable">اداره مجری</span>
             <app-ng-select-virtual-scroll
@@ -126,7 +142,7 @@
               <!-- IsType114 for RFC 51334 -->
             </app-ng-select-virtual-scroll>
           </td>
-          <td *ngIf="InputParam.ResearcherID || ResearcherID" colspan="1" width="25%" style="vertical-align: initial;">
+          <td *ngIf="InputParam.ResearcherID || ResearcherID" colspan="1" width="23%" style="vertical-align: initial;">
             <span class="table-cell-Lable">کد پژوهش </span><input style="width: 60% " class="form-control input-style"
               type="text" value="{{ResearcherID}}" readonly />
           </td>
@@ -169,12 +185,12 @@
             <span class="table-cell-Lable">معاونت متولی</span>
             <app-ng-select-virtual-scroll
               [Disabled]="(IsTMIRegion || (!IsEditable && ModuleCode !== 2773 && ModuleCode !== 2787) || IsContractDisable) && IsdisablebleAdmin"
-              style="display: inline-block;width: 60%;" [NgSelectParams]="RusteeParams"
+              style="display: inline-block;width: 72%;" [NgSelectParams]="RusteeParams"
               (selectedChange)="onChangeRustee($event)" [Items]="RusteeItems" (Open)="OnOpenNgSelect('Rustee', false)"
               [CheckValidate]="CheckValidate">
             </app-ng-select-virtual-scroll>
           </td>
-          <td width="25%">
+          <td width="27%">
             <span style="color: red;">*</span>
             <span class="table-cell-Lable">اداره متولی</span>
             <app-ng-select-virtual-scroll
@@ -184,7 +200,7 @@
               (Open)="OnOpenNgSelect('SubRustee', false)">
             </app-ng-select-virtual-scroll>
           </td>
-          <td colspan="2" width="50%">
+          <td colspan="2" width="48%">
             <span style="color: red;">*</span>
             <span class="table-cell-Lable">موضوع</span>
             <input [readonly]="(!IsEditable && IsDisabledType106) || IsDisableResearch"
@@ -195,7 +211,7 @@
         </tr>
         <tr>
           <td colspan="1" width="25%" style="vertical-align: initial;">
-            <span class="table-cell-Lable">شماره درخواست </span><input style="width: 60% "
+            <span class="table-cell-Lable">شماره درخواست </span><input style="width: 72% "
               class="form-control input-style" type="text" value="{{ProductRequestNo}}" readonly />
           </td>
           <td colspan="3" width="75%">
@@ -206,7 +222,18 @@
               [ngStyle]="{'border-color': CheckValidate && !BriefingReport && (ModuleViewTypeCode === 89 || (IsType114 && ModuleCode === 2730)) ? 'red':''}"
               placeholder="{{CheckValidate && !BriefingReport && (ModuleViewTypeCode === 89 || (IsType114 && ModuleCode === 2730)) ? 'پر کردن مقدار این فیلد الزامیست': ''}}"
               [(ngModel)]="BriefingReport" name="BriefingReport" class="form-control input-style" rows="2"
-              style="display: inline-block;height: 40px;width: 89.2%;" id="indicator-text_note"></textarea>
+              style="display: inline-block;height: 40px;width: 88.5%;" id="indicator-text_note"></textarea>
+          </td>
+        </tr>
+        <tr *ngIf="this.RegionParams.selectedObject == 200">
+          <td width="25%">
+            <span class="table-cell-Lable">توافقنامه</span>
+            <app-custom-check-box 
+            style="vertical-align: sub; margin-left: 58%;" 
+            [configurationInfo]="CustomCheckBoxConfig1"
+            [isSelected]="IsChecked"
+            (PrettyCheckBoxChange)="OnCheckBoxChanged($event)">
+            </app-custom-check-box>
           </td>
         </tr>
       </table>
@@ -218,50 +245,44 @@
           <td width="25%">
             <span class="table-cell-Lable">واحد اجرایی</span>
             <app-ng-select-virtual-scroll [Disabled]="!IsEditable || IsContractSelect"
-              style="display: inline-block;width: 60%;" class="" [NgSelectParams]="OnFilterRegionParams"
+              style="display: inline-block;width: 42%;" class="" [NgSelectParams]="OnFilterRegionParams"
               [Items]="OnFilterRegionItems" (selectedChange)="onChangeFilterRegion($event)"
               (Open)="OnOpenNgSelect('FilterRegion', false)">
             </app-ng-select-virtual-scroll>
+            <span class="table-cell-Lable"
+              style="margin-right: 5px !important; margin-left: 5px !important;">ناحیه</span>
+            <app-ng-select-virtual-scroll [Disabled]="!IsEditable || IsContractSelect"
+              style="display: inline-block;width: 20%;" class="" [NgSelectParams]="RegionAreaParams"
+              [Items]="RegionAreaItems" (selectedChange)="onChangeRegionArea($event)"
+              (Open)="OnOpenNgSelect('RegionArea', false)">
+            </app-ng-select-virtual-scroll>
           </td>
-          <td width="25%">
-            <span class="table-cell-Lable">ناحیه</span>
-            <div style="width: 75%;display: inline-block;">
-
-              <div style="width: 30%;display: inline-block;">
-                <app-ng-select-virtual-scroll [Disabled]="!IsEditable || IsContractSelect"
-                  style="display: inline-block;width: 100%;" class="" [NgSelectParams]="RegionAreaParams"
-                  [Items]="RegionAreaItems" (selectedChange)="onChangeRegionArea($event)"
-                  (Open)="OnOpenNgSelect('RegionArea', false)">
-                </app-ng-select-virtual-scroll>
-              </div>
-              <div style="width: 30%;display: inline-block;">
-                <app-ng-select-virtual-scroll [Disabled]="!IsEditable || IsContractSelect"
-                  style="display: inline-block;width: 99%;" class="" [NgSelectParams]="DistrictDirectionParams"
-                  [Items]="DistrictDirectionItems" (Open)="OnOpenNgSelect('DistrictDirection', false)">
-                </app-ng-select-virtual-scroll>
-              </div>
-              <div style="width: 40%;display: inline-block;">
-                <span class="table-cell-Lable">محله</span>
-                <app-ng-select-virtual-scroll [Disabled]="!IsEditable || IsContractSelect"
-                  style="display: inline-block;width: 55%;" class="" [NgSelectParams]="RegionAreaDistrictParams"
-                  [Items]="RegionAreaDistrictItems" (Open)="OnOpenNgSelect('RegionAreaDistrict', false)">
-                </app-ng-select-virtual-scroll>
-              </div>
-            </div>
+          <td width="27%">
+            <span class="table-cell-Lable">موقعیت</span>
+            <app-ng-select-virtual-scroll [Disabled]="!IsEditable || IsContractSelect"
+              style="display: inline-block;width: 24%;" class="" [NgSelectParams]="DistrictDirectionParams"
+              [Items]="DistrictDirectionItems" (Open)="OnOpenNgSelect('DistrictDirection', false)">
+            </app-ng-select-virtual-scroll>
+            <span class="table-cell-Lable"
+              style="margin-right: 5px !important; margin-left: 5px !important;">محله</span>
+            <app-ng-select-virtual-scroll [Disabled]="!IsEditable || IsContractSelect"
+              style="display: inline-block;width: 35%;" class="" [NgSelectParams]="RegionAreaDistrictParams"
+              [Items]="RegionAreaDistrictItems" (Open)="OnOpenNgSelect('RegionAreaDistrict', false)">
+            </app-ng-select-virtual-scroll>
           </td>
-          <td [style.width.%]="ISActLocation ? 24 : 50">
+          <td [style.width.%]="ISActLocation ? 33 : 48">
             <span *ngIf="IsType114 && ModuleCode === 2730" style="vertical-align: top; color: red;">*</span>
             <span class="table-cell-Lable">آدرس</span><input
               [readonly]="(!IsEditable || IsContractSelect) && !(IsType114 && ModuleCode === 2730)"
-              [style.width.%]="ISActLocation ? 60 : 80.4" class="form-control input-style" type="text" name="Address"
+              [style.width.%]="ISActLocation ? 68 : 80" class="form-control input-style" type="text" name="Address"
               [ngStyle]="{'border-color': CheckValidate && !Address && (IsType114 && ModuleCode === 2730) ? 'red':''}"
               placeholder="{{CheckValidate && !Address && (IsType114 && ModuleCode === 2730) ? 'پر کردن مقدار این فیلد الزامیست': ''}}"
               [(ngModel)]="Address" />
           </td>
-          <td width="25%">
+          <td width="15%">
             <span *ngIf="ISActLocation" class="table-cell-Lable">محدوده انجام</span>
             <app-ng-select-virtual-scroll *ngIf="ISActLocation" [Disabled]="!IsEditable && !IsProvideCredit"
-              style="display: inline-block;width: 65%;" [NgSelectParams]="ActLocationParams" [Items]="ActLocationItems"
+              style="display: inline-block;width: 55%;" [NgSelectParams]="ActLocationParams" [Items]="ActLocationItems"
               (Open)="OnOpenNgSelect('ActLocation', false)">
             </app-ng-select-virtual-scroll>
           </td>
@@ -289,7 +310,7 @@
   </form>
   <ul style="margin-top: 5px" class="nav nav-tabs" role="tablist">
     <li class="nav-item">
-      <a class="nav-link" [ngClass]="{'active': (!HaveReceiveDoc || OrginalModuleCode !== 2730) && !HaveArticle48}"
+      <a class="nav-link" [ngClass]="{'active': (!HaveReceiveDoc || OrginalModuleCode !== 2730) && !HaveArticle48 && !IsShowContractContent}"
         href="#request-item" role="tab" data-toggle="tab">اقلام درخواست</a>
     </li>
     <li *ngIf="HaveArticle48" class="nav-item">
@@ -306,16 +327,19 @@
     <li class="nav-item">
       <a class="nav-link" href="#request-related-product" role="tab" data-toggle="tab">اقلام تعرفه</a>
     </li>
-    <li  *ngIf="false" class="nav-item">
+    <li *ngIf="false" class="nav-item">
       <a class="nav-link" href="#receive-doc-product" role="tab" data-toggle="tab">اسناد دریافتنی</a>
     </li>
     <!--<li class="nav-item">
           <a class="nav-link" href="#request-person-item" role="tab" data-toggle="tab">عوامل اجرایی</a>
         </li> -->
+    <li *ngIf="IsShowContractContent" class="nav-item">
+      <a class="nav-link" [ngClass]="{'active': IsShowContractContent}" href="#contract-content" role="tab" data-toggle="tab">مفاد قرارداد</a>
+    </li>
   </ul>
   <div class="tab-content box-dev" style="margin-top: 5px;padding: 5px;" [style.height.%]="gridHeight">
     <div role="tabpanel" class="tab-pane fade"
-      [ngClass]="{'show': (!HaveReceiveDoc || OrginalModuleCode !== 2730) && !HaveArticle48 ,'active': (!HaveReceiveDoc || OrginalModuleCode !== 2730) && !HaveArticle48}"
+      [ngClass]="{'show': (!HaveReceiveDoc || OrginalModuleCode !== 2730) && !HaveArticle48 && !IsShowContractContent ,'active': (!HaveReceiveDoc || OrginalModuleCode !== 2730) && !HaveArticle48 && !IsShowContractContent}"
       id="request-item" style="margin-bottom: 5px;" [style.height.%]="tabpanelHeight">
       <app-grid [HaveBorder]="true" [columns]="columnDef" [rowsData]="rowsData" (GridReady)="onGridReady($event)"
         [IsEditable]="IsEditable" (cellEditingStarted)="oncellEditingStarted($event)"
@@ -333,6 +357,10 @@
           <span id="sum-final-estimate-amount-coef" class="table-cell-Lable">جمع متره با ضرایب: </span>
           <label for="sum-final-estimate-amount-coef" style="margin:2px"> {{SumEstimateAmountCoefStr}} </label>
         </div>
+        <div *ngIf="!HaseEstimate && PRTypeParams.selectedObject === 2 && PriceListTopicRasteParams.selectedObject === 402374" style="min-width: 100px;font-weight: bold;display: inline-block">
+          <span id="sum-final-estimate-amount" class="table-cell-Lable">جمع کل مبلغ ماهانه:</span>
+          <label for="sum-final-estimate-amount" style="margin:2px"> {{SumFinalItemAmountWithDuration}} </label>
+        </div>
         <div *ngIf="!HaseEstimate" style="min-width: 100px;font-weight: bold;display: inline-block">
           <span id="sum-final-estimate-amount" class="table-cell-Lable">جمع کل با احتساب ضرایب:</span>
           <label for="sum-final-estimate-amount" style="margin:2px"> {{SumFinalItemAmount}} </label>
@@ -344,14 +372,14 @@
         <div *ngIf="!IsNew && !IsProvideCredit" style="font-weight: bold;display: inline-block">
           <!-- RFC 52207-->
           <span id="sum-final-estimate-amount2" class="table-cell-Lable">درصد تغییرات مرحله قرارداد:</span>
-          <input style="width: 20%;color: red;font-weight: bold;" class="form-control input-style" type="text"
+          <input style="width: 15%;color: red;font-weight: bold;" class="form-control input-style" type="text"
             name="PerecentLevel" [(ngModel)]="PercentageLevelOfChanges"
             (ngModelChange)="onChangePercentageLevel($event)" [readonly]="!IsEditable" />
         </div>
         <div *ngIf="!IsNew && !IsProvideCredit" style="font-weight: bold;display: inline-block">
           <!-- RFC 51302-->
           <span id="sum-final-estimate-amount2" class="table-cell-Lable">درصد تغییرات کل قرارداد:</span>
-          <input style="width: 66px;color: red;font-weight: bold;" class="form-control input-style" type="text"
+          <input style="width: 56px;color: red;font-weight: bold;" class="form-control input-style" type="text"
             name="Perecent" [(ngModel)]="PercentageOfChanges" (ngModelChange)="onChangePercentage($event)"
             [readonly]="!IsEditable" />
         </div>
@@ -403,7 +431,6 @@
           </table>
         </div>
       </div>
-
     </div>
     <div role="tabpanel" class="tab-pane fade" [ngClass]="{'show': HaveArticle48,'active': HaveArticle48}"
       id="request-article-48" style="margin-bottom: 5px;" [style.height.%]="tabpanelHeight">
@@ -411,20 +438,6 @@
         (GridReady)="onArticle48GridReady($event)" [IsEditable]="IsArticle48Editable">
       </app-grid>
     </div>
-    <!-- <div role=" tabpanel" class="tab-pane fade" id="request-person-item"
-                  style="margin-bottom: 5px;height: 99%;">
-                نام نقش نوع نقش
-                <app-grid (GridReady)="onPRPersonGridReady($event)" [columns]="ProductRequestPersoncolDef"
-                  [IsEditable]="true" [rowsData]="ProductRequestRowData"
-                  (CellValueChanged)="onPRPersonCellValueChanged($event)" [gridHeight]="90">
-                </app-grid>
-        </div> -->
-    <!-- <div role="tabpanel" class="tab-pane fade" id="product-request-cost" style="margin-bottom: 5px;height: 99%;">
-           اقلام بهای تمام شده  
-          <app-grid (GridReady)="onPRCostGridReady($event)" [columns]="ProductRequestCostColDef" [IsEditable]="true"
-            [rowsData]="PRCostRowData" (CellValueChanged)="onPRCostCellValueChanged($event)" [gridHeight]="90"></app-grid>
-        </div> -->
-
     <div role="tabpanel" class="tab-pane fade" id="asset2" style="margin-bottom: 5px;" [style.height.%]="tabpanelHeight"
       [ngClass]="{'show': HaveAsset}">
       <!-- اموال  -->
@@ -438,16 +451,11 @@
       <app-grid [gridHeight]="WarrantyDocGridHeight" (cellEditingStarted)="onReceiveDocEditingStarted($event)"
         (RowClick)="onReceiveDocRowClick($event)" (GridReady)="onReceiveDocGridReady($event)"
         [columns]="ReceiveDocColDef" [IsEditable]="(HaveReceiveDoc && !IsShowType108) && IsEditeSearch"
-        [rowsData]="ReceiveDocRowData" [HaveBorder]="true"  [HaveDelete]="HaveDelete">
+        [rowsData]="ReceiveDocRowData" [HaveBorder]="true" [HaveDelete]="HaveDelete">
       </app-grid>
-      <!-- <button [disabled]="!ReceiveDocEnable" type="submit" (click)="onReceiveDocArchiveClick()"
-        class="btn-gray-border btn btn-primary small-btn btnGreen">
-        <img width="15px" height="15px" src="assets/Icons/TechnicalArchive.png" />
-        مستندات
-      </button> -->
     </div>
     <div role="tabpanel" class="tab-pane fade" id="request-related-product" style="margin-bottom: 5px;"
-      [style.height.%]="tabpanelHeight">
+     [style.height.%]="tabpanelHeight">
       <app-grid (RowClick)="RelatedProductRowClick($event)" (GridReady)="onRelatedProductGridReady($event)"
         [columns]="RequestRelatedProductColDef" [IsEditable]="IsEditable" [rowsData]="RelatedProductRowData"
         [gridHeight]="100" (cellEditingStarted)="onRelatedProductcellEditingStarted($event)">
@@ -456,8 +464,8 @@
     <div role="tabpanel" class="tab-pane fade" id="receive-doc-product" style="margin-bottom: 5px;"
       [style.height.%]="tabpanelHeight">
       <app-grid (RowClick)="ReceiveDocProductRowClick($event)" (GridReady)="onReceiveDocProductGridReady($event)"
-        [columns]="ReceiveDocProductColDef" [IsEditable]="false" [rowsData]="ReceiveDocProductRowData"
-        [gridHeight]="85" (cellEditingStarted)="onReceiveDocProductcellEditingStarted($event)">
+        [columns]="ReceiveDocProductColDef" [IsEditable]="false" [rowsData]="ReceiveDocProductRowData" [gridHeight]="85"
+        (cellEditingStarted)="onReceiveDocProductcellEditingStarted($event)">
       </app-grid>
       <div class="main-form-body" style=" margin-top: 4px; height: 35px;padding: 3px;">
         <button (click)="onAddReceiveDocClick()" id="btnInsert" class="btn btn-primary btnGreen">
@@ -473,6 +481,25 @@
           حذف
         </button>
       </div>
+    </div>
+    <div role="tabpanel" class="tab-pane fade" id="contract-content" [style.height.%]="100"
+    [ngClass]="{'show': IsShowContractContent , 'active': IsShowContractContent}"
+      style="margin-bottom: 5px;" >
+      <table style="width: 100%;margin-top: 5px;">
+        <tr>
+          <td style="width: 10%">
+            <span class="table-cell-Lable">مفاد قرارداد</span>
+            <app-custom-check-box style="vertical-align: sub;" [configurationInfo]="CustomCheckBoxConfig"
+              [isSelected]="IsContractContent" (PrettyCheckBoxChange)="OnCheckBoxChange($event)">
+            </app-custom-check-box>
+          </td>
+          <td style="width: 90%">
+            <span class="table-cell-Lable">عنوان مفاد قرارداد</span>
+            <input style="width: 74%; " class="form-control input-style" type="text" name="ContractContentNote"
+              [(ngModel)]="ContractContentNote" />
+          </td>
+        </tr>
+      </table>
     </div>
   </div>
   <fieldset *ngIf="BoardDecisions" [style.height.px]="WfDetailsShowHeight" class="feild-set"
@@ -498,11 +525,12 @@
           || ModuleViewTypeCode === 124 || ModuleViewTypeCode === 125 || ModuleViewTypeCode === 126 
           || (ModuleViewTypeCode === 88 && 
           ProductRequestObject.DealMethodCode === 3 && 
-          ProductRequestObject.RegionCode === 217)" style="vertical-align: top; color: red;">*</span>
+          ProductRequestObject.RegionCode === 217 ) || ModuleViewTypeCode === 89"
+            style="vertical-align: top; color: red;">*</span>
           <span class="table-cell-Lable">{{ExpertPersonLabel}}</span>
           <app-ng-select-virtual-scroll style="display: inline-block;width: 40%;" (Open)="onExpertOpen()"
             [NgSelectParams]="ExpertParams" [Items]="ExpertItems" (selectedChange)="onChangeExpert($event)"
-            [Disabled]="!ExpertIsEditable">
+            [Disabled]="!ExpertIsEditable" [CheckValidate]="ExpertCheckValidate">
           </app-ng-select-virtual-scroll>
         </td>
         <td *ngIf="IsUpdateBefore" style="width: 50%;text-align: right">
@@ -769,7 +797,7 @@
         </td>
       </tr>
     </table>
-    <table *ngIf="IsShowContractContent" style="width: 100%;margin-top: 5px;">
+    <table *ngIf="false" style="width: 100%;margin-top: 5px;">
       <tr>
         <td style="width: 10%">
           <span class="table-cell-Lable">مفاد قرارداد</span>
@@ -802,7 +830,6 @@
       </div>
     </div>
   </fieldset>
-
   <fieldset *ngIf="IsShowContractContentfor222" style="display: inherit;min-height: 20px;margin-top: 2px;"
     class="feild-set">
     <table style="width: 100%;">
@@ -1447,6 +1474,31 @@
       </tr>
     </table>
   </fieldset>
+  <fieldset *ngIf="HavePDFSignersInfo" style="display: inherit;min-height: 38px;margin-top: 8px ;padding-left: 235px;"
+    class="feild-set">
+    <table style="width: 100%;">
+      <tr>
+        <td width="50%" style="float: right;color: red;margin-top: 5px;">
+          <span>کاربر گرامی صورتجلسه کمیسیون توسط شما امضای دیجیتال نشده است لطفا نسبت به امضای صورتجلسه اقدام نمایید
+          </span>
+        </td>
+      </tr>
+    </table>
+  </fieldset>
+  <fieldset *ngIf="HaveUpdateTenderDoc" style="display: inherit;min-height: 38px;margin-top: 2px;padding-left: 700px ;"
+    class="feild-set">
+    <table style="width: 100%;">
+      <tr>
+        <td width="100%">
+          <app-radio-box-component [Mode]="'Dual'" [Params]="TDRadioTypes" [Display]="'inline'" [Bordered]="false"
+            [DefaultSelected]='IsUpdateTenderDoc ? IsUpdateTenderDoc : false'
+            [Title]="'آیا نیاز به اصلاح مفاد اسناد مناقصه می باشد؟'" [QuestionStyle]="true" [Title_Width]="120"
+            (SelectedOption)="IsUpdateTenderDocRedioClick($event)">
+          </app-radio-box-component>
+        </td>
+      </tr>
+    </table>
+  </fieldset>
   <app-radio-box-component *ngIf="ShowMCSPanel" [Params]="MCSRadioTypes" [Display]="'inline'" [Bordered]="true"
     [Mode]="'Box'" [Disabled]="!HaveMutualContract || ShowQuestion"
     [DefaultSelected]='MutualContractStatus ? MutualContractStatus : 1' [Title]="'وضعیت قرارداد منعقده'"
@@ -1479,10 +1531,15 @@
       <img width="15px" height="15px" src="assets/Icons/SigneDoc.png" />
       امضای صورتجلسه
     </button>
-    <button *ngIf="HaveArticle18DigitalSign" (click)="Article18DigitalSign()" id="btnTenderRep"
+    <button *ngIf="HaveArticle18DigitalSign" (click)="ChooseArticle18Type()" id="btnTenderRep"
       class="btn btn-primary btnGreen">
       <img width="15px" height="15px" src="assets/Icons/SigneDoc.png" />
       امضای ماده 18
+    </button>
+    <button *ngIf="HasAdequacyDoc" (click)="AdequacyDocDigitalSign()" id="btnTenderRep"
+      class="btn btn-primary btnGreen">
+      <img width="15px" height="15px" src="assets/Icons/SigneDoc.png" />
+      امضای نامه کفایت اسناد
     </button>
     <!-- RFC 52131 -->
     <button *ngIf="CommitionSubjectChange" id="btnClose" class="btn btn-primary btnGreen"
@@ -1495,6 +1552,11 @@
       <img width="15px" height="15px" src="assets/Icons/add.png" />
       {{HasCreateContractBtnText}}
     </button>
+    <button *ngIf="HasEditContractInfoBtn" (click)="onOpenUpdateContractLimited()" id="btn2"
+      class="btn btn-primary btnGreen" [disabled]="DisabledEditContractInfoBtn">
+      <img width="15px" height="15px" src="assets/Icons/update.png" />
+      اصلاح قراداد
+    </button>
     <button *ngIf="VirtualGroupModuleTypeDisplay" [disabled]="false" class="btn btn-primary btnGreen"
       (click)="onVirtualModuleTypeClick()">
       <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
@@ -1505,7 +1567,10 @@
       <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
       {{RequestSuggestionBtnText}}
     </button>
-
+    <button (click)="OnshowhistorydetailClick()" id="showhistorydetail" class="btn btn-primary btnGreen">
+      <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
+      مشاهده ریز اصلاحات
+    </button>
     <button *ngIf="HaveCompleteInfo" [disabled]="IsDisable || !IsEditConfirm" id="btnShowRequestDetailsPage"
       class="btn btn-primary btnGreen" (click)="btnShowReqDetailsClick()">
       <img width="15px" height="15px" src="assets/Icons/Suggestion.png" />
@@ -1619,6 +1684,10 @@
   <img width="16px" height="16px" [src]="row.IsValidity ? 'assets/Icons/TrueCheckBox.png':'assets/Icons/uncheck.png'" />
 </ng-template>
 
+<ng-template #IsReturn let-row>
+  <img width="16px" height="16px" [src]="!row.IsReturn ? 'assets/Icons/TrueCheckBox.png':'assets/Icons/uncheck.png'" />
+</ng-template>
+
 <ng-template #UploadArchive let-row>
   <img [ngClass]="'img-def'" style="cursor: pointer;" width="16px" height="16px" src="assets/Icons/TechnicalArchive.png"
     (click)="(row.ReceiveDocID > 0 && !IsNew && 
@@ -1639,5 +1708,6 @@
   [MainMaxwidthPixel]="MainMaxwidthPixel" [minHeightPixel]="MinHeightPixel"
   (PopupOutPutParam)="PopUpType ==='message-box' ? MessageBoxAction($event) : getOutPutParam($event)"
   (popupclosed)="PopUpType === 'app-product-request-page-proposal' ?  popupProposalClosed($event) : popupclosed($event)"
-  [MainMinwidthPixel]="PopUpType === 'message-box' ? '' : OverMainMinwidthPixel">
+  [MainMinwidthPixel]="PopUpType === 'message-box' ? '' : OverMainMinwidthPixel"
+  [PixelHeight]="PixelHeight ? PixelHeight : ''">
 </app-over-popup>

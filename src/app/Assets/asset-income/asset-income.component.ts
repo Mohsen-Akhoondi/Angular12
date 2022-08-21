@@ -2,7 +2,7 @@ import { Component, OnInit, EventEmitter, Output, Input } from '@angular/core';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { Router, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-asset-income',
   templateUrl: './asset-income.component.html',
@@ -23,7 +23,7 @@ export class AssetIncomeComponent implements OnInit {
     IsDisabled: false,
     Required: true
   };
-  AssetParams  = {
+  AssetParams = {
     bindLabelProp: 'AssetCodeName',
     bindValueProp: 'AssetID',
     placeholder: '',
@@ -43,7 +43,7 @@ export class AssetIncomeComponent implements OnInit {
   AssetIncomeTypeItems;
   AssetIncomeName;
   PlateNo;
-  AssetIncomeTypeParams  = {
+  AssetIncomeTypeParams = {
     bindLabelProp: 'AssetIncomeTypeName',
     bindValueProp: 'AssetIncomeTypeCode',
     placeholder: '',
@@ -68,14 +68,14 @@ export class AssetIncomeComponent implements OnInit {
   ModuleCode;
   AssetIncomeObj;
   constructor(private RegionList: RegionListService,
-              private ProductRequest: ProductRequestService,
-              private RefreshPersonItems: RefreshServices,
-              private route: ActivatedRoute
-             ) {
-               this.route.params.subscribe(params => {
-              this.ModuleCode = +params['ModuleCode'];
-            });
- }
+    private ProductRequest: ProductRequestService,
+    private RefreshPersonItems: RefreshServices,
+    private route: ActivatedRoute
+  ) {
+    this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
+  }
 
   ngOnInit() {
     this.RegionList.GetRegionList(this.ModuleCode, true).subscribe((res: any) => {
@@ -85,21 +85,21 @@ export class AssetIncomeComponent implements OnInit {
       this.AssetIncomeTypeItems = res;
     });
     if (this.InputParam.Mode === 'EditMode') {
-    this.ProductRequest.GetAssetIncome(this.InputParam.AssetIncomeID).subscribe((res: any) => {
-      this.AssetIncomeObj = res;
-      this.RegionParams.selectedObject = this.InputParam.RegionCode;
-      this.ProductRequest.GetAssetIncomeByRegionCode(this.RegionParams.selectedObject).subscribe((res: any) => {
-        this.AssetItems = res;
-        this.AssetParams.selectedObject = this.AssetIncomeObj.AssetID;
+      this.ProductRequest.GetAssetIncome(this.InputParam.AssetIncomeID).subscribe((res: any) => {
+        this.AssetIncomeObj = res;
+        this.RegionParams.selectedObject = this.InputParam.RegionCode;
+        this.ProductRequest.GetAssetIncomeByRegionCode(this.RegionParams.selectedObject).subscribe((res: any) => {
+          this.AssetItems = res;
+          this.AssetParams.selectedObject = this.AssetIncomeObj.AssetID;
+        });
+        this.PlateNo = this.AssetIncomeObj.PlateNo;
+        this.AssetIncomeTypeParams.selectedObject = this.AssetIncomeObj.AssetIncomeTypeCode;
+        this.AssetIncomeName = this.AssetIncomeObj.AssetIncomeName;
+        this.Area = this.AssetIncomeObj.Area;
+        this.Position = this.AssetIncomeObj.Position;
+        this.Note = this.AssetIncomeObj.Note;
       });
-      this.PlateNo = this.AssetIncomeObj.PlateNo;
-      this.AssetIncomeTypeParams.selectedObject = this.AssetIncomeObj.AssetIncomeTypeCode;
-      this.AssetIncomeName = this.AssetIncomeObj.AssetIncomeName;
-      this.Area = this.AssetIncomeObj.Area;
-      this.Position = this.AssetIncomeObj.Position;
-      this.Note = this.AssetIncomeObj.Note;
-    });
-  }
+    }
   }
 
   closeModal() {
@@ -120,32 +120,32 @@ export class AssetIncomeComponent implements OnInit {
         ValidateForm = false;
       }
     });
-    ValidateForm =  ValidateForm && this.Area && this.PlateNo;
+    ValidateForm = ValidateForm && this.Area && this.PlateNo;
     if (ValidateForm) {
       // tslint:disable-next-line:radix
       if (parseInt(this.Area.length) > 6) {
         this.ShowMessageBoxWithOkBtn('مساحت حداکثر 6 رقم صحیح باید داشته باشد');
         return;
       }
-     const AssetIncomeObj = {
-      AssetIncomeID : this.AssetIncomeObj && this.AssetIncomeObj.AssetIncomeID ? this.AssetIncomeObj.AssetIncomeID : -1,
-      AssetID: this.AssetParams.selectedObject,
-      AssetIncomeTypeCode: this.AssetIncomeTypeParams.selectedObject,
-      Area: parseFloat(this.Area),
-      Position: this.Position,
-      Note: this.Note,
-      PlateNo: this.PlateNo,
-      AssetIncomeName: this.AssetIncomeName
-     };
-     this.ProductRequest.SaveAssetIncome(AssetIncomeObj, this.ModuleCode).subscribe((res: any) => {
-      this.Output.emit(true);
-      this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
-       },
-            err => {
-              if (!err.error.Message.includes('|')) {
-                this.ShowMessageBoxWithOkBtn('ثبت با شکست مواجه شد');
-              }
-    });
+      const AssetIncomeObj = {
+        AssetIncomeID: this.AssetIncomeObj && this.AssetIncomeObj.AssetIncomeID ? this.AssetIncomeObj.AssetIncomeID : -1,
+        AssetID: this.AssetParams.selectedObject,
+        AssetIncomeTypeCode: this.AssetIncomeTypeParams.selectedObject,
+        Area: parseFloat(this.Area),
+        Position: this.Position,
+        Note: this.Note,
+        PlateNo: this.PlateNo,
+        AssetIncomeName: this.AssetIncomeName
+      };
+      this.ProductRequest.SaveAssetIncome(AssetIncomeObj, this.ModuleCode).subscribe((res: any) => {
+        this.Output.emit(true);
+        this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
+      },
+        err => {
+          if (!err.error.Message.includes('|')) {
+            this.ShowMessageBoxWithOkBtn('ثبت با شکست مواجه شد');
+          }
+        });
     } else {
       this.ShowMessageBoxWithOkBtn('خواهشمند است ابتدا فیلد های مشخص شده را تکمیل فرمایید');
     }

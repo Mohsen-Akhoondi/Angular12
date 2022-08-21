@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UserSettingsService } from 'src/app/Services/BaseService/UserSettingsService';
 import { Router } from '@angular/router';
-declare var jquery: any;
 declare var $: any;
 @Component({
   selector: 'app-sidebar',

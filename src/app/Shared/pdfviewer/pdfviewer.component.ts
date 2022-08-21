@@ -44,6 +44,7 @@ export class PDFViewerComponent implements OnInit {
     private ComonService: CommonService) { }
   IsDown = false;
   IsFinal = false;
+  IsAutoGenerate = false;
 
   ngOnInit() {
     this.DastineisNotInstalled = !Dastine.isInstalled;
@@ -58,9 +59,19 @@ export class PDFViewerComponent implements OnInit {
       this.DocTypeCode = 1047;
     } else if (!isUndefined(this.PDFParam.IsTrafficRep) && this.PDFParam.IsTrafficRep !== null && this.PDFParam.IsTrafficRep) {
       this.DocTypeCode = 1107;
+    } else if (!isUndefined(this.PDFParam.IsAdequacy) && this.PDFParam.IsAdequacy !== null && this.PDFParam.IsAdequacy) {
+      this.DocTypeCode = 1167;
+    } else if (!isUndefined(this.PDFParam.IsDisArticle18) && this.PDFParam.IsDisArticle18 !== null && this.PDFParam.IsDisArticle18) {
+      this.DocTypeCode = 1228;
     } else {
       this.DocTypeCode = 601;
     }
+    if (this.DocTypeCode && !isUndefined(this.DocTypeCode)) {
+      this.ComonService.IsAutoGenerate(this.DocTypeCode).subscribe(res => {
+        this.IsAutoGenerate = res;
+      });
+    }
+
   }
   ShowMessageBoxWithOkBtn(message, LeftPosition = 530) {
     this.isClicked = true;
@@ -155,9 +166,15 @@ export class PDFViewerComponent implements OnInit {
         if (this.PopUpType === 'message-box' && this.DocTypeCode === 682) {
           // tslint:disable-next-line:max-line-length
           this.ShowMessageBoxWithYesNoBtn('اینجانب فایل چک را مشاهده کردم و صحت اطلاعات این فایل را جهت امضای الکترونیک تایید می نمایم. آیامورد قبول است ؟');
-        } else if (this.PopUpType === 'message-box' && this.DocTypeCode === 1047) {
+        } else if (this.DocTypeCode === 1047) {
           // tslint:disable-next-line: max-line-length
-          this.ShowMessageBoxWithYesNoBtn('اینجانب فایل ابلغ ماده 18 را مشاهده کردم و صحت اطلاعات این فایل را جهت امضای الکترونیک تایید می نمایم. آیامورد قبول است ؟');
+          this.ShowMessageBoxWithYesNoBtn('اینجانب فایل ابلاغ ماده 18 را مشاهده کردم و صحت اطلاعات این فایل را جهت امضای الکترونیک تایید می نمایم. آیامورد قبول است ؟');
+        } else if (this.DocTypeCode === 1167) {
+          // tslint:disable-next-line: max-line-length
+          this.ShowMessageBoxWithYesNoBtn('اینجانب فایل نامه کفایت اسناد را مشاهده کردم و صحت اطلاعات این فایل را جهت امضای الکترونیک تایید می نمایم. آیامورد قبول است ؟');
+        } else if (this.DocTypeCode === 1228) {
+          // tslint:disable-next-line: max-line-length
+          this.ShowMessageBoxWithYesNoBtn('اینجانب فایل عدم تایید ماده 18 را مشاهده کردم و صحت اطلاعات این فایل را جهت امضای الکترونیک تایید می نمایم. آیامورد قبول است ؟');
         } else {
           // tslint:disable-next-line:max-line-length
           this.ShowMessageBoxWithYesNoBtn('اینجانب فایل حاوی صورتجلسه کمیسیون را مشاهده کردم و صحت اطلاعات این فایل را جهت امضای الکترونیک تایید می نمایم. آیامورد قبول است ؟');
@@ -232,7 +249,8 @@ export class PDFViewerComponent implements OnInit {
               this.ShowMessageBoxWithOkBtn('پیکر بندی دستینه با مشکل مواجه گردید با راهبر تماس حاصل فرمایید');
               return;
             }
-            this.ProductRequest.GetPDFDigestMinutesReport(this.PDFParam.OrderCommitionID,
+            this.ProductRequest.GetPDFDigestMinutesReport(this.DocTypeCode === 1167 ? this.PDFParam.CostFactorID
+              : this.PDFParam.OrderCommitionID,
               SelectedCertificate,
               this.DocTypeCode)
               .subscribe((Res: any) => {
@@ -254,7 +272,8 @@ export class PDFViewerComponent implements OnInit {
                       return;
                     }
                     this.ProductRequest.SignedPDFMinutesReport(
-                      this.PDFParam.OrderCommitionID,
+                      this.DocTypeCode === 1167 ? this.PDFParam.CostFactorID
+                        : this.PDFParam.OrderCommitionID,
                       SelectedCertificate,
                       SignRes,
                       this.DocTypeCode)
@@ -412,7 +431,7 @@ export class PDFViewerComponent implements OnInit {
     FileSaver.saveAs(file);
   }
   onDownloadDastineApp() {
-    this.DealsHall.DownloadHelpArchiveFile(747).subscribe(res => {
+    this.DealsHall.DownloadHelpArchiveFile(747, '.zip').subscribe(res => {
       this.CommonService.downloadFile(res);
     });
   }
@@ -430,13 +449,13 @@ export class PDFViewerComponent implements OnInit {
   }
 
   OnDelete() {
-    let archiveDetailCode = 0;
-    if (this.DocTypeCode === 1047) {
-      archiveDetailCode = this.PDFParam.OrderCommitionID;
+    let ObjectID = 0;
+    if (this.DocTypeCode === 1047 || this.DocTypeCode === 1228) {
+      ObjectID = this.PDFParam.OrderCommitionID;
     } else {
-      archiveDetailCode = this.PDFParam.CostFactorID;
+      ObjectID = this.PDFParam.CostFactorID;
     }
-    this.ComonService.DeleteArchiveDetailDocuments(archiveDetailCode,
+    this.ComonService.DeleteArchiveDetailDocuments(ObjectID,
       this.DocTypeCode,
       2730).subscribe(res => {
         this.BtnClickedName = 'DelDoc';

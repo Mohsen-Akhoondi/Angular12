@@ -1,5 +1,11 @@
 <div id="container" class="row" style="clear: both">
   <div id="content" style="height: 90%;width: 100%;">
+    <div class="main-form-body" style="margin: 5px; text-align: right;" [style.height.%]="10">
+      <span style="vertical-align: super" class="table-cell-Lable">سال مالی</span>
+      <app-ng-select-virtual-scroll style="display: inline-block;width: 20%;" [NgSelectParams]="FinYearParams"
+        [Items]="FinYearItems"  (selectedChange)="onChangeFinYearObj($event)">
+      </app-ng-select-virtual-scroll>
+    </div>
     <div class="main-form-body" style="margin: 5px;" [style.height.%]="mainBodyHeight">
       <div style="padding-bottom: 5px;" [style.height.%]="gridHeight">
         <div id="div1" class="box-dev main-div" style="height: 100%;">

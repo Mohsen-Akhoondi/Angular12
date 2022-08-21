@@ -1,9 +1,7 @@
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ModuleService } from 'src/app/Services/BaseService/ModuleService';
-import { GridOptions } from 'ag-grid-community';
-import { of, Observable, forkJoin } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Input, Component, OnInit, Output, EventEmitter, ViewChild, TemplateRef } from '@angular/core';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';

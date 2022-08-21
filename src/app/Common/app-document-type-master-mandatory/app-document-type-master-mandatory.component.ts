@@ -1,9 +1,6 @@
-import { ModuleService } from 'src/app/Services/BaseService/ModuleService';
-import { GridOptions } from 'ag-grid-community';
-import { of, Observable, forkJoin } from 'rxjs';
+import { Observable } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Input, Component, OnInit, Output, EventEmitter, ViewChild, TemplateRef } from '@angular/core';
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
+import { Component, OnInit, Output, EventEmitter, ViewChild, TemplateRef } from '@angular/core';
 import { CommonService } from 'src/app/Services/CommonService/CommonService';
 import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
 import { DealMethodServices } from 'src/app/Services/DealMethodService/DealMethodService';
@@ -17,7 +14,6 @@ import { RegionListService } from 'src/app/Services/BaseService/RegionListServic
 import { WorkflowService } from 'src/app/Services/WorkFlowService/WorkflowServices';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
 import { PriceListService } from 'src/app/Services/BaseService/PriceListService';
-import { data, param } from 'jquery';
 declare var jquery: any;
 declare var $: any;
 @Component({
@@ -192,7 +188,7 @@ export class DocumentTypeMasterMandatoryComponent implements OnInit {
     this.sub = this.Route.params.subscribe(params => {
       this.ModuleCode = +params['ModuleCode'];
     });
-    this.RegionList = this.Region.GetRegionList(this.ModuleCode ,false, false);
+    this.RegionList = this.Region.GetRegionList(this.ModuleCode, false, false);
   }
   ngOnInit() {
     this.NgSelectPRTypeItems = [

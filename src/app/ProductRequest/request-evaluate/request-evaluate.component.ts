@@ -2,15 +2,11 @@ import { Component, OnInit, ViewChild, TemplateRef, Input, Output, EventEmitter 
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { CommonServices } from 'src/app/Services/BaseService/CommonServices';
-import { of, forkJoin } from 'rxjs';
-import { JalaliDatepickerComponent } from 'src/app/Shared/jalali-datepicker/jalali-datepicker.component';
+import { forkJoin } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { isUndefined } from 'util';
-declare var jquery: any;
-declare var $: any;
 
 @Component({
   selector: 'app-request-evaluate',
@@ -599,11 +595,11 @@ export class RequestEvaluateComponent implements OnInit {
       {
         headerName: 'حقیقی / حقوقی',
         field: 'PersonTypeName',
-          cellEditorFramework: NgSelectVirtualScrollComponent,
-            cellEditorParams: {
-              Params: this.PersonTypeParams,
-              Items: this.PersonTypeList,
-              Owner: this
+        cellEditorFramework: NgSelectVirtualScrollComponent,
+        cellEditorParams: {
+          Params: this.PersonTypeParams,
+          Items: this.PersonTypeList,
+          Owner: this
         },
         cellRenderer: 'SeRender',
         valueFormatter: function currencyFormatter(params) {

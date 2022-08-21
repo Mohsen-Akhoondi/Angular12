@@ -2,13 +2,10 @@ import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
-import { single } from 'rxjs/operators';
-import { GridOptions } from 'ag-grid-community';
 import { of } from 'rxjs';
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
+import { NgSelectConfig } from 'src/app/Shared/ng-select';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-declare var jquery: any;
-declare var $: any;
+
 
 @Component({
   selector: 'app-researcher-product-request-list',
@@ -121,23 +118,23 @@ export class ResearcherProductRequestListComponent implements OnInit {
     if (this.selectedRow) {
       if (this.ModuleCode === 2895) {
         if (BtnName === 'insert') {
-           this.type = 'product-request-page';
-           this.HaveHeader = true;
-           this.btnclicked = true;
-           this.startLeftPosition = 20;
-           this.startTopPosition = 5;
-           this.HaveMaxBtn = true;
-           this.HeightPercentWithMaxBtn = 97;
-           this.PercentWidth = 90;
-           this.MainMaxwidthPixel = 2000;
-           this.MinHeightPixel = 645;
-           this.paramObj = {
-              Mode: 'InsertMode',
-              Subject: this.selectedRow.data.Title,
-              CostFactorID: -1,
-              ResearcherID: this.selectedRow.data.Id,
-           };
-           return;
+          this.type = 'product-request-page';
+          this.HaveHeader = true;
+          this.btnclicked = true;
+          this.startLeftPosition = 20;
+          this.startTopPosition = 5;
+          this.HaveMaxBtn = true;
+          this.HeightPercentWithMaxBtn = 97;
+          this.PercentWidth = 90;
+          this.MainMaxwidthPixel = 2000;
+          this.MinHeightPixel = 645;
+          this.paramObj = {
+            Mode: 'InsertMode',
+            Subject: this.selectedRow.data.Title,
+            CostFactorID: -1,
+            ResearcherID: this.selectedRow.data.Id,
+          };
+          return;
         }
       } else if (this.ModuleCode === 2934) {
         if (BtnName === 'insert') {
@@ -152,10 +149,10 @@ export class ResearcherProductRequestListComponent implements OnInit {
           this.MainMaxwidthPixel = 2000;
           this.MinHeightPixel = 645;
           this.paramObj = {
-             Mode: 'InsertMode',
-             Subject: this.selectedRow.data.Title,
-             CostFactorID: -1,
-             ResearcherID: this.selectedRow.data.Id,
+            Mode: 'InsertMode',
+            Subject: this.selectedRow.data.Title,
+            CostFactorID: -1,
+            ResearcherID: this.selectedRow.data.Id,
           };
           return;
         }

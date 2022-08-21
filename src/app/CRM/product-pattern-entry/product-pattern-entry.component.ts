@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Console } from 'console';
 import { ProductPatternService } from 'src/app/Services/CRM/ProductPatternService';
 import { ActivatedRoute } from '@angular/router';
 
@@ -39,6 +38,35 @@ export class ProductPatternEntryComponent implements OnInit {
   SelectedID: any;
   IsEditable: true;
   Editable = true;
+  CostCenter=false;
+ 
+
+  selectedCostCenter;
+  CostCenterItems;
+  CostCenterParams = {
+    bindLabelProp: 'CostCenterName',
+    bindValueProp: 'CostCenterId',
+    placeholder: '',
+    MinWidth: '155px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false
+  };
+
+  SubCostCenterItems;
+  SubCostCenterParams = {
+    bindLabelProp: 'SubCostCenterName',
+    bindValueProp: 'SubCostCenterId',
+    placeholder: '',
+    MinWidth: '155px',
+    selectedObject: null,
+    loading: false,
+    IsVirtualScroll: false,
+    IsDisabled: false,
+    Required: true
+  };
+  hasChildren: any;
   constructor(
     private ProductPattern: ProductPatternService,
     private route: ActivatedRoute
@@ -49,27 +77,54 @@ export class ProductPatternEntryComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.ProductPattern.GetCostCenterByRegion(200).subscribe(res => {
+      this.CostCenterItems = res;
 
+    });
     if (this.InputParam.Mode === 'EditMode') {
 
-      this.ParentProductPatternID=this.InputParam.ParentProductPatternID;
-     
+      this.ParentProductPatternID = this.InputParam.ParentProductPatternID;
+      this.hasChildren=this.InputParam.hasChildren;
       this.ProductPattern.GetProductPatternEntry(this.InputParam.ProductPatternID).subscribe(res => {
         this.ProductPatternCode = res.ProductPatternCode;
         this.ProductPatternName = res.ProductPatternName;
         this.ParentProductPatternID=res.ParentProductPatternID;
         this.IsEditable=true;
-     
-      });
 
+   if(this.hasChildren){
+          this.CostCenter=true;
+        }else
+        {
+          this.CostCenter=false;
+        }
+
+     
+        this.CostCenterParams.selectedObject=res.CostCenterID; 
+        this.ProductPattern.GetSubCostCenterByCostCenter(res.CostCenterID).subscribe(ress => {
+
+          this.SubCostCenterItems = ress;
+      
+        });
+        this.SubCostCenterParams.selectedObject=res.SubCostCenterID; 
+  
+
+      });
+     
     }
 
   }
 
-
+  onChangeCostCenterObj(newObj) {
+    this.selectedCostCenter = newObj;
+    this.SubCostCenterParams.selectedObject = null;
+    this.ProductPattern.GetSubCostCenterByCostCenter(this.selectedCostCenter).subscribe(res => {
+      this.SubCostCenterItems = res;
+    });
+    
+  }
 
   RedioClick(SameLevel) {
-    this.SameLevel = SameLevel;
+    this.SameLevel = SameLevel; 
   }
   insert() {
     this.ProductPatternID = this.InputParam.ProductPatternID;
@@ -77,7 +132,7 @@ export class ProductPatternEntryComponent implements OnInit {
 
     this.CheckValidate = true;
     let ValidateForm = true;
-   
+
     if (ValidateForm) {
       const ProductPattern = {
         ProductPatternCode: this.ProductPatternCode,
@@ -85,21 +140,21 @@ export class ProductPatternEntryComponent implements OnInit {
         RegionGroupCode: this.RegionGroupCode,
         SameLevel: this.SameLevel,
         ParentProductPatternID: this.ParentProductPatternID,
+        SubCostCenterID:this.SubCostCenterParams.selectedObject,
+       
+        
 
       }
 
-
-
-
       if (this.InputParam.Mode === 'EditMode') {
-       
+    
         this.ParentProductPatternID = this.InputParam.ParentProductPatternID;
         this.RegionGroupCode = this.InputParam.RegionGroupCode;
-        
+
         this.ProductPattern.UpdateProductPattern(ProductPattern, this.ProductPatternID, this.ModuleCode).subscribe((res: any) => {
           this.ShowMessageBoxWithOkBtn('اصلاح با موفقیت انجام شد');
           this.OutPutParam.emit(true);
-    
+        
         });
       }
       else {
@@ -109,7 +164,7 @@ export class ProductPatternEntryComponent implements OnInit {
           this.RegionGroupCode = this.InputParam.RegionGroupCode;
           this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
           this.OutPutParam.emit(true);
-    
+
         });
       }
 

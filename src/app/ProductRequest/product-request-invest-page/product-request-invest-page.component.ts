@@ -1,7 +1,9 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
-import { of } from 'rxjs';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { ActorService } from 'src/app/Services/BaseService/ActorService';
+import { NgSelectCellEditorComponent } from 'src/app/Shared/NgSelectCellEditor/ng-select-cell-editor.component';
+import { ActivatedRoute } from '@angular/router';
+
 @Component({
   selector: 'app-product-request-invest-page',
   templateUrl: './product-request-invest-page.component.html',
@@ -17,6 +19,7 @@ export class ProductRequestInvestPageComponent implements OnInit {
   btnclicked = false;
   ProductRequestNo;
   BaseShareValue;
+  CopartnerShareValue;
   BasicOperationPeriod;
   ProductRequestDate;
   ContractorPageCount;
@@ -28,6 +31,8 @@ export class ProductRequestInvestPageComponent implements OnInit {
   UseDuration;
   InvestActorID = null;
   Percent;
+  Area;
+  VoucherArea;
   SalesCommition;
   ProductRequestInvestID;
   HaveHeader;
@@ -35,20 +40,12 @@ export class ProductRequestInvestPageComponent implements OnInit {
   MonthlyRentAmount;
   startLeftPosition;
   startTopPosition;
+  columnDef;
+  rowsData: any = [];
+  gridApi: any;
   InvestTypeParams = {
     bindLabelProp: 'InvestTypeName',
     bindValueProp: 'InvestTypeCode',
-    placeholder: '',
-    selectedObject: null,
-    loading: false,
-    IsVirtualScroll: false,
-    IsDisabled: false,
-    Required: true
-  };
-  InvestUsageTypeItems;
-  InvestUsageTypeParams = {
-    bindLabelProp: 'InvestUsageTypeName',
-    bindValueProp: 'InvestUsageTypeCode',
     placeholder: '',
     selectedObject: null,
     loading: false,
@@ -93,14 +90,76 @@ export class ProductRequestInvestPageComponent implements OnInit {
   InvestorFound;
   InvestorFoundAmount;
   TechnicalSpec;
-  rent: boolean = false;
-  period: boolean = false;
-  percent : boolean =false;
-
+  HasRent: boolean = false;
+  HasPeriod: boolean = false;
+  HasPercent: boolean = false;
+  HasInvestor: boolean = false;
+  HasVoucher: boolean = false;
+  HasArea: boolean = false;
+  edit: boolean = false;
+  ModuleCode;
+  IsInvestArchive = false;
+  
   constructor(private ProductRequest: ProductRequestService,
-    private Actor: ActorService) { }
+    private route: ActivatedRoute,
+    private Actor: ActorService) {
+    this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
+    this.columnDef = [
+      {
+        headerName: 'ردیف',
+        field: 'ItemNo',
+        width: 70,
+        resizable: true
+      },
+      {
+        headerName: 'نوع کاربری',
+        field: 'InvestUsageTypeName',
+        width: 200,
+        cellEditorFramework: NgSelectCellEditorComponent,
+        cellEditorParams: {
+          Items: this.ProductRequest.GetInvestUsageType(),
+          bindLabelProp: 'InvestUsageTypeName',
+          bindValueProp: 'InvestUsageTypeCode',
+        },
+        valueSetter: (params) => {
+          if (params.newValue) {
+            params.data.InvestUsageTypeName = params.newValue.InvestUsageTypeName;
+            params.data.InvestUsageTypeCode = params.newValue.InvestUsageTypeCode;
+            params.data.Rank = '';
+            return true;
+          }
+        },
+        cellRenderer: 'SeRender',
+        editable: true,
+        resizable: true,
+      },
+
+      {
+        headerName: 'تعداد',
+        field: 'QTY',
+        width: 150,
+        resizable: true,
+        editable: (params) => {
+          if (params.data.InvestUsageTypeCode === 1 || params.data.InvestUsageTypeCode === 2 ||
+            params.data.InvestUsageTypeCode === 3 || params.data.InvestUsageTypeCode === 9 ||
+            params.data.InvestUsageTypeCode === 10 || params.data.InvestUsageTypeCode === 12) {
+
+            return true;
+
+          } else {
+
+            return false;
+
+          }
+        },
+      },
+    ]
+  }
 
   ngOnInit() {
+    this.IsInvestArchive = this.PopupParam.IsInvestArchive?true : false;
     this.ProductRequestObject = this.PopupParam.ProductRequestObject;
     this.ContractObject = this.ProductRequestObject.ContractObject;
     this.Subject = this.ProductRequestObject.Subject;
@@ -108,17 +167,16 @@ export class ProductRequestInvestPageComponent implements OnInit {
     this.ProductRequestNo = this.ProductRequestObject.ProductRequestNo;
     this.BaseShareValue = this.ProductRequestObject.BaseShareValue;
     this.BasicOperationPeriod = this.ProductRequestObject.BasicOperationPeriod;
-    this.ProductRequest.GetInvestType(true).subscribe(res => {
+    this.ProductRequest.GetInvestType(true, null).subscribe(res => {
       this.InvestTypeItems = res;
     });
-    this.ProductRequest.GetInvestUsageType().subscribe(ress => {
-      this.InvestUsageTypeItems = ress;
+    this.ProductRequest.GetRequestInvestUsageType(this.ProductRequestObject.CostFactorID).subscribe(ress => {
+      this.rowsData = ress;
     });
     this.ProductRequest.GetProductRequestInvest(this.ProductRequestObject.CostFactorID).subscribe(res => {
       if (res) {
         this.ProductRequestInvestID = res.ProductRequestInvestID;
         this.InvestTypeParams.selectedObject = res.InvestTypeCode;
-        this.InvestUsageTypeParams.selectedObject = res.InvestUsageTypeCode;
         this.UseDuration = res.UseDuration;
         this.InvestActorID = res.ActorID;
         this.SalesCommition = res.SalesCommition;
@@ -126,7 +184,9 @@ export class ProductRequestInvestPageComponent implements OnInit {
         this.IsPercentValue = res.IsPercentValue;
         this.ContractorType = res.ActorType;
         this.CommunicteDate = res.ShortCommunicteDate;
-        this.MunicipalityFound = res.MunicipalityFound;
+        if (this.ModuleCode !== 3034) {
+          this.MunicipalityFound = res.MunicipalityFound;
+        }
         this.MunicipalityFoundAmount = (res.MunicipalityFoundAmount && res.MunicipalityFoundAmount !== null) ? res.MunicipalityFoundAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '';
         this.InvestorFound = res.InvestorFound;
         this.InvestorFoundAmount = (res.InvestorFoundAmount && res.InvestorFoundAmount !== null) ? res.InvestorFoundAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '';
@@ -144,47 +204,63 @@ export class ProductRequestInvestPageComponent implements OnInit {
     });
   }
   onChangeInvestType(event) {
-    this.rent =false;
-    this.period =false;
-    this.percent =false;
+    this.HasRent = false;
+    this.HasPeriod = false;
+    this.HasPercent = false;
+    this.HasInvestor = false;
+    this.HasVoucher = false;
+    this.HasArea = false;
     switch (event) {
       case 4:
-        this.rent = true;
-        this.period = true;
-        this.percent =true;
+        this.HasRent = true;
+        this.HasPeriod = true;
+        this.HasPercent = true;
+        this.HasInvestor = true;
         break;
       case 5:
-        this.period = true;
-        this.percent =true;
+        this.HasPeriod = true;
+        this.HasPercent = true;
+        this.HasInvestor = true;
         break;
       case 3:
-        this.period = true;
-        this.percent =true;
+        this.HasPeriod = true;
+        this.HasPercent = true;
+        this.HasInvestor = true;
+        break;
       case 9:
-        this.rent = true;
-        this.period = true;
-        this.percent =true;
+        this.HasRent = true;
+        this.HasPeriod = true;
+        this.HasPercent = true;
+        this.HasInvestor = true;
+        break;
       case 8:
-        this.rent = true;
-        this.period = true;
-        this.percent =true;
+        this.HasRent = true;
+        this.HasPeriod = true;
+        this.HasPercent = true;
+        this.HasInvestor = true;
+        break;
       case 10:
-        this.period = true;
-        this.percent =true;
+        this.HasPeriod = true;
+        this.HasPercent = true;
+        this.HasInvestor = true;
+        break;
       case 12:
-        this.period = true;
-        this.percent =true;
+        this.HasPeriod = true;
+        this.HasPercent = true;
+        this.HasInvestor = true;
+        break;
       case 14:
-        this.period = true;
-        this.percent =true;
+        this.HasPeriod = true;
+        this.HasPercent = true;
+        this.HasInvestor = true;
+        this.HasVoucher = true;
+        this.HasArea = true;
         break;
       default:
         break;
     }
   }
-  onChangeInvestUsageType(Type) {
 
-  }
   rdoContractorTypeClick(Type) {
     this.ContractorType = Type;
     this.ContractorItems = [];
@@ -212,7 +288,9 @@ export class ProductRequestInvestPageComponent implements OnInit {
   }
   popupclosed() {
     this.btnclicked = false;
+    this.MunicipalityFound = this.MunicipalityFound;
   }
+
   Close() {
     this.Closed.emit(true);
   }
@@ -254,28 +332,33 @@ export class ProductRequestInvestPageComponent implements OnInit {
     this.CheckValidate = true;
     if (!this.InvestTypeParams.selectedObject ||
       this.InvestTypeParams.selectedObject === null ||
-      !this.InvestUsageTypeParams.selectedObject ||
-      this.InvestUsageTypeParams.selectedObject === null ||
       (!this.MunicipalityFound || this.MunicipalityFound === null) ||
       (!this.InvestorFound || this.InvestorFound === null)) {
       this.ShowMessageBoxWithOkBtn('فیلد های ستاره دار را پر نمایید');
       return;
     }
 
-    if(this.rent && (this.MonthlyRentAmount === null || this.BasicOperationPeriod === null))
-    {
-      this.ShowMessageBoxWithOkBtn('فیلد های ستاره دار را پر نمایید');
-      return;
-    }
-    
-    if(this.period && (this.MonthlyRentAmount === null))
-    {
+    if (this.HasRent && (this.MonthlyRentAmount === null || this.BasicOperationPeriod === null)) {
       this.ShowMessageBoxWithOkBtn('فیلد های ستاره دار را پر نمایید');
       return;
     }
 
-    if(this.percent && (this.Percent === null))
-    {
+    if (this.HasPeriod && (this.MonthlyRentAmount === null)) {
+      this.ShowMessageBoxWithOkBtn('فیلد های ستاره دار را پر نمایید');
+      return;
+    }
+
+    if (this.HasPercent && (this.Percent === null)) {
+      this.ShowMessageBoxWithOkBtn('فیلد های ستاره دار را پر نمایید');
+      return;
+    }
+
+    if (this.HasInvestor && (this.NgSelectContractorParams.selectedObject === null)) {
+      this.ShowMessageBoxWithOkBtn('فیلد های ستاره دار را پر نمایید');
+      this.CheckValidate = false;
+      return;
+    }
+    if ((this.HasArea && (this.Area === null)) || (this.HasVoucher && (this.VoucherArea === null))) {
       this.ShowMessageBoxWithOkBtn('فیلد های ستاره دار را پر نمایید');
       return;
     }
@@ -284,7 +367,6 @@ export class ProductRequestInvestPageComponent implements OnInit {
       ProductRequestInvestID: this.ProductRequestInvestID ? this.ProductRequestInvestID : -1,
       CostFactorID: this.ProductRequestObject.CostFactorID,
       InvestTypeCode: this.InvestTypeParams.selectedObject,
-      InvestUsageTypeCode: this.InvestUsageTypeParams.selectedObject,
       UseDuration: this.UseDuration,
       ActorID: this.NgSelectContractorParams.selectedObject,
       SalesCommition: this.SalesCommition,
@@ -298,9 +380,36 @@ export class ProductRequestInvestPageComponent implements OnInit {
       TechnicalSpec: this.TechnicalSpec,
       MonthlyRentAmount: this.MonthlyRentAmount,
       BaseShareValue: this.BaseShareValue,
-      BasicOperationPeriod: this.BasicOperationPeriod
+      BasicOperationPeriod: this.BasicOperationPeriod,
+      VoucherArea: this.VoucherArea ? this.VoucherArea : null,
+      Area: this.Area ? this.Area : null,
     };
-    this.ProductRequest.SaveProductRequestInvest(ProductRequestInvestObj).subscribe(
+
+
+    //   this.gridApi.forEachNode((item) => {
+    //     const obj = {
+    //       ContractPersonID: item.data.ContractPersonID ? item.data.ContractPersonID : -1,
+    //       ActorID: item.data.ActorID,
+    //       RoleID: item.data.RoleID,
+    //       ContractOrderItemID: null
+    //     };
+    //     ContractpersonList.push(obj);    
+    // });
+
+    const RequestInvestUsageTypeList = [];
+
+    this.gridApi.forEachNode((node) => {
+      const RequestInvestUsageType = {
+        ReguestInvestUsageTypeID: node.data.ReguestInvestUsageTypeID ? node.data.ReguestInvestUsageTypeID : -1,
+        QTY: node.data.QTY,
+        CostFactorID: this.ProductRequestObject.CostFactorID,
+        InvestUsageTypeCode: node.data.InvestUsageTypeCode,
+
+      };
+      RequestInvestUsageTypeList.push(RequestInvestUsageType);
+
+    });
+    this.ProductRequest.SaveProductRequestInvest(ProductRequestInvestObj, RequestInvestUsageTypeList).subscribe(
       res => {
         this.ShowMessageBoxWithOkBtn('ثبت با موفقيت انجام شد');
       },
@@ -327,6 +436,8 @@ export class ProductRequestInvestPageComponent implements OnInit {
   }
   BaseShareValueChange(event) {
     this.BaseShareValue = event;
+    this.CopartnerShareValue = 100 - this.BaseShareValue;
+
   }
   BasicOperationPeriodChange(event) {
     this.BasicOperationPeriod = event;
@@ -337,4 +448,11 @@ export class ProductRequestInvestPageComponent implements OnInit {
   InvestorFoundAmountChange(event) {
     this.InvestorFoundAmount = event;
   }
+
+  onGridReady(params: { api: any; }) {
+    this.gridApi = params.api;
+  }
+
+
+
 }

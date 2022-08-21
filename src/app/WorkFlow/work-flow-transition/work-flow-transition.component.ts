@@ -1,9 +1,9 @@
-import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { WorkFlowGraphService } from 'src/app/Services/WorkFlowService/WorkFlowGraphService';
-import { Graph, Layout, Edge, Node } from '@swimlane/ngx-graph';
-import { Router, ActivatedRoute } from '@angular/router';
-import * as $ from 'jquery';
+import { Router } from '@angular/router';
 import { isUndefined } from 'util';
+import { forkJoin } from 'rxjs';
+import * as html2pdf from 'html2pdf.js'
 
 @Component({
   selector: 'app-work-flow-transition',
@@ -14,10 +14,10 @@ import { isUndefined } from 'util';
 export class WorkFlowTransitionComponent implements OnInit {
   @Input() InputParam;
   @Input() PopupMaximized;
-  viewsize=[1100,520];
+  viewsize = [1100, 500];
   @Output() Closed: EventEmitter<any> = new EventEmitter<any>();
-  nodes: Node[];
-  links: Edge[];
+  nodes = [];
+  links = [];
   PopupParam;
   Note;
   WorkFlowTypeCode: any;
@@ -35,20 +35,21 @@ export class WorkFlowTransitionComponent implements OnInit {
   HoverNode = false;
   x;
   y;
-  falg= true;
+  falg = true;
   HaveMax = true;
-  constructor(private workFlowGraghService: WorkFlowGraphService, private router: Router,) {
+  constructor(private workFlowGraghService: WorkFlowGraphService,
+    private router: Router) {
   }
 
   ngOnInit() {
     this.WorkFlowTypeCode = this.InputParam.workFlowTypeCodeSelected;
 
-    this.workFlowGraghService.GetNodeList(this.WorkFlowTypeCode).subscribe(res => {
-      this.nodes = res;
-    });
-
-    this.workFlowGraghService.GetEdgeWorkFlow(this.WorkFlowTypeCode).subscribe(res => {
-      this.links = res;
+    forkJoin([
+      this.workFlowGraghService.GetNodeList(this.WorkFlowTypeCode),
+      this.workFlowGraghService.GetEdgeWorkFlow(this.WorkFlowTypeCode)
+    ]).subscribe(res => {
+      this.nodes = res[0];
+      this.links = res[1];
     });
 
   }
@@ -63,8 +64,8 @@ export class WorkFlowTransitionComponent implements OnInit {
     //   this.NodeHover(this.x, this.y);
     //   this.falg = false;
     // }   
-     
-    
+
+
   }
 
   mouseleave() {
@@ -91,8 +92,24 @@ export class WorkFlowTransitionComponent implements OnInit {
   ngOnChanges(changes): void {
 
     if (changes.PopupMaximized && !isUndefined(changes.PopupMaximized.currentValue)) {
-      this.viewsize = changes.PopupMaximized.currentValue ? [1356 ,580] : [1100 ,520];
-      
+      this.viewsize = changes.PopupMaximized.currentValue ? [1320, 550] : [1100, 500];
+
     }
+  }
+
+  Pdfdownload() {
+    //this.IsLoading.Show();
+    var element = document.getElementById('table');
+    var opt = {
+      margin: 0,
+      filename: 'output.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 5 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+    };
+    html2pdf().from(element).set(opt).toPdf().get('pdf').then(function (pdf) {
+    //  this.IsLoading.Hide();
+      window.open(pdf.output('bloburl'), '_blank');
+    });
   }
 }

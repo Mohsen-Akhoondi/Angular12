@@ -37,21 +37,21 @@
 
         <td width="25%">
           <span class="table-cell-Lable">معاونت مجری</span>
-          <app-ng-select-virtual-scroll style="display: inline-block;width: 60%;"
-            [NgSelectParams]="CostCenterParams" (selectedChange)="onChangeCostCenter($event)" [Items]="CostCenterItems">
+          <app-ng-select-virtual-scroll style="display: inline-block;width: 60%;" [NgSelectParams]="CostCenterParams"
+            (selectedChange)="onChangeCostCenter($event)" [Items]="CostCenterItems">
           </app-ng-select-virtual-scroll>
         </td>
         <td width="25%">
           <span class="table-cell-Lable">اداره مجری</span>
-          <app-ng-select-virtual-scroll style="display: inline-block;width: 60%;"
-            [NgSelectParams]="SubCostCenterParams" [Items]="SubCostCenterItems"
-            (selectedChange)="onSubCostCenterSelectedChange($event)">
+          <app-ng-select-virtual-scroll style="display: inline-block;width: 60%;" [NgSelectParams]="SubCostCenterParams"
+            [Items]="SubCostCenterItems" (selectedChange)="onSubCostCenterSelectedChange($event)">
           </app-ng-select-virtual-scroll>
         </td>
         <td width="25%">
           <span class="table-cell-Lable">مدیر اجرایی</span>
           <app-ng-select-virtual-scroll style="display: inline-block;" [style.width.%]="60"
-            [NgSelectParams]="AdministratorActorParams" [Items]="AdministratorActorItems" (Open)="onOpenAdministratorActor()">
+            [NgSelectParams]="AdministratorActorParams" [Items]="AdministratorActorItems"
+            (Open)="onOpenAdministratorActor()">
           </app-ng-select-virtual-scroll>
         </td>
       </tr>
@@ -88,11 +88,9 @@
             [Items]="EndWFItems"> </app-ng-select-virtual-scroll>
         </td>
         <td width="25%">
-          <span class="table-cell-Lable"  style="margin: 0 ;margin-left: 5px">درخواست کننده</span>
-          <app-ng-select-virtual-scroll  style="display: inline-block;"
-            [style.width.%]="60" [NgSelectParams]="RequestedPersonParams"
-            [Items]="RequestedPersonItems" 
-            (Open)="onOpenRequestedPerson()">
+          <span class="table-cell-Lable" style="margin: 0 ;margin-left: 5px">درخواست کننده</span>
+          <app-ng-select-virtual-scroll style="display: inline-block;" [style.width.%]="60"
+            [NgSelectParams]="RequestedPersonParams" [Items]="RequestedPersonItems" (Open)="onOpenRequestedPerson()">
           </app-ng-select-virtual-scroll>
         </td>
         <td colspan="2" width="50%"></td>
@@ -132,8 +130,11 @@
   <button (click)="Btnclick()" id="btn2" class="btn btn-primary btnGreen">
     <img width="15px" height="15px" src="assets/Icons/show.png" />
     {{BtnName}}</button>
-  <button [disabled]="ClearedToViewFlow" (click)="DetailsBtnClick()" id="btn4"
-    class="btn btn-primary btnGreen">
+  <button *ngIf="deleteClick" id="btnTenderRep" class="btn btn-primary btnGreen" (click)="onDeleteclick()">
+    <img width="15px" height="15px" src="assets/Icons/delete.png" />
+    حذف
+  </button>
+  <button [disabled]="ClearedToViewFlow" (click)="DetailsBtnClick()" id="btn4" class="btn btn-primary btnGreen">
     <img width="15px" height="15px" src="assets/Icons/show.png" />
     جزئیات گردش
   </button>
@@ -148,5 +149,6 @@
   [HeightPercentWithMaxBtn]="HeightPercentWithMaxBtn"
   [PopupParam]="type === 'message-box' ? alertMessageParams : paramObj" [HaveHeader]="HaveHeader"
   (popupclosed)="popupclosed($event)" [MainMaxwidthPixel]="PixelWidth" [PixelWidth]="PixelWidth"
-  [PercentWidth]="PercentWidth">
+  [PercentWidth]="PercentWidth"
+  (PopupOutPutParam)="type ==='message-box' ? MessageBoxAction($event) : getOutPutParam($event)">
 </app-over-popup>

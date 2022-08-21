@@ -1,13 +1,10 @@
 import { Component, OnInit, Input, Output, EventEmitter,ViewChild, TemplateRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
+import { NgSelectConfig } from 'src/app/Shared/ng-select';
 import { ActivatedRoute } from '@angular/router';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { ProductService } from 'src/app/Services/BaseService/ProductService';
-import { GridOptions } from 'ag-grid-community';
-
-import { of } from 'rxjs';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';
 
 @Component({

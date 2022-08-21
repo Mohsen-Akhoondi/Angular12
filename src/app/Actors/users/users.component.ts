@@ -7,8 +7,7 @@ import { TemplateRendererComponent } from 'src/app/Shared/grid-component/templat
 import { CheckboxFieldEditableComponent } from 'src/app/Shared/checkbox-field-editable/checkbox-field-editable.component';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-import { of } from 'rxjs';
-import { log, isUndefined, isNumber } from 'util';
+import { isUndefined, isNumber } from 'util';
 import { NgSelectVirtualScrollComponent } from 'src/app/Shared/ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { ContractListService } from 'src/app/Services/BaseService/ContractListService';
 declare var jquery: any;
@@ -184,6 +183,7 @@ export class UsersComponent implements OnInit {
   PixelWidth: number;
   IsWFSendSms = true;
   ModuleCode;
+  HaveSave = false;
   // -------------------------------------------------------------------
 
   constructor(private UserDetails: UserSettingsService,
@@ -193,10 +193,11 @@ export class UsersComponent implements OnInit {
     private Region: RegionListService,
     private ProductRequest: ProductRequestService,
     private ContractList: ContractListService,
-    private route: ActivatedRoute) {
-        this.route.params.subscribe(params => {
-        this.ModuleCode = +params['ModuleCode'];
-      });
+    private route: ActivatedRoute,
+    ) {
+    this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
     this.Role_colDef = [
       {
         headerName: 'ردیف ',
@@ -405,6 +406,19 @@ export class UsersComponent implements OnInit {
   }
 
   ngOnInit() {
+      this.UserDetails.GetModulOPByUser(this.ModuleCode).subscribe(res => {
+        res.forEach(node => {
+          switch (node.OperationCode) {
+            case 7:
+            case 16:
+              this.HaveSave = true;
+              break;
+            default:
+              break;
+          }
+        });
+
+      });
     this.UnitPatternUserRegion_rowData = [];
     this.UserCostCenter_rowData = [];
     this.Role_rowData = [];
@@ -412,12 +426,10 @@ export class UsersComponent implements OnInit {
 
     this.ContractList.GetRolesList().subscribe(res => {
       this.Role_colDef[1].cellEditorParams.Items = res;
-      // this.UserRegionRole_colDef[1].cellEditorParams.Items = res;
     });
 
   }
 
-  // tslint:disable-next-line:use-life-cycle-interface
   ngAfterViewInit(): void {
 
     this.UserRegion_colDef = [
@@ -506,7 +518,6 @@ export class UsersComponent implements OnInit {
           return { 'text-align': 'center' };
         },
         cellEditorFramework: CheckboxFieldEditableComponent,
-        // cellEditorParams: { MaxLength: 3 },
         cellRendererFramework: TemplateRendererComponent,
         cellRendererParams: {
           ngTemplate: this.IsDefault
@@ -549,7 +560,6 @@ export class UsersComponent implements OnInit {
     this.UnitPatternUserRegion_gridApi = params.api;
   }
 
-
   Person_FetchMore(event) {
     this.NgSelectPersonParams.loading = true;
     const ResultList = [];
@@ -583,7 +593,6 @@ export class UsersComponent implements OnInit {
     });
   }
 
-
   Person_DoSearch(event) {
     this.NgSelectPersonParams.loading = true;
     this.Actor.GetActorPaging(event.PageNumber,
@@ -601,19 +610,12 @@ export class UsersComponent implements OnInit {
             PageCount: Math.ceil(res.TotalItemCount / 30),
             type: 'user-person-search'
           });
-        // console.log(this.ActorID);
-        // console.log(this.NgSelectPersonParams.selectedObject);
         this.IdentityNo = res.List.find(x => x.ActorId === this.ActorID).IdentityNo;
       });
     this.NgSelectPersonParams.loading = false;
   }
 
-
   onSearch() {
-    // console.log(this.UserID);
-    // console.log(this.ActorID);
-    // console.log(this.UserObject);
-    // console.log(this.LoginName);
     if (this.ActorID === 0 && this.LoginName === '') {
       this.ShowMessageBoxWithOkBtn('اطلاعات را کامل وارد نمایید');
       return;
@@ -624,18 +626,17 @@ export class UsersComponent implements OnInit {
     }
 
     this.Actor.GetUser(this.ActorID, this.LoginName, null).subscribe(res => {
-      // console.log(res);
       if (res != null && res.ActorId > 0 && res.UserID > 0) {
-        // console.log('1');
         this.UserObject = res;
         this.UserID = this.UserObject.UserID;
         this.Role_rowData = this.UserObject.UsersRolesList;
         this.UserRegion_rowData = this.UserObject.UsersRegionList;
+        this.UserRegionRole_rowData = this.UserObject.UsersRegionList.UserRegionRoleList;
+        this.UnitPatternUserRegion_rowData = this.UserObject.UsersRegionList.UnitPatternUserRegionList;
+        this.UserCostCenter_rowData = this.UserObject.UsersRegionList.UserCostCenterList;
         this.IdentityNo = res.IdentityNo;
         this.IsWFSendSms = res.IsWFSendSms;
-        // if (!this.NgSelectPersonParams.selectedObject) {
         this.PersonOpened(res.ActorId);
-        // }
 
         if (this.LoginName === '' || (this.LoginName !== '' &&
           res.LoginName !== '' &&
@@ -643,11 +644,7 @@ export class UsersComponent implements OnInit {
           this.LoginName = res.LoginName;
         }
       } else if (res != null && res.ActorId === 0 && res.UserID === 0) {
-        // tslint:disable-next-line:max-line-length
         this.ShowMessageBoxWithOkBtn('اطلاعات کاربری این شخص در سیستم موجود نمیباشد. میتوانید با وارد کردن یک نام کاربری جدید آن را ثبت کنید');
-        // this.UserObject.UsersRolesList = [];
-        // this.UserObject.UsersRegionList = [];
-        // this.UserObject = null;
         this.UserID = 0;
         this.UserCostCenter_rowData = [];
         this.UserRegion_rowData = [];
@@ -669,16 +666,12 @@ export class UsersComponent implements OnInit {
         type: 'user-person-search'
       });
 
-      // console.log(this.ActorID);
-      // console.log(this.NgSelectPersonParams.selectedObject);
-
       if (AActorID) {
         this.NgSelectPersonParams.selectedObject = AActorID;
         this.IdentityNo = res.List.find(x => x.ActorId === AActorID).IdentityNo;
       }
     });
   }
-
 
   onClose() {
     this.router.navigate([{ outlets: { primary: 'Home', PopUp: null } }]);
@@ -691,8 +684,6 @@ export class UsersComponent implements OnInit {
 
   onClear() {
     this.LoginName = '';
-    // this.UserObject.UsersRolesList = [];
-    // this.UserObject.UsersRegionList = [];
     this.UserObject = null;
     this.ActorID = 0;
     this.UserID = 0;
@@ -712,6 +703,7 @@ export class UsersComponent implements OnInit {
     this.HaveHeader = true;
     this.startLeftPosition = 449;
     this.startTopPosition = 87;
+    this.PixelWidth = 360;
     this.alertMessageParams.message = message;
     this.alertMessageParams.HaveOkBtn = true;
     this.alertMessageParams.HaveYesBtn = false;
@@ -723,6 +715,7 @@ export class UsersComponent implements OnInit {
     this.HaveHeader = true;
     this.startLeftPosition = 449;
     this.startTopPosition = 87;
+    this.PixelWidth = 360;
     this.alertMessageParams.message = message;
     this.alertMessageParams.HaveOkBtn = false;
     this.alertMessageParams.HaveYesBtn = true;
@@ -739,7 +732,6 @@ export class UsersComponent implements OnInit {
   }
 
   Person_OnChange(data) {
-    // console.log(data);
     if (isUndefined(data) || data === null) {
       this.onClear();
     } else {
@@ -747,12 +739,7 @@ export class UsersComponent implements OnInit {
     }
   }
 
-  // ----------------------------------CELL EDITING START-------------------------------------------------
-
   UserRegion_onCellEditingStarted(event) {
-
-    // console.log('user region grid : ');
-    // console.log(event);
 
     if (event.colDef && event.colDef.field === 'RegionName') {
       this.Region.GetRegionList(this.ModuleCode, false).subscribe(res => {
@@ -802,26 +789,10 @@ export class UsersComponent implements OnInit {
           type: 'sub-cost-center'
         });
       });
-
-      // const itemsToUpdate = [];
-      // this.UserCostCenter_gridApi.forEachNode(node => {
-      //   if (node.rowIndex === event.rowIndex) {
-      //     if (event.colDef && event.colDef.field === 'SubCostCenterName') {
-      //       node.data.SubCostCenterName = event.newValue;
-      //       itemsToUpdate.push(node.data);
-      //     }
-      //   }
-      // });
-      // this.UserCostCenter_gridApi.updateRowData({ update: itemsToUpdate });
-
     }
   }
 
-
   UnitPatternUserRegion_onCellEditingStarted(event) {
-
-    // console.log('unit pattern grid : ');
-    // console.log(event);
 
     if (event.colDef && event.colDef.field === 'UnitTopicName') {
       this.ProductRequest.GetVWExeUnitByRegion(this.RegionCode).subscribe(res => {
@@ -832,7 +803,6 @@ export class UsersComponent implements OnInit {
       });
     }
   }
-
 
   // -----------------------------------CELL VALUE CHANGED-------------------------------------
 
@@ -854,37 +824,73 @@ export class UsersComponent implements OnInit {
   UserRegionRole_onCellValueChanged(event) {
     const items = [];
     this.UserRegionRole_gridApi.forEachNode(node => {
+      node.data.UserRegionID = this.SelectedUserRegionRow.UsersRegionID;
       items.push(node.data);
     });
-    this.SelectedUserRegionRow.UserRegionRoleList = items;
-
+    this.UserRegion_gridApi.forEachNode(node => {
+      if (node.data.UsersRegionID === this.SelectedUserRegionRow.UsersRegionID) {
+        node.data.UserRegionRoleList = items;
+      }
+    });
   }
 
   UnitPatternUserRegion_onCellValueChanged(event: any) {
     const items = [];
     this.UnitPatternUserRegion_gridApi.forEachNode(node => {
+      node.data.UserRegionID = this.SelectedUserRegionRow.UsersRegionID;
       items.push(node.data);
     });
-    this.SelectedUserRegionRow.UnitPatternUserRegionList = items;
-
+    this.UserRegion_gridApi.forEachNode(node => {
+      if (node.data.UsersRegionID === this.SelectedUserRegionRow.UsersRegionID) {
+        node.data.UnitPatternUserRegionList = items;
+      }
+    });
   }
-
+  UnitPatternUserRegion_onDeletedRow(event) {
+    if (event) {
+      const items = [];
+      this.UnitPatternUserRegion_gridApi.forEachNode(node => {
+        node.data.UserRegionID = this.SelectedUserRegionRow.UsersRegionID;
+        items.push(node.data);
+      });
+      this.UserRegion_gridApi.forEachNode(node => {
+        if (node.data.UsersRegionID === this.SelectedUserRegionRow.UsersRegionID) {
+          node.data.UnitPatternUserRegionList = items;
+        }
+      });
+    }
+  }
+ 
   UserCostCenter_onCellValueChanged(event) {
     const items = [];
     this.UserCostCenter_gridApi.forEachNode(node => {
+      node.data.UserRegionID = this.SelectedUserRegionRow.UsersRegionID;
       items.push(node.data);
     });
-    this.SelectedUserRegionRow.UserCostCenterList = items;
+    this.UserRegion_gridApi.forEachNode(node => {
+      if (node.data.UsersRegionID === this.SelectedUserRegionRow.UsersRegionID) {
+        node.data.UserCostCenterList = items;
+      }
+    });
+  }
+  UserCostCenter_onDeletedRow(event) {
+    if (event) {
+      const items = [];
+      this.UserCostCenter_gridApi.forEachNode(node => {
+        node.data.UserRegionID = this.SelectedUserRegionRow.UsersRegionID;
+        items.push(node.data);
+      });
+      this.UserRegion_gridApi.forEachNode(node => {
+        if (node.data.UsersRegionID === this.SelectedUserRegionRow.UsersRegionID) {
+          node.data.UserCostCenterList = items;
+        }
+      });
+    }
   }
 
   // -------------------------------------SAVE-------------------------------------------
 
   onSave() {
-    // console.log(this.UserID);
-    // console.log(this.ActorID);
-    // console.log(this.UserObject);
-    // console.log(this.LoginName);
-
     if (this.ActorID > 0 && this.UserID === 0 && (isUndefined(this.UserObject) || this.UserObject === null) && this.LoginName) {
       this.UserObject = {
         LoginName: this.LoginName,
@@ -892,17 +898,6 @@ export class UsersComponent implements OnInit {
         UsersRolesList: [],
         UsersRegionList: []
       };
-      // this.Actor.DeclareLoginNameForActor(this.ActorID, this.LoginName).subscribe(res => {
-      //   this.UserObject = res;
-      //   this.UserID = this.UserObject.UserID;
-      //   this.Role_rowData = this.UserObject.UsersRolesList;
-      //   this.UserRegion_rowData = this.UserObject.UsersRegionList;
-      //   this.IdentityNo = this.UserObject.IdentityNo;
-      //   // console.log('karbar e jadid : ');
-      //   // console.log(this.UserObject);
-      //   this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
-      // }
-      // );
     }
     if (this.ActorID > 0 && this.UserID === 0 && isUndefined(this.UserObject) && this.LoginName === '') {
       this.ShowMessageBoxWithOkBtn('اطلاعات را کامل وارد نمایید');
@@ -928,59 +923,38 @@ export class UsersComponent implements OnInit {
         });
       }
 
-      // console.log('1 : ');
-
       if (this.UserRegion_gridApi) {
-        // console.log('2 : ');
-
         this.UserRegion_gridApi.forEachNode((item_1) => {
-          // console.log('3 : ');
-          console.log(item_1);
           if (item_1.data.UnitPatternUserRegionList) {
             item_1.data.UnitPatternUserRegionList.forEach(item_2 => {
               item_2.UsersRegionID = item_1.data.UsersRegionID;
             });
           }
 
-          // console.log('5 : ');
-
           if (item_1.data.UserCostCenterList) {
             item_1.data.UserCostCenterList.forEach(item_3 => {
               item_3.UsersRegionID = item_1.data.UsersRegionID;
             });
           }
-          // console.log('6 : ');
-
-
           if (item_1.data.UserRegionRoleList) {
             item_1.data.UserRegionRoleList.forEach(item_4 => {
               item_4.UsersRegionID = item_1.data.UsersRegionID;
             });
-
           }
           UserRegionList.push(item_1.data);
         });
       }
 
-      // console.log('7 : ');
-
       this.UserObject.UsersRolesList = RoleList;
       this.UserObject.UsersRegionList = UserRegionList;
-
-      // console.log('kol e object : ');
-      // console.log(this.UserObject);
 
       this.UserDetails.SaveUserObject(this.UserObject, this.IsWFSendSms).subscribe(res => {
         if (res) {
           this.ShowMessageBoxWithOkBtn('ثبت اطلاعات با موفقیت انجام شد');
-          // console.log(res);
           this.UserObject = res;
           this.UserObject.UsersRolesList = this.UserObject.UsersRolesList;
           this.UserObject.UsersRegionList = this.UserObject.UsersRegionList;
-          // console.log(this.UserObject);
-
           this.onSearch();
-
         }
       });
     }
@@ -989,53 +963,24 @@ export class UsersComponent implements OnInit {
   // ---------------------------------------ON Row Click----------------------------------------------
 
   UserRegion_onRowClick(event) {
-
-    // console.log('click : ');
-    // console.log(event.data);
-
     this.SelectedUserRegionRow = event.data;
     this.UnitPatternUserRegion_rowData = [];
     this.UserCostCenter_rowData = [];
     this.UserRegionRole_rowData = [];
-
     if (!isUndefined(event.data.RegionCode)) {
 
       this.UsersRegionID = event.data.UsersRegionID;
       this.RegionCode = event.data.RegionCode;
 
-      this.ProductRequest.GetCostCenterByRegion(this.RegionCode, null, null, false).subscribe(res => {
-        this.UserCostCenter_colDef[1].cellEditorParams.Items = res;
-      });
-
-      this.ProductRequest.GetVWExeUnitByRegion(this.RegionCode).subscribe(res => {
-        this.UnitPatternUserRegion_colDef[1].cellEditorParams.Items = res;
-      });
-
       this.UnitPatternUserRegion_rowData = event.data.UnitPatternUserRegionList;
       this.UserCostCenter_rowData = event.data.UserCostCenterList;
       this.UserRegionRole_rowData = event.data.UserRegionRoleList;
 
-    } else if (!isUndefined(event.data.RegionName)) {
-
+    } else {
       this.UsersRegionID = -1;
       this.RegionCode = event.data.RegionName.RegionCode;
-
-      // this.ProductRequest.GetCostCenterByRegion(this.RegionCode, false).subscribe(res => {
-      //   this.UserCostCenter_colDef[1].cellEditorParams.Items = res;
-      // });
-
-      // this.ProductRequest.GetVWExeUnitByRegion(this.RegionCode).subscribe(res => {
-      //   this.UnitPatternUserRegion_colDef[1].cellEditorParams.Items = res;
-      // });
-
-      // this.UnitPatternUserRegion_rowData = event.data.RegionName.UnitPatternUserRegionList;
-      // this.UserCostCenter_rowData = event.data.RegionName.UserCostCenterList;
-      // this.UserRegionRole_rowData = event.data.RegionName.UserRegionRoleList;
     }
-    // console.log(this.RegionCode);
   }
-
-  // ----------------------------------------------------------------
 
   UserRegion_onDeletedRow(event) {
     this.UserRegionRole_rowData = [];
@@ -1046,9 +991,14 @@ export class UsersComponent implements OnInit {
     if (event) {
       const items = [];
       this.UserRegionRole_gridApi.forEachNode(node => {
+        node.data.UserRegionID = this.SelectedUserRegionRow.UsersRegionID;
         items.push(node.data);
       });
-      this.SelectedUserRegionRow.UserRegionRoleList = items;
+      this.UserRegion_gridApi.forEachNode(node => {
+        if (node.data.UsersRegionID === this.SelectedUserRegionRow.UsersRegionID) {
+          node.data.UserRegionRoleList = items;
+        }
+      });
     }
   }
   Role_onDeletedRow(event) {
@@ -1060,24 +1010,7 @@ export class UsersComponent implements OnInit {
       this.SelectedUserRegionRow.UserRoleList = items;
     }
   }
-  UnitPatternUser_onDeletedRow(event) {
-    if (event) {
-      const items = [];
-      this.UnitPatternUserRegion_gridApi.forEachNode(node => {
-        items.push(node.data);
-      });
-      this.SelectedUserRegionRow.UnitPatternUserRegionList = items;
-    }
-  }
-  UserCostCenter_onDeletedRow(event) {
-    if (event) {
-      const items = [];
-      this.UserCostCenter_gridApi.forEachNode(node => {
-        items.push(node.data);
-      });
-      this.SelectedUserRegionRow.UserCostCenterList = items;
-    }
-  }
+
   onSearchUserWorkLog() {
     this.type = 'created-user-log';
     this.btnclicked = true;

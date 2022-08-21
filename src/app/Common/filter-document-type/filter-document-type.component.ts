@@ -72,56 +72,56 @@ export class FilterDocumentTypeComponent implements OnInit {
     private RegionList: RegionListService,
     private RefreshItems: RefreshServices,
     private Common: CommonService) {
-      this.route.params.subscribe(params => {
-        this.ModuleCode = +params['ModuleCode'];
-      });
-      this.columnDef = [
-        {
-          headerName: 'ردیف',
-          field: 'ItemNo',
-          width: 80,
-          resizable: false,
-          editable: false,
+    this.route.params.subscribe(params => {
+      this.ModuleCode = +params['ModuleCode'];
+    });
+    this.columnDef = [
+      {
+        headerName: 'ردیف',
+        field: 'ItemNo',
+        width: 80,
+        resizable: false,
+        editable: false,
+      },
+      {
+        headerName: 'نوع مستند',
+        field: 'DocumentTypeName',
+        cellEditorFramework: NgSelectVirtualScrollComponent,
+        cellEditorParams: {
+          Params: this.ChildDocumentTypeParams,
+          Items: [],
+          MoreFunc: this.FetchMoreChildDocumentType,
+          FetchByTerm: this.FetchChildDocumentTypeByTerm,
+          Owner: this
         },
-        {
-          headerName: 'نوع مستند',
-          field: 'DocumentTypeName',
-          cellEditorFramework: NgSelectVirtualScrollComponent,
-          cellEditorParams: {
-            Params: this.ChildDocumentTypeParams,
-            Items: [],
-            MoreFunc: this.FetchMoreChildDocumentType,
-            FetchByTerm: this.FetchChildDocumentTypeByTerm,
-            Owner: this
-          },
-          cellRenderer: 'SeRender',
-          valueFormatter: function currencyFormatter(params) {
-            if (params.value) {
-              return params.value.DocumentTypeName;
-            } else {
-              return '';
-            }
-          },
-          valueSetter: (params) => {
-            if (params.newValue && params.newValue.DocumentTypeCode) {
-              params.data.DocumentTypeCode = params.newValue.DocumentTypeCode;
-              params.data.DocumentTypeName = params.newValue.DocumentTypeName;
-              return true;
-            } else {
-              params.data.DocumentTypeCode = null;
-              params.data.DocumentTypeName = '';
-              return false;
-            }
-          },
-          editable: true,
-          width: 400,
-          resizable: true
+        cellRenderer: 'SeRender',
+        valueFormatter: function currencyFormatter(params) {
+          if (params.value) {
+            return params.value.DocumentTypeName;
+          } else {
+            return '';
+          }
         },
+        valueSetter: (params) => {
+          if (params.newValue && params.newValue.DocumentTypeCode) {
+            params.data.DocumentTypeCode = params.newValue.DocumentTypeCode;
+            params.data.DocumentTypeName = params.newValue.DocumentTypeName;
+            return true;
+          } else {
+            params.data.DocumentTypeCode = null;
+            params.data.DocumentTypeName = '';
+            return false;
+          }
+        },
+        editable: true,
+        width: 400,
+        resizable: true
+      },
 
-,
+      ,
 
-     ];
-     }
+    ];
+  }
 
   ngOnInit() {
     this.rowData = [];
@@ -208,14 +208,14 @@ export class FilterDocumentTypeComponent implements OnInit {
     }
     if (event.Owner) {
       event.Owner.Common.GetChildDocTypePaging(event.PageNumber, event.PageSize, event.term, event.SearchOption).subscribe(res => {
-          event.Owner.RefreshItems.RefreshItemsVirtualNgSelect({
-            List: res.List,
-            term: event.term,
-            TotalItemCount: res.TotalItemCount,
-            PageCount: Math.ceil(res.TotalItemCount / 30),
-            type: 'child-doc-type'
-          });
+        event.Owner.RefreshItems.RefreshItemsVirtualNgSelect({
+          List: res.List,
+          term: event.term,
+          TotalItemCount: res.TotalItemCount,
+          PageCount: Math.ceil(res.TotalItemCount / 30),
+          type: 'child-doc-type'
         });
+      });
     }
   }
   onSave() {
@@ -238,16 +238,16 @@ export class FilterDocumentTypeComponent implements OnInit {
       FilterDocTypeList.push(FilterDocTypeObj);
     });
 
-      this.Common.SaveFilterDocType(FilterDocTypeList, this.ModuleCode, this.RegionParams.selectedObject).subscribe(res => {
-        this.btnclicked = true;
-        this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد.');
-      },
-        err => {
-          if (!err.error.Message.includes('|')) {
-            this.btnclicked = true;
-            this.ShowMessageBoxWithOkBtn('ثبت با شکست مواجه شد');
-          }
-        });
+    this.Common.SaveFilterDocType(FilterDocTypeList, this.ModuleCode, this.RegionParams.selectedObject).subscribe(res => {
+      this.btnclicked = true;
+      this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد.');
+    },
+      err => {
+        if (!err.error.Message.includes('|')) {
+          this.btnclicked = true;
+          this.ShowMessageBoxWithOkBtn('ثبت با شکست مواجه شد');
+        }
+      });
   }
 
   close() {

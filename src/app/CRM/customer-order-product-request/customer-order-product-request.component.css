@@ -19,9 +19,16 @@
      width: 150px;
      display: inline-block;
 }
-.box-dev{
+/* .box-dev{
   height: 30px;
   margin-top: 10px;
   border-radius: 5px;
   border: 1px solid rgb(218, 218, 218);
-}
+} */
+
+
+.box-dev {
+  border-radius: 5px;
+  border: 1px solid rgb(218, 218, 218);
+  padding: 5px;
+} 

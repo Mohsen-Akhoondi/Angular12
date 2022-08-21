@@ -16,7 +16,7 @@ import { ContractPayDetailsService } from 'src/app/Services/ContractService/Cont
 import { NgSelectVirtualScrollComponent } from '../ng-select-virtual-scroll/ng-select-virtual-scroll.component';
 import { GridOptions } from 'ag-grid-community';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-declare var jquery: any;
+
 declare var $: any;
 
 @Component({

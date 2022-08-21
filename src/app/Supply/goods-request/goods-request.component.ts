@@ -1,10 +1,7 @@
 import { Component, OnInit, Input, EventEmitter, Output, ViewChild, TemplateRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
-import { forkJoin } from 'rxjs';
 import { RefreshServices } from 'src/app/Services/BaseService/RefreshServices';
-import { NgSelectConfig } from 'src/app/Shared/ng-select/public-api';
-import { ModuleService } from 'src/app/Services/BaseService/ModuleService';
 import { CustomCheckBoxModel } from 'src/app/Shared/custom-checkbox/src/public_api';
 import { BaseHttpClient } from 'src/app/Services/BaseService/BaseHttpClient';
 import { TemplateRendererComponent } from 'src/app/Shared/grid-component/template-renderer/template-renderer.component';

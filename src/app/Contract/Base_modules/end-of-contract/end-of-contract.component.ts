@@ -58,6 +58,7 @@ ContractParams = {
     ItemNoWidth: 15
   }
 };
+ContractorName: any;
 currentContractSearchTerm;
 //////////////////////////////////////////////////////
 private sub: any;
@@ -70,6 +71,10 @@ PopupType;
 alertMessageParams = { HaveOkBtn: true, message: '', HaveYesBtn: false, HaveNoBtn: false };
 HaveHeader = false;
 ProductRequestTypeCode;
+selectedContract: any;
+ContractSatusCode = 6;
+IsContractStatus = true;
+ContractSatusName = ' تحویل موقت ';
 
   constructor(private ContractService: ContractListService,
               private router: Router,
@@ -83,7 +88,7 @@ ProductRequestTypeCode;
               }
 
   ngOnInit() {
-    this.RegionService.GetRegionList(this.ModuleCode, true).subscribe(res => {
+    this.RegionService.GetAllRegion().subscribe(res => {
       this.ReigonListSet = res;
       this.NgSelectRegionParams.selectedObject = res[0].RegionCode;
     });
@@ -95,8 +100,13 @@ onChangeReigonObj(event) { // واحد اجرایی
   this.ContractParams.selectedObject = null;
 }
 ///////////////////////////////////////////////////////////////
-onChangeContractObj(event) { // قرارداد
-}
+onChangeContractObj(newObj) { // قرارداد
+  this.selectedContract = newObj;
+    this.ContractService.GetContract(this.selectedContract).subscribe(res => {
+      this.ContractorName = res[0].ContractorName;
+     
+    });
+  }
 //////////////////////////////////////////////////////////////
 OnOpenNgSelect() {
       this.ContractParams.loading = true;
@@ -151,7 +161,7 @@ doContractSearch(event) {
   this.ContractService.GetConcludedContractPaging(event.PageNumber, event.PageSize, event.term,
     event.SearchOption, this.NgSelectRegionParams.selectedObject, this.ProductRequestTypeCode).subscribe((res: any) => {
       if (this.currentContractSearchTerm === event.term) {
-        this.ContractItems = res.List;
+        this.ContractItems = res.List;     
         this.RefreshItems.RefreshItemsVirtualNgSelect({
           List: res.List,
           term: event.term,
@@ -201,7 +211,7 @@ popupclosed() {
 }
 /////////////////////////////////////////
 onSaveClick() {
-  this.ShowMessageBoxWithYesNoBtn('آیا از تغییر وضعیت قرارداد به خاتمه یافته اطمینان دارید؟');
+  this.ShowMessageBoxWithYesNoBtn( 'آیا از تغییر وضعیت قرارداد به '+ this.ContractSatusName + 'اطمینان دارید؟');
 }
 /////////////////////////////////////////
 MessageBoxAction(event) {
@@ -214,7 +224,7 @@ MessageBoxAction(event) {
 }
 //////////////////////////////////////////
 ChangeContractStatus() {
-  this.ContractService.ChangeContractStatus(this.ContractParams.selectedObject, this.ModuleCode).subscribe((res: any) => {
+  this.ContractService.ChangeContractStatus(this.ContractParams.selectedObject, this.ModuleCode , this.ContractSatusCode).subscribe((res: any) => {
     if (res) {
       this.ShowMessageBoxWithOkBtn('ثبت با موفقیت انجام شد');
       this.ContractParams.selectedObject = null;
@@ -227,4 +237,22 @@ ChangeContractStatus() {
   });
 }
 
+RedioClick(event, num: number) {
+  this.IsContractStatus = event;
+  this.ContractSatusCode = num;
+  switch (this.ContractSatusCode) {
+    case 3: 
+     this.ContractSatusName = ' خاتمه یافته ';
+      break;
+    case 6: 
+     this.ContractSatusName = ' تحویل موقت ';
+      break;
+    case 7: 
+     this.ContractSatusName = ' تحویل قطعی ';
+      break;
+    default:
+      break;
+  }
+}
+  
 }

@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { BaseHttpClient } from './BaseHttpClient';
-import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class UserSettingsService {
@@ -12,8 +11,11 @@ export class UserSettingsService {
   GetDateDetail() {
     return this.http.get(window.location.origin + '/Account/GetDateDetail', null);
   }
+  LogOutExternalUser() {
+    return this.http.post(window.location.origin + '/Account/ExternalLogOff', null);
+  }
   LogOutUser() {
-    return this.http.post(window.location.origin + '/Account/LogOff', null);
+    window.location.href = window.location.origin + '/Account/LogOff';
   }
   GetCurrentUserMenu() {
     return this.http.get(window.location.origin + '/Home/GetMenuByUserRole', null);
@@ -124,6 +126,12 @@ export class UserSettingsService {
   GetUserWorkList(WorkflowObjectCodeList: any) {
     return this.http.get(window.location.origin + '/Home/UserCurrentWorkList', { WorkflowObjectCodeList });
   }
+  GetcurrUserWorkListByUserID(AUserId: number, WorkflowObjectCode: any) {
+    return this.http.get(window.location.origin + '/Home/GetcurrUserWorkListByUserID', {
+      AUserId,
+      WorkflowObjectCode
+    });
+  }
   GetUserFinishedWorkList(WorkflowObjectCodeList: any) {
     return this.http.get(window.location.origin + '/Home/GetUserFinishedWorkList', { WorkflowObjectCodeList });
   }
@@ -151,5 +159,10 @@ export class UserSettingsService {
   SignedPDFData(Certificate, Signature, LoadedPDFName) {
     return this.http.post(window.location.origin + '/Home/SignedPDFData', { Certificate, Signature, LoadedPDFName });
   }
- 
+  CheckNewNotif() {
+    return this.http.get(window.location.origin + '/Home/CheckNewNotif', null);
+  }
+  CheckAdminForConfirmArchive() {
+    return this.http.get(window.location.origin + '/Home/CheckAdminForConfirmArchive', null);
+  }
 }

@@ -33,7 +33,7 @@
   </div>
 </div>
 
-<app-over-popup *ngIf="isClicked" [PopupType]="type"
+<app-shared-over-popup *ngIf="isClicked" [PopupType]="type"
   [PopupParam]="type === 'message-box' ? alertMessageParams : paramObj" (popupclosed)="popupclosed($event)"
   [startLeftPosition]="startLeftPosition" [startTopPosition]="startTopPosition" [HaveHeader]="HaveHeader">
-</app-over-popup>
+</app-shared-over-popup>

@@ -1,6 +1,6 @@
 import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 import { RegionListService } from 'src/app/Services/BaseService/RegionListService';
-import { Router, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { ProductRequestService } from 'src/app/Services/ProductRequest/ProductRequestService';
 import { ReportService } from 'src/app/Services/ReportService/ReportService';
 import { RadioBoxModel } from 'src/app/Shared/Radio-Box/Radio-Box-Model/RadioBoxModel';
